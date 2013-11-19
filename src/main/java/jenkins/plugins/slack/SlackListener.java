@@ -1,4 +1,4 @@
-package jenkins.plugins.hipchat;
+package jenkins.plugins.slack;
 
 import hudson.Extension;
 import hudson.model.AbstractBuild;
@@ -13,11 +13,11 @@ import java.util.logging.Logger;
 
 @Extension
 @SuppressWarnings("rawtypes")
-public class HipChatListener extends RunListener<AbstractBuild> {
+public class SlackListener extends RunListener<AbstractBuild> {
 
-    private static final Logger logger = Logger.getLogger(HipChatListener.class.getName());
+    private static final Logger logger = Logger.getLogger(SlackListener.class.getName());
 
-    public HipChatListener() {
+    public SlackListener() {
         super(AbstractBuild.class);
     }
 
@@ -49,8 +49,8 @@ public class HipChatListener extends RunListener<AbstractBuild> {
     FineGrainedNotifier getNotifier(AbstractProject project) {
         Map<Descriptor<Publisher>, Publisher> map = project.getPublishersList().toMap();
         for (Publisher publisher : map.values()) {
-            if (publisher instanceof HipChatNotifier) {
-                return new ActiveNotifier((HipChatNotifier) publisher);
+            if (publisher instanceof SlackNotifier) {
+                return new ActiveNotifier((SlackNotifier) publisher);
             }
         }
         return new DisabledNotifier();

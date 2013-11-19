@@ -1,6 +1,6 @@
-package jenkins.plugins.hipchat;
+package jenkins.plugins.slack;
 
-public interface HipChatService {
+public interface SlackService {
     void publish(String message);
 
     void publish(String message, String color);

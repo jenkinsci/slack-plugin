@@ -3,5 +3,5 @@
   Since we don't really have anything dynamic here, let's just use static HTML. 
 -->
 <div>
-  This plugin is a HipChat notifier that can publish build status to HipChat rooms.
+  This plugin is a Slack notifier that can publish build status to Slack channels.
 </div>

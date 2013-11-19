@@ -19,12 +19,12 @@
 
     <!-- keeping original groupId -->
     <groupId>org.jvnet.hudson.plugins</groupId>
-	<artifactId>hipchat</artifactId>
+	<artifactId>slack</artifactId>
 	<packaging>hpi</packaging>
 	<version>0.1.5-SNAPSHOT</version>
-	<name>Jenkins HipChat Plugin</name>
-	<description>A Build status publisher that notifies channels on a HipChat server</description>
-    <url>http://wiki.jenkins-ci.org/display/JENKINS/HipChat+Plugin</url>
+	<name>Jenkins Slack Plugin</name>
+	<description>A Build status publisher that notifies channels on a Slack team</description>
+    <url>http://wiki.jenkins-ci.org/display/JENKINS/Slack+Plugin</url>
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -46,9 +46,9 @@
     </distributionManagement>
 
     <scm>
-        <connection>scm:git:ssh://github.com/jlewallen/jenkins-hipchat-plugin.git</connection>
-        <developerConnection>scm:git:ssh://git@github.com/jlewallen/jenkins-hipchat-plugin.git</developerConnection>
-        <url>https://github.com/jlewallen/jenkins-hipchat-plugin</url>
+        <connection>scm:git:ssh://github.com/tinyspeck/jenkins-slack-plugin.git</connection>
+        <developerConnection>scm:git:ssh://git@github.com/tinyspeck/jenkins-slack-plugin.git</developerConnection>
+        <url>https://github.com/tinyspeck/jenkins-slack-plugin</url>
     </scm>
 
 	<dependencies>

@@ -1,4 +1,4 @@
-package jenkins.plugins.hipchat;
+package jenkins.plugins.slack;
 
 import hudson.Extension;
 import hudson.Launcher;
@@ -18,9 +18,9 @@ import java.util.Map;
 import java.util.logging.Logger;
 
 @SuppressWarnings({"unchecked"})
-public class HipChatNotifier extends Notifier {
+public class SlackNotifier extends Notifier {
 
-    private static final Logger logger = Logger.getLogger(HipChatNotifier.class.getName());
+    private static final Logger logger = Logger.getLogger(SlackNotifier.class.getName());
 
     private String authToken;
     private String buildServerUrl;
@@ -50,7 +50,7 @@ public class HipChatNotifier extends Notifier {
 
 
     @DataBoundConstructor
-    public HipChatNotifier(final String authToken, final String room, String buildServerUrl, final String sendAs) {
+    public SlackNotifier(final String authToken, final String room, String buildServerUrl, final String sendAs) {
         super();
         this.authToken = authToken;
         this.buildServerUrl = buildServerUrl;
@@ -62,8 +62,8 @@ public class HipChatNotifier extends Notifier {
         return BuildStepMonitor.BUILD;
     }
 
-    public HipChatService newHipChatService(final String room) {
-        return new StandardHipChatService(getAuthToken(), room == null ? getRoom() : room, StringUtils.isBlank(getSendAs()) ? "Build Server" : getSendAs());
+    public SlackService newSlackService(final String room) {
+        return new StandardSlackService(getAuthToken(), room == null ? getRoom() : room, StringUtils.isBlank(getSendAs()) ? "Build Server" : getSendAs());
     }
 
     @Override
@@ -103,25 +103,25 @@ public class HipChatNotifier extends Notifier {
         }
 
         @Override
-        public HipChatNotifier newInstance(StaplerRequest sr) {
-            if (token == null) token = sr.getParameter("hipChatToken");
-            if (buildServerUrl == null) buildServerUrl = sr.getParameter("hipChatBuildServerUrl");
-            if (room == null) room = sr.getParameter("hipChatRoom");
-            if (sendAs == null) sendAs = sr.getParameter("hipChatSendAs");
-            return new HipChatNotifier(token, room, buildServerUrl, sendAs);
+        public SlackNotifier newInstance(StaplerRequest sr) {
+            if (token == null) token = sr.getParameter("slackToken");
+            if (buildServerUrl == null) buildServerUrl = sr.getParameter("slackBuildServerUrl");
+            if (room == null) room = sr.getParameter("slackRoom");
+            if (sendAs == null) sendAs = sr.getParameter("slackSendAs");
+            return new SlackNotifier(token, room, buildServerUrl, sendAs);
         }
 
         @Override
         public boolean configure(StaplerRequest sr, JSONObject formData) throws FormException {
-            token = sr.getParameter("hipChatToken");
-            room = sr.getParameter("hipChatRoom");
-            buildServerUrl = sr.getParameter("hipChatBuildServerUrl");
-            sendAs = sr.getParameter("hipChatSendAs");
+            token = sr.getParameter("slackToken");
+            room = sr.getParameter("slackRoom");
+            buildServerUrl = sr.getParameter("slackBuildServerUrl");
+            sendAs = sr.getParameter("slackSendAs");
             if (buildServerUrl != null && !buildServerUrl.endsWith("/")) {
                 buildServerUrl = buildServerUrl + "/";
             }
             try {
-                new HipChatNotifier(token, room, buildServerUrl, sendAs);
+                new SlackNotifier(token, room, buildServerUrl, sendAs);
             } catch (Exception e) {
                 throw new FormException("Failed to initialize notifier - check your global notifier configuration settings", e, "");
             }
@@ -131,11 +131,11 @@ public class HipChatNotifier extends Notifier {
 
         @Override
         public String getDisplayName() {
-            return "HipChat Notifications";
+            return "Slack Notifications";
         }
     }
 
-    public static class HipChatJobProperty extends hudson.model.JobProperty<AbstractProject<?, ?>> {
+    public static class SlackJobProperty extends hudson.model.JobProperty<AbstractProject<?, ?>> {
         private String room;
         private boolean startNotification;
         private boolean notifySuccess;
@@ -147,7 +147,7 @@ public class HipChatNotifier extends Notifier {
 
 
         @DataBoundConstructor
-        public HipChatJobProperty(String room,
+        public SlackJobProperty(String room,
                                   boolean startNotification,
                                   boolean notifyAborted,
                                   boolean notifyFailure,
@@ -185,9 +185,9 @@ public class HipChatNotifier extends Notifier {
             if (startNotification) {
                 Map<Descriptor<Publisher>, Publisher> map = build.getProject().getPublishersList().toMap();
                 for (Publisher publisher : map.values()) {
-                    if (publisher instanceof HipChatNotifier) {
+                    if (publisher instanceof SlackNotifier) {
                         logger.info("Invoking Started...");
-                        new ActiveNotifier((HipChatNotifier) publisher).started(build);
+                        new ActiveNotifier((SlackNotifier) publisher).started(build);
                     }
                 }
             }
@@ -222,7 +222,7 @@ public class HipChatNotifier extends Notifier {
         @Extension
         public static final class DescriptorImpl extends JobPropertyDescriptor {
             public String getDisplayName() {
-                return "HipChat Notifications";
+                return "Slack Notifications";
             }
 
             @Override
@@ -231,15 +231,15 @@ public class HipChatNotifier extends Notifier {
             }
 
             @Override
-            public HipChatJobProperty newInstance(StaplerRequest sr, JSONObject formData) throws hudson.model.Descriptor.FormException {
-                return new HipChatJobProperty(sr.getParameter("hipChatProjectRoom"),
-                        sr.getParameter("hipChatStartNotification") != null,
-                        sr.getParameter("hipChatNotifyAborted") != null,
-                        sr.getParameter("hipChatNotifyFailure") != null,
-                        sr.getParameter("hipChatNotifyNotBuilt") != null,
-                        sr.getParameter("hipChatNotifySuccess") != null,
-                        sr.getParameter("hipChatNotifyUnstable") != null,
-                        sr.getParameter("hipChatNotifyBackToNormal") != null);
+            public SlackJobProperty newInstance(StaplerRequest sr, JSONObject formData) throws hudson.model.Descriptor.FormException {
+                return new SlackJobProperty(sr.getParameter("slackProjectRoom"),
+                        sr.getParameter("slackStartNotification") != null,
+                        sr.getParameter("slackNotifyAborted") != null,
+                        sr.getParameter("slackNotifyFailure") != null,
+                        sr.getParameter("slackNotifyNotBuilt") != null,
+                        sr.getParameter("slackNotifySuccess") != null,
+                        sr.getParameter("slackNotifyUnstable") != null,
+                        sr.getParameter("slackNotifyBackToNormal") != null);
             }
         }
     }

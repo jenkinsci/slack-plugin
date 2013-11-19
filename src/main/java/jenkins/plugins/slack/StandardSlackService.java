@@ -1,4 +1,4 @@
-package jenkins.plugins.hipchat;
+package jenkins.plugins.slack;
 
 import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.HttpStatus;
@@ -10,16 +10,16 @@ import java.util.logging.Logger;
 import jenkins.model.Jenkins;
 import hudson.ProxyConfiguration;
 
-public class StandardHipChatService implements HipChatService {
+public class StandardSlackService implements SlackService {
 
-    private static final Logger logger = Logger.getLogger(StandardHipChatService.class.getName());
+    private static final Logger logger = Logger.getLogger(StandardSlackService.class.getName());
 
-    private String host = "api.hipchat.com";
+    private String host = "api.slack.com";
     private String token;
     private String[] roomIds;
     private String from;
 
-    public StandardHipChatService(String token, String roomId, String from) {
+    public StandardSlackService(String token, String roomId, String from) {
         super();
         this.token = token;
         this.roomIds = roomId.split(",");
@@ -47,10 +47,10 @@ public class StandardHipChatService implements HipChatService {
                 int responseCode = client.executeMethod(post);
                 String response = post.getResponseBodyAsString();
                 if(responseCode != HttpStatus.SC_OK || ! response.contains("\"sent\"")) {
-                    logger.log(Level.WARNING, "HipChat post may have failed. Response: " + response);
+                    logger.log(Level.WARNING, "Slack post may have failed. Response: " + response);
                 }
             } catch (Exception e) {
-                logger.log(Level.WARNING, "Error posting to HipChat", e);
+                logger.log(Level.WARNING, "Error posting to Slack", e);
             } finally {
                 post.releaseConnection();
             }
