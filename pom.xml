@@ -21,7 +21,7 @@
     <groupId>org.jvnet.hudson.plugins</groupId>
 	<artifactId>slack</artifactId>
 	<packaging>hpi</packaging>
-	<version>0.1.5-SNAPSHOT</version>
+	<version>1.0-SNAPSHOT</version>
 	<name>Jenkins Slack Plugin</name>
 	<description>A Build status publisher that notifies channels on a Slack team</description>
     <url>http://wiki.jenkins-ci.org/display/JENKINS/Slack+Plugin</url>
