@@ -1,0 +1,28 @@
+<j:jelly xmlns:j="jelly:core" xmlns:st="jelly:stapler" xmlns:d="jelly:define" xmlns:l="/lib/layout" xmlns:t="/lib/hudson" xmlns:f="/lib/form">
+  <!--
+    This Jelly script is used to produce the global configuration option.
+
+    Hudson uses a set of tag libraries to provide uniformity in forms.
+    To determine where this tag is defined, first check the namespace URI,
+    and then look under $HUDSON/views/. For example, <f:section> is defined
+    in $HUDSON/views/lib/form/section.jelly.
+
+    It's also often useful to just check other similar scripts to see what
+    tags they use. Views are always organized according to its owner class,
+    so it should be straightforward to find them.
+  -->
+<f:section title="Global HipChat Notifier Settings">
+    <f:entry title="API Token" help="${rootURL}/plugin/hipchat/help-globalConfig-hipChatToken.html">
+        <f:textbox name="hipChatToken" value="${descriptor.getToken()}" />
+    </f:entry>
+    <f:entry title="Room" help="${rootURL}/plugin/hipchat/help-globalConfig-hipChatRoom.html">
+        <f:textbox name="hipChatRoom" value="${descriptor.getRoom()}" />
+    </f:entry>
+    <f:entry title="Build Server URL" help="${rootURL}/plugin/hipchat/help-globalConfig-hipChatBuildServerUrl.html">
+        <f:textbox name="hipChatBuildServerUrl" value="${descriptor.getBuildServerUrl()}" />
+    </f:entry>
+    <f:entry title="Send As" help="${rootURL}/plugin/hipchat/help-globalConfig-hipChatSendAs.html">
+        <f:textbox name="hipChatSendAs" value="${descriptor.getSendAs()}" />
+    </f:entry>
+  </f:section>
+</j:jelly>
