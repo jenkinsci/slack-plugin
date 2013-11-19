@@ -22,6 +22,7 @@ public class SlackNotifier extends Notifier {
 
     private static final Logger logger = Logger.getLogger(SlackNotifier.class.getName());
 
+    private String teamDomain;
     private String authToken;
     private String buildServerUrl;
     private String room;
@@ -30,6 +31,10 @@ public class SlackNotifier extends Notifier {
     @Override
     public DescriptorImpl getDescriptor() {
         return (DescriptorImpl) super.getDescriptor();
+    }
+
+    public String getTeamDomain() {
+        return teamDomain;
     }
 
     public String getRoom() {
@@ -50,8 +55,9 @@ public class SlackNotifier extends Notifier {
 
 
     @DataBoundConstructor
-    public SlackNotifier(final String authToken, final String room, String buildServerUrl, final String sendAs) {
+    public SlackNotifier(final String teamDomain, final String authToken, final String room, String buildServerUrl, final String sendAs) {
         super();
+        this.teamDomain = teamDomain;
         this.authToken = authToken;
         this.buildServerUrl = buildServerUrl;
         this.room = room;
@@ -63,7 +69,7 @@ public class SlackNotifier extends Notifier {
     }
 
     public SlackService newSlackService(final String room) {
-        return new StandardSlackService(getAuthToken(), room == null ? getRoom() : room, StringUtils.isBlank(getSendAs()) ? "Build Server" : getSendAs());
+        return new StandardSlackService(getTeamDomain(), getAuthToken(), room == null ? getRoom() : room, StringUtils.isBlank(getSendAs()) ? "jenkins" : getSendAs());
     }
 
     @Override
@@ -73,6 +79,7 @@ public class SlackNotifier extends Notifier {
 
     @Extension
     public static class DescriptorImpl extends BuildStepDescriptor<Publisher> {
+        private String teamDomain;
         private String token;
         private String room;
         private String buildServerUrl;
@@ -80,6 +87,10 @@ public class SlackNotifier extends Notifier {
 
         public DescriptorImpl() {
             load();
+        }
+
+        public String getTeamDomain() {
+            return teamDomain;
         }
 
         public String getToken() {
@@ -104,15 +115,17 @@ public class SlackNotifier extends Notifier {
 
         @Override
         public SlackNotifier newInstance(StaplerRequest sr) {
+            if (teamDomain == null) teamDomain = sr.getParameter("slackTeamDomain");
             if (token == null) token = sr.getParameter("slackToken");
             if (buildServerUrl == null) buildServerUrl = sr.getParameter("slackBuildServerUrl");
             if (room == null) room = sr.getParameter("slackRoom");
             if (sendAs == null) sendAs = sr.getParameter("slackSendAs");
-            return new SlackNotifier(token, room, buildServerUrl, sendAs);
+            return new SlackNotifier(teamDomain, token, room, buildServerUrl, sendAs);
         }
 
         @Override
         public boolean configure(StaplerRequest sr, JSONObject formData) throws FormException {
+            teamDomain = sr.getParameter("slackTeamDomain");
             token = sr.getParameter("slackToken");
             room = sr.getParameter("slackRoom");
             buildServerUrl = sr.getParameter("slackBuildServerUrl");
@@ -121,7 +134,7 @@ public class SlackNotifier extends Notifier {
                 buildServerUrl = buildServerUrl + "/";
             }
             try {
-                new SlackNotifier(token, room, buildServerUrl, sendAs);
+                new SlackNotifier(teamDomain, token, room, buildServerUrl, sendAs);
             } catch (Exception e) {
                 throw new FormException("Failed to initialize notifier - check your global notifier configuration settings", e, "");
             }

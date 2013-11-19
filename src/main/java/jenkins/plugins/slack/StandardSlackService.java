@@ -14,13 +14,15 @@ public class StandardSlackService implements SlackService {
 
     private static final Logger logger = Logger.getLogger(StandardSlackService.class.getName());
 
-    private String host = "api.slack.com";
+    private String host = "slack.com";
+    private String teamDomain;
     private String token;
     private String[] roomIds;
     private String from;
 
-    public StandardSlackService(String token, String roomId, String from) {
+    public StandardSlackService(String teamDomain, String token, String roomId, String from) {
         super();
+        this.teamDomain = teamDomain;
         this.token = token;
         this.roomIds = roomId.split(",");
         this.from = from;
@@ -34,7 +36,7 @@ public class StandardSlackService implements SlackService {
         for (String roomId : roomIds) {
             logger.info("Posting: " + from + " to " + roomId + ": " + message + " " + color);
             HttpClient client = getHttpClient();
-            String url = "https://" + host + "/v1/rooms/message?auth_token=" + token;
+            String url = "https://" + teamDomain + "." + host + "/services/hooks/jenkins-ci?token=" + token;
             PostMethod post = new PostMethod(url);
 
             try {
