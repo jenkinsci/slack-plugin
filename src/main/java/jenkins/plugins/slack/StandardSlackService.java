@@ -32,20 +32,19 @@ public class StandardSlackService implements SlackService {
 
     public void publish(String message, String color) {
         for (String roomId : roomIds) {
-            logger.info("Posting: to " + roomId + ": " + message + " " + color);
+            logger.info("Posting: to " + roomId + " on " + teamDomain + ": " + message + " " + color);
             HttpClient client = getHttpClient();
             String url = "https://" + teamDomain + "." + host + "/services/hooks/jenkins-ci?token=" + token;
             PostMethod post = new PostMethod(url);
 
             try {
-                post.addParameter("room_id", roomId);
-                post.addParameter("message", message);
+                post.addParameter("channel", roomId);
+                post.addParameter("text", message);
                 post.addParameter("color", color);
-                post.addParameter("notify", shouldNotify(color));
                 post.getParams().setContentCharset("UTF-8");
                 int responseCode = client.executeMethod(post);
                 String response = post.getResponseBodyAsString();
-                if(responseCode != HttpStatus.SC_OK || ! response.contains("\"sent\"")) {
+                if(responseCode != HttpStatus.SC_OK) {
                     logger.log(Level.WARNING, "Slack post may have failed. Response: " + response);
                 }
             } catch (Exception e) {
@@ -65,10 +64,6 @@ public class StandardSlackService implements SlackService {
             }
         }
         return client;
-    }
-
-    private String shouldNotify(String color) {
-        return color.equalsIgnoreCase("green") ? "0" : "1";
     }
 
     void setHost(String host) {

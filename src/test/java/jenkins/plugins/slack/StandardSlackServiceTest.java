@@ -11,8 +11,26 @@ public class StandardSlackServiceTest {
      */
     @Test
     public void publishWithBadHostShouldNotRethrowExceptions() {
-        StandardSlackService service = new StandardSlackService("foo", "token", "room");
+        StandardSlackService service = new StandardSlackService("foo", "token", "#general");
         service.setHost("hostvaluethatwillcausepublishtofail");
+        service.publish("message");
+    }
+
+    /**
+     * Use a valid host, but an invalid team domain
+     */
+    @Test
+    public void invalidTeamDomainShouldFail() {
+        StandardSlackService service = new StandardSlackService("my", "token", "#general");
+        service.publish("message");
+    }
+
+    /**
+     * Use a valid team domain, but a bad token
+     */
+    @Test
+    public void invalidTokenShouldFail() {
+        StandardSlackService service = new StandardSlackService("tinyspeck", "token", "#general");
         service.publish("message");
     }
 }
