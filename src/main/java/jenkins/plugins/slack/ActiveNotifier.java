@@ -134,7 +134,7 @@ public class ActiveNotifier implements FineGrainedNotifier {
         }
 
         public MessageBuilder appendStatusMessage() {
-            message.append(getStatusMessage(build));
+            message.append(this.escape(getStatusMessage(build)));
             return this;
         }
 
@@ -155,19 +155,19 @@ public class ActiveNotifier implements FineGrainedNotifier {
         }
 
         public MessageBuilder append(String string) {
-            message.append(string);
+            message.append(this.escape(string));
             return this;
         }
 
         public MessageBuilder append(Object string) {
-            message.append(string.toString());
+            message.append(this.escape(string.toString()));
             return this;
         }
 
         private MessageBuilder startMessage() {
-            message.append(build.getProject().getDisplayName());
+            message.append(this.escape(build.getProject().getDisplayName()));
             message.append(" - ");
-            message.append(build.getDisplayName());
+            message.append(this.escape(build.getDisplayName()));
             message.append(" ");
             return this;
         }
@@ -182,6 +182,14 @@ public class ActiveNotifier implements FineGrainedNotifier {
             message.append(" after ");
             message.append(build.getDurationString());
             return this;
+        }
+
+        public String escape(String string){
+            string = string.replace("&", "&amp;");
+            string = string.replace("<", "&lt;");
+            string = string.replace(">", "&gt;");
+
+            return string;
         }
 
         public String toString() {
