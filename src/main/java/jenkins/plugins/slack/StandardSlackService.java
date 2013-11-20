@@ -34,9 +34,9 @@ public class StandardSlackService implements SlackService {
 
     public void publish(String message, String color) {
         for (String roomId : roomIds) {
-            logger.info("Posting: to " + roomId + " on " + teamDomain + ": " + message + " " + color);
-            HttpClient client = getHttpClient();
             String url = "https://" + teamDomain + "." + host + "/services/hooks/jenkins-ci?token=" + token;
+            logger.info("Posting: to " + roomId + " on " + teamDomain + " using " + url +": " + message + " " + color);
+            HttpClient client = getHttpClient();
             PostMethod post = new PostMethod(url);
             JSONObject json = new JSONObject();
 
