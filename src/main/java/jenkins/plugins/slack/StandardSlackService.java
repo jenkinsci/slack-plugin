@@ -4,6 +4,8 @@ import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.HttpStatus;
 import org.apache.commons.httpclient.methods.PostMethod;
 
+import org.json.JSONObject;
+
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -36,11 +38,14 @@ public class StandardSlackService implements SlackService {
             HttpClient client = getHttpClient();
             String url = "https://" + teamDomain + "." + host + "/services/hooks/jenkins-ci?token=" + token;
             PostMethod post = new PostMethod(url);
+            JSONObject json = new JSONObject();
 
             try {
-                post.addParameter("channel", roomId);
-                post.addParameter("text", message);
-                post.addParameter("color", color);
+                json.put("channel", roomId);
+                json.put("text", message);
+                json.put("color", color);
+
+                post.addParameter("payload", json.toString());
                 post.getParams().setContentCharset("UTF-8");
                 int responseCode = client.executeMethod(post);
                 String response = post.getResponseBodyAsString();
