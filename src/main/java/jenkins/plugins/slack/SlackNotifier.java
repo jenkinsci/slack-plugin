@@ -69,7 +69,7 @@ public class SlackNotifier extends Notifier {
     }
 
     public SlackService newSlackService(final String room) {
-        return new StandardSlackService(getTeamDomain(), getAuthToken(), room == null ? getRoom() : room, StringUtils.isBlank(getSendAs()) ? "jenkins" : getSendAs());
+        return new StandardSlackService(getTeamDomain(), getAuthToken(), room == null ? getRoom() : room);
     }
 
     @Override

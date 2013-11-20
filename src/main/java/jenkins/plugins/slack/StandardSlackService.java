@@ -18,14 +18,12 @@ public class StandardSlackService implements SlackService {
     private String teamDomain;
     private String token;
     private String[] roomIds;
-    private String from;
 
-    public StandardSlackService(String teamDomain, String token, String roomId, String from) {
+    public StandardSlackService(String teamDomain, String token, String roomId) {
         super();
         this.teamDomain = teamDomain;
         this.token = token;
         this.roomIds = roomId.split(",");
-        this.from = from;
     }
 
     public void publish(String message) {
@@ -34,13 +32,12 @@ public class StandardSlackService implements SlackService {
 
     public void publish(String message, String color) {
         for (String roomId : roomIds) {
-            logger.info("Posting: " + from + " to " + roomId + ": " + message + " " + color);
+            logger.info("Posting: to " + roomId + ": " + message + " " + color);
             HttpClient client = getHttpClient();
             String url = "https://" + teamDomain + "." + host + "/services/hooks/jenkins-ci?token=" + token;
             PostMethod post = new PostMethod(url);
 
             try {
-                post.addParameter("from", from);
                 post.addParameter("room_id", roomId);
                 post.addParameter("message", message);
                 post.addParameter("color", color);

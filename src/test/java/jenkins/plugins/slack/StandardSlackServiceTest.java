@@ -11,7 +11,7 @@ public class StandardSlackServiceTest {
      */
     @Test
     public void publishWithBadHostShouldNotRethrowExceptions() {
-        StandardSlackService service = new StandardSlackService("foo", "token", "room", "from");
+        StandardSlackService service = new StandardSlackService("foo", "token", "room");
         service.setHost("hostvaluethatwillcausepublishtofail");
         service.publish("message");
     }

@@ -18,14 +18,11 @@
     <f:entry title="Integration Token" help="${rootURL}/plugin/slack/help-globalConfig-slackToken.html">
         <f:textbox name="slackToken" value="${descriptor.getToken()}" />
     </f:entry>
-    <f:entry title="Room" help="${rootURL}/plugin/slack/help-globalConfig-slackRoom.html">
+    <f:entry title="Channel" help="${rootURL}/plugin/slack/help-globalConfig-slackRoom.html">
         <f:textbox name="slackRoom" value="${descriptor.getRoom()}" />
     </f:entry>
     <f:entry title="Build Server URL" help="${rootURL}/plugin/slack/help-globalConfig-slackBuildServerUrl.html">
         <f:textbox name="slackBuildServerUrl" value="${descriptor.getBuildServerUrl()}" />
-    </f:entry>
-    <f:entry title="Send As" help="${rootURL}/plugin/slack/help-globalConfig-slackSendAs.html">
-        <f:textbox name="slackSendAs" value="${descriptor.getSendAs()}" />
     </f:entry>
   </f:section>
 </j:jelly>
