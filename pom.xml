@@ -85,17 +85,14 @@
     </dependencies>
 
     <build>
-        <pluginManagement>
-            <plugins>
-                <plugin>
-                   <groupId>org.jenkins-ci.tools</groupId>
-                   <artifactId>maven-hpi-plugin</artifactId>
-                   <configuration>
-                       <disabledTestInjection>true</disabledTestInjection>
-                   </configuration>
-                </plugin>
-            </plugins>
-        </pluginManagement>
+        <plugins>
+          <plugin>
+            <artifactId>maven-release-plugin</artifactId>
+            <configuration>
+              <goals>deploy</goals>
+            </configuration>
+          </plugin>
+        </plugins>
     </build>
 
     <repositories>
