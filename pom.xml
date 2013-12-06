@@ -46,9 +46,9 @@
     </distributionManagement>
 
     <scm>
-        <connection>scm:git:ssh://github.com/tinyspeck/jenkins-slack-plugin.git</connection>
-        <developerConnection>scm:git:ssh://git@github.com/tinyspeck/jenkins-slack-plugin.git</developerConnection>
-        <url>https://github.com/tinyspeck/jenkins-slack-plugin</url>
+        <connection>scm:git:ssh://github.com/jenkinsci/slack-plugin.git</connection>
+        <developerConnection>scm:git:ssh://git@github.com/jenkinsci/slack-plugin.git</developerConnection>
+        <url>https://github.com/jenkinsci/slack-plugin</url>
     </scm>
 
 	<dependencies>
