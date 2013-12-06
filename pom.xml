@@ -109,4 +109,12 @@
         </pluginRepository>
     </pluginRepositories>
 
+    <developers>
+        <developer>
+          <id>grantmd</id>
+          <name>Myles Grant</name>
+          <email>myles@tinyspeck.com</email>
+        </developer>
+    </developers>
+
 </project>
