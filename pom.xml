@@ -17,11 +17,9 @@
         <version>1.447</version>
     </parent>
 
-    <!-- keeping original groupId -->
-    <groupId>org.jvnet.hudson.plugins</groupId>
 	<artifactId>slack</artifactId>
 	<packaging>hpi</packaging>
-	<version>1.3-SNAPSHOT</version>
+	<version>1.4-SNAPSHOT</version>
 	<name>Jenkins Slack Plugin</name>
 	<description>A Build status publisher that notifies channels on a Slack team</description>
     <url>http://wiki.jenkins-ci.org/display/JENKINS/Slack+Plugin</url>
@@ -37,13 +35,6 @@
 			<comments>All source code is under the MIT license.</comments>
 		</license>
 	</licenses>
-
-    <distributionManagement>
-        <repository>
-            <id>maven.jenkins-ci.org</id>
-            <url>http://maven.jenkins-ci.org:8081/content/repositories/releases/</url>
-        </repository>
-    </distributionManagement>
 
     <scm>
         <connection>scm:git:ssh://git@github.com/jenkinsci/slack-plugin.git</connection>
@@ -83,17 +74,6 @@
             <scope>provided</scope>
         </dependency>
     </dependencies>
-
-    <build>
-        <plugins>
-          <plugin>
-            <artifactId>maven-release-plugin</artifactId>
-            <configuration>
-              <goals>deploy</goals>
-            </configuration>
-          </plugin>
-        </plugins>
-    </build>
 
     <repositories>
         <repository>
