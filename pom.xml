@@ -19,7 +19,7 @@
 
 	<artifactId>slack</artifactId>
 	<packaging>hpi</packaging>
-	<version>1.1-SNAPSHOT</version>
+	<version>1.7-SNAPSHOT</version>
 	<name>Slack Notification Plugin</name>
 	<description>A Build status publisher that notifies channels on a Slack team</description>
     <url>http://wiki.jenkins-ci.org/display/JENKINS/Slack+Plugin</url>
