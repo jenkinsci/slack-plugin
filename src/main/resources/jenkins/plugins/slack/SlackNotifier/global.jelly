@@ -11,7 +11,7 @@
     tags they use. Views are always organized according to its owner class,
     so it should be straightforward to find them.
   -->
-<f:section title="Global Slack Notifier Settings">
+<f:section title="Global Slack Notifier Settings" name="slack">
     <f:entry title="Team Domain" help="${rootURL}/plugin/slack/help-globalConfig-slackTeamDomain.html">
         <f:textbox name="slackTeamDomain" value="${descriptor.getTeamDomain()}" />
     </f:entry>
