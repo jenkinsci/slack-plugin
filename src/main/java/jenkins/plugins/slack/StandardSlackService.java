@@ -57,6 +57,7 @@ public class StandardSlackService implements SlackService {
             } catch (Exception e) {
                 logger.log(Level.WARNING, "Error posting to Slack", e);
             } finally {
+                logger.info("Posting succeeded");
                 post.releaseConnection();
             }
         }
