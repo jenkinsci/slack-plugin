@@ -11,6 +11,8 @@ import java.util.logging.Logger;
 
 import jenkins.model.Jenkins;
 import hudson.ProxyConfiguration;
+import org.apache.commons.httpclient.UsernamePasswordCredentials;
+import org.apache.commons.httpclient.auth.AuthScope;
 
 public class StandardSlackService implements SlackService {
 
@@ -66,6 +68,17 @@ public class StandardSlackService implements SlackService {
             ProxyConfiguration proxy = Jenkins.getInstance().proxy;
             if (proxy != null) {
                 client.getHostConfiguration().setProxy(proxy.name, proxy.port);
+                String username = proxy.getUserName();
+                String password = proxy.getPassword();
+                // Consider it to be passed if username specified. Sufficient?
+                if (username != null && !"".equals(username.trim())) {
+                    logger.info("Using proxy authentication (user=" + username + ")");
+                    // http://hc.apache.org/httpclient-3.x/authentication.html#Proxy_Authentication
+                    // and
+                    // http://svn.apache.org/viewvc/httpcomponents/oac.hc3x/trunk/src/examples/BasicAuthenticationExample.java?view=markup
+                    client.getState().setProxyCredentials(AuthScope.ANY,
+                        new UsernamePasswordCredentials(username, password));
+                }
             }
         }
         return client;
