@@ -50,7 +50,7 @@ public class ActiveNotifier implements FineGrainedNotifier {
     }
 
     private void notifyStart(AbstractBuild build, String message) {
-        getSlack(build).publish(message, "green");
+        getSlack(build).publish(message, "good");
     }
 
     public void finalized(AbstractBuild r) {
@@ -106,11 +106,11 @@ public class ActiveNotifier implements FineGrainedNotifier {
     static String getBuildColor(AbstractBuild r) {
         Result result = r.getResult();
         if (result == Result.SUCCESS) {
-            return "green";
+            return "good";
         } else if (result == Result.FAILURE) {
-            return "red";
+            return "danger";
         } else {
-            return "yellow";
+            return "warning";
         }
     }
 
