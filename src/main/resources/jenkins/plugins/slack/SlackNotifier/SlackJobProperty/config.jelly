@@ -1,38 +1,39 @@
 <j:jelly xmlns:j="jelly:core" xmlns:st="jelly:stapler" xmlns:d="jelly:define" xmlns:l="/lib/layout" xmlns:t="/lib/hudson" xmlns:f="/lib/form">
 
 	<f:section title="Slack Notifications">
-    	<f:entry title="Project Channel">
-      		<f:textbox name="slackProjectRoom" value="${instance.getRoom()}"/>
-    	</f:entry>
-
-    	<f:entry title="Notify Build Start">
-      		<f:checkbox name="slackStartNotification" value="true" checked="${instance.getStartNotification()}"/>
-    	</f:entry>
-
-        <f:entry title="Notify Aborted">
-            <f:checkbox name="slackNotifyAborted" value="true" checked="${instance.getNotifyAborted()}"/>
+        <f:entry title="Project Channel">
+            <f:textbox name="slackProjectRoom" value="${instance.getRoom()}"/>
         </f:entry>
 
-        <f:entry title="Notify Failure">
-            <f:checkbox name="slackNotifyFailure" value="true" checked="${instance.getNotifyFailure()}"/>
-        </f:entry>
+        <f:advanced>
+            <f:entry title="Notify Build Start">
+                <f:checkbox name="slackStartNotification" value="true" checked="${instance.getStartNotification()}"/>
+            </f:entry>
 
-        <f:entry title="Notify Not Built">
-            <f:checkbox name="slackNotifyNotBuilt" value="true" checked="${instance.getNotifyNotBuilt()}"/>
-        </f:entry>
+            <f:entry title="Notify Aborted">
+                <f:checkbox name="slackNotifyAborted" value="true" checked="${instance.getNotifyAborted()}"/>
+            </f:entry>
 
-        <f:entry title="Notify Success">
-            <f:checkbox name="slackNotifySuccess" value="true" checked="${instance.getNotifySuccess()}"/>
-        </f:entry>
+            <f:entry title="Notify Failure">
+                <f:checkbox name="slackNotifyFailure" value="true" checked="${instance.getNotifyFailure()}"/>
+            </f:entry>
 
-        <f:entry title="Notify Unstable">
-            <f:checkbox name="slackNotifyUnstable" value="true" checked="${instance.getNotifyUnstable()}"/>
-        </f:entry>
+            <f:entry title="Notify Not Built">
+                <f:checkbox name="slackNotifyNotBuilt" value="true" checked="${instance.getNotifyNotBuilt()}"/>
+            </f:entry>
 
-        <f:entry title="Notify Back To Normal">
-            <f:checkbox name="slackNotifyBackToNormal" value="true" checked="${instance.getNotifyBackToNormal()}"/>
-        </f:entry>
+            <f:entry title="Notify Success">
+                <f:checkbox name="slackNotifySuccess" value="true" checked="${instance.getNotifySuccess()}"/>
+            </f:entry>
 
+            <f:entry title="Notify Unstable">
+                <f:checkbox name="slackNotifyUnstable" value="true" checked="${instance.getNotifyUnstable()}"/>
+            </f:entry>
+
+            <f:entry title="Notify Back To Normal">
+                <f:checkbox name="slackNotifyBackToNormal" value="true" checked="${instance.getNotifyBackToNormal()}"/>
+            </f:entry>
+        </f:advanced>
     </f:section>
 
 </j:jelly>
