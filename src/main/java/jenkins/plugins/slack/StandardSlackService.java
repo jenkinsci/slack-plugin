@@ -5,6 +5,7 @@ import org.apache.commons.httpclient.HttpStatus;
 import org.apache.commons.httpclient.methods.PostMethod;
 
 import org.json.JSONObject;
+import org.json.JSONArray;
 
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -31,7 +32,7 @@ public class StandardSlackService implements SlackService {
     }
 
     public void publish(String message) {
-        publish(message, "yellow");
+        publish(message, "warning");
     }
 
     public void publish(String message, String color) {
@@ -43,9 +44,21 @@ public class StandardSlackService implements SlackService {
             JSONObject json = new JSONObject();
 
             try {
+                JSONObject field = new JSONObject();
+                field.put("short", false);
+                field.put("value", message);
+
+                JSONArray fields = new JSONArray();
+                fields.put(field);
+
+                JSONObject attachment = new JSONObject();
+                attachment.put("color", color);
+                attachment.put("fields", fields);
+                JSONArray attachments = new JSONArray();
+                attachments.put(attachment);
+
                 json.put("channel", roomId);
-                json.put("text", message);
-                json.put("color", color);
+                json.put("attachments", attachments);
 
                 post.addParameter("payload", json.toString());
                 post.getParams().setContentCharset("UTF-8");
