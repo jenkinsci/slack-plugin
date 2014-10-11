@@ -1,17 +1,20 @@
 <j:jelly xmlns:j="jelly:core" xmlns:st="jelly:stapler" xmlns:d="jelly:define" xmlns:l="/lib/layout" xmlns:t="/lib/hudson" xmlns:f="/lib/form">
 
 	<f:section title="Slack Notifications">
-	    <f:entry title="Team Domain" help="${rootURL}/plugin/slack/help-projectConfig-slackTeamDomain.html">
-    	    <f:textbox name="slackTeamDomain" value="${instance.getTeamDomain()}" />
-	    </f:entry>
-	    
-	    <f:entry title="Integration Token" help="${rootURL}/plugin/slack/help-projectConfig-slackToken.html">
-	        <f:textbox name="slackToken" value="${instance.getToken()}" />
-	    </f:entry>
-	    
-    	<f:entry title="Project Channel" help="${rootURL}/plugin/slack/help-projectConfig-slackRoom.html">
-      		<f:textbox name="slackProjectRoom" value="${instance.getRoom()}"/>
-    	</f:entry>
+		<f:advanced>
+		    <f:entry title="Team Domain" help="${rootURL}/plugin/slack/help-projectConfig-slackTeamDomain.html">
+	    	    <f:textbox name="slackTeamDomain" value="${instance.getTeamDomain()}" />
+		    </f:entry>
+		    
+		    <f:entry title="Integration Token" help="${rootURL}/plugin/slack/help-projectConfig-slackToken.html">
+		        <f:textbox name="slackToken" value="${instance.getToken()}" />
+		    </f:entry>
+		    
+	    	<f:entry title="Project Channel" help="${rootURL}/plugin/slack/help-projectConfig-slackRoom.html">
+	      		<f:textbox name="slackProjectRoom" value="${instance.getRoom()}"/>
+	    	</f:entry>
+    	</f:advanced>
+    	
     	<f:entry title="Notify Build Start">
       		<f:checkbox name="slackStartNotification" value="true" checked="${instance.getStartNotification()}"/>
     	</f:entry>
