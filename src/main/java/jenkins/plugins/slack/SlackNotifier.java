@@ -27,14 +27,24 @@ public class SlackNotifier extends Notifier {
 
     private static final Logger logger = Logger.getLogger(SlackNotifier.class.getName());
 
+    private String teamDomain;
+    private String authToken;
     private String buildServerUrl;
     private String sendAs;
+    private String room;
 
     @Override
     public DescriptorImpl getDescriptor() {
         return (DescriptorImpl) super.getDescriptor();
     }
 
+    public String getTeamDomain() {
+        return teamDomain;
+    }
+
+    public String getAuthToken() {
+        return authToken;
+    }
 
     public String getBuildServerUrl() {
         return buildServerUrl;
@@ -43,11 +53,18 @@ public class SlackNotifier extends Notifier {
     public String getSendAs() {
         return sendAs;
     }
+    
+    public String getRoom() {
+        return room;
+    }
 
     @DataBoundConstructor
-    public SlackNotifier(final String buildServerUrl, final String sendAs) {
+    public SlackNotifier(final String teamDomain, final String authToken, final String room, String buildServerUrl, final String sendAs) {
         super();
+        this.teamDomain = teamDomain;
+        this.authToken = authToken;
         this.buildServerUrl = buildServerUrl;
+        this.room = room;
         this.sendAs = sendAs;
     }
 
@@ -56,6 +73,14 @@ public class SlackNotifier extends Notifier {
     }
 
     public SlackService newSlackService(String teamDomain, String token, String projectRoom) {
+    	// Settings are passed here from the job, if they are null, use global settings 
+    	if (teamDomain == null)
+    		teamDomain = getTeamDomain();
+    	if (token == null)
+    		token = getAuthToken();
+    	if (projectRoom == null)
+    		projectRoom = getRoom();
+    	
         return new StandardSlackService(teamDomain, token, projectRoom);
     }
 
@@ -66,13 +91,27 @@ public class SlackNotifier extends Notifier {
 
     @Extension
     public static class DescriptorImpl extends BuildStepDescriptor<Publisher> {
-        private String buildServerUrl;
+        private String teamDomain;
+        private String token;
+        private String room;
+    	private String buildServerUrl;
         private String sendAs;
 
         public DescriptorImpl() {
             load();
         }
+        
+        public String getTeamDomain() {
+            return teamDomain;
+        }
 
+        public String getToken() {
+            return token;
+        }
+
+        public String getRoom() {
+            return room;
+        }
 
         public String getBuildServerUrl() {
             return buildServerUrl;
@@ -88,20 +127,26 @@ public class SlackNotifier extends Notifier {
 
         @Override
         public SlackNotifier newInstance(StaplerRequest sr) {
+            if (teamDomain == null) teamDomain = sr.getParameter("slackTeamDomain");
+            if (token == null) token = sr.getParameter("slackToken");
             if (buildServerUrl == null) buildServerUrl = sr.getParameter("slackBuildServerUrl");
+            if (room == null) room = sr.getParameter("slackRoom");
             if (sendAs == null) sendAs = sr.getParameter("slackSendAs");
-            return new SlackNotifier(buildServerUrl, sendAs);
+            return new SlackNotifier(teamDomain, token, room, buildServerUrl, sendAs);
         }
 
         @Override
         public boolean configure(StaplerRequest sr, JSONObject formData) throws FormException {
-            buildServerUrl = sr.getParameter("slackBuildServerUrl");
+            teamDomain = sr.getParameter("slackTeamDomain");
+            token = sr.getParameter("slackToken");
+            room = sr.getParameter("slackRoom");
+        	buildServerUrl = sr.getParameter("slackBuildServerUrl");
             sendAs = sr.getParameter("slackSendAs");
             if (buildServerUrl != null && !buildServerUrl.endsWith("/")) {
                 buildServerUrl = buildServerUrl + "/";
             }
             try {
-                new SlackNotifier(buildServerUrl, sendAs);
+                new SlackNotifier(teamDomain, token, room, buildServerUrl, sendAs);
             } catch (Exception e) {
                 throw new FormException("Failed to initialize notifier - check your global notifier configuration settings", e, "");
             }
