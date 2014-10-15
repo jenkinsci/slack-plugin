@@ -5,6 +5,8 @@ import hudson.model.*;
 import hudson.scm.ChangeLogSet;
 import hudson.scm.ChangeLogSet.AffectedFile;
 import hudson.scm.ChangeLogSet.Entry;
+import hudson.tasks.test.AbstractTestResultAction;
+
 import org.apache.commons.lang.StringUtils;
 
 import java.util.HashSet;
@@ -118,7 +120,8 @@ public class ActiveNotifier implements FineGrainedNotifier {
         MessageBuilder message = new MessageBuilder(notifier, r);
         message.appendStatusMessage();
         message.appendDuration();
-        return message.appendOpenLink().toString();
+        message.appendOpenLink();
+        return message.appendTestSummary().toString();
     }
 
     public static class MessageBuilder {
@@ -181,6 +184,23 @@ public class ActiveNotifier implements FineGrainedNotifier {
         public MessageBuilder appendDuration() {
             message.append(" after ");
             message.append(build.getDurationString());
+            return this;
+        }
+
+        public MessageBuilder appendTestSummary(){
+            AbstractTestResultAction<?> action = this.build
+                    .getAction(AbstractTestResultAction.class);
+            if (action != null) {
+                int total = action.getTotalCount();
+                int failed = action.getFailCount();
+                int skipped = action.getSkipCount();
+                message.append("\nTest Status:\n");
+                message.append("\tPassed: " + (total - failed - skipped));
+                message.append(", Failed: " + failed);
+                message.append(", Skipped: " + skipped);
+            } else {
+                message.append("\nNo Tests found.");
+            }
             return this;
         }
 
