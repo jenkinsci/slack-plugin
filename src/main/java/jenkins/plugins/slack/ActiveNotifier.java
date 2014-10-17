@@ -70,7 +70,8 @@ public class ActiveNotifier implements FineGrainedNotifier {
                 || (result == Result.SUCCESS && previousResult == Result.FAILURE && jobProperty.getNotifyBackToNormal())
                 || (result == Result.SUCCESS && jobProperty.getNotifySuccess())
                 || (result == Result.UNSTABLE && jobProperty.getNotifyUnstable())) {
-            getSlack(r).publish(getBuildStatusMessage(r), getBuildColor(r));
+            getSlack(r).publish(getBuildStatusMessage(r, jobProperty.includeTestSummary()),
+                    getBuildColor(r));
         }
     }
 
@@ -116,11 +117,14 @@ public class ActiveNotifier implements FineGrainedNotifier {
         }
     }
 
-    String getBuildStatusMessage(AbstractBuild r) {
+    String getBuildStatusMessage(AbstractBuild r, boolean includeTestSummary) {
         MessageBuilder message = new MessageBuilder(notifier, r);
         message.appendStatusMessage();
         message.appendDuration();
         message.appendOpenLink();
+        if (!includeTestSummary){
+            return message.toString();
+        }
         return message.appendTestSummary().toString();
     }
 
