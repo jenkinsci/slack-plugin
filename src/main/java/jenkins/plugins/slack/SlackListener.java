@@ -50,6 +50,7 @@ public class SlackListener extends RunListener<AbstractBuild> {
         Map<Descriptor<Publisher>, Publisher> map = project.getPublishersList().toMap();
         for (Publisher publisher : map.values()) {
             if (publisher instanceof SlackNotifier) {
+                ((SlackNotifier)publisher).update();
                 return new ActiveNotifier((SlackNotifier) publisher);
             }
         }
