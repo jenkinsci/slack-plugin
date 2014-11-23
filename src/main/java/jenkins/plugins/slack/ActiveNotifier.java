@@ -152,12 +152,12 @@ public class ActiveNotifier implements FineGrainedNotifier {
             Result result = r.getResult();
             Run previousBuild = r.getProject().getLastBuild().getPreviousBuild();
             Result previousResult = (previousBuild != null) ? previousBuild.getResult() : Result.SUCCESS;
-            if (result == Result.SUCCESS && previousResult == Result.FAILURE) return "*Back to normal*";
-            if (result == Result.SUCCESS) return "*Success*";
-            if (result == Result.FAILURE) return "*Failure*";
-            if (result == Result.ABORTED) return "*Aborted*";
-            if (result == Result.NOT_BUILT) return "*Not built*";
-            if (result == Result.UNSTABLE) return "*Unstable*";
+            if (result == Result.SUCCESS && previousResult == Result.FAILURE) return "Back to normal";
+            if (result == Result.SUCCESS) return "Success";
+            if (result == Result.FAILURE) return "Failure";
+            if (result == Result.ABORTED) return "Aborted";
+            if (result == Result.NOT_BUILT) return "Not built";
+            if (result == Result.UNSTABLE) return "Unstable";
             return "Unknown";
         }
 
@@ -181,7 +181,7 @@ public class ActiveNotifier implements FineGrainedNotifier {
 
         public MessageBuilder appendOpenLink() {
             String url = notifier.getBuildServerUrl() + build.getUrl();
-            message.append(" (<").append(url).append("|Open>)");
+            message.append(" (<").append(url).append("|Open Build>)");
             return this;
         }
 
@@ -198,13 +198,13 @@ public class ActiveNotifier implements FineGrainedNotifier {
           Integer failedTests = action.getFailCount();
           Integer skippedtests = action.getSkipCount();
           message.append("\n");
-          message.append("Total Tests   : *"+String.valueOf(totalTests)+"*");
+          message.append("Total Tests   : "+String.valueOf(totalTests));
           message.append("\n");
-          message.append("Passed Tests  : *"+String.valueOf(totalTests-failedTests)+"*");
+          message.append("Passed Tests  : "+String.valueOf(totalTests-failedTests));
           message.append("\n");
-          message.append("Failed Tests  : *"+String.valueOf(failedTests)+"*");
+          message.append("Failed Tests  : "+String.valueOf(failedTests));
           message.append("\n");
-          message.append("Skipped Tests : *"+String.valueOf(skippedtests)+"*");
+          message.append("Skipped Tests : "+String.valueOf(skippedtests));
           message.append("\n");
           
           return this;
