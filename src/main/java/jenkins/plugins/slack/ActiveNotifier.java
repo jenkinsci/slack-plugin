@@ -1,17 +1,23 @@
 package jenkins.plugins.slack;
 
 import hudson.Util;
-import hudson.model.*;
+import hudson.model.Result;
+import hudson.model.AbstractBuild;
+import hudson.model.AbstractProject;
+import hudson.model.CauseAction;
+import hudson.model.Run;
 import hudson.scm.ChangeLogSet;
 import hudson.scm.ChangeLogSet.AffectedFile;
 import hudson.scm.ChangeLogSet.Entry;
-import org.apache.commons.lang.StringUtils;
+import hudson.tasks.test.AbstractTestResultAction;
 
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 import java.util.logging.Logger;
+
+import org.apache.commons.lang.StringUtils;
 
 @SuppressWarnings("rawtypes")
 public class ActiveNotifier implements FineGrainedNotifier {
@@ -118,6 +124,7 @@ public class ActiveNotifier implements FineGrainedNotifier {
         MessageBuilder message = new MessageBuilder(notifier, r);
         message.appendStatusMessage();
         message.appendDuration();
+        message.appendPassFailCount();
         return message.appendOpenLink().toString();
     }
 
@@ -145,12 +152,12 @@ public class ActiveNotifier implements FineGrainedNotifier {
             Result result = r.getResult();
             Run previousBuild = r.getProject().getLastBuild().getPreviousBuild();
             Result previousResult = (previousBuild != null) ? previousBuild.getResult() : Result.SUCCESS;
-            if (result == Result.SUCCESS && previousResult == Result.FAILURE) return "Back to normal";
-            if (result == Result.SUCCESS) return "Success";
-            if (result == Result.FAILURE) return "Failure";
-            if (result == Result.ABORTED) return "Aborted";
-            if (result == Result.NOT_BUILT) return "Not built";
-            if (result == Result.UNSTABLE) return "Unstable";
+            if (result == Result.SUCCESS && previousResult == Result.FAILURE) return "*Back to normal*";
+            if (result == Result.SUCCESS) return "*Success*";
+            if (result == Result.FAILURE) return "*Failure*";
+            if (result == Result.ABORTED) return "*Aborted*";
+            if (result == Result.NOT_BUILT) return "*Not built*";
+            if (result == Result.UNSTABLE) return "*Unstable*";
             return "Unknown";
         }
 
@@ -183,7 +190,26 @@ public class ActiveNotifier implements FineGrainedNotifier {
             message.append(build.getDurationString());
             return this;
         }
-
+        
+        public MessageBuilder appendPassFailCount() {
+        	
+          AbstractTestResultAction<?> action = build.getAction(AbstractTestResultAction.class);
+          Integer totalTests = action.getTotalCount();
+          Integer failedTests = action.getFailCount();
+          Integer skippedtests = action.getSkipCount();
+          message.append("\n");
+          message.append("Total Tests   : *"+String.valueOf(totalTests)+"*");
+          message.append("\n");
+          message.append("Passed Tests  : *"+String.valueOf(totalTests-failedTests)+"*");
+          message.append("\n");
+          message.append("Failed Tests  : *"+String.valueOf(failedTests)+"*");
+          message.append("\n");
+          message.append("Skipped Tests : *"+String.valueOf(skippedtests)+"*");
+          message.append("\n");
+          
+          return this;
+       }
+        
         public String escape(String string){
             string = string.replace("&", "&amp;");
             string = string.replace("<", "&lt;");
