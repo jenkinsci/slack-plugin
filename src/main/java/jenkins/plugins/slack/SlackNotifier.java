@@ -41,7 +41,7 @@ public class SlackNotifier extends Notifier {
     public String getTeamDomain() {
         return teamDomain;
     }
-    
+
     public String getRoom() {
         return room;
     }
@@ -73,14 +73,14 @@ public class SlackNotifier extends Notifier {
     }
 
     public SlackService newSlackService(String teamDomain, String token, String projectRoom) {
-    	// Settings are passed here from the job, if they are null, use global settings 
+    	// Settings are passed here from the job, if they are null, use global settings
     	if (teamDomain == null)
     		teamDomain = getTeamDomain();
     	if (token == null)
     		token = getAuthToken();
     	if (projectRoom == null)
     		projectRoom = getRoom();
-    	
+
         return new StandardSlackService(teamDomain, token, projectRoom);
     }
 
@@ -175,7 +175,7 @@ public class SlackNotifier extends Notifier {
         private boolean notifyFailure;
         private boolean notifyBackToNormal;
         private boolean includeTestSummary;
-
+        private boolean showCommitList;
 
         @DataBoundConstructor
         public SlackJobProperty(String teamDomain,
@@ -188,7 +188,8 @@ public class SlackNotifier extends Notifier {
                                   boolean notifySuccess,
                                   boolean notifyUnstable,
                                   boolean notifyBackToNormal,
-                                  boolean includeTestSummary) {
+                                  boolean includeTestSummary,
+                                  boolean showCommitList) {
             this.teamDomain = teamDomain;
             this.token = token;
             this.room = room;
@@ -200,13 +201,14 @@ public class SlackNotifier extends Notifier {
             this.notifyUnstable = notifyUnstable;
             this.notifyBackToNormal = notifyBackToNormal;
             this.includeTestSummary = includeTestSummary;
+            this.showCommitList = showCommitList;
         }
-        
+
         @Exported
         public String getTeamDomain() {
 			return teamDomain;
 		}
-        
+
         @Exported
         public String getToken() {
 			return token;
@@ -225,6 +227,11 @@ public class SlackNotifier extends Notifier {
         @Exported
         public boolean getNotifySuccess() {
             return notifySuccess;
+        }
+
+        @Exported
+        public boolean getShowCommitList() {
+            return showCommitList;
         }
 
         @Override
@@ -296,7 +303,8 @@ public class SlackNotifier extends Notifier {
                         sr.getParameter("slackNotifySuccess") != null,
                         sr.getParameter("slackNotifyUnstable") != null,
                         sr.getParameter("slackNotifyBackToNormal") != null,
-                        sr.getParameter("includeTestSummary") != null);
+                        sr.getParameter("includeTestSummary") != null,
+                        sr.getParameter("slackShowCommitList") != null);
             }
         }
     }
