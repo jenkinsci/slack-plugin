@@ -92,6 +92,10 @@ public class ActiveNotifier implements FineGrainedNotifier {
             getSlack(r).publish(getBuildStatusMessage(r, jobProperty.includeTestSummary()),
                     getBuildColor(r));
         }
+        if (result == Result.SUCCESS && jobProperty.getNotifySuccess()
+                && jobProperty.getShowCommitList()) {
+            getSlack(r).publish(getCommitList(r), "good");
+        }
     }
 
     String getChanges(AbstractBuild r) {
@@ -123,6 +127,35 @@ public class ActiveNotifier implements FineGrainedNotifier {
         message.append(files.size());
         message.append(" file(s) changed)");
         return message.appendOpenLink().toString();
+    }
+
+    String getCommitList(AbstractBuild r) {
+        if (!r.hasChangeSetComputed()) {
+            logger.info("No commits.");
+            return null;
+        }
+        ChangeLogSet changeSet = r.getChangeSet();
+        List<Entry> entries = new LinkedList<Entry>();
+        for (Object o : changeSet.getItems()) {
+            Entry entry = (Entry) o;
+            logger.info("Entry " + o);
+            entries.add(entry);
+        }
+        if (entries.isEmpty()) {
+            logger.info("Empty change...");
+            return null;
+        }
+        Set<String> commits = new HashSet<String>();
+        for (Entry entry : entries) {
+            StringBuffer commit = new StringBuffer();
+            commit.append(entry.getMsg());
+            commit.append(" [").append(entry.getAuthor().getDisplayName()).append("]");
+            commits.add(commit.toString());
+        }
+        MessageBuilder message = new MessageBuilder(notifier, r);
+        message.append("Changes:\n- ");
+        message.append(StringUtils.join(commits, "\n- "));
+        return message.toString();
     }
 
     static String getBuildColor(AbstractBuild r) {
@@ -179,6 +212,7 @@ public class ActiveNotifier implements FineGrainedNotifier {
             if (result == Result.UNSTABLE) return "Unstable";
             return "Unknown";
         }
+
 
         public MessageBuilder append(String string) {
             message.append(this.escape(string));

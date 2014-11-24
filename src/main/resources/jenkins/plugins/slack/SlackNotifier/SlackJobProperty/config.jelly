@@ -5,16 +5,16 @@
 		    <f:entry title="Team Domain" help="${rootURL}/plugin/slack/help-projectConfig-slackTeamDomain.html">
 	    	    <f:textbox name="slackTeamDomain" value="${instance.getTeamDomain()}" />
 		    </f:entry>
-		    
+
 		    <f:entry title="Integration Token" help="${rootURL}/plugin/slack/help-projectConfig-slackToken.html">
 		        <f:textbox name="slackToken" value="${instance.getToken()}" />
 		    </f:entry>
-		    
+
 	    	<f:entry title="Project Channel" help="${rootURL}/plugin/slack/help-projectConfig-slackRoom.html">
 	      		<f:textbox name="slackProjectRoom" value="${instance.getRoom()}"/>
 	    	</f:entry>
     	</f:advanced>
-    	
+
     	<f:entry title="Notify Build Start">
       		<f:checkbox name="slackStartNotification" value="true" checked="${instance.getStartNotification()}"/>
     	</f:entry>
@@ -46,6 +46,13 @@
         <f:entry title="Include Test Summary">
             <f:checkbox name="includeTestSummary" value="true" checked="${instance.includeTestSummary()}"/>
         </f:entry>
+
+        <f:advanced>
+            <f:entry title="Show Commit List with Titles and Authors">
+                <f:checkbox name="slackShowCommitList" value="true" checked="${instance.getShowCommitList()}"/>
+            </f:entry>
+        </f:advanced>
+
     </f:section>
 
 </j:jelly>
