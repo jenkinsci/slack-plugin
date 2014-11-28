@@ -41,6 +41,8 @@ public class ActiveNotifier implements FineGrainedNotifier {
     }
 
     public void started(AbstractBuild build) {
+        AbstractProject<?, ?> project = build.getProject();
+        SlackNotifier.SlackJobProperty jobProperty = project.getProperty(SlackNotifier.SlackJobProperty.class);
         String changes = getChanges(build);
         CauseAction cause = build.getAction(CauseAction.class);
 
@@ -51,7 +53,7 @@ public class ActiveNotifier implements FineGrainedNotifier {
             message.append(cause.getShortDescription());
             notifyStart(build, message.appendOpenLink().toString());
         } else {
-            notifyStart(build, getBuildStatusMessage(build));
+            notifyStart(build, getBuildStatusMessage(build,jobProperty));
         }
     }
 
@@ -74,7 +76,7 @@ public class ActiveNotifier implements FineGrainedNotifier {
                 || (result == Result.SUCCESS && previousResult == Result.FAILURE && jobProperty.getNotifyBackToNormal())
                 || (result == Result.SUCCESS && jobProperty.getNotifySuccess())
                 || (result == Result.UNSTABLE && jobProperty.getNotifyUnstable())) {
-            getSlack(r).publish(getBuildStatusMessage(r), getBuildColor(r));
+            getSlack(r).publish(getBuildStatusMessage(r,jobProperty), getBuildColor(r));
         }
     }
 
@@ -120,11 +122,13 @@ public class ActiveNotifier implements FineGrainedNotifier {
         }
     }
 
-    String getBuildStatusMessage(AbstractBuild r) {
+    String getBuildStatusMessage(AbstractBuild r,SlackNotifier.SlackJobProperty jobProperty) {
         MessageBuilder message = new MessageBuilder(notifier, r);
         message.appendStatusMessage();
         message.appendDuration();
-        message.appendPassFailCount();
+        if(jobProperty.getPostTestResults()){
+            message.appendPassFailCount();
+        }
         return message.appendOpenLink().toString();
     }
 

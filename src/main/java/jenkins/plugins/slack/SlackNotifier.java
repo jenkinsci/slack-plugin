@@ -157,6 +157,7 @@ public class SlackNotifier extends Notifier {
         private boolean notifyUnstable;
         private boolean notifyFailure;
         private boolean notifyBackToNormal;
+        private boolean postTestResults;
 
 
         @DataBoundConstructor
@@ -167,7 +168,8 @@ public class SlackNotifier extends Notifier {
                                   boolean notifyNotBuilt,
                                   boolean notifySuccess,
                                   boolean notifyUnstable,
-                                  boolean notifyBackToNormal) {
+                                  boolean notifyBackToNormal,
+                                  boolean postTestResults) {
             this.room = room;
             this.startNotification = startNotification;
             this.notifyAborted = notifyAborted;
@@ -176,6 +178,7 @@ public class SlackNotifier extends Notifier {
             this.notifySuccess = notifySuccess;
             this.notifyUnstable = notifyUnstable;
             this.notifyBackToNormal = notifyBackToNormal;
+            this.postTestResults = postTestResults;
         }
 
         @Exported
@@ -231,6 +234,11 @@ public class SlackNotifier extends Notifier {
         public boolean getNotifyBackToNormal() {
             return notifyBackToNormal;
         }
+        
+        @Exported
+        public boolean getPostTestResults() {
+            return postTestResults;
+        }
 
         @Extension
         public static final class DescriptorImpl extends JobPropertyDescriptor {
@@ -252,7 +260,8 @@ public class SlackNotifier extends Notifier {
                         sr.getParameter("slackNotifyNotBuilt") != null,
                         sr.getParameter("slackNotifySuccess") != null,
                         sr.getParameter("slackNotifyUnstable") != null,
-                        sr.getParameter("slackNotifyBackToNormal") != null);
+                        sr.getParameter("slackNotifyBackToNormal") != null,
+                        sr.getParameter("slackPostTestResults") != null);
             }
         }
     }
