@@ -181,7 +181,7 @@ public class ActiveNotifier implements FineGrainedNotifier {
 
         public MessageBuilder appendOpenLink() {
             String url = notifier.getBuildServerUrl() + build.getUrl();
-            message.append(" (<").append(url).append("|Open Build>)");
+            message.append(" (<").append(url).append("|Open>)");
             return this;
         }
 
@@ -192,20 +192,24 @@ public class ActiveNotifier implements FineGrainedNotifier {
         }
         
         public MessageBuilder appendPassFailCount() {
-        	
-          AbstractTestResultAction<?> action = build.getAction(AbstractTestResultAction.class);
-          Integer totalTests = action.getTotalCount();
-          Integer failedTests = action.getFailCount();
-          Integer skippedtests = action.getSkipCount();
-          message.append("\n");
-          message.append("Total Tests   : "+String.valueOf(totalTests));
-          message.append("\n");
-          message.append("Passed Tests  : "+String.valueOf(totalTests-failedTests));
-          message.append("\n");
-          message.append("Failed Tests  : "+String.valueOf(failedTests));
-          message.append("\n");
-          message.append("Skipped Tests : "+String.valueOf(skippedtests));
-          message.append("\n");
+            try{
+                AbstractTestResultAction<?> action = build.getAction(AbstractTestResultAction.class);
+                Integer totalTests = action.getTotalCount();
+                Integer failedTests = action.getFailCount();
+                Integer skippedtests = action.getSkipCount();
+                message.append("\n");
+                message.append("Total Tests   : "+String.valueOf(totalTests));
+                message.append("\n");
+                message.append("Passed Tests  : "+String.valueOf(totalTests-failedTests));
+                message.append("\n");
+                message.append("Failed Tests  : "+String.valueOf(failedTests));
+                message.append("\n");
+                message.append("Skipped Tests : "+String.valueOf(skippedtests));
+                message.append("\n");
+            }
+            catch(Exception e){
+                message.append("\n No Test Results Were Generated");
+            }
           
           return this;
        }
