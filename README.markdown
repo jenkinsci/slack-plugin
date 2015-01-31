@@ -15,12 +15,12 @@ Which was, in turn, a fork of the Campfire plugin.
 # Developer instructions
 
 Install Maven and JDK.  This was last build with Maven 2.2.1 and OpenJDK
-1.7.0\_75 on Ubuntu 14.04.
+1.7.0\_75 on KUbuntu 14.04.
 
 Run unit tests
 
     mvn test
 
-Create a JAR file to install in Jenkins (JAR file will be in `target/slack.jar`).
+Create an HPI file to install in Jenkins (HPI file will be in `target/slack.hpi`).
 
     mvn package
