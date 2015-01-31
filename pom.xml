@@ -73,6 +73,15 @@
             <version>1.0.4</version>
             <scope>provided</scope>
         </dependency>
+        <!--
+            Adding JNA to fix failing unit tests on Ubuntu 14.04
+            https://bugs.launchpad.net/ubuntu/+source/libjna-java/+bug/1065253
+        -->
+        <dependency>
+            <groupId>net.java.dev.jna</groupId>
+            <artifactId>jna</artifactId>
+            <version>3.2.2</version>
+        </dependency>
     </dependencies>
 
     <build>
