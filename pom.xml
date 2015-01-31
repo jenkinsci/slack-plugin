@@ -85,15 +85,15 @@
     </dependencies>
 
     <build>
-    <plugins>
-      <plugin>
-        <artifactId>maven-release-plugin</artifactId>
-        <configuration>
-          <goals>deploy</goals>
-        </configuration>
-      </plugin>
-    </plugins>
-  </build>
+        <plugins>
+            <plugin>
+                <artifactId>maven-release-plugin</artifactId>
+                <configuration>
+                    <goals>deploy</goals>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
 
     <repositories>
         <repository>
@@ -111,22 +111,22 @@
 
     <developers>
         <developer>
-          <id>grantmd</id>
-          <name>Myles Grant</name>
-          <email>myles@tinyspeck.com</email>
-          <roles>
-            <role>author</role>
-          </roles>
+            <id>grantmd</id>
+            <name>Myles Grant</name>
+            <email>myles@tinyspeck.com</email>
+            <roles>
+                <role>author</role>
+            </roles>
         </developer>
         <developer>
-          <id>samrocketman</id>
-          <name>Sam Gleske</name>
-          <email>sam.mxracer@gmail.com</email>
-          <url>https://github.com/samrocketman</url>
-          <roles>
-            <role>maintainer</role>
-          </roles>
-          <timezone>America/New_York</timezone>
+            <id>samrocketman</id>
+            <name>Sam Gleske</name>
+            <email>sam.mxracer@gmail.com</email>
+            <url>https://github.com/samrocketman</url>
+            <roles>
+                <role>maintainer</role>
+            </roles>
+            <timezone>America/New_York</timezone>
         </developer>
     </developers>
 
