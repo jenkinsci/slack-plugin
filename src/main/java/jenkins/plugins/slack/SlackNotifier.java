@@ -2,22 +2,27 @@ package jenkins.plugins.slack;
 
 import hudson.Extension;
 import hudson.Launcher;
-import hudson.model.*;
+import hudson.model.BuildListener;
+import hudson.model.JobPropertyDescriptor;
+import hudson.model.AbstractBuild;
+import hudson.model.AbstractProject;
+import hudson.model.Descriptor;
+import hudson.model.Job;
 import hudson.tasks.BuildStepDescriptor;
 import hudson.tasks.BuildStepMonitor;
 import hudson.tasks.Notifier;
 import hudson.tasks.Publisher;
-import net.sf.json.JSONObject;
-import org.apache.commons.lang.StringUtils;
-import org.kohsuke.stapler.DataBoundConstructor;
-import org.kohsuke.stapler.StaplerRequest;
-import org.kohsuke.stapler.export.Exported;
 
 import java.io.IOException;
 import java.util.Map;
 import java.util.logging.Logger;
 
-@SuppressWarnings({"unchecked"})
+import net.sf.json.JSONObject;
+
+import org.kohsuke.stapler.DataBoundConstructor;
+import org.kohsuke.stapler.StaplerRequest;
+import org.kohsuke.stapler.export.Exported;
+
 public class SlackNotifier extends Notifier {
 
     private static final Logger logger = Logger.getLogger(SlackNotifier.class.getName());
@@ -36,7 +41,7 @@ public class SlackNotifier extends Notifier {
     public String getTeamDomain() {
         return teamDomain;
     }
-
+    
     public String getRoom() {
         return room;
     }
@@ -53,7 +58,6 @@ public class SlackNotifier extends Notifier {
         return sendAs;
     }
 
-
     @DataBoundConstructor
     public SlackNotifier(final String teamDomain, final String authToken, final String room, String buildServerUrl, final String sendAs) {
         super();
@@ -68,8 +72,16 @@ public class SlackNotifier extends Notifier {
         return BuildStepMonitor.BUILD;
     }
 
-    public SlackService newSlackService(final String room) {
-        return new StandardSlackService(getTeamDomain(), getAuthToken(), room == null ? getRoom() : room);
+    public SlackService newSlackService(String teamDomain, String token, String projectRoom) {
+    	// Settings are passed here from the job, if they are null, use global settings 
+    	if (teamDomain == null)
+    		teamDomain = getTeamDomain();
+    	if (token == null)
+    		token = getAuthToken();
+    	if (projectRoom == null)
+    		projectRoom = getRoom();
+    	
+        return new StandardSlackService(teamDomain, token, projectRoom);
     }
 
     @Override
@@ -152,6 +164,8 @@ public class SlackNotifier extends Notifier {
     }
 
     public static class SlackJobProperty extends hudson.model.JobProperty<AbstractProject<?, ?>> {
+        private String teamDomain;
+        private String token;
         private String room;
         private boolean startNotification;
         private boolean notifySuccess;
@@ -163,7 +177,9 @@ public class SlackNotifier extends Notifier {
 
 
         @DataBoundConstructor
-        public SlackJobProperty(String room,
+        public SlackJobProperty(String teamDomain,
+                                String token,
+                                String room,
                                   boolean startNotification,
                                   boolean notifyAborted,
                                   boolean notifyFailure,
@@ -171,6 +187,8 @@ public class SlackNotifier extends Notifier {
                                   boolean notifySuccess,
                                   boolean notifyUnstable,
                                   boolean notifyBackToNormal) {
+            this.teamDomain = teamDomain;
+            this.token = token;
             this.room = room;
             this.startNotification = startNotification;
             this.notifyAborted = notifyAborted;
@@ -180,6 +198,16 @@ public class SlackNotifier extends Notifier {
             this.notifyUnstable = notifyUnstable;
             this.notifyBackToNormal = notifyBackToNormal;
         }
+        
+        @Exported
+        public String getTeamDomain() {
+			return teamDomain;
+		}
+        
+        @Exported
+        public String getToken() {
+			return token;
+		}
 
         @Exported
         public String getRoom() {
@@ -249,7 +277,10 @@ public class SlackNotifier extends Notifier {
 
             @Override
             public SlackJobProperty newInstance(StaplerRequest sr, JSONObject formData) throws hudson.model.Descriptor.FormException {
-                return new SlackJobProperty(sr.getParameter("slackProjectRoom"),
+                return new SlackJobProperty(
+                        sr.getParameter("slackTeamDomain"),
+                        sr.getParameter("slackToken"),
+                        sr.getParameter("slackProjectRoom"),
                         sr.getParameter("slackStartNotification") != null,
                         sr.getParameter("slackNotifyAborted") != null,
                         sr.getParameter("slackNotifyFailure") != null,
