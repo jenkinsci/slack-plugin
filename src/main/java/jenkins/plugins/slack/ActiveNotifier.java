@@ -57,7 +57,13 @@ public class ActiveNotifier implements FineGrainedNotifier {
     }
 
     private void notifyStart(AbstractBuild build, String message) {
-        getSlack(build).publish(message, "good");
+        AbstractProject<?, ?> project = build.getProject();
+        AbstractBuild<?, ?> previousBuild = project.getLastBuild().getPreviousBuild();
+        if (previousBuild == null) {
+           getSlack(build).publish(message, "good");
+        } else {
+           getSlack(build).publish(message, getBuildColor(previousBuild));
+        }
     }
 
     public void finalized(AbstractBuild r) {
