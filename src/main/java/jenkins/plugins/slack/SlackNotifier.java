@@ -77,6 +77,14 @@ public class SlackNotifier extends Notifier {
         return true;
     }
 
+    public void update() {
+        this.teamDomain = getDescriptor().teamDomain;
+        this.authToken = getDescriptor().token;
+        this.buildServerUrl = getDescriptor().buildServerUrl;
+        this.room = getDescriptor().room;
+        this.sendAs = getDescriptor().sendAs;
+    }
+
     @Extension
     public static class DescriptorImpl extends BuildStepDescriptor<Publisher> {
         private String teamDomain;
@@ -132,11 +140,6 @@ public class SlackNotifier extends Notifier {
             sendAs = sr.getParameter("slackSendAs");
             if (buildServerUrl != null && !buildServerUrl.endsWith("/")) {
                 buildServerUrl = buildServerUrl + "/";
-            }
-            try {
-                new SlackNotifier(teamDomain, token, room, buildServerUrl, sendAs);
-            } catch (Exception e) {
-                throw new FormException("Failed to initialize notifier - check your global notifier configuration settings", e, "");
             }
             save();
             return super.configure(sr, formData);
@@ -200,6 +203,7 @@ public class SlackNotifier extends Notifier {
                 for (Publisher publisher : map.values()) {
                     if (publisher instanceof SlackNotifier) {
                         logger.info("Invoking Started...");
+                        ((SlackNotifier)publisher).update();
                         new ActiveNotifier((SlackNotifier) publisher).started(build);
                     }
                 }
