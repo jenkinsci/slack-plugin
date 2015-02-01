@@ -72,6 +72,10 @@ public class ActiveNotifier implements FineGrainedNotifier {
     public void completed(AbstractBuild r) {
         AbstractProject<?, ?> project = r.getProject();
         SlackNotifier.SlackJobProperty jobProperty = project.getProperty(SlackNotifier.SlackJobProperty.class);
+        if (jobProperty == null) {
+            logger.warning("Project " + project.getName() + " has no Slack configuration.");
+            return;
+        }
         Result result = r.getResult();
         AbstractBuild<?, ?> previousBuild = project.getLastBuild().getPreviousBuild();
         Result previousResult = (previousBuild != null) ? previousBuild.getResult() : Result.SUCCESS;
