@@ -18,8 +18,6 @@ import java.util.List;
 import java.util.Set;
 import java.util.logging.Logger;
 
-import org.apache.commons.lang.StringUtils;
-
 @SuppressWarnings("rawtypes")
 public class ActiveNotifier implements FineGrainedNotifier {
 
@@ -131,7 +129,7 @@ public class ActiveNotifier implements FineGrainedNotifier {
     String getCommitList(AbstractBuild r) {
         if (!r.hasChangeSetComputed()) {
             logger.info("No commits.");
-            return null;
+            return "No Changes.";
         }
         ChangeLogSet changeSet = r.getChangeSet();
         List<Entry> entries = new LinkedList<Entry>();
@@ -142,7 +140,7 @@ public class ActiveNotifier implements FineGrainedNotifier {
         }
         if (entries.isEmpty()) {
             logger.info("Empty change...");
-            return null;
+            return "No Changes.";
         }
         Set<String> commits = new HashSet<String>();
         for (Entry entry : entries) {
@@ -211,7 +209,6 @@ public class ActiveNotifier implements FineGrainedNotifier {
             if (result == Result.UNSTABLE) return "Unstable";
             return "Unknown";
         }
-
 
         public MessageBuilder append(String string) {
             message.append(this.escape(string));
