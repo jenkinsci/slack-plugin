@@ -91,10 +91,9 @@ public class ActiveNotifier implements FineGrainedNotifier {
                 || (result == Result.UNSTABLE && jobProperty.getNotifyUnstable())) {
             getSlack(r).publish(getBuildStatusMessage(r, jobProperty.includeTestSummary()),
                     getBuildColor(r));
-        }
-        if (result == Result.SUCCESS && jobProperty.getNotifySuccess()
-                && jobProperty.getShowCommitList()) {
-            getSlack(r).publish(getCommitList(r), "good");
+            if (jobProperty.getShowCommitList()) {
+                getSlack(r).publish(getCommitList(r), getBuildColor(r));
+            }
         }
     }
 
