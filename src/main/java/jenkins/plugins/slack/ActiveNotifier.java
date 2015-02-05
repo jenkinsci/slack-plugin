@@ -60,9 +60,9 @@ public class ActiveNotifier implements FineGrainedNotifier {
         AbstractProject<?, ?> project = build.getProject();
         AbstractBuild<?, ?> previousBuild = project.getLastBuild().getPreviousBuild();
         if (previousBuild == null) {
-           getSlack(build).publish(message, "good");
+            getSlack(build).publish(message, "good");
         } else {
-           getSlack(build).publish(message, getBuildColor(previousBuild));
+            getSlack(build).publish(message, getBuildColor(previousBuild));
         }
     }
 
@@ -77,14 +77,19 @@ public class ActiveNotifier implements FineGrainedNotifier {
             return;
         }
         Result result = r.getResult();
-        AbstractBuild<?, ?> previousBuild = project.getLastBuild().getPreviousBuild();
+        AbstractBuild<?, ?> previousBuild = project.getLastBuild();
+        do {
+            previousBuild = previousBuild.getPreviousBuild();
+        } while (previousBuild != null && previousBuild.getResult() == Result.ABORTED);
         Result previousResult = (previousBuild != null) ? previousBuild.getResult() : Result.SUCCESS;
         if ((result == Result.ABORTED && jobProperty.getNotifyAborted())
-                || (result == Result.FAILURE && jobProperty.getNotifyFailure())
+                || (result == Result.FAILURE
+                && (previousResult != Result.FAILURE || jobProperty.getNotifyRepeatedFailure())
+                && jobProperty.getNotifyFailure())
                 || (result == Result.NOT_BUILT && jobProperty.getNotifyNotBuilt())
                 || (result == Result.SUCCESS
-                		&& (previousResult == Result.FAILURE || previousResult == Result.UNSTABLE)
-                		&& jobProperty.getNotifyBackToNormal())
+                && (previousResult == Result.FAILURE || previousResult == Result.UNSTABLE)
+                && jobProperty.getNotifyBackToNormal())
                 || (result == Result.SUCCESS && jobProperty.getNotifySuccess())
                 || (result == Result.UNSTABLE && jobProperty.getNotifyUnstable())) {
             getSlack(r).publish(getBuildStatusMessage(r, jobProperty.includeTestSummary()),
@@ -171,13 +176,14 @@ public class ActiveNotifier implements FineGrainedNotifier {
         message.appendStatusMessage();
         message.appendDuration();
         message.appendOpenLink();
-        if (!includeTestSummary){
+        if (!includeTestSummary) {
             return message.toString();
         }
         return message.appendTestSummary().toString();
     }
 
     public static class MessageBuilder {
+
         private StringBuffer message;
         private SlackNotifier notifier;
         private AbstractBuild build;
@@ -201,12 +207,24 @@ public class ActiveNotifier implements FineGrainedNotifier {
             Result result = r.getResult();
             Run previousBuild = r.getProject().getLastBuild().getPreviousBuild();
             Result previousResult = (previousBuild != null) ? previousBuild.getResult() : Result.SUCCESS;
-            if (result == Result.SUCCESS && previousResult == Result.FAILURE) return "Back to normal";
-            if (result == Result.SUCCESS) return "Success";
-            if (result == Result.FAILURE) return "Failure";
-            if (result == Result.ABORTED) return "Aborted";
-            if (result == Result.NOT_BUILT) return "Not built";
-            if (result == Result.UNSTABLE) return "Unstable";
+            if (result == Result.SUCCESS && previousResult == Result.FAILURE) {
+                return "Back to normal";
+            }
+            if (result == Result.SUCCESS) {
+                return "Success";
+            }
+            if (result == Result.FAILURE) {
+                return "Failure";
+            }
+            if (result == Result.ABORTED) {
+                return "Aborted";
+            }
+            if (result == Result.NOT_BUILT) {
+                return "Not built";
+            }
+            if (result == Result.UNSTABLE) {
+                return "Unstable";
+            }
             return "Unknown";
         }
 
@@ -240,7 +258,7 @@ public class ActiveNotifier implements FineGrainedNotifier {
             return this;
         }
 
-        public MessageBuilder appendTestSummary(){
+        public MessageBuilder appendTestSummary() {
             AbstractTestResultAction<?> action = this.build
                     .getAction(AbstractTestResultAction.class);
             if (action != null) {
@@ -257,7 +275,7 @@ public class ActiveNotifier implements FineGrainedNotifier {
             return this;
         }
 
-        public String escape(String string){
+        public String escape(String string) {
             string = string.replace("&", "&amp;");
             string = string.replace("<", "&lt;");
             string = string.replace(">", "&gt;");

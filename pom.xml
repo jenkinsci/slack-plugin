@@ -128,6 +128,13 @@
             </roles>
             <timezone>America/New_York</timezone>
         </developer>
+        <developer>
+            <id>peergum</id>
+            <name>Phil Hilger</name>
+            <email>phil@peergum.com</email>
+            <roles>
+                <role>collaborator</role>
+            </roles>
+        </developer>
     </developers>
-
 </project>
