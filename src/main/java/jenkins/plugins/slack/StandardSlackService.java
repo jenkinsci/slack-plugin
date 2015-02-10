@@ -76,7 +76,7 @@ public class StandardSlackService implements SlackService {
             }
         }
     }
-    
+
     private HttpClient getHttpClient() {
         HttpClient client = new HttpClient();
         if (Jenkins.getInstance() != null) {
