@@ -2,7 +2,7 @@
 
     <f:section title="Slack Notifications">
         <f:entry title="Notify Build Start">
-              <f:checkbox name="slackStartNotification" value="true" checked="${instance.getStartNotification()}"/>
+            <f:checkbox name="slackStartNotification" value="true" checked="${instance.getStartNotification()}"/>
         </f:entry>
 
         <f:entry title="Notify Aborted">
@@ -30,6 +30,9 @@
         </f:entry>
 
         <f:advanced>
+            <f:entry title="Notify Repeated Failure">
+                <f:checkbox name="slackNotifyRepeatedFailure" value="true" checked="${instance.getNotifyRepeatedFailure()}"/>
+            </f:entry>
             <f:entry title="Include Test Summary">
                 <f:checkbox name="includeTestSummary" value="true" checked="${instance.includeTestSummary()}"/>
             </f:entry>
@@ -47,9 +50,12 @@
             </f:entry>
 
             <f:entry title="Project Channel" help="${rootURL}/plugin/slack/help-projectConfig-slackRoom.html">
-                  <f:textbox name="slackProjectRoom" value="${instance.getRoom()}"/>
+                <f:textbox name="slackProjectRoom" value="${instance.getRoom()}"/>
             </f:entry>
         </f:advanced>
+        <f:validateButton
+            title="${%Test Connection}" progress="${%Testing...}"
+            method="testConnection" with="slackTeamDomain,slackToken,slackProjectRoom" />
     </f:section>
 
 </j:jelly>

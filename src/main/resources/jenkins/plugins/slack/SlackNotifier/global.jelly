@@ -13,16 +13,19 @@
   -->
 <f:section title="Global Slack Notifier Settings" name="slack">
     <f:entry title="Team Domain" help="${rootURL}/plugin/slack/help-globalConfig-slackTeamDomain.html">
-        <f:textbox name="slackTeamDomain" value="${descriptor.getTeamDomain()}" />
+        <f:textbox field="teamDomain" name="slackTeamDomain" value="${descriptor.getTeamDomain()}" />
     </f:entry>
     <f:entry title="Integration Token" help="${rootURL}/plugin/slack/help-globalConfig-slackToken.html">
-        <f:textbox name="slackToken" value="${descriptor.getToken()}" />
+        <f:textbox field="token" name="slackToken" value="${descriptor.getToken()}" />
     </f:entry>
     <f:entry title="Channel" help="${rootURL}/plugin/slack/help-globalConfig-slackRoom.html">
-        <f:textbox name="slackRoom" value="${descriptor.getRoom()}" />
+        <f:textbox field="room" name="slackRoom" value="${descriptor.getRoom()}" />
     </f:entry>
     <f:entry title="Build Server URL" help="${rootURL}/plugin/slack/help-globalConfig-slackBuildServerUrl.html">
-        <f:textbox name="slackBuildServerUrl" value="${descriptor.getBuildServerUrl()}" />
+        <f:textbox field="buildServerUrl" name="slackBuildServerUrl" value="${descriptor.getBuildServerUrl()}" />
     </f:entry>
+    <f:validateButton
+        title="${%Test Connection}" progress="${%Testing...}"
+        method="testConnection" with="slackTeamDomain,slackToken,slackRoom,slackBuildServerUrl" />
   </f:section>
 </j:jelly>

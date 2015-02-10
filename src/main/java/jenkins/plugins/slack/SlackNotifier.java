@@ -12,14 +12,17 @@ import hudson.tasks.BuildStepDescriptor;
 import hudson.tasks.BuildStepMonitor;
 import hudson.tasks.Notifier;
 import hudson.tasks.Publisher;
+import hudson.util.FormValidation;
 
 import java.io.IOException;
 import java.util.Map;
 import java.util.logging.Logger;
+import javax.servlet.ServletException;
 
 import net.sf.json.JSONObject;
 
 import org.kohsuke.stapler.DataBoundConstructor;
+import org.kohsuke.stapler.QueryParameter;
 import org.kohsuke.stapler.StaplerRequest;
 import org.kohsuke.stapler.export.Exported;
 
@@ -73,13 +76,16 @@ public class SlackNotifier extends Notifier {
     }
 
     public SlackService newSlackService(String teamDomain, String token, String projectRoom) {
-    	// Settings are passed here from the job, if they are null, use global settings
-    	if (teamDomain == null)
-    		teamDomain = getTeamDomain();
-    	if (token == null)
-    		token = getAuthToken();
-    	if (projectRoom == null)
-    		projectRoom = getRoom();
+        // Settings are passed here from the job, if they are null, use global settings
+        if (teamDomain == null) {
+            teamDomain = getTeamDomain();
+        }
+        if (token == null) {
+            token = getAuthToken();
+        }
+        if (projectRoom == null) {
+            projectRoom = getRoom();
+        }
 
         return new StandardSlackService(teamDomain, token, projectRoom);
     }
@@ -99,6 +105,7 @@ public class SlackNotifier extends Notifier {
 
     @Extension
     public static class DescriptorImpl extends BuildStepDescriptor<Publisher> {
+
         private String teamDomain;
         private String token;
         private String room;
@@ -135,11 +142,21 @@ public class SlackNotifier extends Notifier {
 
         @Override
         public SlackNotifier newInstance(StaplerRequest sr) {
-            if (teamDomain == null) teamDomain = sr.getParameter("slackTeamDomain");
-            if (token == null) token = sr.getParameter("slackToken");
-            if (buildServerUrl == null) buildServerUrl = sr.getParameter("slackBuildServerUrl");
-            if (room == null) room = sr.getParameter("slackRoom");
-            if (sendAs == null) sendAs = sr.getParameter("slackSendAs");
+            if (teamDomain == null) {
+                teamDomain = sr.getParameter("slackTeamDomain");
+            }
+            if (token == null) {
+                token = sr.getParameter("slackToken");
+            }
+            if (buildServerUrl == null) {
+                buildServerUrl = sr.getParameter("slackBuildServerUrl");
+            }
+            if (room == null) {
+                room = sr.getParameter("slackRoom");
+            }
+            if (sendAs == null) {
+                sendAs = sr.getParameter("slackSendAs");
+            }
             return new SlackNotifier(teamDomain, token, room, buildServerUrl, sendAs);
         }
 
@@ -161,9 +178,24 @@ public class SlackNotifier extends Notifier {
         public String getDisplayName() {
             return "Slack Notifications";
         }
+
+        public FormValidation doTestConnection(@QueryParameter("slackTeamDomain") final String teamDomain,
+                @QueryParameter("slackToken") final String authToken,
+                @QueryParameter("slackRoom") final String room,
+                @QueryParameter("slackBuildServerUrl") final String buildServerUrl) throws FormException {
+            try {
+                SlackService testSlackService = new StandardSlackService(teamDomain, authToken, room);
+                String message = "Slack/Jenkins plugin: you're all set on " + buildServerUrl;
+                testSlackService.publish(message, "green");
+                return FormValidation.ok("Success");
+            } catch (Exception e) {
+                return FormValidation.error("Client error : " + e.getMessage());
+            }
+        }
     }
 
     public static class SlackJobProperty extends hudson.model.JobProperty<AbstractProject<?, ?>> {
+
         private String teamDomain;
         private String token;
         private String room;
@@ -174,22 +206,24 @@ public class SlackNotifier extends Notifier {
         private boolean notifyUnstable;
         private boolean notifyFailure;
         private boolean notifyBackToNormal;
+        private boolean notifyRepeatedFailure;
         private boolean includeTestSummary;
         private boolean showCommitList;
 
         @DataBoundConstructor
         public SlackJobProperty(String teamDomain,
-                                String token,
-                                String room,
-                                  boolean startNotification,
-                                  boolean notifyAborted,
-                                  boolean notifyFailure,
-                                  boolean notifyNotBuilt,
-                                  boolean notifySuccess,
-                                  boolean notifyUnstable,
-                                  boolean notifyBackToNormal,
-                                  boolean includeTestSummary,
-                                  boolean showCommitList) {
+                String token,
+                String room,
+                boolean startNotification,
+                boolean notifyAborted,
+                boolean notifyFailure,
+                boolean notifyNotBuilt,
+                boolean notifySuccess,
+                boolean notifyUnstable,
+                boolean notifyBackToNormal,
+                boolean notifyRepeatedFailure,
+                boolean includeTestSummary,
+                boolean showCommitList) {
             this.teamDomain = teamDomain;
             this.token = token;
             this.room = room;
@@ -200,19 +234,20 @@ public class SlackNotifier extends Notifier {
             this.notifySuccess = notifySuccess;
             this.notifyUnstable = notifyUnstable;
             this.notifyBackToNormal = notifyBackToNormal;
+            this.notifyRepeatedFailure = notifyRepeatedFailure;
             this.includeTestSummary = includeTestSummary;
             this.showCommitList = showCommitList;
         }
 
         @Exported
         public String getTeamDomain() {
-			return teamDomain;
-		}
+            return teamDomain;
+        }
 
         @Exported
         public String getToken() {
-			return token;
-		}
+            return token;
+        }
 
         @Exported
         public String getRoom() {
@@ -241,7 +276,7 @@ public class SlackNotifier extends Notifier {
                 for (Publisher publisher : map.values()) {
                     if (publisher instanceof SlackNotifier) {
                         logger.info("Invoking Started...");
-                        ((SlackNotifier)publisher).update();
+                        ((SlackNotifier) publisher).update();
                         new ActiveNotifier((SlackNotifier) publisher).started(build);
                     }
                 }
@@ -279,8 +314,14 @@ public class SlackNotifier extends Notifier {
             return includeTestSummary;
         }
 
+        @Exported
+        public boolean getNotifyRepeatedFailure() {
+            return notifyRepeatedFailure;
+        }
+
         @Extension
         public static final class DescriptorImpl extends JobPropertyDescriptor {
+
             public String getDisplayName() {
                 return "Slack Notifications";
             }
@@ -304,7 +345,21 @@ public class SlackNotifier extends Notifier {
                         sr.getParameter("slackNotifyUnstable") != null,
                         sr.getParameter("slackNotifyBackToNormal") != null,
                         sr.getParameter("includeTestSummary") != null,
+                        sr.getParameter("slackNotifyRepeatedFailure") != null,
                         sr.getParameter("slackShowCommitList") != null);
+            }
+
+            public FormValidation doTestConnection(@QueryParameter("slackTeamDomain") final String teamDomain,
+                    @QueryParameter("slackToken") final String authToken,
+                    @QueryParameter("slackProjectRoom") final String room) throws FormException {
+                try {
+                    SlackService testSlackService = new StandardSlackService(teamDomain, authToken, room);
+                    String message = "Slack/Jenkins plugin: you're all set.";
+                    testSlackService.publish(message, "green");
+                    return FormValidation.ok("Success");
+                } catch (Exception e) {
+                    return FormValidation.error("Client error : " + e.getMessage());
+                }
             }
         }
     }
