@@ -1,4 +1,4 @@
-# Slack plugin for Jenkins
+# Slack plugin for Jenkins - [![Build Status][jenkins-status]][jenkins-builds]
 
 Started with a fork of the HipChat plugin:
 
@@ -14,7 +14,7 @@ Which was, in turn, a fork of the Campfire plugin.
 
 # Developer instructions
 
-Install Maven and JDK.  This was last build with Maven 2.2.1 and OpenJDK
+Install Maven and JDK.  This was last build with Maven 3.2.5 and OpenJDK
 1.7.0\_75 on KUbuntu 14.04.
 
 Run unit tests
@@ -24,3 +24,6 @@ Run unit tests
 Create an HPI file to install in Jenkins (HPI file will be in `target/slack.hpi`).
 
     mvn package
+
+[jenkins-builds]: https://jenkins.ci.cloudbees.com/job/plugins/job/slack-plugin/
+[jenkins-status]: https://jenkins.ci.cloudbees.com/buildStatus/icon?job=plugins/slack-plugin
