@@ -1,4 +1,4 @@
-# Slack plugin for Jenkins - [![Build Status][jenkins-status]][jenkins-builds]
+# Slack plugin for Jenkins - [![Build Status](https://jenkins.ci.cloudbees.com/buildStatus/icon?job=plugins/slack-plugin)](https://jenkins.ci.cloudbees.com/job/plugins/job/slack-plugin/)
 
 Started with a fork of the HipChat plugin:
 
@@ -24,6 +24,3 @@ Run unit tests
 Create an HPI file to install in Jenkins (HPI file will be in `target/slack.hpi`).
 
     mvn package
-
-[jenkins-builds]: https://jenkins.ci.cloudbees.com/job/plugins/job/slack-plugin/
-[jenkins-status]: https://jenkins.ci.cloudbees.com/buildStatus/icon?job=plugins/slack-plugin
