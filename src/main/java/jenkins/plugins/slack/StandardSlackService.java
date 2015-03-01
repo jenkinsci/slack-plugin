@@ -28,7 +28,7 @@ public class StandardSlackService implements SlackService {
         super();
         this.teamDomain = teamDomain;
         this.token = token;
-        this.roomIds = roomId.split(",");
+        this.roomIds = roomId.split("[,; ]+");
     }
 
     public void publish(String message) {
