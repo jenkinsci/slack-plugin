@@ -345,8 +345,8 @@ public class SlackNotifier extends Notifier {
                         sr.getParameter("slackNotifySuccess") != null,
                         sr.getParameter("slackNotifyUnstable") != null,
                         sr.getParameter("slackNotifyBackToNormal") != null,
-                        sr.getParameter("includeTestSummary") != null,
                         sr.getParameter("slackNotifyRepeatedFailure") != null,
+                        sr.getParameter("includeTestSummary") != null,
                         sr.getParameter("slackShowCommitList") != null);
             }
 
