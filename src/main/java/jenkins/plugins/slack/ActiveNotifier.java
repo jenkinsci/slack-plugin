@@ -239,7 +239,7 @@ public class ActiveNotifier implements FineGrainedNotifier {
         }
 
         private MessageBuilder startMessage() {
-            message.append(this.escape(build.getProject().getDisplayName()));
+            message.append(this.escape(build.getProject().getFullDisplayName()));
             message.append(" - ");
             message.append(this.escape(build.getDisplayName()));
             message.append(" ");
