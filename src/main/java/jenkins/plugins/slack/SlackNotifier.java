@@ -2,6 +2,7 @@ package jenkins.plugins.slack;
 
 import hudson.Extension;
 import hudson.Launcher;
+import hudson.Util;
 import hudson.model.BuildListener;
 import hudson.model.JobPropertyDescriptor;
 import hudson.model.AbstractBuild;
@@ -17,9 +18,9 @@ import hudson.util.FormValidation;
 import java.io.IOException;
 import java.util.Map;
 import java.util.logging.Logger;
-import javax.servlet.ServletException;
 
 import net.sf.json.JSONObject;
+import org.kohsuke.stapler.AncestorInPath;
 
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.QueryParameter;
@@ -351,11 +352,21 @@ public class SlackNotifier extends Notifier {
 
             public FormValidation doTestConnection(@QueryParameter("slackTeamDomain") final String teamDomain,
                     @QueryParameter("slackToken") final String authToken,
-                    @QueryParameter("slackProjectRoom") final String room) throws FormException {
+                    @QueryParameter("slackProjectRoom") final String projectRoom,
+                    @AncestorInPath AbstractProject<?,?> project) throws FormException {
+                String team = !teamDomain.equals("")
+                        ? teamDomain
+                        : Util.fixEmpty(project.getProperty(SlackNotifier.SlackJobProperty.class).getTeamDomain());
+                String room = !projectRoom.equals("")
+                        ? projectRoom
+                        : Util.fixEmpty(project.getProperty(SlackNotifier.SlackJobProperty.class).getRoom());
+                String token = !authToken.equals("")
+                        ? authToken
+                        : Util.fixEmpty(project.getProperty(SlackNotifier.SlackJobProperty.class).getToken());
                 try {
-                    SlackService testSlackService = new StandardSlackService(teamDomain, authToken, room);
-                    String message = "Slack/Jenkins plugin: you're all set.";
-                    testSlackService.publish(message, "green");
+                    SlackService testSlackService = new StandardSlackService(team, token, room);
+                    String message = "Slack/Jenkins plugin: you're all set for Project ";
+                    testSlackService.publish(message + project.getFullDisplayName(), "green");
                     return FormValidation.ok("Success");
                 } catch (Exception e) {
                     return FormValidation.error("Client error : " + e.getMessage());
