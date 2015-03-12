@@ -1,4 +1,4 @@
-package jenkins.plugins.slack;
+package jenkins.plugins.slack_connect;
 
 public interface SlackService {
     void publish(String message);

@@ -1,4 +1,4 @@
-package jenkins.plugins.slack;
+package jenkins.plugins.slack_connect;
 
 import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.HttpStatus;

@@ -1,4 +1,4 @@
-package jenkins.plugins.slack;
+package jenkins.plugins.slack_connect;
 
 import hudson.Extension;
 import hudson.Launcher;
@@ -144,30 +144,30 @@ public class SlackNotifier extends Notifier {
         @Override
         public SlackNotifier newInstance(StaplerRequest sr) {
             if (teamDomain == null) {
-                teamDomain = sr.getParameter("slackTeamDomain");
+                teamDomain = sr.getParameter("sl2TeamDomain");
             }
             if (token == null) {
-                token = sr.getParameter("slackToken");
+                token = sr.getParameter("sl2Token");
             }
             if (buildServerUrl == null) {
-                buildServerUrl = sr.getParameter("slackBuildServerUrl");
+                buildServerUrl = sr.getParameter("sl2BuildServerUrl");
             }
             if (room == null) {
-                room = sr.getParameter("slackRoom");
+                room = sr.getParameter("sl2Room");
             }
             if (sendAs == null) {
-                sendAs = sr.getParameter("slackSendAs");
+                sendAs = sr.getParameter("sl2SendAs");
             }
             return new SlackNotifier(teamDomain, token, room, buildServerUrl, sendAs);
         }
 
         @Override
         public boolean configure(StaplerRequest sr, JSONObject formData) throws FormException {
-            teamDomain = sr.getParameter("slackTeamDomain");
-            token = sr.getParameter("slackToken");
-            room = sr.getParameter("slackRoom");
-            buildServerUrl = sr.getParameter("slackBuildServerUrl");
-            sendAs = sr.getParameter("slackSendAs");
+            teamDomain = sr.getParameter("sl2TeamDomain");
+            token = sr.getParameter("sl2Token");
+            room = sr.getParameter("sl2Room");
+            buildServerUrl = sr.getParameter("sl2BuildServerUrl");
+            sendAs = sr.getParameter("sl2SendAs");
             if (buildServerUrl != null && !buildServerUrl.endsWith("/")) {
                 buildServerUrl = buildServerUrl + "/";
             }
@@ -180,10 +180,10 @@ public class SlackNotifier extends Notifier {
             return "Slack Notifications";
         }
 
-        public FormValidation doTestConnection(@QueryParameter("slackTeamDomain") final String teamDomain,
-                @QueryParameter("slackToken") final String authToken,
-                @QueryParameter("slackRoom") final String room,
-                @QueryParameter("slackBuildServerUrl") final String buildServerUrl) throws FormException {
+        public FormValidation doTestConnection(@QueryParameter("sl2TeamDomain") final String teamDomain,
+                @QueryParameter("sl2Token") final String authToken,
+                @QueryParameter("sl2Room") final String room,
+                @QueryParameter("sl2BuildServerUrl") final String buildServerUrl) throws FormException {
             try {
                 SlackService testSlackService = new StandardSlackService(teamDomain, authToken, room);
                 String message = "Slack/Jenkins plugin: you're all set on " + buildServerUrl;
@@ -335,24 +335,24 @@ public class SlackNotifier extends Notifier {
             @Override
             public SlackJobProperty newInstance(StaplerRequest sr, JSONObject formData) throws hudson.model.Descriptor.FormException {
                 return new SlackJobProperty(
-                        sr.getParameter("slackTeamDomain"),
-                        sr.getParameter("slackToken"),
-                        sr.getParameter("slackProjectRoom"),
-                        sr.getParameter("slackStartNotification") != null,
-                        sr.getParameter("slackNotifyAborted") != null,
-                        sr.getParameter("slackNotifyFailure") != null,
-                        sr.getParameter("slackNotifyNotBuilt") != null,
-                        sr.getParameter("slackNotifySuccess") != null,
-                        sr.getParameter("slackNotifyUnstable") != null,
-                        sr.getParameter("slackNotifyBackToNormal") != null,
-                        sr.getParameter("slackNotifyRepeatedFailure") != null,
+                        sr.getParameter("sl2TeamDomain"),
+                        sr.getParameter("sl2Token"),
+                        sr.getParameter("sl2ProjectRoom"),
+                        sr.getParameter("sl2StartNotification") != null,
+                        sr.getParameter("sl2NotifyAborted") != null,
+                        sr.getParameter("sl2NotifyFailure") != null,
+                        sr.getParameter("sl2NotifyNotBuilt") != null,
+                        sr.getParameter("sl2NotifySuccess") != null,
+                        sr.getParameter("sl2NotifyUnstable") != null,
+                        sr.getParameter("sl2NotifyBackToNormal") != null,
+                        sr.getParameter("sl2NotifyRepeatedFailure") != null,
                         sr.getParameter("includeTestSummary") != null,
-                        sr.getParameter("slackShowCommitList") != null);
+                        sr.getParameter("sl2ShowCommitList") != null);
             }
 
-            public FormValidation doTestConnection(@QueryParameter("slackTeamDomain") final String teamDomain,
-                    @QueryParameter("slackToken") final String authToken,
-                    @QueryParameter("slackProjectRoom") final String projectRoom,
+            public FormValidation doTestConnection(@QueryParameter("sl2TeamDomain") final String teamDomain,
+                    @QueryParameter("sl2Token") final String authToken,
+                    @QueryParameter("sl2ProjectRoom") final String projectRoom,
                     @AncestorInPath AbstractProject<?,?> project) throws FormException {
                 String team = !teamDomain.equals("")
                         ? teamDomain

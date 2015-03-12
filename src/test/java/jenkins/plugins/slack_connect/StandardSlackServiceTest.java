@@ -1,13 +1,13 @@
-package jenkins.plugins.slack;
+package jenkins.plugins.slack_connect;
 
-import jenkins.plugins.slack.StandardSlackService;
+import org.jvnet.hudson.test.JenkinsRule;
 import org.junit.Before;
 import org.junit.Test;
 
 public class StandardSlackServiceTest {
 
     /**
-     * Publish should generally not rethrow exceptions, or it will cause a build job to fail at end.
+     * Publish should generally not re-throw exceptions, or it will cause a build job to fail at end.
      */
     @Test
     public void publishWithBadHostShouldNotRethrowExceptions() {
