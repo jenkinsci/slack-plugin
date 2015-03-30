@@ -11,6 +11,7 @@ Which was, in turn, a fork of the Campfire plugin.
 1. Get a Slack account: https://slack.com/
 2. Configure the Jenkins integration: https://my.slack.com/services/new/jenkins-ci
 3. Install this plugin on your Jenkins server
+4. Configure it in your Jenkins job and **add it as a Post-build action**.
 
 # Developer instructions
 
