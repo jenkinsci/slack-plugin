@@ -36,6 +36,12 @@
                 <f:checkbox name="includeTestSummary" value="true" checked="${instance.includeTestSummary()}"/>
             </f:entry>
 
+            <f:optionalBlock name="includeCustomMessage" title="Include Custom Message" checked="${instance.includeCustomMessage()}">
+                <f:entry title="Custom Message" help="${rootURL}/plugin/slack/help-projectConfig-slackCustomMessage.html">
+                    <f:textbox name="customMessage" value="${instance.getCustomMessage()}"/>
+                </f:entry>
+            </f:optionalBlock>
+
             <f:entry title="Show Commit List with Titles and Authors">
                 <f:checkbox name="slackShowCommitList" value="true" checked="${instance.getShowCommitList()}"/>
             </f:entry>

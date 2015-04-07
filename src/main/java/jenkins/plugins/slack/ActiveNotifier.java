@@ -10,13 +10,17 @@ import hudson.scm.ChangeLogSet;
 import hudson.scm.ChangeLogSet.AffectedFile;
 import hudson.scm.ChangeLogSet.Entry;
 import hudson.tasks.test.AbstractTestResultAction;
+import hudson.util.LogTaskListener;
+import hudson.util.VariableResolver;
 import org.apache.commons.lang.StringUtils;
 
-import java.util.HashSet;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Set;
+import java.io.IOException;
+import java.util.*;
 import java.util.logging.Logger;
+
+import static hudson.Util.replaceMacro;
+import static java.util.logging.Level.INFO;
+import static java.util.logging.Level.SEVERE;
 
 @SuppressWarnings("rawtypes")
 public class ActiveNotifier implements FineGrainedNotifier {
@@ -44,6 +48,8 @@ public class ActiveNotifier implements FineGrainedNotifier {
     public void started(AbstractBuild build) {
         String changes = getChanges(build);
         CauseAction cause = build.getAction(CauseAction.class);
+        AbstractProject<?, ?> project = build.getProject();
+        SlackNotifier.SlackJobProperty jobProperty = project.getProperty(SlackNotifier.SlackJobProperty.class);
 
         if (changes != null) {
             notifyStart(build, changes);
@@ -52,7 +58,7 @@ public class ActiveNotifier implements FineGrainedNotifier {
             message.append(cause.getShortDescription());
             notifyStart(build, message.appendOpenLink().toString());
         } else {
-            notifyStart(build, getBuildStatusMessage(build, false));
+            notifyStart(build, getBuildStatusMessage(build, false, jobProperty.includeCustomMessage()));
         }
     }
 
@@ -92,7 +98,8 @@ public class ActiveNotifier implements FineGrainedNotifier {
                 && jobProperty.getNotifyBackToNormal())
                 || (result == Result.SUCCESS && jobProperty.getNotifySuccess())
                 || (result == Result.UNSTABLE && jobProperty.getNotifyUnstable())) {
-            getSlack(r).publish(getBuildStatusMessage(r, jobProperty.includeTestSummary()),
+            getSlack(r).publish(getBuildStatusMessage(r, jobProperty.includeTestSummary(),
+                            jobProperty.includeCustomMessage()),
                     getBuildColor(r));
             if (jobProperty.getShowCommitList()) {
                 getSlack(r).publish(getCommitList(r), getBuildColor(r));
@@ -171,15 +178,18 @@ public class ActiveNotifier implements FineGrainedNotifier {
         }
     }
 
-    String getBuildStatusMessage(AbstractBuild r, boolean includeTestSummary) {
+    String getBuildStatusMessage(AbstractBuild r, boolean includeTestSummary, boolean includeCustomMessage) {
         MessageBuilder message = new MessageBuilder(notifier, r);
         message.appendStatusMessage();
         message.appendDuration();
         message.appendOpenLink();
-        if (!includeTestSummary) {
-            return message.toString();
+        if (includeTestSummary) {
+            message.appendTestSummary();
         }
-        return message.appendTestSummary().toString();
+        if (includeCustomMessage) {
+            message.appendCustomMessage();
+        }
+        return message.toString();
     }
 
     public static class MessageBuilder {
@@ -272,6 +282,24 @@ public class ActiveNotifier implements FineGrainedNotifier {
             } else {
                 message.append("\nNo Tests found.");
             }
+            return this;
+        }
+
+        public MessageBuilder appendCustomMessage() {
+            AbstractProject<?, ?> project = build.getProject();
+            String customMessage = Util.fixEmpty(project.getProperty(SlackNotifier.SlackJobProperty.class)
+                    .getCustomMessage());
+            Map<String, String> buildVariables = new HashMap();
+            buildVariables.putAll(build.getBuildVariables());
+            try {
+                buildVariables.putAll(build.getEnvironment(new LogTaskListener(logger, INFO)));
+            } catch (IOException e) {
+                logger.log(SEVERE, e.getMessage(), e);
+            } catch (InterruptedException e) {
+                logger.log(SEVERE, e.getMessage(), e);
+            }
+            message.append("\n");
+            message.append(replaceMacro(customMessage, new VariableResolver.ByMap<String>(buildVariables)));
             return this;
         }
 
