@@ -1,16 +1,13 @@
 package jenkins.plugins.slack;
 
-
 import hudson.EnvVars;
-import hudson.Util;
-import hudson.EnvVars;
-import hudson.model.BuildListener;
-import hudson.model.Result;
 import hudson.model.AbstractBuild;
 import hudson.model.AbstractProject;
+import hudson.model.BuildListener;
 import hudson.model.Cause;
 import hudson.model.CauseAction;
 import hudson.model.Hudson;
+import hudson.model.Result;
 import hudson.model.Run;
 import hudson.scm.ChangeLogSet;
 import hudson.scm.ChangeLogSet.AffectedFile;
@@ -45,32 +42,15 @@ public class ActiveNotifier implements FineGrainedNotifier {
     }
 
     private SlackService getSlack(AbstractBuild r) {
-        AbstractProject<?, ?> project = r.getProject();
-        String projectRoom = Util.fixEmpty(project.getProperty(SlackNotifier.SlackJobProperty.class).getRoom());
-        String teamDomain = Util.fixEmpty(project.getProperty(SlackNotifier.SlackJobProperty.class).getTeamDomain());
-        String token = Util.fixEmpty(project.getProperty(SlackNotifier.SlackJobProperty.class).getToken());
-
-        EnvVars env = null;
-        try {
-            env = r.getEnvironment(listener);
-        } catch (Exception e) {
-            listener.getLogger().println("Error retrieving environment vars: " + e.getMessage());
-            env = new EnvVars();
-        }
-        teamDomain = env.expand(teamDomain);
-        token = env.expand(token);
-        projectRoom = env.expand(projectRoom);
-
-        return notifier.newSlackService(teamDomain, token, projectRoom);
+        return notifier.newSlackService(r, listener);
     }
 
     public void deleted(AbstractBuild r) {
     }
 
     public void started(AbstractBuild build) {
-        
+
         AbstractProject<?, ?> project = build.getProject();
-        SlackNotifier.SlackJobProperty jobProperty = project.getProperty(SlackNotifier.SlackJobProperty.class);
 
         CauseAction causeAction = build.getAction(CauseAction.class);
 
@@ -87,7 +67,7 @@ public class ActiveNotifier implements FineGrainedNotifier {
         if (changes != null) {
             notifyStart(build, changes);
         } else {
-            notifyStart(build, getBuildStatusMessage(build, false, jobProperty.includeCustomMessage()));
+            notifyStart(build, getBuildStatusMessage(build, false, notifier.includeCustomMessage()));
         }
     }
 
@@ -106,31 +86,25 @@ public class ActiveNotifier implements FineGrainedNotifier {
 
     public void completed(AbstractBuild r) {
         AbstractProject<?, ?> project = r.getProject();
-        SlackNotifier.SlackJobProperty jobProperty = project.getProperty(SlackNotifier.SlackJobProperty.class);
-        if (jobProperty == null) {
-            logger.warning("Project " + project.getName() + " has no Slack configuration.");
-            return;
-        }
         Result result = r.getResult();
         AbstractBuild<?, ?> previousBuild = project.getLastBuild();
         do {
             previousBuild = previousBuild.getPreviousCompletedBuild();
         } while (previousBuild != null && previousBuild.getResult() == Result.ABORTED);
         Result previousResult = (previousBuild != null) ? previousBuild.getResult() : Result.SUCCESS;
-        if ((result == Result.ABORTED && jobProperty.getNotifyAborted())
+        if ((result == Result.ABORTED && notifier.getNotifyAborted())
                 || (result == Result.FAILURE
-                && (previousResult != Result.FAILURE || jobProperty.getNotifyRepeatedFailure())
-                && jobProperty.getNotifyFailure())
-                || (result == Result.NOT_BUILT && jobProperty.getNotifyNotBuilt())
+                && (previousResult != Result.FAILURE || notifier.getNotifyRepeatedFailure())
+                && notifier.getNotifyFailure())
+                || (result == Result.NOT_BUILT && notifier.getNotifyNotBuilt())
                 || (result == Result.SUCCESS
                 && (previousResult == Result.FAILURE || previousResult == Result.UNSTABLE)
-                && jobProperty.getNotifyBackToNormal())
-                || (result == Result.SUCCESS && jobProperty.getNotifySuccess())
-                || (result == Result.UNSTABLE && jobProperty.getNotifyUnstable())) {
-            getSlack(r).publish(getBuildStatusMessage(r, jobProperty.includeTestSummary(),
-                            jobProperty.includeCustomMessage()),
-                    getBuildColor(r));
-            if (jobProperty.getShowCommitList()) {
+                && notifier.getNotifyBackToNormal())
+                || (result == Result.SUCCESS && notifier.getNotifySuccess())
+                || (result == Result.UNSTABLE && notifier.getNotifyUnstable())) {
+            getSlack(r).publish(getBuildStatusMessage(r, notifier.includeTestSummary(),
+                    notifier.includeCustomMessage()), getBuildColor(r));
+            if (notifier.getShowCommitList()) {
                 getSlack(r).publish(getCommitList(r), getBuildColor(r));
             }
         }
@@ -323,8 +297,7 @@ public class ActiveNotifier implements FineGrainedNotifier {
 
         public MessageBuilder appendCustomMessage() {
             AbstractProject<?, ?> project = build.getProject();
-            String customMessage = Util.fixEmpty(project.getProperty(SlackNotifier.SlackJobProperty.class)
-                    .getCustomMessage());
+            String customMessage = notifier.getCustomMessage();
             EnvVars envVars = new EnvVars();
             try {
                 envVars = build.getEnvironment(new LogTaskListener(logger, INFO));
