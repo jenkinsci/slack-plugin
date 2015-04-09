@@ -1,5 +1,6 @@
 package jenkins.plugins.slack;
 
+import hudson.EnvVars;
 import hudson.Util;
 import hudson.model.Result;
 import hudson.model.AbstractBuild;
@@ -289,17 +290,16 @@ public class ActiveNotifier implements FineGrainedNotifier {
             AbstractProject<?, ?> project = build.getProject();
             String customMessage = Util.fixEmpty(project.getProperty(SlackNotifier.SlackJobProperty.class)
                     .getCustomMessage());
-            Map<String, String> buildVariables = new HashMap();
-            buildVariables.putAll(build.getBuildVariables());
+            EnvVars envVars = new EnvVars();
             try {
-                buildVariables.putAll(build.getEnvironment(new LogTaskListener(logger, INFO)));
+                envVars = build.getEnvironment(new LogTaskListener(logger, INFO));
             } catch (IOException e) {
                 logger.log(SEVERE, e.getMessage(), e);
             } catch (InterruptedException e) {
                 logger.log(SEVERE, e.getMessage(), e);
             }
             message.append("\n");
-            message.append(replaceMacro(customMessage, new VariableResolver.ByMap<String>(buildVariables)));
+            message.append(envVars.expand(customMessage));
             return this;
         }
 
