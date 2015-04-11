@@ -6,6 +6,7 @@ import hudson.model.AbstractBuild;
 import hudson.model.AbstractProject;
 import hudson.model.Cause;
 import hudson.model.CauseAction;
+import hudson.model.Hudson;
 import hudson.model.Run;
 import hudson.scm.ChangeLogSet;
 import hudson.scm.ChangeLogSet.AffectedFile;
@@ -139,10 +140,6 @@ public class ActiveNotifier implements FineGrainedNotifier {
     }
 
     String getCommitList(AbstractBuild r) {
-        if (!r.hasChangeSetComputed()) {
-            logger.info("No commits.");
-            return "No Changes.";
-        }
         ChangeLogSet changeSet = r.getChangeSet();
         List<Entry> entries = new LinkedList<Entry>();
         for (Object o : changeSet.getItems()) {
@@ -152,7 +149,15 @@ public class ActiveNotifier implements FineGrainedNotifier {
         }
         if (entries.isEmpty()) {
             logger.info("Empty change...");
-            return "No Changes.";
+            Cause.UpstreamCause c = (Cause.UpstreamCause)r.getCause(Cause.UpstreamCause.class);
+            if (c == null) {
+                return "No Changes.";
+            }
+            String upProjectName = c.getUpstreamProject();
+            int buildNumber = c.getUpstreamBuild();
+            AbstractProject project = Hudson.getInstance().getItemByFullName(upProjectName, AbstractProject.class);
+            AbstractBuild upBuild = (AbstractBuild)project.getBuildByNumber(buildNumber);
+            return getCommitList(upBuild);
         }
         Set<String> commits = new HashSet<String>();
         for (Entry entry : entries) {
