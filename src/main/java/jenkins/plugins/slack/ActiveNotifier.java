@@ -222,6 +222,9 @@ public class ActiveNotifier implements FineGrainedNotifier {
             if (result == Result.SUCCESS && previousResult == Result.FAILURE) {
                 return "Back to normal";
             }
+            if (result == Result.FAILURE && previousResult == Result.FAILURE) {
+                return "Still Failing";
+            }
             if (result == Result.SUCCESS) {
                 return "Success";
             }
