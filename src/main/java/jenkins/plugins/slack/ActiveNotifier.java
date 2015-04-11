@@ -4,12 +4,14 @@ import hudson.Util;
 import hudson.model.Result;
 import hudson.model.AbstractBuild;
 import hudson.model.AbstractProject;
+import hudson.model.Cause;
 import hudson.model.CauseAction;
 import hudson.model.Run;
 import hudson.scm.ChangeLogSet;
 import hudson.scm.ChangeLogSet.AffectedFile;
 import hudson.scm.ChangeLogSet.Entry;
 import hudson.tasks.test.AbstractTestResultAction;
+import hudson.triggers.SCMTrigger;
 import org.apache.commons.lang.StringUtils;
 
 import java.util.HashSet;
@@ -42,15 +44,21 @@ public class ActiveNotifier implements FineGrainedNotifier {
     }
 
     public void started(AbstractBuild build) {
-        String changes = getChanges(build);
-        CauseAction cause = build.getAction(CauseAction.class);
+        CauseAction causeAction = build.getAction(CauseAction.class);
 
+        if (causeAction != null) {
+            Cause scmCause = causeAction.findCause(SCMTrigger.SCMTriggerCause.class);
+            if (scmCause == null) {
+                MessageBuilder message = new MessageBuilder(notifier, build);
+                message.append(causeAction.getShortDescription());
+                notifyStart(build, message.appendOpenLink().toString());
+                return;
+            }
+        }
+
+        String changes = getChanges(build);
         if (changes != null) {
             notifyStart(build, changes);
-        } else if (cause != null) {
-            MessageBuilder message = new MessageBuilder(notifier, build);
-            message.append(cause.getShortDescription());
-            notifyStart(build, message.appendOpenLink().toString());
         } else {
             notifyStart(build, getBuildStatusMessage(build, false));
         }
