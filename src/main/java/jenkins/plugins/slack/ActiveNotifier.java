@@ -46,12 +46,7 @@ public class ActiveNotifier implements FineGrainedNotifier {
     }
 
     public void started(AbstractBuild build) {
-/*
-        String changes = getChanges(build);
-        CauseAction cause = build.getAction(CauseAction.class);
-        AbstractProject<?, ?> project = build.getProject();
-        SlackNotifier.SlackJobProperty jobProperty = project.getProperty(SlackNotifier.SlackJobProperty.class);
-*/
+        
         AbstractProject<?, ?> project = build.getProject();
         SlackNotifier.SlackJobProperty jobProperty = project.getProperty(SlackNotifier.SlackJobProperty.class);
 
