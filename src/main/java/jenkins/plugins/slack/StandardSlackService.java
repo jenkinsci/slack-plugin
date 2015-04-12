@@ -31,11 +31,11 @@ public class StandardSlackService implements SlackService {
         this.roomIds = roomId.split("[,; ]+");
     }
 
-    public void publish(String message) {
-        publish(message, "warning");
+    public boolean publish(String message) {
+        return publish(message, "warning");
     }
 
-    public void publish(String message, String color) {
+    public boolean publish(String message, String color) {
         for (String roomId : roomIds) {
             String url = "https://" + teamDomain + "." + host + "/services/hooks/jenkins-ci?token=" + token;
             logger.info("Posting: to " + roomId + " on " + teamDomain + " using " + url +": " + message + " " + color);
@@ -67,14 +67,18 @@ public class StandardSlackService implements SlackService {
                 String response = post.getResponseBodyAsString();
                 if(responseCode != HttpStatus.SC_OK) {
                     logger.log(Level.WARNING, "Slack post may have failed. Response: " + response);
+                    return false;
                 }
+                return true;
             } catch (Exception e) {
                 logger.log(Level.WARNING, "Error posting to Slack", e);
+                return false;
             } finally {
                 logger.info("Posting succeeded");
                 post.releaseConnection();
             }
         }
+        return false;
     }
 
     private HttpClient getHttpClient() {

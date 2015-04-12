@@ -1,25 +1,24 @@
 package jenkins.plugins.slack;
 
+
 import hudson.EnvVars;
 import hudson.Util;
-import hudson.model.Result;
-import hudson.model.AbstractBuild;
-import hudson.model.AbstractProject;
-import hudson.model.CauseAction;
-import hudson.model.Run;
+import hudson.model.*;
 import hudson.scm.ChangeLogSet;
 import hudson.scm.ChangeLogSet.AffectedFile;
 import hudson.scm.ChangeLogSet.Entry;
 import hudson.tasks.test.AbstractTestResultAction;
+import hudson.triggers.SCMTrigger;
 import hudson.util.LogTaskListener;
-import hudson.util.VariableResolver;
 import org.apache.commons.lang.StringUtils;
 
 import java.io.IOException;
-import java.util.*;
+import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Set;
 import java.util.logging.Logger;
 
-import static hudson.Util.replaceMacro;
 import static java.util.logging.Level.INFO;
 import static java.util.logging.Level.SEVERE;
 
@@ -47,17 +46,29 @@ public class ActiveNotifier implements FineGrainedNotifier {
     }
 
     public void started(AbstractBuild build) {
+/*
         String changes = getChanges(build);
         CauseAction cause = build.getAction(CauseAction.class);
         AbstractProject<?, ?> project = build.getProject();
         SlackNotifier.SlackJobProperty jobProperty = project.getProperty(SlackNotifier.SlackJobProperty.class);
+*/
+        AbstractProject<?, ?> project = build.getProject();
+        SlackNotifier.SlackJobProperty jobProperty = project.getProperty(SlackNotifier.SlackJobProperty.class);
 
+        CauseAction causeAction = build.getAction(CauseAction.class);
+
+        if (causeAction != null) {
+            Cause scmCause = causeAction.findCause(SCMTrigger.SCMTriggerCause.class);
+            if (scmCause == null) {
+                MessageBuilder message = new MessageBuilder(notifier, build);
+                message.append(causeAction.getShortDescription());
+                notifyStart(build, message.appendOpenLink().toString());
+            }
+        }
+
+        String changes = getChanges(build);
         if (changes != null) {
             notifyStart(build, changes);
-        } else if (cause != null) {
-            MessageBuilder message = new MessageBuilder(notifier, build);
-            message.append(cause.getShortDescription());
-            notifyStart(build, message.appendOpenLink().toString());
         } else {
             notifyStart(build, getBuildStatusMessage(build, false, jobProperty.includeCustomMessage()));
         }
@@ -65,7 +76,7 @@ public class ActiveNotifier implements FineGrainedNotifier {
 
     private void notifyStart(AbstractBuild build, String message) {
         AbstractProject<?, ?> project = build.getProject();
-        AbstractBuild<?, ?> previousBuild = project.getLastBuild().getPreviousBuild();
+        AbstractBuild<?, ?> previousBuild = project.getLastBuild().getPreviousCompletedBuild();
         if (previousBuild == null) {
             getSlack(build).publish(message, "good");
         } else {
@@ -86,7 +97,7 @@ public class ActiveNotifier implements FineGrainedNotifier {
         Result result = r.getResult();
         AbstractBuild<?, ?> previousBuild = project.getLastBuild();
         do {
-            previousBuild = previousBuild.getPreviousBuild();
+            previousBuild = previousBuild.getPreviousCompletedBuild();
         } while (previousBuild != null && previousBuild.getResult() == Result.ABORTED);
         Result previousResult = (previousBuild != null) ? previousBuild.getResult() : Result.SUCCESS;
         if ((result == Result.ABORTED && jobProperty.getNotifyAborted())
@@ -140,10 +151,6 @@ public class ActiveNotifier implements FineGrainedNotifier {
     }
 
     String getCommitList(AbstractBuild r) {
-        if (!r.hasChangeSetComputed()) {
-            logger.info("No commits.");
-            return "No Changes.";
-        }
         ChangeLogSet changeSet = r.getChangeSet();
         List<Entry> entries = new LinkedList<Entry>();
         for (Object o : changeSet.getItems()) {
@@ -153,7 +160,15 @@ public class ActiveNotifier implements FineGrainedNotifier {
         }
         if (entries.isEmpty()) {
             logger.info("Empty change...");
-            return "No Changes.";
+            Cause.UpstreamCause c = (Cause.UpstreamCause)r.getCause(Cause.UpstreamCause.class);
+            if (c == null) {
+                return "No Changes.";
+            }
+            String upProjectName = c.getUpstreamProject();
+            int buildNumber = c.getUpstreamBuild();
+            AbstractProject project = Hudson.getInstance().getItemByFullName(upProjectName, AbstractProject.class);
+            AbstractBuild upBuild = (AbstractBuild)project.getBuildByNumber(buildNumber);
+            return getCommitList(upBuild);
         }
         Set<String> commits = new HashSet<String>();
         for (Entry entry : entries) {
@@ -220,6 +235,9 @@ public class ActiveNotifier implements FineGrainedNotifier {
             Result previousResult = (previousBuild != null) ? previousBuild.getResult() : Result.SUCCESS;
             if (result == Result.SUCCESS && previousResult == Result.FAILURE) {
                 return "Back to normal";
+            }
+            if (result == Result.FAILURE && previousResult == Result.FAILURE) {
+                return "Still Failing";
             }
             if (result == Result.SUCCESS) {
                 return "Success";
