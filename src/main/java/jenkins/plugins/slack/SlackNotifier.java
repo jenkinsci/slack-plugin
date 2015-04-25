@@ -174,6 +174,10 @@ public class SlackNotifier extends Notifier {
             return super.configure(sr, formData);
         }
 
+        SlackService getSlackService(final String teamDomain, final String authToken, final String room) {
+            return new StandardSlackService(teamDomain, authToken, room);
+        }
+
         @Override
         public String getDisplayName() {
             return "Slack Notifications";
@@ -184,7 +188,7 @@ public class SlackNotifier extends Notifier {
                 @QueryParameter("slackRoom") final String room,
                 @QueryParameter("slackBuildServerUrl") final String buildServerUrl) throws FormException {
             try {
-                SlackService testSlackService = new StandardSlackService(teamDomain, authToken, room);
+                SlackService testSlackService = getSlackService(teamDomain, authToken, room);
                 String message = "Slack/Jenkins plugin: you're all set on " + buildServerUrl;
                 boolean success = testSlackService.publish(message, "green");
                 return success ? FormValidation.ok("Success") : FormValidation.error("Failure");
