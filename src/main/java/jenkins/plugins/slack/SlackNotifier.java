@@ -180,9 +180,9 @@ public class SlackNotifier extends Notifier {
         }
 
         public FormValidation doTestConnection(@QueryParameter("slackTeamDomain") final String teamDomain,
-                @QueryParameter("slackToken") final String authToken,
-                @QueryParameter("slackRoom") final String room,
-                @QueryParameter("slackBuildServerUrl") final String buildServerUrl) throws FormException {
+                                               @QueryParameter("slackToken") final String authToken,
+                                               @QueryParameter("slackRoom") final String room,
+                                               @QueryParameter("slackBuildServerUrl") final String buildServerUrl) throws FormException {
             try {
                 SlackService testSlackService = new StandardSlackService(teamDomain, authToken, room);
                 String message = "Slack/Jenkins plugin: you're all set on " + buildServerUrl;
@@ -209,21 +209,25 @@ public class SlackNotifier extends Notifier {
         private boolean notifyRepeatedFailure;
         private boolean includeTestSummary;
         private boolean showCommitList;
+        private boolean includeCustomMessage;
+        private String customMessage;
 
         @DataBoundConstructor
         public SlackJobProperty(String teamDomain,
-                String token,
-                String room,
-                boolean startNotification,
-                boolean notifyAborted,
-                boolean notifyFailure,
-                boolean notifyNotBuilt,
-                boolean notifySuccess,
-                boolean notifyUnstable,
-                boolean notifyBackToNormal,
-                boolean notifyRepeatedFailure,
-                boolean includeTestSummary,
-                boolean showCommitList) {
+                                String token,
+                                String room,
+                                boolean startNotification,
+                                boolean notifyAborted,
+                                boolean notifyFailure,
+                                boolean notifyNotBuilt,
+                                boolean notifySuccess,
+                                boolean notifyUnstable,
+                                boolean notifyBackToNormal,
+                                boolean notifyRepeatedFailure,
+                                boolean includeTestSummary,
+                                boolean showCommitList,
+                                boolean includeCustomMessage,
+                                String customMessage) {
             this.teamDomain = teamDomain;
             this.token = token;
             this.room = room;
@@ -237,6 +241,8 @@ public class SlackNotifier extends Notifier {
             this.notifyRepeatedFailure = notifyRepeatedFailure;
             this.includeTestSummary = includeTestSummary;
             this.showCommitList = showCommitList;
+            this.includeCustomMessage = includeCustomMessage;
+            this.customMessage = customMessage;
         }
 
         @Exported
@@ -319,6 +325,16 @@ public class SlackNotifier extends Notifier {
             return notifyRepeatedFailure;
         }
 
+        @Exported
+        public boolean includeCustomMessage() {
+            return includeCustomMessage;
+        }
+
+        @Exported
+        public String getCustomMessage() {
+            return customMessage;
+        }
+
         @Extension
         public static final class DescriptorImpl extends JobPropertyDescriptor {
 
@@ -346,12 +362,14 @@ public class SlackNotifier extends Notifier {
                         sr.getParameter("slackNotifyBackToNormal") != null,
                         sr.getParameter("slackNotifyRepeatedFailure") != null,
                         sr.getParameter("includeTestSummary") != null,
-                        sr.getParameter("slackShowCommitList") != null);
+                        sr.getParameter("slackShowCommitList") != null,
+                        sr.getParameter("includeCustomMessage") != null,
+                        sr.getParameter("customMessage"));
             }
 
             public FormValidation doTestConnection(@QueryParameter("slackTeamDomain") final String teamDomain,
-                    @QueryParameter("slackToken") final String authToken,
-                    @QueryParameter("slackProjectRoom") final String room) throws FormException {
+                                                   @QueryParameter("slackToken") final String authToken,
+                                                   @QueryParameter("slackProjectRoom") final String room) throws FormException {
                 try {
                     SlackService testSlackService = new StandardSlackService(teamDomain, authToken, room);
                     String message = "Slack/Jenkins plugin: you're all set.";

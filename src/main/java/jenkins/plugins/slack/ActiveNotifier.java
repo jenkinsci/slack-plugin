@@ -1,25 +1,26 @@
 package jenkins.plugins.slack;
 
+
+import hudson.EnvVars;
 import hudson.Util;
-import hudson.model.Result;
-import hudson.model.AbstractBuild;
-import hudson.model.AbstractProject;
-import hudson.model.Cause;
-import hudson.model.CauseAction;
-import hudson.model.Hudson;
-import hudson.model.Run;
+import hudson.model.*;
 import hudson.scm.ChangeLogSet;
 import hudson.scm.ChangeLogSet.AffectedFile;
 import hudson.scm.ChangeLogSet.Entry;
 import hudson.tasks.test.AbstractTestResultAction;
 import hudson.triggers.SCMTrigger;
+import hudson.util.LogTaskListener;
 import org.apache.commons.lang.StringUtils;
 
+import java.io.IOException;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 import java.util.logging.Logger;
+
+import static java.util.logging.Level.INFO;
+import static java.util.logging.Level.SEVERE;
 
 @SuppressWarnings("rawtypes")
 public class ActiveNotifier implements FineGrainedNotifier {
@@ -45,6 +46,10 @@ public class ActiveNotifier implements FineGrainedNotifier {
     }
 
     public void started(AbstractBuild build) {
+        
+        AbstractProject<?, ?> project = build.getProject();
+        SlackNotifier.SlackJobProperty jobProperty = project.getProperty(SlackNotifier.SlackJobProperty.class);
+
         CauseAction causeAction = build.getAction(CauseAction.class);
 
         if (causeAction != null) {
@@ -60,7 +65,7 @@ public class ActiveNotifier implements FineGrainedNotifier {
         if (changes != null) {
             notifyStart(build, changes);
         } else {
-            notifyStart(build, getBuildStatusMessage(build, false));
+            notifyStart(build, getBuildStatusMessage(build, false, jobProperty.includeCustomMessage()));
         }
     }
 
@@ -100,7 +105,8 @@ public class ActiveNotifier implements FineGrainedNotifier {
                 && jobProperty.getNotifyBackToNormal())
                 || (result == Result.SUCCESS && jobProperty.getNotifySuccess())
                 || (result == Result.UNSTABLE && jobProperty.getNotifyUnstable())) {
-            getSlack(r).publish(getBuildStatusMessage(r, jobProperty.includeTestSummary()),
+            getSlack(r).publish(getBuildStatusMessage(r, jobProperty.includeTestSummary(),
+                            jobProperty.includeCustomMessage()),
                     getBuildColor(r));
             if (jobProperty.getShowCommitList()) {
                 getSlack(r).publish(getCommitList(r), getBuildColor(r));
@@ -183,15 +189,18 @@ public class ActiveNotifier implements FineGrainedNotifier {
         }
     }
 
-    String getBuildStatusMessage(AbstractBuild r, boolean includeTestSummary) {
+    String getBuildStatusMessage(AbstractBuild r, boolean includeTestSummary, boolean includeCustomMessage) {
         MessageBuilder message = new MessageBuilder(notifier, r);
         message.appendStatusMessage();
         message.appendDuration();
         message.appendOpenLink();
-        if (!includeTestSummary) {
-            return message.toString();
+        if (includeTestSummary) {
+            message.appendTestSummary();
         }
-        return message.appendTestSummary().toString();
+        if (includeCustomMessage) {
+            message.appendCustomMessage();
+        }
+        return message.toString();
     }
 
     public static class MessageBuilder {
@@ -287,6 +296,23 @@ public class ActiveNotifier implements FineGrainedNotifier {
             } else {
                 message.append("\nNo Tests found.");
             }
+            return this;
+        }
+
+        public MessageBuilder appendCustomMessage() {
+            AbstractProject<?, ?> project = build.getProject();
+            String customMessage = Util.fixEmpty(project.getProperty(SlackNotifier.SlackJobProperty.class)
+                    .getCustomMessage());
+            EnvVars envVars = new EnvVars();
+            try {
+                envVars = build.getEnvironment(new LogTaskListener(logger, INFO));
+            } catch (IOException e) {
+                logger.log(SEVERE, e.getMessage(), e);
+            } catch (InterruptedException e) {
+                logger.log(SEVERE, e.getMessage(), e);
+            }
+            message.append("\n");
+            message.append(envVars.expand(customMessage));
             return this;
         }
 
