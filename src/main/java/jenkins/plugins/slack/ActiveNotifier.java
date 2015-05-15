@@ -3,7 +3,15 @@ package jenkins.plugins.slack;
 
 import hudson.EnvVars;
 import hudson.Util;
-import hudson.model.*;
+import hudson.EnvVars;
+import hudson.model.BuildListener;
+import hudson.model.Result;
+import hudson.model.AbstractBuild;
+import hudson.model.AbstractProject;
+import hudson.model.Cause;
+import hudson.model.CauseAction;
+import hudson.model.Hudson;
+import hudson.model.Run;
 import hudson.scm.ChangeLogSet;
 import hudson.scm.ChangeLogSet.AffectedFile;
 import hudson.scm.ChangeLogSet.Entry;
@@ -28,10 +36,12 @@ public class ActiveNotifier implements FineGrainedNotifier {
     private static final Logger logger = Logger.getLogger(SlackListener.class.getName());
 
     SlackNotifier notifier;
+    BuildListener listener;
 
-    public ActiveNotifier(SlackNotifier notifier) {
+    public ActiveNotifier(SlackNotifier notifier, BuildListener listener) {
         super();
         this.notifier = notifier;
+        this.listener = listener;
     }
 
     private SlackService getSlack(AbstractBuild r) {
@@ -39,6 +49,18 @@ public class ActiveNotifier implements FineGrainedNotifier {
         String projectRoom = Util.fixEmpty(project.getProperty(SlackNotifier.SlackJobProperty.class).getRoom());
         String teamDomain = Util.fixEmpty(project.getProperty(SlackNotifier.SlackJobProperty.class).getTeamDomain());
         String token = Util.fixEmpty(project.getProperty(SlackNotifier.SlackJobProperty.class).getToken());
+
+        EnvVars env = null;
+        try {
+            env = r.getEnvironment(listener);
+        } catch (Exception e) {
+            listener.getLogger().println("Error retrieving environment vars: " + e.getMessage());
+            env = new EnvVars();
+        }
+        teamDomain = env.expand(teamDomain);
+        token = env.expand(token);
+        projectRoom = env.expand(projectRoom);
+
         return notifier.newSlackService(teamDomain, token, projectRoom);
     }
 

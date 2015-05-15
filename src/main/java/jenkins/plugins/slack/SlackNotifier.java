@@ -287,7 +287,7 @@ public class SlackNotifier extends Notifier {
                     if (publisher instanceof SlackNotifier) {
                         logger.info("Invoking Started...");
                         ((SlackNotifier) publisher).update();
-                        new ActiveNotifier((SlackNotifier) publisher).started(build);
+                        new ActiveNotifier((SlackNotifier) publisher, listener).started(build);
                     }
                 }
             }
