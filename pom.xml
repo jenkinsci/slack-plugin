@@ -117,15 +117,13 @@
         </pluginRepository>
     </pluginRepositories>
 
+    <!--
+      The developers show up as current maintainers in the Jenkins wiki.
+      https://wiki.jenkins-ci.org/display/JENKINS/Slack+Plugin
+
+      The id should be the jenkinsci.org username and not your GitHub username.
+    -->
     <developers>
-        <developer>
-            <id>grantmd</id>
-            <name>Myles Grant</name>
-            <email>myles@tinyspeck.com</email>
-            <roles>
-                <role>author</role>
-            </roles>
-        </developer>
         <developer>
             <id>sag47</id>
             <name>Sam Gleske</name>
@@ -135,14 +133,6 @@
                 <role>maintainer</role>
             </roles>
             <timezone>America/New_York</timezone>
-        </developer>
-        <developer>
-            <id>peergum</id>
-            <name>Phil Hilger</name>
-            <email>phil@peergum.com</email>
-            <roles>
-                <role>collaborator</role>
-            </roles>
         </developer>
     </developers>
 </project>
