@@ -25,6 +25,7 @@ import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.QueryParameter;
 import org.kohsuke.stapler.StaplerRequest;
 import org.kohsuke.stapler.export.Exported;
+import jenkins.model.JenkinsLocationConfiguration;
 
 public class SlackNotifier extends Notifier {
 
@@ -54,7 +55,13 @@ public class SlackNotifier extends Notifier {
     }
 
     public String getBuildServerUrl() {
-        return buildServerUrl;
+        if(buildServerUrl == null || buildServerUrl == "") {
+            JenkinsLocationConfiguration jenkinsConfig = new JenkinsLocationConfiguration();
+            return jenkinsConfig.getUrl();
+        }
+        else {
+            return buildServerUrl;
+        }
     }
 
     public String getSendAs() {
@@ -129,7 +136,13 @@ public class SlackNotifier extends Notifier {
         }
 
         public String getBuildServerUrl() {
-            return buildServerUrl;
+            if(buildServerUrl == null || buildServerUrl == "") {
+                JenkinsLocationConfiguration jenkinsConfig = new JenkinsLocationConfiguration();
+                return jenkinsConfig.getUrl();
+            }
+            else {
+                return buildServerUrl;
+            }
         }
 
         public String getSendAs() {
@@ -167,6 +180,10 @@ public class SlackNotifier extends Notifier {
             room = sr.getParameter("slackRoom");
             buildServerUrl = sr.getParameter("slackBuildServerUrl");
             sendAs = sr.getParameter("slackSendAs");
+            if(buildServerUrl == null || buildServerUrl == "") {
+                JenkinsLocationConfiguration jenkinsConfig = new JenkinsLocationConfiguration();
+                buildServerUrl = jenkinsConfig.getUrl();
+            }
             if (buildServerUrl != null && !buildServerUrl.endsWith("/")) {
                 buildServerUrl = buildServerUrl + "/";
             }
