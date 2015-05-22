@@ -207,7 +207,7 @@ public class SlackNotifier extends Notifier {
             try {
                 SlackService testSlackService = getSlackService(teamDomain, authToken, room);
                 String message = "Slack/Jenkins plugin: you're all set on " + buildServerUrl;
-                boolean success = testSlackService.publish(message, "green");
+                boolean success = testSlackService.publish(message, "good");
                 return success ? FormValidation.ok("Success") : FormValidation.error("Failure");
             } catch (Exception e) {
                 return FormValidation.error("Client error : " + e.getMessage());
@@ -394,7 +394,7 @@ public class SlackNotifier extends Notifier {
                 try {
                     SlackService testSlackService = new StandardSlackService(teamDomain, authToken, room);
                     String message = "Slack/Jenkins plugin: you're all set.";
-                    boolean success = testSlackService.publish(message, "green");
+                    boolean success = testSlackService.publish(message, "good");
                     return success ? FormValidation.ok("Success") : FormValidation.error("Failure");
                 } catch (Exception e) {
                     return FormValidation.error("Client error : " + e.getMessage());
