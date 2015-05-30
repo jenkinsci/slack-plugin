@@ -3,9 +3,9 @@ package jenkins.plugins.slack;
 import hudson.Extension;
 import hudson.model.AbstractBuild;
 import hudson.model.AbstractProject;
+import hudson.model.BuildListener;
 import hudson.model.Descriptor;
 import hudson.model.TaskListener;
-import hudson.model.BuildListener;
 import hudson.model.listeners.RunListener;
 import hudson.tasks.Publisher;
 
@@ -51,7 +51,6 @@ public class SlackListener extends RunListener<AbstractBuild> {
         Map<Descriptor<Publisher>, Publisher> map = project.getPublishersList().toMap();
         for (Publisher publisher : map.values()) {
             if (publisher instanceof SlackNotifier) {
-                ((SlackNotifier)publisher).update();
                 return new ActiveNotifier((SlackNotifier) publisher, (BuildListener)listener);
             }
         }
