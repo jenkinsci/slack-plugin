@@ -36,6 +36,7 @@ public class StandardSlackService implements SlackService {
     }
 
     public boolean publish(String message, String color) {
+        boolean result = true;
         for (String roomId : roomIds) {
             String url = "https://" + teamDomain + "." + host + "/services/hooks/jenkins-ci?token=" + token;
             logger.info("Posting: to " + roomId + " on " + teamDomain + " using " + url +": " + message + " " + color);
@@ -67,21 +68,20 @@ public class StandardSlackService implements SlackService {
                 String response = post.getResponseBodyAsString();
                 if(responseCode != HttpStatus.SC_OK) {
                     logger.log(Level.WARNING, "Slack post may have failed. Response: " + response);
-                    return false;
+                    result = false;
                 }
-                return true;
             } catch (Exception e) {
                 logger.log(Level.WARNING, "Error posting to Slack", e);
-                return false;
+                result = false;
             } finally {
                 logger.info("Posting succeeded");
                 post.releaseConnection();
             }
         }
-        return false;
+        return result;
     }
 
-    private HttpClient getHttpClient() {
+    protected HttpClient getHttpClient() {
         HttpClient client = new HttpClient();
         if (Jenkins.getInstance() != null) {
             ProxyConfiguration proxy = Jenkins.getInstance().proxy;
