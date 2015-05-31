@@ -316,7 +316,7 @@ public class SlackNotifier extends Notifier {
                 }
                 SlackService testSlackService = getSlackService(targetDomain, targetToken, targetRoom);
                 String message = "Slack/Jenkins plugin: you're all set on " + targetBuildServerUrl;
-                boolean success = testSlackService.publish(message, "green");
+                boolean success = testSlackService.publish(message, "good");
                 return success ? FormValidation.ok("Success") : FormValidation.error("Failure");
             } catch (Exception e) {
                 return FormValidation.error("Client error : " + e.getMessage());
