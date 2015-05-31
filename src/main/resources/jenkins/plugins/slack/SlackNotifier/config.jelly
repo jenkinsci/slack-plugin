@@ -39,7 +39,7 @@
 
         <f:optionalBlock name="includeCustomMessage" title="Include Custom Message" checked="${instance.includeCustomMessage()}">
             <f:entry title="Custom Message" help="${rootURL}/plugin/slack/help-projectConfig-slackCustomMessage.html">
-                <f:textbox name="customMessage" value="${instance.getCustomMessage()}"/>
+                <f:textarea name="customMessage" value="${instance.getCustomMessage()}"/>
             </f:entry>
         </f:optionalBlock>
 
