@@ -83,7 +83,7 @@ public class ActiveNotifier implements FineGrainedNotifier {
             }
         }
 
-        String changes = getChanges(build);
+        String changes = getChanges(build, jobProperty.includeCustomMessage());
         if (changes != null) {
             notifyStart(build, changes);
         } else {
@@ -136,7 +136,7 @@ public class ActiveNotifier implements FineGrainedNotifier {
         }
     }
 
-    String getChanges(AbstractBuild r) {
+    String getChanges(AbstractBuild r, boolean includeCustomMessage) {
         if (!r.hasChangeSetComputed()) {
             logger.info("No change set computed...");
             return null;
@@ -164,7 +164,11 @@ public class ActiveNotifier implements FineGrainedNotifier {
         message.append(" (");
         message.append(files.size());
         message.append(" file(s) changed)");
-        return message.appendOpenLink().toString();
+        message.appendOpenLink();
+        if (includeCustomMessage) {
+            message.appendCustomMessage();
+        }
+        return message.toString();
     }
 
     String getCommitList(AbstractBuild r) {
