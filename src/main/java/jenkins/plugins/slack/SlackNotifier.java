@@ -79,7 +79,7 @@ public class SlackNotifier extends Notifier {
     }
 
     public BuildStepMonitor getRequiredMonitorService() {
-        return BuildStepMonitor.BUILD;
+        return BuildStepMonitor.NONE;
     }
 
     public SlackService newSlackService(String teamDomain, String token, String projectRoom) {
