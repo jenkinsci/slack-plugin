@@ -43,8 +43,12 @@
             </f:entry>
         </f:optionalBlock>
 
-        <f:entry title="Show Commit List with Titles and Authors">
-            <f:checkbox name="slackShowCommitList" value="true" checked="${instance.getShowCommitList()}"/>
+        <f:entry title="Notification message includes" description="What commit information to include into notification message">
+            <select class="setting-input" name="slackCommitInfoChoice">
+                <j:forEach var="i" items="${descriptor.COMMIT_INFO_CHOICES}">
+                    <f:option selected="${instance.getCommitInfoChoice()==i}">${i.getDisplayName()}</f:option>
+                </j:forEach>
+            </select>
         </f:entry>
 
         <f:entry title="Team Domain" help="${rootURL}/plugin/slack/help-projectConfig-slackTeamDomain.html">
