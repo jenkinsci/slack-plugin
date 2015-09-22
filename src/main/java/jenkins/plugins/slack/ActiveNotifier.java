@@ -237,10 +237,32 @@ public class ActiveNotifier implements FineGrainedNotifier {
                 return STARTING_STATUS_MESSAGE;
             }
             Result result = r.getResult();
+            Result previousResult;
             Run previousBuild = r.getProject().getLastBuild().getPreviousBuild();
             Run previousSuccessfulBuild = r.getPreviousSuccessfulBuild();
             boolean buildHasSucceededBefore = previousSuccessfulBuild != null;
-            Result previousResult = (previousBuild != null) ? previousBuild.getResult() : Result.SUCCESS;
+            
+            /*
+             * If the last build was aborted, go back to find the last non-aborted build.
+             * This is so that aborted builds do not affect build transitions.
+             * I.e. if build 1 was failure, build 2 was aborted and build 3 was a success the transition
+             * should be failure -> success (and therefore back to normal) not aborted -> success. 
+             */
+            Run lastNonAbortedBuild = previousBuild;
+            while(lastNonAbortedBuild != null && lastNonAbortedBuild.getResult() == Result.ABORTED) {
+                lastNonAbortedBuild = lastNonAbortedBuild.getPreviousBuild();
+            }
+            
+            
+            /* If all previous builds have been aborted, then use 
+             * SUCCESS as a default status so an aborted message is sent
+             */
+            if(lastNonAbortedBuild == null) {
+                previousResult = Result.SUCCESS;
+            } else {
+                previousResult = lastNonAbortedBuild.getResult();
+            }
+            
             /* Back to normal should only be shown if the build has actually succeeded at some point.
              * Also, if a build was previously unstable and has now succeeded the status should be 
              * "Back to normal"
