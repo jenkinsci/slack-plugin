@@ -56,6 +56,11 @@ public class StandardSlackService implements SlackService {
                 attachment.put("fallback", message);
                 attachment.put("color", color);
                 attachment.put("fields", fields);
+                JSONArray mrkdwn = new JSONArray();
+                mrkdwn.put("pretext");
+                mrkdwn.put("text");
+                mrkdwn.put("fields");
+                attachment.put("mrkdwn_in", mrkdwn);
                 JSONArray attachments = new JSONArray();
                 attachments.put(attachment);
 
