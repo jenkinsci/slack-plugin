@@ -24,6 +24,9 @@
     <f:entry title="Build Server URL" help="${rootURL}/plugin/slack/help-globalConfig-slackBuildServerUrl.html">
         <f:textbox field="buildServerUrl" name="slackBuildServerUrl" value="${descriptor.getBuildServerUrl()}" />
     </f:entry>
+    <f:entry title="Job Prefix" help="${rootURL}/plugin/slack/help-globalConfig-slackJobPrefix.html">
+        <f:textbox field="jobPrefix" name="slackJobPrefix" value="${descriptor.getJobPrefix()}" />
+    </f:entry>
     <f:validateButton
         title="${%Test Connection}" progress="${%Testing...}"
         method="testConnection" with="slackTeamDomain,slackToken,slackRoom,slackBuildServerUrl" />
