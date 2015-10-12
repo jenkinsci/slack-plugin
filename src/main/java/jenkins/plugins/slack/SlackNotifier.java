@@ -213,6 +213,7 @@ public class SlackNotifier extends Notifier {
         private String room;
         private String buildServerUrl;
         private String sendAs;
+        private String jobPrefix;
 
         public DescriptorImpl() {
             load();
