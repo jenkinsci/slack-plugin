@@ -30,6 +30,7 @@ public class SlackNotifier extends Notifier {
     private String teamDomain;
     private String authToken;
     private String buildServerUrl;
+    private String jobPrefix;
     private String room;
     private String sendAs;
     private boolean startNotification;
@@ -71,7 +72,9 @@ public class SlackNotifier extends Notifier {
             return buildServerUrl;
         }
     }
-
+    public String getJobPrefix() {
+        return jobPrefix;
+    }
     public String getSendAs() {
         return sendAs;
     }
@@ -129,7 +132,7 @@ public class SlackNotifier extends Notifier {
                          final String sendAs, final boolean startNotification, final boolean notifyAborted, final boolean notifyFailure,
                          final boolean notifyNotBuilt, final boolean notifySuccess, final boolean notifyUnstable, final boolean notifyBackToNormal,
                          final boolean notifyRepeatedFailure, final boolean includeTestSummary, final boolean showCommitList,
-                         boolean includeCustomMessage, String customMessage) {
+                         boolean includeCustomMessage, String customMessage, String jobPrefix) {
         super();
         this.teamDomain = teamDomain;
         this.authToken = authToken;
@@ -148,6 +151,7 @@ public class SlackNotifier extends Notifier {
         this.showCommitList = showCommitList;
         this.includeCustomMessage = includeCustomMessage;
         this.customMessage = customMessage;
+        this.jobPrefix = jobPrefix;
     }
 
     public BuildStepMonitor getRequiredMonitorService() {
@@ -209,6 +213,7 @@ public class SlackNotifier extends Notifier {
         private String room;
         private String buildServerUrl;
         private String sendAs;
+        private String jobPrefix;
 
         public DescriptorImpl() {
             load();
@@ -261,9 +266,10 @@ public class SlackNotifier extends Notifier {
             boolean showCommitList = "true".equals(sr.getParameter("slackShowCommitList"));
             boolean includeCustomMessage = "on".equals(sr.getParameter("includeCustomMessage"));
             String customMessage = sr.getParameter("customMessage");
+            String jobPrefix = sr.getParameter("slackJobPrefix");
             return new SlackNotifier(teamDomain, token, room, buildServerUrl, sendAs, startNotification, notifyAborted,
                     notifyFailure, notifyNotBuilt, notifySuccess, notifyUnstable, notifyBackToNormal, notifyRepeatedFailure,
-                    includeTestSummary, showCommitList, includeCustomMessage, customMessage);
+                    includeTestSummary, showCommitList, includeCustomMessage, customMessage, jobPrefix);
         }
 
         @Override
@@ -272,6 +278,7 @@ public class SlackNotifier extends Notifier {
             token = sr.getParameter("slackToken");
             room = sr.getParameter("slackRoom");
             buildServerUrl = sr.getParameter("slackBuildServerUrl");
+            jobPrefix = sr.getParameter("slackJobPrefix");
             sendAs = sr.getParameter("slackSendAs");
             if(buildServerUrl == null || buildServerUrl == "") {
                 JenkinsLocationConfiguration jenkinsConfig = new JenkinsLocationConfiguration();
