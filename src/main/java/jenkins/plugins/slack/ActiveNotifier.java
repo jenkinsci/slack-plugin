@@ -263,7 +263,7 @@ public class ActiveNotifier implements FineGrainedNotifier {
         }
 
         private MessageBuilder startMessage() {
-            if(notifier.getJobPrefix().length()){
+            if(notifier.getJobPrefix().length() > 0){
                 message.append(notifier.getJobPrefix());
                 message.append(":");
             }
