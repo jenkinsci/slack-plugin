@@ -361,7 +361,7 @@ public class ActiveNotifier implements FineGrainedNotifier {
             return this;
         }
         
-        public String createBackToNormalDurationString(){
+        private String createBackToNormalDurationString(){
             Run previousSuccessfulBuild = build.getPreviousSuccessfulBuild();
             long previousSuccessStartTime = previousSuccessfulBuild.getStartTimeInMillis();
             long previousSuccessDuration = previousSuccessfulBuild.getDuration();
