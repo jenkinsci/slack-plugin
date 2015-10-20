@@ -151,7 +151,7 @@ public class SlackNotifier extends Notifier {
     }
 
     public BuildStepMonitor getRequiredMonitorService() {
-        return BuildStepMonitor.BUILD;
+        return BuildStepMonitor.NONE;
     }
 
     public SlackService newSlackService(AbstractBuild r, BuildListener listener) {
