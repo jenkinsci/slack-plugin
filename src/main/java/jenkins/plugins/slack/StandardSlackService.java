@@ -75,11 +75,13 @@ public class StandardSlackService implements SlackService {
                     logger.log(Level.WARNING, "Slack post may have failed. Response: " + response);
                     result = false;
                 }
+                else {
+                    logger.info("Posting succeeded");
+                }
             } catch (Exception e) {
                 logger.log(Level.WARNING, "Error posting to Slack", e);
                 result = false;
             } finally {
-                logger.info("Posting succeeded");
                 post.releaseConnection();
             }
         }
