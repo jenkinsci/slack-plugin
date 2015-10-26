@@ -1,3 +1,18 @@
+# 1.8.1 release notes
+
+Fix publish to multiple rooms. Add unit tests.
+Set test connection message color correctly.
+Include custom message when changes are found
+
+Use textarea for customMessage
+
+Improves custom message help text
+
+Allow simple markup formatting in custom messages
+
+[FIXED JENKINS-29696] Allow parallel builds
+
+
 # 1.8.0 release notes
 
 New Features:
