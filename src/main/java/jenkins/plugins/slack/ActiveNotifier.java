@@ -105,7 +105,7 @@ public class ActiveNotifier implements FineGrainedNotifier {
                 || (result == Result.UNSTABLE && notifier.getNotifyUnstable())) {
             getSlack(r).publish(getBuildStatusMessage(r, notifier.includeTestSummary(),
                     notifier.includeCustomMessage()), getBuildColor(r));
-            if (notifier.getShowCommitList()) {
+            if (notifier.getCommitInfoChoice().showAnything()) {
                 getSlack(r).publish(getCommitList(r), getBuildColor(r));
             }
         }
@@ -169,8 +169,13 @@ public class ActiveNotifier implements FineGrainedNotifier {
         Set<String> commits = new HashSet<String>();
         for (Entry entry : entries) {
             StringBuffer commit = new StringBuffer();
-            commit.append(entry.getMsg());
-            commit.append(" [").append(entry.getAuthor().getDisplayName()).append("]");
+            CommitInfoChoice commitInfoChoice = notifier.getCommitInfoChoice();
+            if (commitInfoChoice.showTitle()) {
+                commit.append(entry.getMsg());
+            }
+            if (commitInfoChoice.showAuthor()) {
+                commit.append(" [").append(entry.getAuthor().getDisplayName()).append("]");
+            }
             commits.add(commit.toString());
         }
         MessageBuilder message = new MessageBuilder(notifier, r);
