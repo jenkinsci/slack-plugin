@@ -1,6 +1,7 @@
 package jenkins.plugins.slack;
 
 import hudson.EnvVars;
+import hudson.Util;
 import hudson.model.AbstractBuild;
 import hudson.model.AbstractProject;
 import hudson.model.BuildListener;
@@ -205,6 +206,16 @@ public class ActiveNotifier implements FineGrainedNotifier {
 
     public static class MessageBuilder {
 
+        private static final String STARTING_STATUS_MESSAGE = "Starting...",
+                                    BACK_TO_NORMAL_STATUS_MESSAGE = "Back to normal",
+                                    STILL_FAILING_STATUS_MESSAGE = "Still Failing",
+                                    SUCCESS_STATUS_MESSAGE = "Success",
+                                    FAILURE_STATUS_MESSAGE = "Failure",
+                                    ABORTED_STATUS_MESSAGE = "Aborted",
+                                    NOT_BUILT_STATUS_MESSAGE = "Not built",
+                                    UNSTABLE_STATUS_MESSAGE = "Unstable",
+                                    UNKNOWN_STATUS_MESSAGE = "Unknown";
+        
         private StringBuffer message;
         private SlackNotifier notifier;
         private AbstractBuild build;
@@ -223,33 +234,63 @@ public class ActiveNotifier implements FineGrainedNotifier {
 
         static String getStatusMessage(AbstractBuild r) {
             if (r.isBuilding()) {
-                return "Starting...";
+                return STARTING_STATUS_MESSAGE;
             }
             Result result = r.getResult();
+            Result previousResult;
             Run previousBuild = r.getProject().getLastBuild().getPreviousBuild();
-            Result previousResult = (previousBuild != null) ? previousBuild.getResult() : Result.SUCCESS;
-            if (result == Result.SUCCESS && previousResult == Result.FAILURE) {
-                return "Back to normal";
+            Run previousSuccessfulBuild = r.getPreviousSuccessfulBuild();
+            boolean buildHasSucceededBefore = previousSuccessfulBuild != null;
+            
+            /*
+             * If the last build was aborted, go back to find the last non-aborted build.
+             * This is so that aborted builds do not affect build transitions.
+             * I.e. if build 1 was failure, build 2 was aborted and build 3 was a success the transition
+             * should be failure -> success (and therefore back to normal) not aborted -> success. 
+             */
+            Run lastNonAbortedBuild = previousBuild;
+            while(lastNonAbortedBuild != null && lastNonAbortedBuild.getResult() == Result.ABORTED) {
+                lastNonAbortedBuild = lastNonAbortedBuild.getPreviousBuild();
+            }
+            
+            
+            /* If all previous builds have been aborted, then use 
+             * SUCCESS as a default status so an aborted message is sent
+             */
+            if(lastNonAbortedBuild == null) {
+                previousResult = Result.SUCCESS;
+            } else {
+                previousResult = lastNonAbortedBuild.getResult();
+            }
+            
+            /* Back to normal should only be shown if the build has actually succeeded at some point.
+             * Also, if a build was previously unstable and has now succeeded the status should be 
+             * "Back to normal"
+             */
+            if (result == Result.SUCCESS
+                    && (previousResult == Result.FAILURE || previousResult == Result.UNSTABLE) 
+                    && buildHasSucceededBefore) {
+                return BACK_TO_NORMAL_STATUS_MESSAGE;
             }
             if (result == Result.FAILURE && previousResult == Result.FAILURE) {
-                return "Still Failing";
+                return STILL_FAILING_STATUS_MESSAGE;
             }
             if (result == Result.SUCCESS) {
-                return "Success";
+                return SUCCESS_STATUS_MESSAGE;
             }
             if (result == Result.FAILURE) {
-                return "Failure";
+                return FAILURE_STATUS_MESSAGE;
             }
             if (result == Result.ABORTED) {
-                return "Aborted";
+                return ABORTED_STATUS_MESSAGE;
             }
             if (result == Result.NOT_BUILT) {
-                return "Not built";
+                return NOT_BUILT_STATUS_MESSAGE;
             }
             if (result == Result.UNSTABLE) {
-                return "Unstable";
+                return UNSTABLE_STATUS_MESSAGE;
             }
-            return "Unknown";
+            return UNKNOWN_STATUS_MESSAGE;
         }
 
         public MessageBuilder append(String string) {
@@ -278,7 +319,13 @@ public class ActiveNotifier implements FineGrainedNotifier {
 
         public MessageBuilder appendDuration() {
             message.append(" after ");
-            message.append(build.getDurationString());
+            String durationString;
+            if(message.toString().contains(BACK_TO_NORMAL_STATUS_MESSAGE)){
+                durationString = createBackToNormalDurationString();
+            } else {
+                durationString = build.getDurationString();
+            }
+            message.append(durationString);
             return this;
         }
 
@@ -312,6 +359,18 @@ public class ActiveNotifier implements FineGrainedNotifier {
             message.append("\n");
             message.append(envVars.expand(customMessage));
             return this;
+        }
+        
+        private String createBackToNormalDurationString(){
+            Run previousSuccessfulBuild = build.getPreviousSuccessfulBuild();
+            long previousSuccessStartTime = previousSuccessfulBuild.getStartTimeInMillis();
+            long previousSuccessDuration = previousSuccessfulBuild.getDuration();
+            long previousSuccessEndTime = previousSuccessStartTime + previousSuccessDuration;
+            long buildStartTime = build.getStartTimeInMillis();
+            long buildDuration = build.getDuration();
+            long buildEndTime = buildStartTime + buildDuration;
+            long backToNormalDuration = buildEndTime - previousSuccessEndTime;
+            return Util.getTimeSpanString(backToNormalDuration);
         }
 
         public String escape(String string) {
