@@ -61,6 +61,8 @@ public class ActiveNotifier implements FineGrainedNotifier {
                 MessageBuilder message = new MessageBuilder(notifier, build);
                 message.append(causeAction.getShortDescription());
                 notifyStart(build, message.appendOpenLink().toString());
+                // Cause was found, exit early to prevent double-message
+                return;
             }
         }
 
