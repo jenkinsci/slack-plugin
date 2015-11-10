@@ -24,8 +24,11 @@
     <f:entry title="Build Server URL" help="${rootURL}/plugin/slack/help-globalConfig-slackBuildServerUrl.html">
         <f:textbox field="buildServerUrl" name="slackBuildServerUrl" value="${descriptor.getBuildServerUrl()}" />
     </f:entry>
+    <f:entry title="Proxy URL" help="${rootURL}/plugin/slack/help-globalConfig-slackBuildServerUrl.html">
+        <f:textbox field="proxyServerUrl" name="slackProxyServerUrl" value="${descriptor.getProxyServerUrl()}" />
+    </f:entry>
     <f:validateButton
         title="${%Test Connection}" progress="${%Testing...}"
-        method="testConnection" with="slackTeamDomain,slackToken,slackRoom,slackBuildServerUrl" />
+        method="testConnection" with="slackTeamDomain,slackToken,slackRoom,slackBuildServerUrl,slackProxyServerUrl" />
   </f:section>
 </j:jelly>

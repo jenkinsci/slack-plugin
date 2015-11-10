@@ -21,7 +21,7 @@ public class SlackNotifierStub extends SlackNotifier {
         }
 
         @Override
-        SlackService getSlackService(final String teamDomain, final String authToken, final String room) {
+        SlackService getSlackService(final String teamDomain, final String authToken, final String room, final String proxyServerUrl) {
             return slackService;
         }
 

@@ -45,6 +45,8 @@ public class SlackNotifier extends Notifier {
     private boolean includeCustomMessage;
     private String customMessage;
 
+	private String proxyUrl;
+
     @Override
     public DescriptorImpl getDescriptor() {
         return (DescriptorImpl) super.getDescriptor();
@@ -167,6 +169,10 @@ public class SlackNotifier extends Notifier {
         if (StringUtils.isEmpty(room)) {
             room = getDescriptor().getRoom();
         }
+        String proxyUrl = this.proxyUrl;
+        if (StringUtils.isEmpty(proxyUrl)) {
+            room = getDescriptor().getProxyUrl();
+        }
 
         EnvVars env = null;
         try {
@@ -178,8 +184,9 @@ public class SlackNotifier extends Notifier {
         teamDomain = env.expand(teamDomain);
         authToken = env.expand(authToken);
         room = env.expand(room);
+        proxyUrl = env.expand(proxyUrl);
 
-        return new StandardSlackService(teamDomain, authToken, room);
+        return new StandardSlackService(teamDomain, authToken, room, proxyUrl);
     }
 
     @Override
@@ -209,6 +216,7 @@ public class SlackNotifier extends Notifier {
         private String room;
         private String buildServerUrl;
         private String sendAs;
+		private String proxyUrl;
 
         public static final CommitInfoChoice[] COMMIT_INFO_CHOICES = CommitInfoChoice.values();
 
@@ -216,7 +224,12 @@ public class SlackNotifier extends Notifier {
             load();
         }
 
-        public String getTeamDomain() {
+        public String getProxyUrl() {
+			// TODO Auto-generated method stub
+			return null;
+		}
+
+		public String getTeamDomain() {
             return teamDomain;
         }
 
@@ -286,8 +299,8 @@ public class SlackNotifier extends Notifier {
             return super.configure(sr, formData);
         }
 
-        SlackService getSlackService(final String teamDomain, final String authToken, final String room) {
-            return new StandardSlackService(teamDomain, authToken, room);
+        SlackService getSlackService(final String teamDomain, final String authToken, final String room, final String proxyUrl) {
+            return new StandardSlackService(teamDomain, authToken, room, proxyUrl);
         }
 
         @Override
@@ -298,7 +311,8 @@ public class SlackNotifier extends Notifier {
         public FormValidation doTestConnection(@QueryParameter("slackTeamDomain") final String teamDomain,
                                                @QueryParameter("slackToken") final String authToken,
                                                @QueryParameter("slackRoom") final String room,
-                                               @QueryParameter("slackBuildServerUrl") final String buildServerUrl) throws FormException {
+                                               @QueryParameter("slackBuildServerUrl") final String buildServerUrl,
+                                               @QueryParameter("slackProxyServerUrl") final String proxyUrl) throws FormException {
             try {
                 String targetDomain = teamDomain;
                 if (StringUtils.isEmpty(targetDomain)) {
@@ -316,7 +330,11 @@ public class SlackNotifier extends Notifier {
                 if (StringUtils.isEmpty(targetBuildServerUrl)) {
                     targetBuildServerUrl = this.buildServerUrl;
                 }
-                SlackService testSlackService = getSlackService(targetDomain, targetToken, targetRoom);
+                String targetProxyUrl = buildServerUrl;
+                if (StringUtils.isEmpty(targetProxyUrl)) {
+                	targetProxyUrl = this.proxyUrl;
+                }
+                SlackService testSlackService = getSlackService(targetDomain, targetToken, targetRoom, targetProxyUrl);
                 String message = "Slack/Jenkins plugin: you're all set on " + targetBuildServerUrl;
                 boolean success = testSlackService.publish(message, "good");
                 return success ? FormValidation.ok("Success") : FormValidation.error("Failure");
