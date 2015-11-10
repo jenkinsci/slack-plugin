@@ -1,6 +1,5 @@
 package jenkins.plugins.slack;
 
-import org.apache.commons.httpclient.HostConfiguration;
 import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.HttpStatus;
 import org.apache.commons.httpclient.methods.PostMethod;
@@ -22,17 +21,14 @@ public class StandardSlackService implements SlackService {
 
     private String host = "slack.com";
     private String teamDomain;
-    private String token;   
+    private String token;
     private String[] roomIds;
 
-	private String proxyUrl;
-
-    public StandardSlackService(String teamDomain, String token, String roomId, String proxyUrl) {
+    public StandardSlackService(String teamDomain, String token, String roomId) {
         super();
         this.teamDomain = teamDomain;
         this.token = token;
         this.roomIds = roomId.split("[,; ]+");
-        this.proxyUrl = proxyUrl;
     }
 
     public boolean publish(String message) {
@@ -47,8 +43,6 @@ public class StandardSlackService implements SlackService {
             HttpClient client = getHttpClient();
             PostMethod post = new PostMethod(url);
             JSONObject json = new JSONObject();
-            HostConfiguration config = client.getHostConfiguration();
-            config.setProxy(proxyUrl, 8080);
 
             try {
                 JSONObject field = new JSONObject();
