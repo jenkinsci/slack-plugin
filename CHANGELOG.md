@@ -1,3 +1,29 @@
+# 1.8.1 release notes
+
+This is a backport release which backports features originally intended for
+slack-2.0 release.  This is meant as a nice fix for people missing critical
+bugs.  Thanks [@Nooba](https://github.com/Nooba/) for taking the time to
+backport all of the changes.  Since new features listed here will also be
+included in the slack-2.0 release I'm not going to bother mentioning them in the
+slack-2.0 release at all.
+
+New Features:
+
+* Allow simple markup formatting in custom messages. (#127)
+
+UI Improvements:
+
+* Improves custom message help text. (#97)
+
+Bug fixes:
+
+* Allow parallel builds. (#122)
+* Use textarea for customMessage.  This allows custom messages to have new
+  lines. (#103)
+* Set test connection message color correctly. (#101)
+* Fix publish to multiple rooms. Add unit tests. (#98, #100)
+* Include custom message when changes are found. (#95)
+
 # 1.8.0 release notes
 
 New Features:
