@@ -22,7 +22,7 @@
     <version>1.8.1-SNAPSHOT</version>
     <name>Slack Notification Plugin</name>
     <description>A Build status publisher that notifies channels on a Slack team</description>
-    <url>http://wiki.jenkins-ci.org/display/JENKINS/Slack+Plugin</url>
+    <url>https://wiki.jenkins-ci.org/display/JENKINS/Slack+Plugin</url>
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -105,14 +105,14 @@
     <repositories>
         <repository>
             <id>repo.jenkins-ci.org</id>
-            <url>http://repo.jenkins-ci.org/public/</url>
+            <url>https://repo.jenkins-ci.org/public/</url>
         </repository>
     </repositories>
 
     <pluginRepositories>
         <pluginRepository>
             <id>repo.jenkins-ci.org</id>
-            <url>http://repo.jenkins-ci.org/public/</url>
+            <url>https://repo.jenkins-ci.org/public/</url>
         </pluginRepository>
     </pluginRepositories>
 
