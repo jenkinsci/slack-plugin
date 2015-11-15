@@ -19,6 +19,10 @@ the Jenkins documentation for [making a new release][plugin-release].
     mvn org.apache.maven.plugins:maven-release-plugin:2.5:prepare org.apache.maven.plugins:maven-release-plugin:2.5:perform
     ```
 
+- [ ] Wait for the plugin to be released into the Jenkins Update Center.
+- [ ] Successfully perform an upgrade from the last stable plugin release to the
+      current release.
+
 I pin which version of the release plugin to use because of the working around
 common issues section of the [release document][plugin-release].
 
