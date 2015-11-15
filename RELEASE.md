@@ -12,6 +12,7 @@ the Jenkins documentation for [making a new release][plugin-release].
 - [ ] Open a pull request from `prepare_release` branch to `master` branch.
       Merge it.
 - [ ] Fetch the latest `master`.
+- [ ] Clean the workspace `git clean -xfd`.
 - [ ] Execute the release plugin.
 
     ```
