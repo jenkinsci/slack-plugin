@@ -1,19 +1,33 @@
 package jenkins.plugins.slack;
 
-import org.apache.commons.httpclient.HttpClient;
+
+import hudson.ProxyConfiguration;
+import jenkins.model.Jenkins;
 import org.apache.commons.httpclient.HttpStatus;
-import org.apache.commons.httpclient.methods.PostMethod;
-
-import org.json.JSONObject;
+import org.apache.http.HttpHost;
+import org.apache.http.NameValuePair;
+import org.apache.http.auth.AuthScope;
+import org.apache.http.auth.UsernamePasswordCredentials;
+import org.apache.http.client.CredentialsProvider;
+import org.apache.http.client.entity.UrlEncodedFormEntity;
+import org.apache.http.client.methods.CloseableHttpResponse;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.conn.routing.HttpRoutePlanner;
+import org.apache.http.impl.client.BasicCredentialsProvider;
+import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.impl.client.HttpClientBuilder;
+import org.apache.http.impl.client.HttpClients;
+import org.apache.http.impl.conn.DefaultProxyRoutePlanner;
+import org.apache.http.message.BasicNameValuePair;
 import org.json.JSONArray;
+import org.json.JSONObject;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-
-import jenkins.model.Jenkins;
-import hudson.ProxyConfiguration;
-import org.apache.commons.httpclient.UsernamePasswordCredentials;
-import org.apache.commons.httpclient.auth.AuthScope;
 
 public class StandardSlackService implements SlackService {
 
@@ -40,8 +54,8 @@ public class StandardSlackService implements SlackService {
         for (String roomId : roomIds) {
             String url = "https://" + teamDomain + "." + host + "/services/hooks/jenkins-ci?token=" + token;
             logger.info("Posting: to " + roomId + " on " + teamDomain + " using " + url +": " + message + " " + color);
-            HttpClient client = getHttpClient();
-            PostMethod post = new PostMethod(url);
+            CloseableHttpClient client = getHttpClient();
+            HttpPost post = new HttpPost(url);
             JSONObject json = new JSONObject();
 
             try {
@@ -67,12 +81,34 @@ public class StandardSlackService implements SlackService {
                 json.put("channel", roomId);
                 json.put("attachments", attachments);
 
-                post.addParameter("payload", json.toString());
-                post.getParams().setContentCharset("UTF-8");
-                int responseCode = client.executeMethod(post);
-                String response = post.getResponseBodyAsString();
+                List<NameValuePair> nvps = new ArrayList<NameValuePair>();
+                nvps.add(new BasicNameValuePair("payload", json.toString()));
+
+                post.setEntity(new UrlEncodedFormEntity(nvps, "UTF-8"));
+
+
+                CloseableHttpResponse response = client.execute(post);
+
+                int responseCode;
+                try {
+                    responseCode = response.getStatusLine().getStatusCode();
+                } finally {
+                    response.close();
+                }
+
                 if(responseCode != HttpStatus.SC_OK) {
-                    logger.log(Level.WARNING, "Slack post may have failed. Response: " + response);
+                    InputStream is = post.getEntity().getContent();
+
+                    StringBuilder responseBuilder = new StringBuilder();
+                    int data = is.read();
+                    while(data != -1) {
+                        responseBuilder.append((char)data);
+                        data = is.read();
+                    }
+
+                    String responseString = responseBuilder.toString();
+                    logger.log(Level.WARNING, "Slack post may have failed. Response: " + responseString);
+                    logger.log(Level.WARNING, "Response Code: " + responseCode);
                     result = false;
                 }
                 else {
@@ -83,31 +119,39 @@ public class StandardSlackService implements SlackService {
                 result = false;
             } finally {
                 post.releaseConnection();
+                try {
+                    client.close();
+                }catch (IOException e) {
+                    logger.warning("Failed to close CloseableHttpClient: " + e.getLocalizedMessage());
+                }
             }
         }
         return result;
     }
 
-    protected HttpClient getHttpClient() {
-        HttpClient client = new HttpClient();
+    protected CloseableHttpClient getHttpClient() {
+        final HttpClientBuilder clientBuilder = HttpClients.custom();
+        final CredentialsProvider credentialsProvider = new BasicCredentialsProvider();
+        clientBuilder.setDefaultCredentialsProvider(credentialsProvider);
+
         if (Jenkins.getInstance() != null) {
             ProxyConfiguration proxy = Jenkins.getInstance().proxy;
             if (proxy != null) {
-                client.getHostConfiguration().setProxy(proxy.name, proxy.port);
+                final HttpHost proxyHost = new HttpHost(proxy.name, proxy.port);
+                final HttpRoutePlanner routePlanner = new DefaultProxyRoutePlanner(proxyHost);
+                clientBuilder.setRoutePlanner(routePlanner);
+
+
                 String username = proxy.getUserName();
                 String password = proxy.getPassword();
                 // Consider it to be passed if username specified. Sufficient?
                 if (username != null && !"".equals(username.trim())) {
                     logger.info("Using proxy authentication (user=" + username + ")");
-                    // http://hc.apache.org/httpclient-3.x/authentication.html#Proxy_Authentication
-                    // and
-                    // http://svn.apache.org/viewvc/httpcomponents/oac.hc3x/trunk/src/examples/BasicAuthenticationExample.java?view=markup
-                    client.getState().setProxyCredentials(AuthScope.ANY,
-                        new UsernamePasswordCredentials(username, password));
+                    credentialsProvider.setCredentials(new AuthScope(proxyHost), new UsernamePasswordCredentials(username, password));
                 }
             }
         }
-        return client;
+        return clientBuilder.build();
     }
 
     void setHost(String host) {
