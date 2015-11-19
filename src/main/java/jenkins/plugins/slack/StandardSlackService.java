@@ -89,30 +89,28 @@ public class StandardSlackService implements SlackService {
 
                 CloseableHttpResponse response = client.execute(post);
 
-                int responseCode;
                 try {
-                    responseCode = response.getStatusLine().getStatusCode();
+                    int responseCode = response.getStatusLine().getStatusCode();
+                    if(responseCode != HttpStatus.SC_OK) {
+                        InputStream is = response.getEntity().getContent();
+
+                        StringBuilder responseBuilder = new StringBuilder();
+                        int data = is.read();
+                        while(data != -1) {
+                            responseBuilder.append((char)data);
+                            data = is.read();
+                        }
+
+                        String responseString = responseBuilder.toString();
+                        logger.log(Level.WARNING, "Slack post may have failed. Response: " + responseString);
+                        logger.log(Level.WARNING, "Response Code: " + responseCode);
+                        result = false;
+                    }
+                    else {
+                        logger.info("Posting succeeded");
+                    }
                 } finally {
                     response.close();
-                }
-
-                if(responseCode != HttpStatus.SC_OK) {
-                    InputStream is = post.getEntity().getContent();
-
-                    StringBuilder responseBuilder = new StringBuilder();
-                    int data = is.read();
-                    while(data != -1) {
-                        responseBuilder.append((char)data);
-                        data = is.read();
-                    }
-
-                    String responseString = responseBuilder.toString();
-                    logger.log(Level.WARNING, "Slack post may have failed. Response: " + responseString);
-                    logger.log(Level.WARNING, "Response Code: " + responseCode);
-                    result = false;
-                }
-                else {
-                    logger.info("Posting succeeded");
                 }
             } catch (Exception e) {
                 logger.log(Level.WARNING, "Error posting to Slack", e);
@@ -157,4 +155,4 @@ public class StandardSlackService implements SlackService {
     void setHost(String host) {
         this.host = host;
     }
-}
+        }
