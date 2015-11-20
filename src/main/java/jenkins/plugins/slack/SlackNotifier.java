@@ -1,23 +1,21 @@
 package jenkins.plugins.slack;
 
-import hudson.EnvVars;
-import hudson.Extension;
-import hudson.Launcher;
-import hudson.model.AbstractBuild;
-import hudson.model.AbstractProject;
-import hudson.model.BuildListener;
-import hudson.model.Descriptor;
+import hudson.*;
+import hudson.model.*;
+import hudson.model.listeners.ItemListener;
 import hudson.tasks.BuildStepDescriptor;
 import hudson.tasks.BuildStepMonitor;
 import hudson.tasks.Notifier;
 import hudson.tasks.Publisher;
 import hudson.util.FormValidation;
+import jenkins.model.Jenkins;
 import jenkins.model.JenkinsLocationConfiguration;
 import net.sf.json.JSONObject;
 import org.apache.commons.lang.StringUtils;
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.QueryParameter;
 import org.kohsuke.stapler.StaplerRequest;
+import org.kohsuke.stapler.export.Exported;
 
 import java.io.IOException;
 import java.util.Map;
@@ -322,6 +320,188 @@ public class SlackNotifier extends Notifier {
                 return success ? FormValidation.ok("Success") : FormValidation.error("Failure");
             } catch (Exception e) {
                 return FormValidation.error("Client error : " + e.getMessage());
+            }
+        }
+    }
+
+    @Deprecated
+    public static class SlackJobProperty extends hudson.model.JobProperty<AbstractProject<?, ?>> {
+
+        private String teamDomain;
+        private String token;
+        private String room;
+        private boolean startNotification;
+        private boolean notifySuccess;
+        private boolean notifyAborted;
+        private boolean notifyNotBuilt;
+        private boolean notifyUnstable;
+        private boolean notifyFailure;
+        private boolean notifyBackToNormal;
+        private boolean notifyRepeatedFailure;
+        private boolean includeTestSummary;
+        private boolean showCommitList;
+        private boolean includeCustomMessage;
+        private String customMessage;
+
+        @DataBoundConstructor
+        public SlackJobProperty(String teamDomain,
+                                String token,
+                                String room,
+                                boolean startNotification,
+                                boolean notifyAborted,
+                                boolean notifyFailure,
+                                boolean notifyNotBuilt,
+                                boolean notifySuccess,
+                                boolean notifyUnstable,
+                                boolean notifyBackToNormal,
+                                boolean notifyRepeatedFailure,
+                                boolean includeTestSummary,
+                                boolean showCommitList,
+                                boolean includeCustomMessage,
+                                String customMessage) {
+            this.teamDomain = teamDomain;
+            this.token = token;
+            this.room = room;
+            this.startNotification = startNotification;
+            this.notifyAborted = notifyAborted;
+            this.notifyFailure = notifyFailure;
+            this.notifyNotBuilt = notifyNotBuilt;
+            this.notifySuccess = notifySuccess;
+            this.notifyUnstable = notifyUnstable;
+            this.notifyBackToNormal = notifyBackToNormal;
+            this.notifyRepeatedFailure = notifyRepeatedFailure;
+            this.includeTestSummary = includeTestSummary;
+            this.showCommitList = showCommitList;
+            this.includeCustomMessage = includeCustomMessage;
+            this.customMessage = customMessage;
+        }
+
+        @Exported
+        public String getTeamDomain() {
+            return teamDomain;
+        }
+
+        @Exported
+        public String getToken() {
+            return token;
+        }
+
+        @Exported
+        public String getRoom() {
+            return room;
+        }
+
+        @Exported
+        public boolean getStartNotification() {
+            return startNotification;
+        }
+
+        @Exported
+        public boolean getNotifySuccess() {
+            return notifySuccess;
+        }
+
+        @Exported
+        public boolean getShowCommitList() {
+            return showCommitList;
+        }
+
+        @Override
+        public boolean prebuild(AbstractBuild<?, ?> build, BuildListener listener) {
+            return super.prebuild(build, listener);
+        }
+
+        @Exported
+        public boolean getNotifyAborted() {
+            return notifyAborted;
+        }
+
+        @Exported
+        public boolean getNotifyFailure() {
+            return notifyFailure;
+        }
+
+        @Exported
+        public boolean getNotifyNotBuilt() {
+            return notifyNotBuilt;
+        }
+
+        @Exported
+        public boolean getNotifyUnstable() {
+            return notifyUnstable;
+        }
+
+        @Exported
+        public boolean getNotifyBackToNormal() {
+            return notifyBackToNormal;
+        }
+
+        @Exported
+        public boolean includeTestSummary() {
+            return includeTestSummary;
+        }
+
+        @Exported
+        public boolean getNotifyRepeatedFailure() {
+            return notifyRepeatedFailure;
+        }
+
+        @Exported
+        public boolean includeCustomMessage() {
+            return includeCustomMessage;
+        }
+
+        @Exported
+        public String getCustomMessage() {
+            return customMessage;
+        }
+
+    }
+
+    @Extension public static final class Migrator extends ItemListener {
+        @SuppressWarnings("deprecation")
+        @Override
+        public void onLoaded() {
+            logger.info("Starting Settings Migration Process");
+            for (AbstractProject<?, ?> p : Jenkins.getInstance().getAllItems(AbstractProject.class)) {
+                logger.info("processing Job: " + p.getName());
+
+                final SlackJobProperty slackJobProperty = p.getProperty(SlackJobProperty.class);
+
+                if(slackJobProperty == null) {
+                    logger.info("Configuration is already uptodate, exiting migration");
+                    return;
+                }
+
+                SlackNotifier slackNotifier = p.getPublishersList().get(SlackNotifier.class);
+
+                //map settings
+                slackNotifier.teamDomain = slackJobProperty.getTeamDomain();
+                slackNotifier.authToken = slackJobProperty.getToken();
+                slackNotifier.room = slackJobProperty.getRoom();
+                slackNotifier.startNotification = slackJobProperty.getStartNotification();
+
+                slackNotifier.notifyAborted = slackJobProperty.getNotifyAborted();
+                slackNotifier.notifyFailure = slackJobProperty.getNotifyFailure();
+                slackNotifier.notifyNotBuilt = slackJobProperty.getNotifyNotBuilt();
+                slackNotifier.notifySuccess = slackJobProperty.getNotifySuccess();
+                slackNotifier.notifyUnstable = slackJobProperty.getNotifyUnstable();
+                slackNotifier.notifyBackToNormal = slackJobProperty.getNotifyBackToNormal();
+                slackNotifier.notifyRepeatedFailure = slackJobProperty.getNotifyRepeatedFailure();
+
+                slackNotifier.includeTestSummary = slackJobProperty.includeTestSummary();
+                slackNotifier.commitInfoChoice = slackJobProperty.getShowCommitList() ? CommitInfoChoice.AUTHORS_AND_TITLES : CommitInfoChoice.NONE;
+                slackNotifier.includeCustomMessage = slackJobProperty.includeCustomMessage();
+                slackNotifier.customMessage = slackJobProperty.getCustomMessage();
+
+                try {
+                    //property section is not used anymore - remove
+                    p.removeProperty(SlackJobProperty.class);
+                    p.save();
+                    logger.info("Configuration updated successfully");
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
             }
         }
     }
