@@ -1,7 +1,12 @@
 package jenkins.plugins.slack;
 
-import hudson.*;
-import hudson.model.*;
+import hudson.EnvVars;
+import hudson.Extension;
+import hudson.Launcher;
+import hudson.model.AbstractBuild;
+import hudson.model.AbstractProject;
+import hudson.model.BuildListener;
+import hudson.model.Descriptor;
 import hudson.model.listeners.ItemListener;
 import hudson.tasks.BuildStepDescriptor;
 import hudson.tasks.BuildStepMonitor;
@@ -19,6 +24,7 @@ import org.kohsuke.stapler.export.Exported;
 
 import java.io.IOException;
 import java.util.Map;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 public class SlackNotifier extends Notifier {
@@ -500,7 +506,7 @@ public class SlackNotifier extends Notifier {
                     p.save();
                     logger.info("Configuration updated successfully");
                 } catch (IOException e) {
-                    e.printStackTrace();
+                    logger.log(Level.SEVERE, e.getMessage(), e);
                 }
             }
         }
