@@ -60,7 +60,11 @@ public class ActiveNotifier implements FineGrainedNotifier {
             if (scmCause == null) {
                 MessageBuilder message = new MessageBuilder(notifier, build);
                 message.append(causeAction.getShortDescription());
-                notifyStart(build, message.appendOpenLink().toString());
+                message.appendOpenLink();
+                if (notifier.includeCustomMessage()) {
+                  message.appendCustomMessage();
+                }
+                notifyStart(build, message.toString());
                 // Cause was found, exit early to prevent double-message
                 return;
             }
