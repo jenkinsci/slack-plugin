@@ -474,31 +474,47 @@ public class SlackNotifier extends Notifier {
 
                 final SlackJobProperty slackJobProperty = p.getProperty(SlackJobProperty.class);
 
-                if(slackJobProperty == null) {
-                    logger.info("Configuration is already uptodate, exiting migration");
-                    return;
+                if (slackJobProperty == null) {
+                    logger.info(String
+                            .format("Configuration is already up to date for \"%s\", skipping migration",
+                                    p.getName()));
+                    continue;
                 }
 
                 SlackNotifier slackNotifier = p.getPublishersList().get(SlackNotifier.class);
+                
+                if (slackNotifier == null) {
+                    logger.info(String
+                            .format("Configuration does not have a notifier for \"%s\", not migrating settings",
+                                    p.getName()));
+                } else {
 
-                //map settings
-                slackNotifier.teamDomain = slackJobProperty.getTeamDomain();
-                slackNotifier.authToken = slackJobProperty.getToken();
-                slackNotifier.room = slackJobProperty.getRoom();
-                slackNotifier.startNotification = slackJobProperty.getStartNotification();
-
-                slackNotifier.notifyAborted = slackJobProperty.getNotifyAborted();
-                slackNotifier.notifyFailure = slackJobProperty.getNotifyFailure();
-                slackNotifier.notifyNotBuilt = slackJobProperty.getNotifyNotBuilt();
-                slackNotifier.notifySuccess = slackJobProperty.getNotifySuccess();
-                slackNotifier.notifyUnstable = slackJobProperty.getNotifyUnstable();
-                slackNotifier.notifyBackToNormal = slackJobProperty.getNotifyBackToNormal();
-                slackNotifier.notifyRepeatedFailure = slackJobProperty.getNotifyRepeatedFailure();
-
-                slackNotifier.includeTestSummary = slackJobProperty.includeTestSummary();
-                slackNotifier.commitInfoChoice = slackJobProperty.getShowCommitList() ? CommitInfoChoice.AUTHORS_AND_TITLES : CommitInfoChoice.NONE;
-                slackNotifier.includeCustomMessage = slackJobProperty.includeCustomMessage();
-                slackNotifier.customMessage = slackJobProperty.getCustomMessage();
+                    //map settings
+                    if (StringUtils.isBlank(slackNotifier.teamDomain)) {
+                        slackNotifier.teamDomain = slackJobProperty.getTeamDomain();
+                    }
+                    if (StringUtils.isBlank(slackNotifier.authToken)) {
+                        slackNotifier.authToken = slackJobProperty.getToken();
+                    }
+                    if (StringUtils.isBlank(slackNotifier.room)) {
+                        slackNotifier.room = slackJobProperty.getRoom();
+                    }
+                    
+                    slackNotifier.startNotification = slackJobProperty.getStartNotification();
+    
+                    slackNotifier.notifyAborted = slackJobProperty.getNotifyAborted();
+                    slackNotifier.notifyFailure = slackJobProperty.getNotifyFailure();
+                    slackNotifier.notifyNotBuilt = slackJobProperty.getNotifyNotBuilt();
+                    slackNotifier.notifySuccess = slackJobProperty.getNotifySuccess();
+                    slackNotifier.notifyUnstable = slackJobProperty.getNotifyUnstable();
+                    slackNotifier.notifyBackToNormal = slackJobProperty.getNotifyBackToNormal();
+                    slackNotifier.notifyRepeatedFailure = slackJobProperty.getNotifyRepeatedFailure();
+    
+                    slackNotifier.includeTestSummary = slackJobProperty.includeTestSummary();
+                    slackNotifier.commitInfoChoice = slackJobProperty.getShowCommitList() ? CommitInfoChoice.AUTHORS_AND_TITLES : CommitInfoChoice.NONE;
+                    slackNotifier.includeCustomMessage = slackJobProperty.includeCustomMessage();
+                    slackNotifier.customMessage = slackJobProperty.getCustomMessage();
+                }
 
                 try {
                     //property section is not used anymore - remove
