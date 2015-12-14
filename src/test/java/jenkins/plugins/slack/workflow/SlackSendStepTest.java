@@ -27,7 +27,7 @@ import static org.powermock.api.mockito.PowerMockito.spy;
  */
 @RunWith(PowerMockRunner.class)
 @PrepareForTest({Jenkins.class,SlackSendStep.class})
-public class SlackSendTest {
+public class SlackSendStepTest {
 
     @Mock
     TaskListener taskListenerMock;
