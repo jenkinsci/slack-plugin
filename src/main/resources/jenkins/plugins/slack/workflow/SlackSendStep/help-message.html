@@ -3,6 +3,6 @@
     The content will automatically collapse if it contains 700+ characters or 5+ linebreaks, and will display a "Show more..." link to expand the content.
     Message may include global variables, for example environment and currentBuild variables:<br>
     <code>
-        slackSend "${env.JOB_NAME} ${env.BUILD_NUMBER} status: ${currentBuild.result} (<${env.BUILD_URL}|Open>)"
+        slackSend "started ${env.JOB_NAME} ${env.BUILD_NUMBER} (<${env.BUILD_URL}|Open>)"
     </code>
 </div>
