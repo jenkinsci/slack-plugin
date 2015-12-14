@@ -124,6 +124,8 @@ public class SlackNotifier extends Notifier {
         return customMessage;
     }
 
+    public SlackNotifier(){}
+
     @DataBoundConstructor
     public SlackNotifier(final String teamDomain, final String authToken, final String room, final String buildServerUrl,
                          final String sendAs, final boolean startNotification, final boolean notifyAborted, final boolean notifyFailure,
