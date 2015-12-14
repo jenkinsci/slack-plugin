@@ -32,21 +32,6 @@ public class SlackSendStepTest {
     }
 
     @Test
-    public void test_publish_message() throws Exception {
-        story.addStep(new Statement() {
-            @Override
-            public void evaluate() throws Throwable {
-                WorkflowJob job = story.j.jenkins.createProject(WorkflowJob.class, "workflow");
-                //just define message
-                job.setDefinition(new CpsFlowDefinition("slackSend 'message';", true));
-                WorkflowRun run = story.j.assertBuildStatus(Result.FAILURE, job.scheduleBuild2(0).get());
-                //everything should come from global configuration
-                story.j.assertLogContains(Messages.SlackSendStepConfig(true, true, true, true), run);
-            }
-        });
-    }
-
-    @Test
     public void test_global_config_override() throws Exception {
         story.addStep(new Statement() {
             @Override
