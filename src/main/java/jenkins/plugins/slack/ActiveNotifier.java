@@ -69,7 +69,7 @@ public class ActiveNotifier implements FineGrainedNotifier {
                 message.append(causeAction.getCauses().get(0).getShortDescription());
                 message.appendOpenLink();
                 if (notifier.getIncludeCustomMessage()) {
-                  message.appendCustomMessage();
+                  message.appendCustomMessage(build.getResult());
                 }
                 notifyStart(build, message.toString());
                 // Cause was found, exit early to prevent double-message
@@ -207,7 +207,7 @@ public class ActiveNotifier implements FineGrainedNotifier {
         message.append(" file(s) changed)");
         message.appendOpenLink();
         if (includeCustomMessage) {
-            message.appendCustomMessage();
+            message.appendCustomMessage(r.getResult());
         }
         return message.toString();
     }
@@ -275,7 +275,7 @@ public class ActiveNotifier implements FineGrainedNotifier {
             message.appendFailedTests();
         }
         if (includeCustomMessage) {
-            message.appendCustomMessage();
+            message.appendCustomMessage(r.getResult());
         }
         return message.toString();
     }
@@ -293,7 +293,7 @@ public class ActiveNotifier implements FineGrainedNotifier {
                                     UNSTABLE_STATUS_MESSAGE = "Unstable",
                                     REGRESSION_STATUS_MESSAGE = "Regression",
                                     UNKNOWN_STATUS_MESSAGE = "Unknown";
-        
+
         private StringBuffer message;
         private SlackNotifier notifier;
         private AbstractBuild build;
@@ -443,9 +443,21 @@ public class ActiveNotifier implements FineGrainedNotifier {
             return this;
         }
 
-        public MessageBuilder appendCustomMessage() {
+        public MessageBuilder appendCustomMessage(Result buildResult) {
             String customMessage = notifier.getCustomMessage();
-
+            if (buildResult != null) {
+                if (buildResult == Result.SUCCESS) {
+                    customMessage = notifier.getCustomMessageSuccess();
+                } else if (buildResult == Result.ABORTED) {
+                    customMessage = notifier.getCustomMessageAborted();
+                } else if (buildResult == Result.NOT_BUILT) {
+                    customMessage = notifier.getCustomMessageNotBuilt();
+                } else if (buildResult == Result.UNSTABLE) {
+                    customMessage = notifier.getCustomMessageUnstable();
+                } else if (buildResult == Result.FAILURE) {
+                    customMessage = notifier.getCustomMessageFailure();
+                }
+            }
             try {
                 String replaced = TokenMacro.expandAll(build, new LogTaskListener(logger, INFO), customMessage, false, null);
                 message.append("\n");
@@ -455,7 +467,7 @@ public class ActiveNotifier implements FineGrainedNotifier {
             }
             return this;
         }
-        
+
         private String createBackToNormalDurationString(){
             // This status code guarantees that the previous build fails and has been successful before
             // The back to normal time is the time since the build first broke
