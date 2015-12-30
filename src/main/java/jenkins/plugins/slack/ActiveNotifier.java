@@ -26,6 +26,7 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.logging.Logger;
 import java.util.regex.Matcher;
@@ -152,7 +153,7 @@ public class ActiveNotifier implements FineGrainedNotifier {
         message.append(" file(s) changed)");
         message.appendOpenLink();
         if (includeCustomMessage) {
-            message.appendCustomMessage();
+            message.appendCustomMessage(r.getResult());
         }
         return message.toString();
     }
@@ -218,7 +219,7 @@ public class ActiveNotifier implements FineGrainedNotifier {
             message.appendFailedTests();
         }
         if (includeCustomMessage) {
-            message.appendCustomMessage();
+            message.appendCustomMessage(r.getResult());
         }
         return message.toString();
     }
@@ -380,8 +381,8 @@ public class ActiveNotifier implements FineGrainedNotifier {
             return this;
         }
 
-        public MessageBuilder appendCustomMessage() {
-            String customMessage = notifier.getCustomMessage();
+        public MessageBuilder appendCustomMessage(Result buildResult) {
+            String customMessage = notifier.getCustomMessage(buildResult);
             EnvVars envVars = new EnvVars();
             try {
                 envVars = build.getEnvironment(new LogTaskListener(logger, INFO));

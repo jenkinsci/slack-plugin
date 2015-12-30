@@ -44,6 +44,21 @@
             <f:entry title="Custom Message" help="/plugin/slack/help-projectConfig-slackCustomMessage.html">
                 <f:textarea name="customMessage" value="${instance.getCustomMessage()}"/>
             </f:entry>
+            <f:entry title="Custom Message - Build Unstable" help="${rootURL}/plugin/slack/help-projectConfig-slackCustomMessage.html">
+                <f:textarea name="customMessageBuildUnstable" value="${instance.getCustomMessage('UNSTABLE')}"/>
+            </f:entry>
+            <f:entry title="Custom Message - Build Aborted" help="${rootURL}/plugin/slack/help-projectConfig-slackCustomMessage.html">
+                <f:textarea name="customMessageBuildAborted" value="${instance.getCustomMessage('ABORTED')}"/>
+            </f:entry>
+            <f:entry title="Custom Message - Build Failure" help="${rootURL}/plugin/slack/help-projectConfig-slackCustomMessage.html">
+                <f:textarea name="customMessageBuildFailure" value="${instance.getCustomMessage('FAILURE')}"/>
+            </f:entry>
+            <f:entry title="Custom Message - Build Not Built" help="${rootURL}/plugin/slack/help-projectConfig-slackCustomMessage.html">
+                <f:textarea name="customMessageBuildNotBuilt" value="${instance.getCustomMessage('NOT_BUILT')}"/>
+            </f:entry>
+            <f:entry title="Custom Message - Success" help="${rootURL}/plugin/slack/help-projectConfig-slackCustomMessage.html">
+                <f:textarea name="customMessageBuildSuccess" value="${instance.getCustomMessage('SUCCESS')}"/>
+            </f:entry>
         </f:optionalBlock>
 
         <f:entry title="Notification message includes" description="What commit information to include into notification message">
