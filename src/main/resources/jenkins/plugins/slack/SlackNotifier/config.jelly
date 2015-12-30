@@ -49,6 +49,21 @@
             <f:entry title="Custom Message" field="customMessage" help="/plugin/slack/help-projectConfig-slackCustomMessage.html">
                 <f:textarea />
             </f:entry>
+            <f:entry title="Custom Message - Build Unstable" help="/plugin/slack/help-projectConfig-slackCustomMessage.html">
+                <f:textarea field="customMessageUnstable" />
+            </f:entry>
+            <f:entry title="Custom Message - Build Aborted" help="/plugin/slack/help-projectConfig-slackCustomMessage.html">
+                <f:textarea field="customMessageAborted" />
+            </f:entry>
+            <f:entry title="Custom Message - Build Failure" help="/plugin/slack/help-projectConfig-slackCustomMessage.html">
+                <f:textarea field="customMessageFailure" />
+            </f:entry>
+            <f:entry title="Custom Message - Build Not Built" help="/plugin/slack/help-projectConfig-slackCustomMessage.html">
+                <f:textarea field="customMessageNotBuilt" />
+            </f:entry>
+            <f:entry title="Custom Message - Success" help="/plugin/slack/help-projectConfig-slackCustomMessage.html">
+                <f:textarea field="customMessageSuccess" />
+            </f:entry>
         </f:optionalBlock>
 
 

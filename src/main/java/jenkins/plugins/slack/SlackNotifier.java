@@ -62,6 +62,11 @@ public class SlackNotifier extends Notifier {
     private CommitInfoChoice commitInfoChoice;
     private boolean includeCustomMessage;
     private String customMessage;
+    private String customMessageSuccess;
+    private String customMessageAborted;
+    private String customMessageNotBuilt;
+    private String customMessageUnstable;
+    private String customMessageFailure;
 
     /** @deprecated use {@link #tokenCredentialId} */
     private transient String authTokenCredentialId;
@@ -196,6 +201,26 @@ public class SlackNotifier extends Notifier {
         return customMessage;
     }
 
+    public String getCustomMessageSuccess() {
+        return customMessageSuccess;
+    }
+
+    public String getCustomMessageAborted() {
+        return customMessageAborted;
+    }
+
+    public String getCustomMessageNotBuilt() {
+        return customMessageNotBuilt;
+    }
+
+    public String getCustomMessageUnstable() {
+        return customMessageUnstable;
+    }
+
+    public String getCustomMessageFailure() {
+        return customMessageFailure;
+    }
+
     @DataBoundSetter
     public void setStartNotification(boolean startNotification) {
         this.startNotification = startNotification;
@@ -266,12 +291,38 @@ public class SlackNotifier extends Notifier {
         this.customMessage = customMessage;
     }
 
+    @DataBoundSetter
+    public void setCustomMessageSuccess(String customMessageSuccess) {
+        this.customMessageSuccess = customMessageSuccess;
+    }
+
+    @DataBoundSetter
+    public void setCustomMessageAborted(String customMessageAborted) {
+        this.customMessageAborted = customMessageAborted;
+    }
+
+    @DataBoundSetter
+    public void setCustomMessageNotBuilt(String customMessageNotBuilt) {
+        this.customMessageNotBuilt = customMessageNotBuilt;
+    }
+
+    @DataBoundSetter
+    public void setCustomMessageUnstable(String customMessageUnstable) {
+        this.customMessageUnstable = customMessageUnstable;
+    }
+
+    @DataBoundSetter
+    public void setCustomMessageFailure(String customMessageFailure) {
+        this.customMessageFailure = customMessageFailure;
+    }
+
     @DataBoundConstructor
     public SlackNotifier(final String baseUrl, final String teamDomain, final String authToken, final boolean botUser, final String room, final String tokenCredentialId,
                          final String sendAs, final boolean startNotification, final boolean notifyAborted, final boolean notifyFailure,
                          final boolean notifyNotBuilt, final boolean notifySuccess, final boolean notifyUnstable, final boolean notifyRegression, final boolean notifyBackToNormal,
                          final boolean notifyRepeatedFailure, final boolean includeTestSummary, final boolean includeFailedTests,
-                         CommitInfoChoice commitInfoChoice, boolean includeCustomMessage, String customMessage) {
+                         CommitInfoChoice commitInfoChoice, boolean includeCustomMessage, String customMessage, String customMessageSuccess,
+                         String customMessageAborted, String customMessageNotBuilt, String customMessageUnstable, String customMessageFailure) {
         super();
         this.baseUrl = baseUrl;
         if(this.baseUrl != null && !this.baseUrl.isEmpty() && !this.baseUrl.endsWith("/")) {
@@ -298,6 +349,11 @@ public class SlackNotifier extends Notifier {
         this.includeCustomMessage = includeCustomMessage;
         if (includeCustomMessage) {
             this.customMessage = customMessage;
+            this.customMessageSuccess = customMessageSuccess;
+            this.customMessageAborted = customMessageAborted;
+            this.customMessageNotBuilt = customMessageNotBuilt;
+            this.customMessageUnstable = customMessageUnstable;
+            this.customMessageFailure = customMessageFailure;
         } else {
             this.customMessage = null;
         }
@@ -576,6 +632,12 @@ public class SlackNotifier extends Notifier {
         private boolean showCommitList;
         private boolean includeCustomMessage;
         private String customMessage;
+        private String customMessageSuccess;
+        private String customMessageAborted;
+        private String customMessageNotBuilt;
+        private String customMessageUnstable;
+        private String customMessageRegression;
+        private String customMessageFailure;
 
         @DataBoundConstructor
         public SlackJobProperty(String teamDomain,
@@ -594,7 +656,13 @@ public class SlackNotifier extends Notifier {
                                 boolean includeTestSummary,
                                 boolean showCommitList,
                                 boolean includeCustomMessage,
-                                String customMessage) {
+                                String customMessage,
+                                String customMessageSuccess,
+                                String customMessageAborted,
+                                String customMessageNotBuilt,
+                                String customMessageUnstable,
+                                String customMessageRegression,
+                                String customMessageFailure) {
             this.teamDomain = teamDomain;
             this.token = token;
             this.botUser = botUser;
@@ -612,6 +680,12 @@ public class SlackNotifier extends Notifier {
             this.showCommitList = showCommitList;
             this.includeCustomMessage = includeCustomMessage;
             this.customMessage = customMessage;
+            this.customMessageSuccess = customMessageSuccess;
+            this.customMessageFailure = customMessageAborted;
+            this.customMessageSuccess = customMessageNotBuilt;
+            this.customMessageFailure = customMessageUnstable;
+            this.customMessageSuccess = customMessageRegression;
+            this.customMessageFailure = customMessageFailure;
         }
 
         @Exported
@@ -702,6 +776,31 @@ public class SlackNotifier extends Notifier {
         @Exported
         public String getCustomMessage() {
             return customMessage;
+        }
+
+        @Exported
+        public String getCustomMessageSuccess() {
+            return customMessageSuccess;
+        }
+
+        @Exported
+        public String getCustomMessageAborted() {
+            return customMessageAborted;
+        }
+
+        @Exported
+        public String getCustomMessageNotBuilt() {
+            return customMessageNotBuilt;
+        }
+
+        @Exported
+        public String getCustomMessageUnstable() {
+            return customMessageUnstable;
+        }
+
+        @Exported
+        public String getCustomMessageFailure() {
+            return customMessageFailure;
         }
 
     }
