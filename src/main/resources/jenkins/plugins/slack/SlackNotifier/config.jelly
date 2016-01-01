@@ -51,7 +51,7 @@
             </select>
         </f:entry>
 
-        <f:entry title="Team Domain" help="${rootURL}/plugin/slack/help-projectConfig-slackTeamDomain.html">
+        <f:entry title="Team Subdomain" help="${rootURL}/plugin/slack/help-projectConfig-slackTeamDomain.html">
             <f:textbox name="slackTeamDomain" value="${instance.getTeamDomain()}"/>
         </f:entry>
 
