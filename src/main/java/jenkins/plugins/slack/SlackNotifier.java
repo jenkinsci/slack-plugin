@@ -359,6 +359,7 @@ public class SlackNotifier extends Notifier {
         private boolean botUser;
         private String room;
         private String sendAs;
+        private String apiToken;
 
         public static final CommitInfoChoice[] COMMIT_INFO_CHOICES = CommitInfoChoice.values();
 
@@ -412,6 +413,10 @@ public class SlackNotifier extends Notifier {
         public FormValidation doCheckToken(@QueryParameter String value) {
             //always show the warning - TODO investigate if there is a better way to handle this
             return FormValidation.warning("Exposing your Integration Token is a security risk. Please use the Integration Token Credential ID");
+        }
+
+        public String getApiToken() {
+            return apiToken;
         }
 
         public boolean isApplicable(Class<? extends AbstractProject> aClass) {
