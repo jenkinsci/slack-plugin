@@ -213,6 +213,7 @@ public class SlackNotifier extends Notifier {
         private String room;
         private String buildServerUrl;
         private String sendAs;
+        private String apiToken;
 
         public static final CommitInfoChoice[] COMMIT_INFO_CHOICES = CommitInfoChoice.values();
 
@@ -244,6 +245,10 @@ public class SlackNotifier extends Notifier {
 
         public String getSendAs() {
             return sendAs;
+        }
+
+        public String getApiToken() {
+            return apiToken;
         }
 
         public boolean isApplicable(Class<? extends AbstractProject> aClass) {

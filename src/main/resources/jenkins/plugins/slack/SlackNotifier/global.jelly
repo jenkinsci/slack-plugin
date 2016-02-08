@@ -24,6 +24,9 @@
     <f:entry title="Build Server URL" help="${rootURL}/plugin/slack/help-globalConfig-slackBuildServerUrl.html">
         <f:textbox field="buildServerUrl" name="slackBuildServerUrl" value="${descriptor.getBuildServerUrl()}" />
     </f:entry>
+    <f:entry title="API Token" help="${rootURL}/plugin/slack/help-globalConfig-slackApiToken.html">
+        <f:textbox field="apiToken" name="slackApiToken" value="${descriptor.getApiToken()}" />
+    </f:entry>
     <f:validateButton
         title="${%Test Connection}" progress="${%Testing...}"
         method="testConnection" with="slackTeamDomain,slackToken,slackRoom,slackBuildServerUrl" />
