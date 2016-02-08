@@ -11,6 +11,7 @@ import com.cloudbees.plugins.credentials.domains.DomainRequirement;
 import hudson.security.ACL;
 import jenkins.model.Jenkins;
 import org.apache.commons.httpclient.HttpStatus;
+import org.apache.commons.httpclient.methods.GetMethod;
 import org.apache.commons.httpclient.methods.PostMethod;
 import org.apache.commons.lang.StringUtils;
 import org.jenkinsci.plugins.plaincredentials.StringCredentials;
@@ -22,6 +23,7 @@ import java.io.InputStream;
 import java.net.URLEncoder;
 import java.util.Collections;
 import java.util.List;
+import java.io.IOException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.ArrayList;
@@ -153,7 +155,47 @@ public class StandardSlackService implements SlackService {
     }
 
     public String getUserId(String email) {
-        return "";
+
+        if (apiToken.equals("")) {
+            return null;
+        }
+
+        String url = "https://" + host + "/api/users.list?token=" + apiToken;
+        logger.info("Getting: users list");
+        Client client = getClient();
+        GetMethod get = new GetMethod(url);
+        try {
+            ClientResponse response = client.request(get);
+
+            String responseBody = response.getBody();
+            if (response.getStatusCode() != HttpStatus.SC_OK) {
+                logger.log(Level.WARNING, "Slack get request may have failed. Response: " + responseBody);
+                return null;
+            }
+            logger.info("Getting succeeded");
+            JSONObject responseJSON = new JSONObject(responseBody);
+
+            Boolean ok = responseJSON.getBoolean("ok");
+            if (!ok) {
+                String error = responseJSON.getString("error");
+                logger.log(Level.WARNING, "Slack get request may have failed. Error: " + error);
+                return null;
+            }
+
+            // TODO: Cache this somewhere
+            JSONArray members = responseJSON.getJSONArray("members");
+            for (int i = 0; i < members.length(); i++) {
+                JSONObject member = members.getJSONObject(i);
+                if (email.equals(member.getJSONObject("profile").optString("email"))) {
+                    return member.getString("id");
+                }
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        } finally {
+            get.releaseConnection();
+        }
+        return null;
     }
 
     private String getTokenToUse() {

@@ -1,0 +1,40 @@
+{
+  "ok": true,
+  "members": [
+    {
+      "id": "U125V2OQL",
+      "team_id": "T13FL5A5B",
+      "name": "john.doe",
+      "deleted": false,
+      "status": null,
+      "color": "684b6c",
+      "real_name": "John Doe",
+      "tz": "Europe/Amsterdam",
+      "tz_label": "Central European Time",
+      "tz_offset": 3600,
+      "profile": {
+        "first_name": "John",
+        "last_name": "Doe",
+        "title": "Rockstar",
+        "skype": "",
+        "phone": "",
+        "image_24": "https://avatars.slack-edge.com/2014-11-18/1234567890_ab12345678abcdef1234_24.jpg",
+        "image_32": "https://avatars.slack-edge.com/2014-11-18/1234567890_ab12345678abcdef1234_32.jpg",
+        "image_48": "https://avatars.slack-edge.com/2014-11-18/1234567890_ab12345678abcdef1234_48.jpg",
+        "image_72": "https://avatars.slack-edge.com/2014-11-18/1234567890_ab12345678abcdef1234_72.jpg",
+        "image_192": "https://avatars.slack-edge.com/2014-11-18/1234567890_ab12345678abcdef1234_192.jpg",
+        "image_original": "https://avatars.slack-edge.com/2014-11-18/1234567890_ab12345678abcdef1234_original.jpg",
+        "real_name": "John Doe",
+        "real_name_normalized": "John Doe",
+        "email": "john.doe@example.com"
+      },
+      "is_admin": false,
+      "is_owner": false,
+      "is_primary_owner": false,
+      "is_restricted": false,
+      "is_ultra_restricted": false,
+      "is_bot": false
+    }
+  ],
+  "cache_ts": 1455016329
+}
