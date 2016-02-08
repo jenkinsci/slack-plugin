@@ -13,6 +13,7 @@ import hudson.model.Run;
 import hudson.scm.ChangeLogSet;
 import hudson.scm.ChangeLogSet.AffectedFile;
 import hudson.scm.ChangeLogSet.Entry;
+import hudson.tasks.Mailer;
 import hudson.tasks.test.AbstractTestResultAction;
 import hudson.triggers.SCMTrigger;
 import hudson.util.LogTaskListener;
@@ -22,6 +23,7 @@ import java.io.IOException;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.ListIterator;
 import java.util.Set;
 import java.util.logging.Logger;
 
@@ -171,21 +173,44 @@ public class ActiveNotifier implements FineGrainedNotifier {
             AbstractBuild upBuild = (AbstractBuild)project.getBuildByNumber(buildNumber);
             return getCommitList(upBuild);
         }
-        Set<String> commits = new HashSet<String>();
-        for (Entry entry : entries) {
-            StringBuffer commit = new StringBuffer();
+        MessageBuilder message = new MessageBuilder(notifier, r);
+        message.append("Changes:\n");
+        ListIterator<Entry> entriesIterator = entries.listIterator();
+        while (entriesIterator.hasNext()) {
+            Entry entry  = entriesIterator.next();
+
+            message.append("- ");
+
             CommitInfoChoice commitInfoChoice = notifier.getCommitInfoChoice();
             if (commitInfoChoice.showTitle()) {
-                commit.append(entry.getMsg());
+                message.append(entry.getMsg());
             }
             if (commitInfoChoice.showAuthor()) {
-                commit.append(" [").append(entry.getAuthor().getDisplayName()).append("]");
+                message.append(" [");
+
+                String slackUserId = null;
+                Mailer.UserProperty authorEmail = entry.getAuthor().getProperty(Mailer.UserProperty.class);
+                String authorEmailAddress = authorEmail.getAddress();
+                // Check if user id is a valid email
+                if (authorEmailAddress != null) {
+                    // Lookup Slack user in Slack API
+                    slackUserId = getSlack(r).getUserId(authorEmailAddress);
+                }
+
+                if (slackUserId != null) {
+                    message.append("<@", false);
+                    message.append(slackUserId, false);
+                    message.append(">", false);
+                } else {
+                    message.append(entry.getAuthor().getDisplayName());
+                }
+
+                message.append("]");
             }
-            commits.add(commit.toString());
+            if (entriesIterator.hasNext()) {
+                message.append("\n");
+            }
         }
-        MessageBuilder message = new MessageBuilder(notifier, r);
-        message.append("Changes:\n- ");
-        message.append(StringUtils.join(commits, "\n- "));
         return message.toString();
     }
 
@@ -304,7 +329,15 @@ public class ActiveNotifier implements FineGrainedNotifier {
         }
 
         public MessageBuilder append(String string) {
-            message.append(this.escape(string));
+            return append(string, true);
+        }
+
+        public MessageBuilder append(String string, Boolean escape) {
+            if (escape) {
+                message.append(this.escape(string));
+            } else {
+                message.append(string);
+            }
             return this;
         }
 
