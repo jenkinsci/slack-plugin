@@ -1,11 +1,15 @@
 package jenkins.plugins.slack;
 
+import org.apache.commons.io.IOUtils;
 import org.apache.http.HttpStatus;
 import org.junit.Test;
+
+import java.io.IOException;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.assertNull;
 
 public class StandardSlackServiceTest {
     /**
@@ -108,4 +112,55 @@ public class StandardSlackServiceTest {
         service.setClientStub(clientStub);
         assertTrue(service.publish("message"));
     }
+
+    @Test
+    public void getUserIdWithEmptyApiTokenReturnsNull() {
+        StandardSlackServiceStub service = new StandardSlackServiceStub("domain", "token", null, "", "");
+        ClientStub clientStub = new ClientStub();
+        service.setClientStub(clientStub);
+        assertNull(service.getUserId("john.doe@example.com"));
+    }
+
+    @Test
+    public void getUserIdReturnsUserIdWhenFound() throws IOException {
+        StandardSlackServiceStub service = new StandardSlackServiceStub("domain", "token", null, "", "apiToken");
+        ClientStub clientStub = new ClientStub();
+        clientStub.setClientResponse(new ClientResponse(
+                HttpStatus.SC_OK,
+                IOUtils.toString(this.getClass().getResourceAsStream("/slack-api-users.list.json"), "UTF-8"))
+        );
+        service.setClientStub(clientStub);
+        assertEquals("U125V2OQL", service.getUserId("john.doe@example.com"));
+    }
+
+    @Test
+    public void getUserIdReturnsNullWhenNotFound() throws IOException {
+        StandardSlackServiceStub service = new StandardSlackServiceStub("domain", "token", null, "", "apiToken");
+        ClientStub clientStub = new ClientStub();
+        clientStub.setClientResponse(new ClientResponse(
+                HttpStatus.SC_OK,
+                IOUtils.toString(this.getClass().getResourceAsStream("/slack-api-users.list.json"), "UTF-8"))
+        );
+        service.setClientStub(clientStub);
+        assertNull(service.getUserId("john.doe2@example.com"));
+    }
+
+    @Test
+    public void getUserIdReturnsNullWhenHttpStatusNotOk() throws IOException {
+        StandardSlackServiceStub service = new StandardSlackServiceStub("domain", "token", null, "", "apiToken");
+        ClientStub clientStub = new ClientStub();
+        clientStub.setClientResponse(new ClientResponse(HttpStatus.SC_INTERNAL_SERVER_ERROR, ""));
+        service.setClientStub(clientStub);
+        assertNull(service.getUserId("john.doe@example.com"));
+    }
+
+    @Test
+    public void getUserIdReturnsNullWhenHttpStatusBodyNotOk() throws IOException {
+        StandardSlackServiceStub service = new StandardSlackServiceStub("domain", "token", null, "", "apiToken");
+        ClientStub clientStub = new ClientStub();
+        clientStub.setClientResponse(new ClientResponse(HttpStatus.SC_OK, "{\"ok\":false,\"error\":\"API error\"}"));
+        service.setClientStub(clientStub);
+        assertNull(service.getUserId("john.doe@example.com"));
+    }
+
 }
