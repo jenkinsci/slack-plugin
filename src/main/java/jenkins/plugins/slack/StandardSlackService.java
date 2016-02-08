@@ -1,10 +1,12 @@
 package jenkins.plugins.slack;
 
 import org.apache.commons.httpclient.HttpStatus;
+import org.apache.commons.httpclient.methods.GetMethod;
 import org.apache.commons.httpclient.methods.PostMethod;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
+import java.io.IOException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -84,7 +86,46 @@ public class StandardSlackService implements SlackService {
     }
 
     public String getUserId(String email) {
-        return "";
+
+        if (apiToken.equals("")) {
+            return null;
+        }
+
+        String url = "https://" + host + "/api/users.list?token=" + apiToken;
+        logger.info("Getting: users list");
+        Client client = getClient();
+        GetMethod get = new GetMethod(url);
+        ClientResponse response = null;
+        try {
+            response = client.request(get);
+        } catch (IOException e) {
+            e.printStackTrace();
+            return null;
+        }
+        String responseBody = response.getBody();
+        if (response.getStatusCode() != HttpStatus.SC_OK) {
+            logger.log(Level.WARNING, "Slack get request may have failed. Response: " + responseBody);
+            return null;
+        }
+        logger.info("Getting succeeded");
+        JSONObject responseJSON = new JSONObject(responseBody);
+
+        Boolean ok = responseJSON.getBoolean("ok");
+        if (!ok) {
+            String error = responseJSON.getString("error");
+            logger.log(Level.WARNING, "Slack get request may have failed. Error: " + error);
+            return null;
+        }
+
+        // TODO: Cache this somewhere
+        JSONArray members = responseJSON.getJSONArray("members");
+        for (int i = 0; i < members.length(); i++) {
+            JSONObject member = members.getJSONObject(i);
+            if (email.equals(member.getJSONObject("profile").optString("email"))) {
+                return member.getString("id");
+            }
+        }
+        return null;
     }
 
     protected Client getClient() {
