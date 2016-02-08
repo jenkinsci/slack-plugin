@@ -147,6 +147,10 @@ public class StandardSlackService implements SlackService {
         return result;
     }
 
+    public String getUserId(String email) {
+        return "";
+    }
+
     private String getTokenToUse() {
         if (authTokenCredentialId != null && !authTokenCredentialId.isEmpty()) {
             StringCredentials credentials = lookupCredentials(authTokenCredentialId);

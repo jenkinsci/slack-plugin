@@ -63,6 +63,7 @@ public class SlackNotifierTest extends TestCase {
     public static class SlackServiceStub implements SlackService {
 
         private boolean response;
+        private String username = "";
 
         public boolean publish(String message) {
             return response;
@@ -72,8 +73,16 @@ public class SlackNotifierTest extends TestCase {
             return response;
         }
 
+        public String getUserId(String email) {
+            return null;
+        }
+
         public void setResponse(boolean response) {
             this.response = response;
+        }
+
+        public void setUsername(String username) {
+            this.username = username;
         }
     }
 }
