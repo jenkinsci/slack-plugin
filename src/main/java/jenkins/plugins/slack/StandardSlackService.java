@@ -8,6 +8,12 @@ import com.cloudbees.plugins.credentials.CredentialsMatcher;
 import com.cloudbees.plugins.credentials.CredentialsMatchers;
 import com.cloudbees.plugins.credentials.domains.DomainRequirement;
 
+import hudson.security.ACL;
+import jenkins.model.Jenkins;
+import org.apache.commons.httpclient.HttpStatus;
+import org.apache.commons.httpclient.methods.PostMethod;
+import org.apache.commons.lang.StringUtils;
+import org.jenkinsci.plugins.plaincredentials.StringCredentials;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
@@ -91,7 +97,7 @@ public class StandardSlackService implements SlackService {
             JSONArray attachments = new JSONArray();
             attachments.put(attachment);
 
-            HttpPost post;
+            PostMethod post;
             String url;
             List<NameValuePair> nvps = new ArrayList<NameValuePair>();
             //prepare post methods for both requests types
@@ -100,14 +106,15 @@ public class StandardSlackService implements SlackService {
                 if (!StringUtils.isEmpty(baseUrl)) {
                     url = baseUrl + getTokenToUse();
                 }
-                post = new HttpPost(url);
+                post = new PostMethod(url);
                 JSONObject json = new JSONObject();
 
                 json.put("channel", roomId);
                 json.put("attachments", attachments);
                 json.put("link_names", "1");
 
-                nvps.add(new BasicNameValuePair("payload", json.toString()));
+                post.addParameter("payload", json.toString());
+                post.getParams().setContentCharset("UTF-8");
             } else {
                 url = "https://slack.com/api/chat.postMessage?token=" + getTokenToUse() +
                         "&channel=" + roomId +
@@ -118,19 +125,17 @@ public class StandardSlackService implements SlackService {
                 } catch (UnsupportedEncodingException e) {
                     logger.log(Level.ALL, "Error while encoding attachments: " + e.getMessage());
                 }
-                post = new HttpPost(url);
+                post = new PostMethod(url);
             }
             logger.fine("Posting: to " + roomId + " on " + teamDomain + " using " + url + ": " + message + " " + color);
-            CloseableHttpClient client = getHttpClient();
+            Client client = getClient();
 
             try {
-            	post.setEntity(new UrlEncodedFormEntity(nvps, "UTF-8"));
-            	CloseableHttpResponse response = client.execute(post);
+            	ClientResponse response = client.request(post);
 
-            	int responseCode = response.getStatusLine().getStatusCode();
+            	int responseCode = response.getStatusCode();
             	if(responseCode != HttpStatus.SC_OK) {
-            		 HttpEntity entity = response.getEntity();
-            		 String responseString = EntityUtils.toString(entity);
+            		 String responseString = response.getBody();
             		 logger.log(Level.WARNING, "Slack post may have failed. Response: " + responseString);
             		 logger.log(Level.WARNING, "Response Code: " + responseCode);
             		 result = false;
@@ -171,29 +176,8 @@ public class StandardSlackService implements SlackService {
         return CredentialsMatchers.firstOrNull(credentials, matcher);
     }
 
-    protected CloseableHttpClient getHttpClient() {
-    	final HttpClientBuilder clientBuilder = HttpClients.custom();
-    	final CredentialsProvider credentialsProvider = new BasicCredentialsProvider();
-    	clientBuilder.setDefaultCredentialsProvider(credentialsProvider);
-
-        if (Jenkins.getInstance() != null) {
-            ProxyConfiguration proxy = Jenkins.getInstance().proxy;
-            if (proxy != null) {
-                final HttpHost proxyHost = new HttpHost(proxy.name, proxy.port);
-                final HttpRoutePlanner routePlanner = new DefaultProxyRoutePlanner(proxyHost);
-                clientBuilder.setRoutePlanner(routePlanner);
-
-                String username = proxy.getUserName();
-                String password = proxy.getPassword();
-                // Consider it to be passed if username specified. Sufficient?
-                if (username != null && !"".equals(username.trim())) {
-                    logger.info("Using proxy authentication (user=" + username + ")");
-                    credentialsProvider.setCredentials(new AuthScope(proxyHost),
-                    								   new UsernamePasswordCredentials(username, password));
-                }
-            }
-        }
-        return clientBuilder.build();
+    protected Client getClient() {
+        return new StandardClient();
     }
 
     void setHost(String host) {
