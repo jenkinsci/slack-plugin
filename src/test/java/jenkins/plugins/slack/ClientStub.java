@@ -1,22 +1,20 @@
 package jenkins.plugins.slack;
 
-import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.HttpMethod;
 import org.apache.commons.httpclient.HttpStatus;
 
-public class HttpClientStub extends HttpClient {
+public class ClientStub implements Client {
 
     private int numberOfCallsToExecuteMethod;
-    private int httpStatus;
     private boolean failAlternateResponses = false;
+    private ClientResponse clientResponse = new ClientResponse(HttpStatus.SC_OK, "");
 
-    @Override
-    public int executeMethod(HttpMethod httpMethod) {
+    public ClientResponse request(HttpMethod httpMethod) {
         numberOfCallsToExecuteMethod++;
         if (failAlternateResponses && (numberOfCallsToExecuteMethod % 2 == 0)) {
-            return HttpStatus.SC_NOT_FOUND;
+            return new ClientResponse(HttpStatus.SC_NOT_FOUND, "");
         } else {
-            return httpStatus;
+            return this.clientResponse;
         }
     }
 
@@ -24,8 +22,8 @@ public class HttpClientStub extends HttpClient {
         return numberOfCallsToExecuteMethod;
     }
 
-    public void setHttpStatus(int httpStatus) {
-        this.httpStatus = httpStatus;
+    public void setClientResponse(ClientResponse clientResponse) {
+        this.clientResponse = clientResponse;
     }
 
     public void setFailAlternateResponses(boolean failAlternateResponses) {

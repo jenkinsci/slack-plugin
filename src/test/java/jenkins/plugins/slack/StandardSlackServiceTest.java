@@ -40,64 +40,64 @@ public class StandardSlackServiceTest {
     @Test
     public void publishToASingleRoomSendsASingleMessage() {
         StandardSlackServiceStub service = new StandardSlackServiceStub("domain", "token", "#room1", "apiToken");
-        HttpClientStub httpClientStub = new HttpClientStub();
-        service.setHttpClient(httpClientStub);
+        ClientStub clientStub = new ClientStub();
+        service.setClientStub(clientStub);
         service.publish("message");
-        assertEquals(1, service.getHttpClient().getNumberOfCallsToExecuteMethod());
+        assertEquals(1, service.getClient().getNumberOfCallsToExecuteMethod());
     }
 
     @Test
     public void publishToMultipleRoomsSendsAMessageToEveryRoom() {
         StandardSlackServiceStub service = new StandardSlackServiceStub("domain", "token", "#room1,#room2,#room3", "apiToken");
-        HttpClientStub httpClientStub = new HttpClientStub();
-        service.setHttpClient(httpClientStub);
+        ClientStub clientStub = new ClientStub();
+        service.setClientStub(clientStub);
         service.publish("message");
-        assertEquals(3, service.getHttpClient().getNumberOfCallsToExecuteMethod());
+        assertEquals(3, service.getClient().getNumberOfCallsToExecuteMethod());
     }
 
     @Test
     public void successfulPublishToASingleRoomReturnsTrue() {
         StandardSlackServiceStub service = new StandardSlackServiceStub("domain", "token", "#room1", "apiToken");
-        HttpClientStub httpClientStub = new HttpClientStub();
-        httpClientStub.setHttpStatus(HttpStatus.SC_OK);
-        service.setHttpClient(httpClientStub);
+        ClientStub clientStub = new ClientStub();
+        clientStub.setClientResponse(new ClientResponse(HttpStatus.SC_OK, ""));
+        service.setClientStub(clientStub);
         assertTrue(service.publish("message"));
     }
 
     @Test
     public void successfulPublishToMultipleRoomsReturnsTrue() {
         StandardSlackServiceStub service = new StandardSlackServiceStub("domain", "token", "#room1,#room2,#room3", "apiToken");
-        HttpClientStub httpClientStub = new HttpClientStub();
-        httpClientStub.setHttpStatus(HttpStatus.SC_OK);
-        service.setHttpClient(httpClientStub);
+        ClientStub clientStub = new ClientStub();
+        clientStub.setClientResponse(new ClientResponse(HttpStatus.SC_OK, ""));
+        service.setClientStub(clientStub);
         assertTrue(service.publish("message"));
     }
 
     @Test
     public void failedPublishToASingleRoomReturnsFalse() {
         StandardSlackServiceStub service = new StandardSlackServiceStub("domain", "token", "#room1", "apiToken");
-        HttpClientStub httpClientStub = new HttpClientStub();
-        httpClientStub.setHttpStatus(HttpStatus.SC_NOT_FOUND);
-        service.setHttpClient(httpClientStub);
+        ClientStub clientStub = new ClientStub();
+        clientStub.setClientResponse(new ClientResponse(HttpStatus.SC_NOT_FOUND, ""));
+        service.setClientStub(clientStub);
         assertFalse(service.publish("message"));
     }
 
     @Test
     public void singleFailedPublishToMultipleRoomsReturnsFalse() {
         StandardSlackServiceStub service = new StandardSlackServiceStub("domain", "token", "#room1,#room2,#room3", "apiToken");
-        HttpClientStub httpClientStub = new HttpClientStub();
-        httpClientStub.setFailAlternateResponses(true);
-        httpClientStub.setHttpStatus(HttpStatus.SC_OK);
-        service.setHttpClient(httpClientStub);
+        ClientStub clientStub = new ClientStub();
+        clientStub.setFailAlternateResponses(true);
+        clientStub.setClientResponse(new ClientResponse(HttpStatus.SC_OK, ""));
+        service.setClientStub(clientStub);
         assertFalse(service.publish("message"));
     }
 
     @Test
     public void publishToEmptyRoomReturnsTrue() {
         StandardSlackServiceStub service = new StandardSlackServiceStub("domain", "token", "", "apiToken");
-        HttpClientStub httpClientStub = new HttpClientStub();
-        httpClientStub.setHttpStatus(HttpStatus.SC_OK);
-        service.setHttpClient(httpClientStub);
+        ClientStub clientStub = new ClientStub();
+        clientStub.setClientResponse(new ClientResponse(HttpStatus.SC_OK, ""));
+        service.setClientStub(clientStub);
         assertTrue(service.publish("message"));
     }
 }

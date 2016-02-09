@@ -1,19 +1,12 @@
 package jenkins.plugins.slack;
 
-import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.HttpStatus;
 import org.apache.commons.httpclient.methods.PostMethod;
-
-import org.json.JSONObject;
 import org.json.JSONArray;
+import org.json.JSONObject;
 
 import java.util.logging.Level;
 import java.util.logging.Logger;
-
-import jenkins.model.Jenkins;
-import hudson.ProxyConfiguration;
-import org.apache.commons.httpclient.UsernamePasswordCredentials;
-import org.apache.commons.httpclient.auth.AuthScope;
 
 public class StandardSlackService implements SlackService {
 
@@ -42,7 +35,7 @@ public class StandardSlackService implements SlackService {
         for (String roomId : roomIds) {
             String url = "https://" + teamDomain + "." + host + "/services/hooks/jenkins-ci?token=" + token;
             logger.info("Posting: to " + roomId + " on " + teamDomain + " using " + url +": " + message + " " + color);
-            HttpClient client = getHttpClient();
+            Client client = getClient();
             PostMethod post = new PostMethod(url);
             JSONObject json = new JSONObject();
 
@@ -72,10 +65,9 @@ public class StandardSlackService implements SlackService {
 
                 post.addParameter("payload", json.toString());
                 post.getParams().setContentCharset("UTF-8");
-                int responseCode = client.executeMethod(post);
-                String response = post.getResponseBodyAsString();
-                if(responseCode != HttpStatus.SC_OK) {
-                    logger.log(Level.WARNING, "Slack post may have failed. Response: " + response);
+                ClientResponse response = client.request(post);
+                if(response.getStatusCode() != HttpStatus.SC_OK) {
+                    logger.log(Level.WARNING, "Slack post may have failed. Response: " + response.getBody());
                     result = false;
                 }
                 else {
@@ -95,26 +87,8 @@ public class StandardSlackService implements SlackService {
         return "";
     }
 
-    protected HttpClient getHttpClient() {
-        HttpClient client = new HttpClient();
-        if (Jenkins.getInstance() != null) {
-            ProxyConfiguration proxy = Jenkins.getInstance().proxy;
-            if (proxy != null) {
-                client.getHostConfiguration().setProxy(proxy.name, proxy.port);
-                String username = proxy.getUserName();
-                String password = proxy.getPassword();
-                // Consider it to be passed if username specified. Sufficient?
-                if (username != null && !"".equals(username.trim())) {
-                    logger.info("Using proxy authentication (user=" + username + ")");
-                    // http://hc.apache.org/httpclient-3.x/authentication.html#Proxy_Authentication
-                    // and
-                    // http://svn.apache.org/viewvc/httpcomponents/oac.hc3x/trunk/src/examples/BasicAuthenticationExample.java?view=markup
-                    client.getState().setProxyCredentials(AuthScope.ANY,
-                            new UsernamePasswordCredentials(username, password));
-                }
-            }
-        }
-        return client;
+    protected Client getClient() {
+        return new StandardClient();
     }
 
     void setHost(String host) {
