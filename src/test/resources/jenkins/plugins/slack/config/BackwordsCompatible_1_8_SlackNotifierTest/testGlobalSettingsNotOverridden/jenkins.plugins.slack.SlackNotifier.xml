@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<jenkins.plugins.slack.SlackNotifier_-DescriptorImpl plugin="slack@1.8.1-SNAPSHOT">
+  <teamDomain>jenkins-slack-plugin-global</teamDomain>
+  <token>auth-token-for-test-global</token>
+  <room>#slack-plugin-testing-global</room>
+  <buildServerUrl>http://localhost:8080/global/</buildServerUrl>
+</jenkins.plugins.slack.SlackNotifier_-DescriptorImpl>
