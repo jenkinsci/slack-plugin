@@ -43,7 +43,7 @@
         <connection>scm:git:ssh://git@github.com/jenkinsci/slack-plugin.git</connection>
         <developerConnection>scm:git:ssh://git@github.com/jenkinsci/slack-plugin.git</developerConnection>
         <url>https://github.com/jenkinsci/slack-plugin</url>
-        <tag>slack-2.0</tag>
+        <tag>head</tag>
     </scm>
 
     <dependencies>
