@@ -184,7 +184,7 @@
                 <artifactId>maven-release-plugin</artifactId>
                 <version>2.5.2</version>
                 <configuration>
-                    <tagNameFormat>workflow-@{project.version}</tagNameFormat>
+                    <tagNameFormat>slack-@{project.version}</tagNameFormat>
                 </configuration>
             </plugin>
             <plugin>
