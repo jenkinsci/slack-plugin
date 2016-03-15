@@ -2,8 +2,8 @@
 
 New Features:
 
-* Adding configurable webhook endpoint for exposing jenkins commands with a Slack outgoing-webhook (jenkinsci/slack-plugin#160)
-* Added Jenkins Pipeline support via custom step `slackSend`. ([#167])
+* Adding configurable webhook endpoint for exposing jenkins commands with a Slack outgoing-webhook (#160)
+* Added Jenkins Pipeline support via custom step `slackSend`. (#167)
 
 UI Improvements:
 
