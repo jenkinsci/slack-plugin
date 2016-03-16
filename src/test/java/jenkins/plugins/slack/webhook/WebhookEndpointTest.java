@@ -8,6 +8,7 @@ import org.junit.Before;
 import static org.junit.Assert.assertEquals;
 
 import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.nullValue;
 import static org.hamcrest.Matchers.containsString;
 
@@ -39,6 +40,8 @@ import jenkins.model.GlobalConfiguration;
 
 import jenkins.plugins.slack.webhook.model.SlackTextMessage;
 
+import jenkins.plugins.slack.webhook.WebhookEndpoint;
+
 
 
 
@@ -62,6 +65,14 @@ public class WebhookEndpointTest {
         data = new ArrayList<NameValuePair>();
         data.add(new NameValuePair("token", "GOOD_TOKEN"));
         data.add(new NameValuePair("trigger_word", "jenkins")); 
+    }
+
+    @Test
+    public void testNotNullOutgoingWebhookUrl() throws Exception {
+        WebhookEndpoint endpoint = new WebhookEndpoint();
+        String url = endpoint.getUrlName();
+        assertThat(url, is(not(nullValue())));
+        assertThat(url.isEmpty(), is(false));
     }
 
     @Test
