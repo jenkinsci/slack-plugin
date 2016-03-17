@@ -6,6 +6,12 @@ https://github.com/jlewallen/jenkins-hipchat-plugin
 
 Which was, in turn, a fork of the Campfire plugin.
 
+Includes [Jenkins Pipeline](https://github.com/jenkinsci/workflow-plugin) support as of version 2.0:
+
+```
+slackSend color: 'good', message: 'Message from Jenkins Pipeline'
+```
+
 # Jenkins Instructions
 
 1. Get a Slack account: https://slack.com/
