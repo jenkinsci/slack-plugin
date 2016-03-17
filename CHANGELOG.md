@@ -1,3 +1,10 @@
+# 2.0.1 release notes
+
+Bug Fixes:
+
+* Set webhook endpoint to random uuid based string if not set (PR # 190)
+* Upgrading to Slack 2.0 outbound webhooks breaks Jenkins  (#191)
+
 # 2.0 release notes
 
 New Features:
