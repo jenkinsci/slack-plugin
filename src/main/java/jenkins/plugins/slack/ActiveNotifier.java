@@ -16,6 +16,7 @@ import hudson.scm.ChangeLogSet.Entry;
 import hudson.tasks.test.AbstractTestResultAction;
 import hudson.triggers.SCMTrigger;
 import hudson.util.LogTaskListener;
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
 
 import java.io.IOException;
@@ -128,7 +129,9 @@ public class ActiveNotifier implements FineGrainedNotifier {
             Entry entry = (Entry) o;
             logger.info("Entry " + o);
             entries.add(entry);
-            files.addAll(entry.getAffectedFiles());
+            if (CollectionUtils.isNotEmpty(entry.getAffectedFiles())) {
+                files.addAll(entry.getAffectedFiles());
+            }
         }
         if (entries.isEmpty()) {
             logger.info("Empty change...");
