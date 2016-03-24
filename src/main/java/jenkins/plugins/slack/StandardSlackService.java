@@ -1,12 +1,23 @@
 package jenkins.plugins.slack;
 
+import hudson.security.ACL;
+
 import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.HttpStatus;
 import org.apache.commons.httpclient.methods.PostMethod;
 
+import org.jenkinsci.plugins.plaincredentials.StringCredentials;
+
+import com.cloudbees.plugins.credentials.CredentialsMatcher;
+import com.cloudbees.plugins.credentials.CredentialsMatchers;
+import com.cloudbees.plugins.credentials.CredentialsProvider;
+import com.cloudbees.plugins.credentials.domains.DomainRequirement;
+
 import org.json.JSONObject;
 import org.json.JSONArray;
 
+import java.util.Collections;
+import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -22,12 +33,14 @@ public class StandardSlackService implements SlackService {
     private String host = "slack.com";
     private String teamDomain;
     private String token;
+    private String authTokenCredentialId;
     private String[] roomIds;
 
-    public StandardSlackService(String teamDomain, String token, String roomId) {
+    public StandardSlackService(String teamDomain, String token, String authTokenCredentialId, String roomId) {
         super();
         this.teamDomain = teamDomain;
         this.token = token;
+        this.authTokenCredentialId = authTokenCredentialId;
         this.roomIds = roomId.split("[,; ]+");
     }
 
@@ -38,7 +51,7 @@ public class StandardSlackService implements SlackService {
     public boolean publish(String message, String color) {
         boolean result = true;
         for (String roomId : roomIds) {
-            String url = "https://" + teamDomain + "." + host + "/services/hooks/jenkins-ci?token=" + token;
+            String url = "https://" + teamDomain + "." + host + "/services/hooks/jenkins-ci?token=" + getTokenToUse();
             logger.info("Posting: to " + roomId + " on " + teamDomain + " using " + url +": " + message + " " + color);
             HttpClient client = getHttpClient();
             PostMethod post = new PostMethod(url);
@@ -86,6 +99,26 @@ public class StandardSlackService implements SlackService {
             }
         }
         return result;
+    }
+
+    private String getTokenToUse() {
+        if (authTokenCredentialId != null && !authTokenCredentialId.isEmpty()) {
+            StringCredentials credentials = lookupCredentials(authTokenCredentialId);
+            if (credentials != null) {
+                logger.info("Using Integration Token Credential ID.");
+                return credentials.getSecret().getPlainText();
+            }
+        }
+
+        logger.info("Using Integration Token.");
+
+        return token;
+    }
+
+    private StringCredentials lookupCredentials(String credentialId) {
+        List<StringCredentials> credentials = CredentialsProvider.lookupCredentials(StringCredentials.class, Jenkins.getInstance(), ACL.SYSTEM, Collections.<DomainRequirement>emptyList());
+        CredentialsMatcher matcher = CredentialsMatchers.withId(credentialId);
+        return CredentialsMatchers.firstOrNull(credentials, matcher);
     }
 
     protected HttpClient getHttpClient() {
