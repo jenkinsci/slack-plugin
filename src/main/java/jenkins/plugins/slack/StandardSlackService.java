@@ -1,9 +1,11 @@
 package jenkins.plugins.slack;
 
+import com.ctc.wstx.util.StringUtil;
 import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.HttpStatus;
 import org.apache.commons.httpclient.methods.PostMethod;
 
+import org.apache.commons.lang.StringUtils;
 import org.json.JSONObject;
 import org.json.JSONArray;
 
@@ -42,8 +44,9 @@ public class StandardSlackService implements SlackService {
         for (String roomId : roomIds) {
 
             String url = "https://" + teamDomain + "." + host + "/services/hooks/jenkins-ci?token=" + token;
-            if(baseUrl.length() > 0)
+            if (StringUtils.isEmpty(baseUrl)) {
                 url = baseUrl + token;
+            }
 
             logger.info("Posting: to " + roomId + " on " + teamDomain + " using " + url +": " + message + " " + color);
             HttpClient client = getHttpClient();

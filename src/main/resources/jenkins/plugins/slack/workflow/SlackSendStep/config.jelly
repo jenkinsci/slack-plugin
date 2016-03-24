@@ -17,6 +17,9 @@
         <f:entry field="teamDomain" title="Team Domain">
             <f:textbox />
         </f:entry>
+        <f:entry field="baseUrl" title="Base URL">
+             <f:textbox />
+        </f:entry>
         <f:entry field="failOnError">
             <f:checkbox title="Fail On Error" default="false"/>
         </f:entry>

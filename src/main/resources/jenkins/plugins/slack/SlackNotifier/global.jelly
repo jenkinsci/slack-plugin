@@ -13,7 +13,7 @@
   -->
 <f:section title="Global Slack Notifier Settings" name="slack">
     <f:entry title="Base URL" help="${rootURL}/plugin/slack/help-projectConfig-slackTeamDomain.html">
-        <f:textbox field="slackBaseUrl" name="slackBaseUrl" value="${descriptor.getBaseUrl()}"/>
+        <f:textbox field="baseUrl" name="slackBaseUrl" value="${descriptor.getBaseUrl()}"/>
     </f:entry>
     <f:entry title="Team Subdomain" help="${rootURL}/plugin/slack/help-globalConfig-slackTeamDomain.html">
         <f:textbox field="teamDomain" name="slackTeamDomain" value="${descriptor.getTeamDomain()}" />

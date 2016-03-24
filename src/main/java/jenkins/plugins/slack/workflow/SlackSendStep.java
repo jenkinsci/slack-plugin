@@ -28,6 +28,7 @@ public class SlackSendStep extends AbstractStepImpl {
     private String color;
     private String token;
     private String channel;
+    private String baseUrl;
     private String teamDomain;
     private boolean failOnError;
 
@@ -62,6 +63,15 @@ public class SlackSendStep extends AbstractStepImpl {
     @DataBoundSetter
     public void setChannel(String channel) {
         this.channel = Util.fixEmpty(channel);
+    }
+
+    public String getBaseUrl() {
+        return baseUrl;
+    }
+
+    @DataBoundSetter
+    public void setBaseUrl(String baseUrl) {
+        this.baseUrl= Util.fixEmpty(baseUrl);
     }
 
     public String getTeamDomain() {
@@ -128,15 +138,16 @@ public class SlackSendStep extends AbstractStepImpl {
                 return null;
             }
             SlackNotifier.DescriptorImpl slackDesc = jenkins.getDescriptorByType(SlackNotifier.DescriptorImpl.class);
+            String baseUrl = step.baseUrl != null ? step.baseUrl : slackDesc.getBaseUrl();
             String team = step.teamDomain != null ? step.teamDomain : slackDesc.getTeamDomain();
             String token = step.token != null ? step.token : slackDesc.getToken();
             String channel = step.channel != null ? step.channel : slackDesc.getRoom();
             String color = step.color != null ? step.color : "";
 
             //placing in console log to simplify testing of retrieving values from global config or from step field; also used for tests
-            listener.getLogger().println(Messages.SlackSendStepConfig(step.teamDomain == null, step.token == null, step.channel == null, step.color == null));
+            listener.getLogger().println(Messages.SlackSendStepConfig(step.baseUrl == null, step.teamDomain == null, step.token == null, step.channel == null, step.color == null));
 
-            SlackService slackService = getSlackService(team, token, channel);
+            SlackService slackService = getSlackService(baseUrl, team, token, channel);
             boolean publishSuccess = slackService.publish(step.message, color);
             if (!publishSuccess && step.failOnError) {
                 throw new AbortException(Messages.NotificationFailed());
@@ -147,8 +158,8 @@ public class SlackSendStep extends AbstractStepImpl {
         }
 
         //streamline unit testing
-        SlackService getSlackService(String team, String token, String channel) {
-            return new StandardSlackService(team, token, channel);
+        SlackService getSlackService(String baseUrl, String team, String token, String channel) {
+            return new StandardSlackService(baseUrl, team, token, channel);
         }
 
     }
