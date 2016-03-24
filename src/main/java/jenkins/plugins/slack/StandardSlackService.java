@@ -1,9 +1,11 @@
 package jenkins.plugins.slack;
 
+import com.ctc.wstx.util.StringUtil;
 import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.HttpStatus;
 import org.apache.commons.httpclient.methods.PostMethod;
 
+import org.apache.commons.lang.StringUtils;
 import org.json.JSONObject;
 import org.json.JSONArray;
 
@@ -20,12 +22,14 @@ public class StandardSlackService implements SlackService {
     private static final Logger logger = Logger.getLogger(StandardSlackService.class.getName());
 
     private String host = "slack.com";
+    private String baseUrl;
     private String teamDomain;
     private String token;
     private String[] roomIds;
 
-    public StandardSlackService(String teamDomain, String token, String roomId) {
+    public StandardSlackService(String baseUrl, String teamDomain, String token, String roomId) {
         super();
+        this.baseUrl = baseUrl;
         this.teamDomain = teamDomain;
         this.token = token;
         this.roomIds = roomId.split("[,; ]+");
@@ -38,7 +42,12 @@ public class StandardSlackService implements SlackService {
     public boolean publish(String message, String color) {
         boolean result = true;
         for (String roomId : roomIds) {
+
             String url = "https://" + teamDomain + "." + host + "/services/hooks/jenkins-ci?token=" + token;
+            if (StringUtils.isEmpty(baseUrl)) {
+                url = baseUrl + token;
+            }
+
             logger.info("Posting: to " + roomId + " on " + teamDomain + " using " + url +": " + message + " " + color);
             HttpClient client = getHttpClient();
             PostMethod post = new PostMethod(url);

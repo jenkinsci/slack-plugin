@@ -50,7 +50,9 @@
                 </j:forEach>
             </select>
         </f:entry>
-
+        <f:entry title="Base URL" help="${rootURL}/plugin/slack/help-projectConfig-slackTeamDomain.html">
+            <f:textbox name="slackBaseUrl" value="${instance.getBaseUrl()}"/>
+        </f:entry>
         <f:entry title="Team Subdomain" help="${rootURL}/plugin/slack/help-projectConfig-slackTeamDomain.html">
             <f:textbox name="slackTeamDomain" value="${instance.getTeamDomain()}"/>
         </f:entry>
@@ -64,6 +66,6 @@
         </f:entry>
         <f:validateButton
                 title="${%Test Connection}" progress="${%Testing...}"
-                method="testConnection" with="slackTeamDomain,slackToken,slackRoom"/>
+                method="testConnection" with="slackBaseURL,slackTeamDomain,slackToken,slackRoom"/>
     </f:advanced>
 </j:jelly>
