@@ -4,8 +4,8 @@ public class StandardSlackServiceStub extends StandardSlackService {
 
     private HttpClientStub httpClientStub;
 
-    public StandardSlackServiceStub(String teamDomain, String token, String roomId) {
-        super(teamDomain, token, roomId);
+    public StandardSlackServiceStub(String baseUrl, String teamDomain, String token, String roomId) {
+        super(baseUrl, teamDomain, token, roomId);
     }
 
     @Override

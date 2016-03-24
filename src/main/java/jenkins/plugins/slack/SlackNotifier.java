@@ -31,6 +31,7 @@ public class SlackNotifier extends Notifier {
 
     private static final Logger logger = Logger.getLogger(SlackNotifier.class.getName());
 
+    private String baseUrl;
     private String teamDomain;
     private String authToken;
     private String buildServerUrl;
@@ -52,6 +53,10 @@ public class SlackNotifier extends Notifier {
     @Override
     public DescriptorImpl getDescriptor() {
         return (DescriptorImpl) super.getDescriptor();
+    }
+
+    public String getBaseUrl() {
+        return baseUrl;
     }
 
     public String getTeamDomain() {
@@ -129,12 +134,13 @@ public class SlackNotifier extends Notifier {
     }
 
     @DataBoundConstructor
-    public SlackNotifier(final String teamDomain, final String authToken, final String room, final String buildServerUrl,
+    public SlackNotifier(final String baseUrl, final String teamDomain, final String authToken, final String room, final String buildServerUrl,
                          final String sendAs, final boolean startNotification, final boolean notifyAborted, final boolean notifyFailure,
                          final boolean notifyNotBuilt, final boolean notifySuccess, final boolean notifyUnstable, final boolean notifyBackToNormal,
                          final boolean notifyRepeatedFailure, final boolean includeTestSummary, CommitInfoChoice commitInfoChoice,
                          boolean includeCustomMessage, String customMessage) {
         super();
+        this.baseUrl = baseUrl;
         this.teamDomain = teamDomain;
         this.authToken = authToken;
         this.buildServerUrl = buildServerUrl;
@@ -160,9 +166,15 @@ public class SlackNotifier extends Notifier {
 
     public SlackService newSlackService(AbstractBuild r, BuildListener listener) {
         String teamDomain = this.teamDomain;
+
         if (StringUtils.isEmpty(teamDomain)) {
             teamDomain = getDescriptor().getTeamDomain();
         }
+        String baseUrl = this.baseUrl;
+        if (StringUtils.isEmpty(baseUrl)) {
+            baseUrl = getDescriptor().getBaseUrl();
+        }
+
         String authToken = this.authToken;
         if (StringUtils.isEmpty(authToken)) {
             authToken = getDescriptor().getToken();
@@ -179,11 +191,12 @@ public class SlackNotifier extends Notifier {
             listener.getLogger().println("Error retrieving environment vars: " + e.getMessage());
             env = new EnvVars();
         }
+        baseUrl = env.expand(baseUrl);
         teamDomain = env.expand(teamDomain);
         authToken = env.expand(authToken);
         room = env.expand(room);
 
-        return new StandardSlackService(teamDomain, authToken, room);
+        return new StandardSlackService(baseUrl, teamDomain, authToken, room);
     }
 
     @Override
@@ -208,6 +221,7 @@ public class SlackNotifier extends Notifier {
     @Extension
     public static class DescriptorImpl extends BuildStepDescriptor<Publisher> {
 
+        private String baseUrl;
         private String teamDomain;
         private String token;
         private String room;
@@ -218,6 +232,10 @@ public class SlackNotifier extends Notifier {
 
         public DescriptorImpl() {
             load();
+        }
+
+        public String getBaseUrl() {
+            return baseUrl;
         }
 
         public String getTeamDomain() {
@@ -252,6 +270,7 @@ public class SlackNotifier extends Notifier {
 
         @Override
         public SlackNotifier newInstance(StaplerRequest sr, JSONObject json) {
+            String baseUrl = sr.getParameter("slackBaseUrl");
             String teamDomain = sr.getParameter("slackTeamDomain");
             String token = sr.getParameter("slackToken");
             String room = sr.getParameter("slackRoom");
@@ -267,13 +286,14 @@ public class SlackNotifier extends Notifier {
             CommitInfoChoice commitInfoChoice = CommitInfoChoice.forDisplayName(sr.getParameter("slackCommitInfoChoice"));
             boolean includeCustomMessage = "on".equals(sr.getParameter("includeCustomMessage"));
             String customMessage = sr.getParameter("customMessage");
-            return new SlackNotifier(teamDomain, token, room, buildServerUrl, sendAs, startNotification, notifyAborted,
+            return new SlackNotifier(baseUrl, teamDomain, token, room, buildServerUrl, sendAs, startNotification, notifyAborted,
                     notifyFailure, notifyNotBuilt, notifySuccess, notifyUnstable, notifyBackToNormal, notifyRepeatedFailure,
                     includeTestSummary, commitInfoChoice, includeCustomMessage, customMessage);
         }
 
         @Override
         public boolean configure(StaplerRequest sr, JSONObject formData) throws FormException {
+            baseUrl = sr.getParameter("slackBaseUrl");
             teamDomain = sr.getParameter("slackTeamDomain");
             token = sr.getParameter("slackToken");
             room = sr.getParameter("slackRoom");
@@ -290,8 +310,8 @@ public class SlackNotifier extends Notifier {
             return super.configure(sr, formData);
         }
 
-        SlackService getSlackService(final String teamDomain, final String authToken, final String room) {
-            return new StandardSlackService(teamDomain, authToken, room);
+        SlackService getSlackService(final String baseUrl, final String teamDomain, final String authToken, final String room) {
+            return new StandardSlackService(baseUrl, teamDomain, authToken, room);
         }
 
         @Override
@@ -299,11 +319,16 @@ public class SlackNotifier extends Notifier {
             return "Slack Notifications";
         }
 
-        public FormValidation doTestConnection(@QueryParameter("slackTeamDomain") final String teamDomain,
+        public FormValidation doTestConnection(@QueryParameter("slackBaseUrl") final String baseUrl,
+                                               @QueryParameter("slackTeamDomain") final String teamDomain,
                                                @QueryParameter("slackToken") final String authToken,
                                                @QueryParameter("slackRoom") final String room,
                                                @QueryParameter("slackBuildServerUrl") final String buildServerUrl) throws FormException {
             try {
+                String targetUrl = baseUrl;
+                if (StringUtils.isEmpty(targetUrl)) {
+                    targetUrl = this.baseUrl;
+                }
                 String targetDomain = teamDomain;
                 if (StringUtils.isEmpty(targetDomain)) {
                     targetDomain = this.teamDomain;
@@ -320,7 +345,7 @@ public class SlackNotifier extends Notifier {
                 if (StringUtils.isEmpty(targetBuildServerUrl)) {
                     targetBuildServerUrl = this.buildServerUrl;
                 }
-                SlackService testSlackService = getSlackService(targetDomain, targetToken, targetRoom);
+                SlackService testSlackService = getSlackService(targetUrl, targetDomain, targetToken, targetRoom);
                 String message = "Slack/Jenkins plugin: you're all set on " + targetBuildServerUrl;
                 boolean success = testSlackService.publish(message, "good");
                 return success ? FormValidation.ok("Success") : FormValidation.error("Failure");
