@@ -44,7 +44,7 @@ public class StandardSlackService implements SlackService {
         for (String roomId : roomIds) {
 
             String url = "https://" + teamDomain + "." + host + "/services/hooks/jenkins-ci?token=" + token;
-            if (StringUtils.isEmpty(baseUrl)) {
+            if (!StringUtils.isEmpty(baseUrl)) {
                 url = baseUrl + token;
             }
 
