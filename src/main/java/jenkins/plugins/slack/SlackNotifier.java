@@ -142,7 +142,7 @@ public class SlackNotifier extends Notifier {
         super();
         this.teamDomain = teamDomain;
         this.authToken = authToken;
-        this.authTokenCredentialId = authTokenCredentialId;
+        this.authTokenCredentialId = authTokenCredentialId.trim();
         this.buildServerUrl = buildServerUrl;
         this.room = room;
         this.sendAs = sendAs;

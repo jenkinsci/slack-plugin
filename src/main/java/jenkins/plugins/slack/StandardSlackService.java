@@ -40,7 +40,7 @@ public class StandardSlackService implements SlackService {
         super();
         this.teamDomain = teamDomain;
         this.token = token;
-        this.authTokenCredentialId = authTokenCredentialId;
+        this.authTokenCredentialId = authTokenCredentialId.trim();
         this.roomIds = roomId.split("[,; ]+");
     }
 
