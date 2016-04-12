@@ -23,8 +23,10 @@ import java.util.logging.Logger;
 
 import jenkins.model.Jenkins;
 import hudson.ProxyConfiguration;
+
 import org.apache.commons.httpclient.UsernamePasswordCredentials;
 import org.apache.commons.httpclient.auth.AuthScope;
+import org.apache.commons.lang.StringUtils;
 
 public class StandardSlackService implements SlackService {
 
@@ -40,7 +42,7 @@ public class StandardSlackService implements SlackService {
         super();
         this.teamDomain = teamDomain;
         this.token = token;
-        this.authTokenCredentialId = authTokenCredentialId.trim();
+        this.authTokenCredentialId = StringUtils.trim(authTokenCredentialId);
         this.roomIds = roomId.split("[,; ]+");
     }
 
