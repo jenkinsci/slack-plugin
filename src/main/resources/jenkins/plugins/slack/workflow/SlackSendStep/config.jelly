@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?jelly escape-by-default='true'?>
+<j:jelly xmlns:j="jelly:core" xmlns:f="/lib/form">
+    <f:entry field="message" title="Message">
+        <f:textbox/>
+    </f:entry>
+    <f:entry field="color" title="Color">
+        <f:textbox/>
+    </f:entry>
+    <f:advanced>
+        <f:entry field="channel" title="Channel">
+            <f:textbox />
+        </f:entry>
+        <f:entry field="token" title="Integration Token">
+            <f:textbox />
+        </f:entry>
+        <f:entry field="teamDomain" title="Team Domain">
+            <f:textbox />
+        </f:entry>
+        <f:entry field="failOnError">
+            <f:checkbox title="Fail On Error" default="false"/>
+        </f:entry>
+    </f:advanced>
+</j:jelly>

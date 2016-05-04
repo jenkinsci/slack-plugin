@@ -1,3 +1,33 @@
+# 2.0.1 release notes
+
+Bug Fixes:
+
+* Set webhook endpoint to random uuid based string if not set (PR # 190)
+* Upgrading to Slack 2.0 outbound webhooks breaks Jenkins  (#191)
+
+# 2.0 release notes
+
+New Features:
+
+* Adding configurable webhook endpoint for exposing jenkins commands with a Slack outgoing-webhook (#160)
+* Added Jenkins Pipeline support via custom step `slackSend`. (#167)
+
+UI Improvements:
+
+* Job level configuration was moved under post-build actions with support for migration from previous versions. (#79, #170)
+* Use Subdomain instead of Domain (#168)
+
+Bug Fixes
+
+* Notify for repeated failures doesn't work (#136)
+* Workflow plugin integration (#50)
+* "Back to normal" message duration is build duration rather than time the job has been broken for (#129)
+* [FIXED JENKINS-30559] Dropdown list to select commit info for notifications (#133)
+* Fix double start message when build is manually started (#96, #137)
+* "success" instead of "back to normal" after aborted build (123)
+* Doesn't support the Jenkins Inheritance plugin (#6)
+
+
 # 1.8.1 release notes
 
 This is a backport release which backports features originally intended for
