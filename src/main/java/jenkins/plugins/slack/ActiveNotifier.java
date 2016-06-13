@@ -372,14 +372,17 @@ public class ActiveNotifier implements FineGrainedNotifier {
         }
         
         private String createBackToNormalDurationString(){
+            // This status code guarantees that the previous build fails and has been successful before
+            // The back to normal time is the time since the build first broke
             Run previousSuccessfulBuild = build.getPreviousSuccessfulBuild();
-            long previousSuccessStartTime = previousSuccessfulBuild.getStartTimeInMillis();
-            long previousSuccessDuration = previousSuccessfulBuild.getDuration();
-            long previousSuccessEndTime = previousSuccessStartTime + previousSuccessDuration;
+            Run initialFailureAfterPreviousSuccessfulBuild = previousSuccessfulBuild.getNextBuild();
+            long initialFailureStartTime = initialFailureAfterPreviousSuccessfulBuild.getStartTimeInMillis();
+            long initialFailureDuration = initialFailureAfterPreviousSuccessfulBuild.getDuration();
+            long initialFailureEndTime = initialFailureStartTime + initialFailureDuration;
             long buildStartTime = build.getStartTimeInMillis();
             long buildDuration = build.getDuration();
             long buildEndTime = buildStartTime + buildDuration;
-            long backToNormalDuration = buildEndTime - previousSuccessEndTime;
+            long backToNormalDuration = buildEndTime - initialFailureEndTime;
             return Util.getTimeSpanString(backToNormalDuration);
         }
 
