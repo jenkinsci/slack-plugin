@@ -16,6 +16,7 @@ import hudson.util.FormValidation;
 import hudson.util.ListBoxModel;
 import jenkins.model.Jenkins;
 import jenkins.model.JenkinsLocationConfiguration;
+import jenkins.plugins.slack.webhook.model.SlackUser;
 import net.sf.json.JSONObject;
 import org.apache.commons.lang.StringUtils;
 import org.kohsuke.stapler.DataBoundConstructor;
@@ -341,6 +342,11 @@ public class SlackNotifier extends Notifier {
                 }
 
                 SlackService slackService = getSlackService(targetDomain, targetToken, targetRoom, targetApiToken);
+                for (SlackUser user: slackService.getUserList()) {
+                  if (!user.isDeleted()) {
+                    items.add("@" + user.getName(), user.getName());
+                  }
+                }
 
             } catch (Exception e) {
               // ignore
