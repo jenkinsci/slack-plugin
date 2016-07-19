@@ -13,6 +13,7 @@ import hudson.tasks.BuildStepMonitor;
 import hudson.tasks.Notifier;
 import hudson.tasks.Publisher;
 import hudson.util.FormValidation;
+import hudson.util.ListBoxModel;
 import jenkins.model.Jenkins;
 import jenkins.model.JenkinsLocationConfiguration;
 import net.sf.json.JSONObject;
@@ -313,6 +314,41 @@ public class SlackNotifier extends Notifier {
             return "Slack Notifications";
         }
 
+        public ListBoxModel doFillMentionToItems(@QueryParameter("slackTeamDomain") final String teamDomain,
+                                                 @QueryParameter("slackToken") final String authToken,
+                                                 @QueryParameter("slackRoom") final String room,
+                                                 @QueryParameter("slackApiToken") final String apiToken) {
+
+            ListBoxModel items = new ListBoxModel();
+            items.add("@channel", "channel");
+            items.add("@here", "here");
+            try {
+                String targetDomain = teamDomain;
+                if (StringUtils.isEmpty(targetDomain)) {
+                    targetDomain = this.teamDomain;
+                }
+                String targetToken = authToken;
+                if (StringUtils.isEmpty(targetToken)) {
+                    targetToken = this.token;
+                }
+                String targetRoom = room;
+                if (StringUtils.isEmpty(targetRoom)) {
+                    targetRoom = this.room;
+                }
+                String targetApiToken = apiToken;
+                if (StringUtils.isEmpty(targetApiToken)) {
+                    targetApiToken = this.apiToken;
+                }
+
+                SlackService slackService = getSlackService(targetDomain, targetToken, targetRoom, targetApiToken);
+
+            } catch (Exception e) {
+              // ignore
+            }
+
+            return items;
+        }
+
         public FormValidation doTestConnection(@QueryParameter("slackTeamDomain") final String teamDomain,
                                                @QueryParameter("slackToken") final String authToken,
                                                @QueryParameter("slackRoom") final String room,
@@ -501,7 +537,7 @@ public class SlackNotifier extends Notifier {
                 }
 
                 SlackNotifier slackNotifier = p.getPublishersList().get(SlackNotifier.class);
-                
+
                 if (slackNotifier == null) {
                     logger.info(String
                             .format("Configuration does not have a notifier for \"%s\", not migrating settings",
@@ -518,9 +554,9 @@ public class SlackNotifier extends Notifier {
                     if (StringUtils.isBlank(slackNotifier.room)) {
                         slackNotifier.room = slackJobProperty.getRoom();
                     }
-                    
+
                     slackNotifier.startNotification = slackJobProperty.getStartNotification();
-    
+
                     slackNotifier.notifyAborted = slackJobProperty.getNotifyAborted();
                     slackNotifier.notifyFailure = slackJobProperty.getNotifyFailure();
                     slackNotifier.notifyNotBuilt = slackJobProperty.getNotifyNotBuilt();
@@ -528,7 +564,7 @@ public class SlackNotifier extends Notifier {
                     slackNotifier.notifyUnstable = slackJobProperty.getNotifyUnstable();
                     slackNotifier.notifyBackToNormal = slackJobProperty.getNotifyBackToNormal();
                     slackNotifier.notifyRepeatedFailure = slackJobProperty.getNotifyRepeatedFailure();
-    
+
                     slackNotifier.includeTestSummary = slackJobProperty.includeTestSummary();
                     slackNotifier.commitInfoChoice = slackJobProperty.getShowCommitList() ? CommitInfoChoice.AUTHORS_AND_TITLES : CommitInfoChoice.NONE;
                     slackNotifier.includeCustomMessage = slackJobProperty.includeCustomMessage();
