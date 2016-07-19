@@ -17,6 +17,7 @@ import hudson.util.ListBoxModel;
 import jenkins.model.Jenkins;
 import jenkins.model.JenkinsLocationConfiguration;
 import jenkins.plugins.slack.webhook.model.SlackUser;
+import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
 import org.apache.commons.lang.StringUtils;
 import org.kohsuke.stapler.DataBoundConstructor;
@@ -25,6 +26,8 @@ import org.kohsuke.stapler.StaplerRequest;
 import org.kohsuke.stapler.export.Exported;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -51,6 +54,8 @@ public class SlackNotifier extends Notifier {
     private CommitInfoChoice commitInfoChoice;
     private boolean includeCustomMessage;
     private String customMessage;
+    private boolean includeMention;
+    private List<String> mentionList;
 
     @Override
     public DescriptorImpl getDescriptor() {
@@ -131,12 +136,20 @@ public class SlackNotifier extends Notifier {
         return customMessage;
     }
 
+    public boolean includeMention() {
+      return includeMention;
+    }
+
+    public List<String> getMentionList() {
+      return mentionList;
+    }
+
     @DataBoundConstructor
     public SlackNotifier(final String teamDomain, final String authToken, final String room, String apiToken, final String buildServerUrl,
                          final String sendAs, final boolean startNotification, final boolean notifyAborted, final boolean notifyFailure,
                          final boolean notifyNotBuilt, final boolean notifySuccess, final boolean notifyUnstable, final boolean notifyBackToNormal,
                          final boolean notifyRepeatedFailure, final boolean includeTestSummary, CommitInfoChoice commitInfoChoice,
-                         boolean includeCustomMessage, String customMessage) {
+                         boolean includeCustomMessage, String customMessage, boolean includeMention, List<String> mentionList) {
         super();
         this.teamDomain = teamDomain;
         this.authToken = authToken;
@@ -156,6 +169,8 @@ public class SlackNotifier extends Notifier {
         this.commitInfoChoice = commitInfoChoice;
         this.includeCustomMessage = includeCustomMessage;
         this.customMessage = customMessage;
+        this.includeMention = includeMention;
+        this.mentionList = mentionList;
     }
 
     public BuildStepMonitor getRequiredMonitorService() {
@@ -282,9 +297,28 @@ public class SlackNotifier extends Notifier {
             CommitInfoChoice commitInfoChoice = CommitInfoChoice.forDisplayName(sr.getParameter("slackCommitInfoChoice"));
             boolean includeCustomMessage = "on".equals(sr.getParameter("includeCustomMessage"));
             String customMessage = sr.getParameter("customMessage");
+            boolean includeMention = (json.optJSONObject("includeMention") != null);
+            List<String> mentionList = new ArrayList<String>();
+
+            if (includeMention) {
+              JSONArray mentionArray = json.getJSONObject("includeMention").optJSONArray("mention");
+              if (mentionArray != null) {
+                for (Object mentionObj: mentionArray) {
+                  JSONObject mention = JSONObject.fromObject(mentionObj);
+                  mentionList.add(mention.getString("mentionTo"));
+                }
+              } else {
+                JSONObject mention = json.getJSONObject("includeMention").optJSONObject("mention");
+                if (mention != null) {
+                  mentionList.add(mention.getString("mentionTo"));
+                }
+              }
+            }
+
+
             return new SlackNotifier(teamDomain, token, room, apiToken, buildServerUrl, sendAs, startNotification, notifyAborted,
                     notifyFailure, notifyNotBuilt, notifySuccess, notifyUnstable, notifyBackToNormal, notifyRepeatedFailure,
-                    includeTestSummary, commitInfoChoice, includeCustomMessage, customMessage);
+                    includeTestSummary, commitInfoChoice, includeCustomMessage, customMessage, includeMention, mentionList);
         }
 
         @Override
