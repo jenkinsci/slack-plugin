@@ -609,6 +609,8 @@ public class SlackNotifier extends Notifier {
                     slackNotifier.commitInfoChoice = slackJobProperty.getShowCommitList() ? CommitInfoChoice.AUTHORS_AND_TITLES : CommitInfoChoice.NONE;
                     slackNotifier.includeCustomMessage = slackJobProperty.includeCustomMessage();
                     slackNotifier.customMessage = slackJobProperty.getCustomMessage();
+                    slackNotifier.includeMention = false;
+                    slackNotifier.mentionList = new ArrayList<String>();
                 }
 
                 try {

@@ -32,10 +32,14 @@ public class StandardSlackService implements SlackService {
     }
 
     public boolean publish(String message) {
-        return publish(message, "warning");
+        return publish(null, message, "warning");
     }
 
     public boolean publish(String message, String color) {
+        return publish(null, message, color);
+    }
+
+    public boolean publish(String text, String message, String color) {
         boolean result = true;
         for (String roomId : roomIds) {
             String url = "https://" + teamDomain + "." + host + "/services/hooks/jenkins-ci?token=" + token;
@@ -45,6 +49,10 @@ public class StandardSlackService implements SlackService {
             JSONObject json = new JSONObject();
 
             try {
+                if (text != null) {
+                  json.put("text", text);
+                }
+
                 JSONObject field = new JSONObject();
                 field.put("short", false);
                 field.put("value", message);

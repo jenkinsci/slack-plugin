@@ -110,8 +110,14 @@ public class ActiveNotifier implements FineGrainedNotifier {
                     && notifier.getNotifyBackToNormal())
                 || (result == Result.SUCCESS && notifier.getNotifySuccess())
                 || (result == Result.UNSTABLE && notifier.getNotifyUnstable())) {
-            getSlack(r).publish(getBuildStatusMessage(r, notifier.includeTestSummary(),
-                    notifier.includeCustomMessage()), getBuildColor(r));
+            if (notifier.includeMention()) {
+                getSlack(r).publish(getMentionText(),
+                        getBuildStatusMessage(r, notifier.includeTestSummary(),
+                        notifier.includeCustomMessage()), getBuildColor(r));
+            } else {
+                getSlack(r).publish(getBuildStatusMessage(r, notifier.includeTestSummary(),
+                        notifier.includeCustomMessage()), getBuildColor(r));
+            }
             if (notifier.getCommitInfoChoice().showAnything()) {
                 getSlack(r).publish(getCommitList(r), getBuildColor(r));
             }
@@ -239,6 +245,14 @@ public class ActiveNotifier implements FineGrainedNotifier {
         return message.toString();
     }
 
+    String getMentionText() {
+      StringBuffer text = new StringBuffer();
+      for (String mention: notifier.getMentionList()) {
+        text.append("<@" + mention + "> ");
+      }
+      return text.toString();
+    }
+
     public static class MessageBuilder {
 
         private static final String STARTING_STATUS_MESSAGE = "Starting...",
@@ -250,7 +264,7 @@ public class ActiveNotifier implements FineGrainedNotifier {
                                     NOT_BUILT_STATUS_MESSAGE = "Not built",
                                     UNSTABLE_STATUS_MESSAGE = "Unstable",
                                     UNKNOWN_STATUS_MESSAGE = "Unknown";
-        
+
         private StringBuffer message;
         private SlackNotifier notifier;
         private AbstractBuild build;
@@ -276,20 +290,20 @@ public class ActiveNotifier implements FineGrainedNotifier {
             Run previousBuild = r.getProject().getLastBuild().getPreviousBuild();
             Run previousSuccessfulBuild = r.getPreviousSuccessfulBuild();
             boolean buildHasSucceededBefore = previousSuccessfulBuild != null;
-            
+
             /*
              * If the last build was aborted, go back to find the last non-aborted build.
              * This is so that aborted builds do not affect build transitions.
              * I.e. if build 1 was failure, build 2 was aborted and build 3 was a success the transition
-             * should be failure -> success (and therefore back to normal) not aborted -> success. 
+             * should be failure -> success (and therefore back to normal) not aborted -> success.
              */
             Run lastNonAbortedBuild = previousBuild;
             while(lastNonAbortedBuild != null && lastNonAbortedBuild.getResult() == Result.ABORTED) {
                 lastNonAbortedBuild = lastNonAbortedBuild.getPreviousBuild();
             }
-            
-            
-            /* If all previous builds have been aborted, then use 
+
+
+            /* If all previous builds have been aborted, then use
              * SUCCESS as a default status so an aborted message is sent
              */
             if(lastNonAbortedBuild == null) {
@@ -297,13 +311,13 @@ public class ActiveNotifier implements FineGrainedNotifier {
             } else {
                 previousResult = lastNonAbortedBuild.getResult();
             }
-            
+
             /* Back to normal should only be shown if the build has actually succeeded at some point.
-             * Also, if a build was previously unstable and has now succeeded the status should be 
+             * Also, if a build was previously unstable and has now succeeded the status should be
              * "Back to normal"
              */
             if (result == Result.SUCCESS
-                    && (previousResult == Result.FAILURE || previousResult == Result.UNSTABLE) 
+                    && (previousResult == Result.FAILURE || previousResult == Result.UNSTABLE)
                     && buildHasSucceededBefore) {
                 return BACK_TO_NORMAL_STATUS_MESSAGE;
             }
@@ -403,7 +417,18 @@ public class ActiveNotifier implements FineGrainedNotifier {
             message.append(envVars.expand(customMessage));
             return this;
         }
-        
+
+        public MessageBuilder appendMention() {
+            List<String> mentionList = notifier.getMentionList();
+            for (String mention: mentionList) {
+                message.append(" <@");
+                message.append(mention);
+                message.append(">");
+            }
+
+            return this;
+        }
+
         private String createBackToNormalDurationString(){
             Run previousSuccessfulBuild = build.getPreviousSuccessfulBuild();
             long previousSuccessStartTime = previousSuccessfulBuild.getStartTimeInMillis();
