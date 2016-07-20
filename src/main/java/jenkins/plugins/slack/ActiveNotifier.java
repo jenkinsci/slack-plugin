@@ -283,6 +283,27 @@ public class ActiveNotifier implements FineGrainedNotifier {
               } else {
                   text.append("<@" + slackUserId + "> ");
               }
+          } else if (Constants.GHPRB_MENTION.equals(mention)) {
+            EnvVars env = null;
+            try {
+                env = r.getEnvironment(listener);
+            } catch (Exception e) {
+                listener.getLogger().println("Error retrieving environment vars: " + e.getMessage());
+                continue;
+            }
+
+            String mail = env.get("ghprbPullAuthorEmail", "");
+
+            if ("".equals(mail)) {
+              continue;
+            }
+
+            String slackUserId = getSlack(r).getUserId(mail);
+            if (slackUserId == null || slackUserId == "") {
+                text.append("<@" + mail.split("@")[0] + "> ");
+            } else {
+                text.append("<@" + slackUserId + "> ");
+            }
           } else {
               text.append("<@" + mention + "> ");
           }

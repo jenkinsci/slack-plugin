@@ -356,6 +356,7 @@ public class SlackNotifier extends Notifier {
 
             ListBoxModel items = new ListBoxModel();
             items.add("[ job triggerd user ]", Constants.JOB_TRIGGERD_MENTION);
+            items.add("[ ghprb triggerd user ]", Constants.GHPRB_MENTION);
             items.add("@channel", "channel");
             items.add("@here", "here");
             try {
