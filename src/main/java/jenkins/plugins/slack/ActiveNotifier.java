@@ -10,9 +10,11 @@ import hudson.model.CauseAction;
 import hudson.model.Hudson;
 import hudson.model.Result;
 import hudson.model.Run;
+import hudson.model.User;
 import hudson.scm.ChangeLogSet;
 import hudson.scm.ChangeLogSet.AffectedFile;
 import hudson.scm.ChangeLogSet.Entry;
+import hudson.tasks.MailAddressResolver;
 import hudson.tasks.Mailer;
 import hudson.tasks.test.AbstractTestResultAction;
 import hudson.triggers.SCMTrigger;
@@ -111,7 +113,7 @@ public class ActiveNotifier implements FineGrainedNotifier {
                 || (result == Result.SUCCESS && notifier.getNotifySuccess())
                 || (result == Result.UNSTABLE && notifier.getNotifyUnstable())) {
             if (notifier.includeMention()) {
-                getSlack(r).publish(getMentionText(),
+                getSlack(r).publish(getMentionText(r),
                         getBuildStatusMessage(r, notifier.includeTestSummary(),
                         notifier.includeCustomMessage()), getBuildColor(r));
             } else {
@@ -245,10 +247,45 @@ public class ActiveNotifier implements FineGrainedNotifier {
         return message.toString();
     }
 
-    String getMentionText() {
+    String getMentionText(AbstractBuild r) {
+      Cause.UpstreamCause c = (Cause.UpstreamCause)r.getCause(Cause.UpstreamCause.class);
+      if (c != null) {
+          String upProjectName = c.getUpstreamProject();
+          int buildNumber = c.getUpstreamBuild();
+          AbstractProject project = Hudson.getInstance().getItemByFullName(upProjectName, AbstractProject.class);
+          AbstractBuild upBuild = (AbstractBuild)project.getBuildByNumber(buildNumber);
+          return getMentionText(upBuild);
+      }
+
       StringBuffer text = new StringBuffer();
       for (String mention: notifier.getMentionList()) {
-        text.append("<@" + mention + "> ");
+          if (Constants.JOB_TRIGGERD_MENTION.equals(mention)) {
+              Cause.UserIdCause cause = (Cause.UserIdCause)r.getCause(Cause.UserIdCause.class);
+
+              if (cause == null) {
+                  continue;
+              }
+
+              User triggerdUser = User.get(cause.getUserId());
+              if (triggerdUser == null) {
+                  continue;
+              }
+
+              String mail = MailAddressResolver.resolve(triggerdUser);
+
+              if (mail == null) {
+                  continue;
+              }
+
+              String slackUserId = getSlack(r).getUserId(mail);
+              if (slackUserId == null || slackUserId == "") {
+                  text.append("<@" + mail.split("@")[0] + "> ");
+              } else {
+                  text.append("<@" + slackUserId + "> ");
+              }
+          } else {
+              text.append("<@" + mention + "> ");
+          }
       }
       return text.toString();
     }

@@ -355,6 +355,7 @@ public class SlackNotifier extends Notifier {
                                                  @QueryParameter("slackApiToken") final String apiToken) {
 
             ListBoxModel items = new ListBoxModel();
+            items.add("[ job triggerd user ]", Constants.JOB_TRIGGERD_MENTION);
             items.add("@channel", "channel");
             items.add("@here", "here");
             try {
