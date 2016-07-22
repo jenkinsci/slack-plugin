@@ -9,6 +9,7 @@ import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 
 import java.util.Arrays;
+import java.util.List;
 import java.util.Collection;
 
 @RunWith(Parameterized.class)
@@ -68,7 +69,15 @@ public class SlackNotifierTest extends TestCase {
             return response;
         }
 
+        public boolean publish(String text, String message, String color) {
+            return response;
+        }
+
         public String getUserId(String email) {
+            return null;
+        }
+
+        public List<SlackUser> getUserList() {
             return null;
         }
 

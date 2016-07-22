@@ -1,15 +1,17 @@
 package jenkins.plugins.slack;
 
+import java.util.List;
+
 public class SlackNotifierStub extends SlackNotifier {
 
     public SlackNotifierStub(String teamDomain, String authToken, String room, String apiToken, String buildServerUrl,
                              String sendAs, boolean startNotification, boolean notifyAborted, boolean notifyFailure,
                              boolean notifyNotBuilt, boolean notifySuccess, boolean notifyUnstable, boolean notifyBackToNormal,
                              boolean notifyRepeatedFailure, boolean includeTestSummary, CommitInfoChoice commitInfoChoice,
-                             boolean includeCustomMessage, String customMessage) {
+                             boolean includeCustomMessage, String customMessage, boolean includeMention, List<Mention> mentionList) {
         super(teamDomain, authToken, room, apiToken, buildServerUrl, sendAs, startNotification, notifyAborted, notifyFailure,
                 notifyNotBuilt, notifySuccess, notifyUnstable, notifyBackToNormal, notifyRepeatedFailure,
-                includeTestSummary, commitInfoChoice, includeCustomMessage, customMessage);
+                includeTestSummary, commitInfoChoice, includeCustomMessage, customMessage, includeMention, mentionList);
     }
 
     public static class DescriptorImplStub extends SlackNotifier.DescriptorImpl {

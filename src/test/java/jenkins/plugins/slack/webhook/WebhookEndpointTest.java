@@ -58,13 +58,13 @@ public class WebhookEndpointTest {
     @Rule
     public final JenkinsRule jenkinsRule = new JenkinsRule();
 
-    
+
     @Before
     public void setUp() throws Exception {
         client = jenkinsRule.createWebClient();
         data = new ArrayList<NameValuePair>();
         data.add(new NameValuePair("token", "GOOD_TOKEN"));
-        data.add(new NameValuePair("trigger_word", "jenkins")); 
+        data.add(new NameValuePair("trigger_word", "jenkins"));
     }
 
     @Test
@@ -83,7 +83,8 @@ public class WebhookEndpointTest {
 
     @Test
     public void testUnconfiguredSlackToken() throws Exception {
-        HtmlForm form = jenkinsRule.createWebClient().goTo("configure").getFormByName("config");
+        JenkinsRule.WebClient client = jenkinsRule.createWebClient();
+        HtmlForm form = client.goTo("configure").getFormByName("config");
         form.getInputByName("_.slackOutgoingWebhookURL").setValueAttribute(URL);
         jenkinsRule.submit(form);
 
@@ -101,7 +102,7 @@ public class WebhookEndpointTest {
 
         WebResponse response = makeRequest(goodToken);
         assertThat(getSlackMessage(response).getText(), is("Invalid command, text field required"));
-    } 
+    }
 
     @Test
     public void testNoTriggerWordPostData() throws Exception {
@@ -116,7 +117,7 @@ public class WebhookEndpointTest {
 
     @Test
     public void testInvalidConfiguredSlackToken() throws Exception {
-        GlobalConfig config = GlobalConfiguration.all().get(GlobalConfig.class);        
+        GlobalConfig config = GlobalConfiguration.all().get(GlobalConfig.class);
         assertThat(config.getSlackOutgoingWebhookToken(), is(nullValue()));
 
         setConfigSettings();
@@ -125,7 +126,7 @@ public class WebhookEndpointTest {
         badData.add(new NameValuePair("token", "BAD_TOKEN"));
 
         WebResponse response = makeRequest(badData);
-        
+
         assertThat(getSlackMessage(response).getText(), is("Invalid Slack token"));
     }
 
@@ -139,8 +140,8 @@ public class WebhookEndpointTest {
 
     @Test
     public void testListProjects() throws Exception {
-        setConfigSettings(); 
-        data.add(new NameValuePair("text", "jenkins list projects")); 
+        setConfigSettings();
+        data.add(new NameValuePair("text", "jenkins list projects"));
         WebResponse response = makeRequest(data);
         assertThat(getSlackMessage(response).getText(), is("*Projects:*\n>_No projects found_"));
 
@@ -195,7 +196,7 @@ public class WebhookEndpointTest {
         jenkinsRule.submit(form);
     }
 
-    private SlackTextMessage getSlackMessage(WebResponse response) throws Exception { 
+    private SlackTextMessage getSlackMessage(WebResponse response) throws Exception {
         return new ObjectMapper().readValue(response.getContentAsString(),
             SlackTextMessage.class);
     }
@@ -210,5 +211,5 @@ public class WebhookEndpointTest {
         request.setCharset("utf-8");
 
         return client.loadWebResponse(request);
-    } 
+    }
 }
