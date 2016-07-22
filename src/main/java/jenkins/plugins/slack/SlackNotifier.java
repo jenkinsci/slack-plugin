@@ -16,7 +16,6 @@ import hudson.util.FormValidation;
 import hudson.util.ListBoxModel;
 import jenkins.model.Jenkins;
 import jenkins.model.JenkinsLocationConfiguration;
-import jenkins.plugins.slack.webhook.model.SlackUser;
 import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
 import org.apache.commons.lang.StringUtils;
@@ -55,7 +54,7 @@ public class SlackNotifier extends Notifier {
     private boolean includeCustomMessage;
     private String customMessage;
     private boolean includeMention;
-    private List<String> mentionList;
+    private List<Mention> mentionList;
 
     @Override
     public DescriptorImpl getDescriptor() {
@@ -137,11 +136,11 @@ public class SlackNotifier extends Notifier {
     }
 
     public boolean includeMention() {
-      return includeMention;
+        return includeMention;
     }
 
-    public List<String> getMentionList() {
-      return mentionList;
+    public List<Mention> getMentionList() {
+        return mentionList;
     }
 
     @DataBoundConstructor
@@ -149,7 +148,7 @@ public class SlackNotifier extends Notifier {
                          final String sendAs, final boolean startNotification, final boolean notifyAborted, final boolean notifyFailure,
                          final boolean notifyNotBuilt, final boolean notifySuccess, final boolean notifyUnstable, final boolean notifyBackToNormal,
                          final boolean notifyRepeatedFailure, final boolean includeTestSummary, CommitInfoChoice commitInfoChoice,
-                         boolean includeCustomMessage, String customMessage, boolean includeMention, List<String> mentionList) {
+                         boolean includeCustomMessage, String customMessage, boolean includeMention, List<Mention> mentionList) {
         super();
         this.teamDomain = teamDomain;
         this.authToken = authToken;
@@ -298,21 +297,23 @@ public class SlackNotifier extends Notifier {
             boolean includeCustomMessage = "on".equals(sr.getParameter("includeCustomMessage"));
             String customMessage = sr.getParameter("customMessage");
             boolean includeMention = (json.optJSONObject("includeMention") != null);
-            List<String> mentionList = new ArrayList<String>();
+            List<Mention> mentionList = new ArrayList<Mention>();
 
             if (includeMention) {
-              JSONArray mentionArray = json.getJSONObject("includeMention").optJSONArray("mention");
-              if (mentionArray != null) {
-                for (Object mentionObj: mentionArray) {
-                  JSONObject mention = JSONObject.fromObject(mentionObj);
-                  mentionList.add(mention.getString("mentionTo"));
+                JSONArray mentionArray = json.getJSONObject("includeMention").optJSONArray("mention");
+                if (mentionArray != null) {
+                    for (Object mentionObj: mentionArray) {
+                        JSONObject mention = JSONObject.fromObject(mentionObj);
+                        NotificationTiming timing = NotificationTiming.forDisplayName(mention.getString("mentionTiming"));
+                        mentionList.add(new Mention(timing, mention.getString("mentionTo")));
+                    }
+                } else {
+                    JSONObject mention = json.getJSONObject("includeMention").optJSONObject("mention");
+                    if (mention != null) {
+                        NotificationTiming timing = NotificationTiming.forDisplayName(mention.getString("mentionTiming"));
+                        mentionList.add(new Mention(timing, mention.getString("mentionTo")));
+                    }
                 }
-              } else {
-                JSONObject mention = json.getJSONObject("includeMention").optJSONObject("mention");
-                if (mention != null) {
-                  mentionList.add(mention.getString("mentionTo"));
-                }
-              }
             }
 
 
@@ -349,6 +350,14 @@ public class SlackNotifier extends Notifier {
             return "Slack Notifications";
         }
 
+        public ListBoxModel doFillMentionTimingItems() {
+            ListBoxModel items = new ListBoxModel();
+            for(NotificationTiming timing: NotificationTiming.values()) {
+                items.add(timing.getDisplayName());
+            }
+            return items;
+        }
+
         public ListBoxModel doFillMentionToItems(@QueryParameter("slackTeamDomain") final String teamDomain,
                                                  @QueryParameter("slackToken") final String authToken,
                                                  @QueryParameter("slackRoom") final String room,
@@ -379,9 +388,9 @@ public class SlackNotifier extends Notifier {
 
                 SlackService slackService = getSlackService(targetDomain, targetToken, targetRoom, targetApiToken);
                 for (SlackUser user: slackService.getUserList()) {
-                  if (!user.isDeleted()) {
-                    items.add("@" + user.getName(), user.getName());
-                  }
+                    if (!user.isDeleted()) {
+                        items.add("@" + user.getName(), user.getName());
+                    }
                 }
 
             } catch (Exception e) {
@@ -612,7 +621,7 @@ public class SlackNotifier extends Notifier {
                     slackNotifier.includeCustomMessage = slackJobProperty.includeCustomMessage();
                     slackNotifier.customMessage = slackJobProperty.getCustomMessage();
                     slackNotifier.includeMention = false;
-                    slackNotifier.mentionList = new ArrayList<String>();
+                    slackNotifier.mentionList = new ArrayList<Mention>();
                 }
 
                 try {

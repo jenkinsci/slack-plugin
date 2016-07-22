@@ -5,7 +5,6 @@ import org.apache.commons.httpclient.methods.GetMethod;
 import org.apache.commons.httpclient.methods.PostMethod;
 import org.json.JSONArray;
 import org.json.JSONObject;
-import jenkins.plugins.slack.webhook.model.SlackUser;
 
 import java.io.IOException;
 import java.util.ArrayList;

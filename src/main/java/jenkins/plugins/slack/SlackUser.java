@@ -1,4 +1,4 @@
-package jenkins.plugins.slack.webhook.model;
+package jenkins.plugins.slack;
 
 import org.json.JSONObject;
 

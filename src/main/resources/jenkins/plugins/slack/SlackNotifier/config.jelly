@@ -47,8 +47,11 @@
             <f:entry title="Mention List">
                 <f:repeatable var="mention" items="${instance.getMentionList()}">
                   <table>
+                    <f:entry title="When: " field="mentionTiming">
+                      <f:select value="${mention.getTiming().getDisplayName()}" />
+                    </f:entry>
                     <f:entry title="To: " field="mentionTo">
-                      <f:select value="${mention.toString()}" />
+                      <f:select value="${mention.getTo()}" />
                     </f:entry>
                     <f:entry><f:repeatableDeleteButton /></f:entry>
                   </table>

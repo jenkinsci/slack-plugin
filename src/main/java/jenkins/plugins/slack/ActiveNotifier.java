@@ -258,8 +258,14 @@ public class ActiveNotifier implements FineGrainedNotifier {
       }
 
       StringBuffer text = new StringBuffer();
-      for (String mention: notifier.getMentionList()) {
-          if (Constants.JOB_TRIGGERD_MENTION.equals(mention)) {
+
+      String statusMessage = MessageBuilder.getStatusMessage(r);
+      for (Mention mention: notifier.getMentionList()) {
+          if (! mention.getTiming().equals(NotificationTiming.forStatusMessage(statusMessage))) {
+              continue;
+          }
+
+          if (Constants.JOB_TRIGGERD_MENTION.equals(mention.getTo())) {
               Cause.UserIdCause cause = (Cause.UserIdCause)r.getCause(Cause.UserIdCause.class);
 
               if (cause == null) {
@@ -283,29 +289,29 @@ public class ActiveNotifier implements FineGrainedNotifier {
               } else {
                   text.append("<@" + slackUserId + "> ");
               }
-          } else if (Constants.GHPRB_MENTION.equals(mention)) {
-            EnvVars env = null;
-            try {
-                env = r.getEnvironment(listener);
-            } catch (Exception e) {
-                listener.getLogger().println("Error retrieving environment vars: " + e.getMessage());
+          } else if (Constants.GHPRB_MENTION.equals(mention.getTo())) {
+              EnvVars env = null;
+              try {
+                  env = r.getEnvironment(listener);
+              } catch (Exception e) {
+                  listener.getLogger().println("Error retrieving environment vars: " + e.getMessage());
+                  continue;
+              }
+
+              String mail = env.get("ghprbPullAuthorEmail", "");
+
+              if ("".equals(mail)) {
                 continue;
-            }
+              }
 
-            String mail = env.get("ghprbPullAuthorEmail", "");
-
-            if ("".equals(mail)) {
-              continue;
-            }
-
-            String slackUserId = getSlack(r).getUserId(mail);
-            if (slackUserId == null || slackUserId == "") {
-                text.append("<@" + mail.split("@")[0] + "> ");
-            } else {
-                text.append("<@" + slackUserId + "> ");
-            }
+              String slackUserId = getSlack(r).getUserId(mail);
+              if (slackUserId == null || slackUserId == "") {
+                  text.append("<@" + mail.split("@")[0] + "> ");
+              } else {
+                  text.append("<@" + slackUserId + "> ");
+              }
           } else {
-              text.append("<@" + mention + "> ");
+              text.append("<@" + mention.getTo() + "> ");
           }
       }
       return text.toString();
@@ -313,15 +319,15 @@ public class ActiveNotifier implements FineGrainedNotifier {
 
     public static class MessageBuilder {
 
-        private static final String STARTING_STATUS_MESSAGE = "Starting...",
-                                    BACK_TO_NORMAL_STATUS_MESSAGE = "Back to normal",
-                                    STILL_FAILING_STATUS_MESSAGE = "Still Failing",
-                                    SUCCESS_STATUS_MESSAGE = "Success",
-                                    FAILURE_STATUS_MESSAGE = "Failure",
-                                    ABORTED_STATUS_MESSAGE = "Aborted",
-                                    NOT_BUILT_STATUS_MESSAGE = "Not built",
-                                    UNSTABLE_STATUS_MESSAGE = "Unstable",
-                                    UNKNOWN_STATUS_MESSAGE = "Unknown";
+        static final String STARTING_STATUS_MESSAGE = "Starting...",
+                            BACK_TO_NORMAL_STATUS_MESSAGE = "Back to normal",
+                            STILL_FAILING_STATUS_MESSAGE = "Still Failing",
+                            SUCCESS_STATUS_MESSAGE = "Success",
+                            FAILURE_STATUS_MESSAGE = "Failure",
+                            ABORTED_STATUS_MESSAGE = "Aborted",
+                            NOT_BUILT_STATUS_MESSAGE = "Not built",
+                            UNSTABLE_STATUS_MESSAGE = "Unstable",
+                            UNKNOWN_STATUS_MESSAGE = "Unknown";
 
         private StringBuffer message;
         private SlackNotifier notifier;
@@ -473,17 +479,6 @@ public class ActiveNotifier implements FineGrainedNotifier {
             }
             message.append("\n");
             message.append(envVars.expand(customMessage));
-            return this;
-        }
-
-        public MessageBuilder appendMention() {
-            List<String> mentionList = notifier.getMentionList();
-            for (String mention: mentionList) {
-                message.append(" <@");
-                message.append(mention);
-                message.append(">");
-            }
-
             return this;
         }
 
