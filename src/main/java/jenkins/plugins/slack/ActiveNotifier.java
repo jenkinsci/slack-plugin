@@ -1,6 +1,7 @@
 package jenkins.plugins.slack;
 
 import hudson.EnvVars;
+import hudson.PluginManager;
 import hudson.Util;
 import hudson.model.AbstractBuild;
 import hudson.model.AbstractProject;
@@ -19,8 +20,10 @@ import hudson.tasks.Mailer;
 import hudson.tasks.test.AbstractTestResultAction;
 import hudson.triggers.SCMTrigger;
 import hudson.util.LogTaskListener;
+import jenkins.model.Jenkins;
 import org.apache.commons.lang.StringUtils;
 
+import java.lang.reflect.Method;
 import java.io.IOException;
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -285,30 +288,37 @@ public class ActiveNotifier implements FineGrainedNotifier {
 
               String slackUserId = getSlack(r).getUserId(mail);
               if (slackUserId == null || slackUserId == "") {
-                  text.append("<@" + mail.split("@")[0] + "> ");
+                  text.append("@" + mail.split("@")[0] + " ");
               } else {
                   text.append("<@" + slackUserId + "> ");
               }
           } else if (Constants.GHPRB_MENTION.equals(mention.getTo())) {
-              EnvVars env = null;
-              try {
-                  env = r.getEnvironment(listener);
-              } catch (Exception e) {
-                  listener.getLogger().println("Error retrieving environment vars: " + e.getMessage());
+              // Skip if ghprb is not installed or disabled.
+              if (Jenkins.getInstance().getPlugin("ghprb") == null) {
                   continue;
               }
 
-              String mail = env.get("ghprbPullAuthorEmail", "");
+              try {
+                  ClassLoader classLoader = Jenkins.getInstance().pluginManager.uberClassLoader;
+                  Class<?> clazz = Class.forName("org.jenkinsci.plugins.ghprb.GhprbCause", true, classLoader);
+                  Cause ghprbCause = r.getCause(clazz);
 
-              if ("".equals(mail)) {
-                continue;
-              }
+                  if (ghprbCause == null) {
+                      continue;
+                  }
 
-              String slackUserId = getSlack(r).getUserId(mail);
-              if (slackUserId == null || slackUserId == "") {
-                  text.append("<@" + mail.split("@")[0] + "> ");
-              } else {
-                  text.append("<@" + slackUserId + "> ");
+                  Method getAuthorEmail = ghprbCause.getClass().getMethod("getAuthorEmail", null);
+                  String mail = getAuthorEmail.invoke(ghprbCause, null).toString();
+
+                  String slackUserId = getSlack(r).getUserId(mail);
+                  if (slackUserId == null || slackUserId == "") {
+                      text.append("@" + mail.split("@")[0] + " ");
+                  } else {
+                      text.append("<@" + slackUserId + "> ");
+                  }
+              } catch (Exception e) {
+                  listener.getLogger().println(e.toString());
+                  continue;
               }
           } else {
               text.append("<@" + mention.getTo() + "> ");
