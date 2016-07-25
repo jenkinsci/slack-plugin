@@ -317,7 +317,6 @@ public class ActiveNotifier implements FineGrainedNotifier {
                       text.append("<@" + slackUserId + "> ");
                   }
               } catch (Exception e) {
-                  listener.getLogger().println(e.toString());
                   continue;
               }
           } else {
