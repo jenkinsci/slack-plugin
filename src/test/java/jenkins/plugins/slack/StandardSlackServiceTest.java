@@ -5,6 +5,7 @@ import org.apache.http.HttpStatus;
 import org.junit.Test;
 
 import java.io.IOException;
+import java.util.List;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -153,6 +154,24 @@ public class StandardSlackServiceTest {
         clientStub.setClientResponse(new ClientResponse(HttpStatus.SC_OK, "{\"ok\":false,\"error\":\"API error\"}"));
         service.setClientStub(clientStub);
         assertNull(service.getUserId("john.doe@example.com"));
+    }
+
+    @Test
+    public void getUserListReturnsUserList() throws IOException {
+        StandardSlackServiceStub service = new StandardSlackServiceStub("domain", "token", "", "apiToken");
+        ClientStub clientStub = new ClientStub();
+        clientStub.setClientResponse(new ClientResponse(
+                HttpStatus.SC_OK,
+                IOUtils.toString(this.getClass().getResourceAsStream("/slack-api-users.list.json"), "UTF-8"))
+        );
+        service.setClientStub(clientStub);
+
+        List<SlackUser> userList = service.getUserList();
+        assertEquals(1, userList.size());
+
+        SlackUser user = userList.get(0);
+        assertEquals("john.doe", user.getName());
+        assertFalse(user.isDeleted());
     }
 
 }
