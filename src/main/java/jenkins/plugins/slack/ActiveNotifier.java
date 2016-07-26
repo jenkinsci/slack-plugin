@@ -319,6 +319,8 @@ public class ActiveNotifier implements FineGrainedNotifier {
               } catch (Exception e) {
                   continue;
               }
+          } else if ("here".equals(mention.getTo()) || "channel".equals(mention.getTo())) {
+              text.append("<!" + mention.getTo() + "|" + mention.getTo() + "> ");
           } else {
               text.append("<@" + mention.getTo() + "> ");
           }
