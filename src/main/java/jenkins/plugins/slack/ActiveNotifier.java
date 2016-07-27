@@ -282,7 +282,7 @@ public class ActiveNotifier implements FineGrainedNotifier {
 
               String mail = MailAddressResolver.resolve(triggerdUser);
 
-              if (mail == null) {
+              if (mail == null || "".equals(mail)) {
                   continue;
               }
 
@@ -307,8 +307,15 @@ public class ActiveNotifier implements FineGrainedNotifier {
                       continue;
                   }
 
-                  Method getAuthorEmail = ghprbCause.getClass().getMethod("getAuthorEmail", null);
-                  String mail = getAuthorEmail.invoke(ghprbCause, null).toString();
+                  Method getCommitAuthor = ghprbCause.getClass().getMethod("getCommitAuthor", null);
+                  Object commitUser = getCommitAuthor.invoke(ghprbCause, null);
+
+                  Method getEmail = commitUser.getClass().getMethod("getEmail", null);
+                  String mail = getEmail.invoke(commitUser, null).toString();
+
+                  if (mail == null || "".equals(mail)) {
+                      continue;
+                  }
 
                   String slackUserId = getSlack(r).getUserId(mail);
                   if (slackUserId == null || slackUserId == "") {
