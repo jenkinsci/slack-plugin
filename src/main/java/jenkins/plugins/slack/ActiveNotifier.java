@@ -287,9 +287,7 @@ public class ActiveNotifier implements FineGrainedNotifier {
               }
 
               String slackUserId = getSlack(r).getUserId(mail);
-              if (slackUserId == null || slackUserId == "") {
-                  text.append("@" + mail.split("@")[0] + " ");
-              } else {
+              if (slackUserId != null || ! "".equals(slackUserId)) {
                   text.append("<@" + slackUserId + "> ");
               }
           } else if (Constants.GHPRB_MENTION.equals(mention.getTo())) {
@@ -318,9 +316,7 @@ public class ActiveNotifier implements FineGrainedNotifier {
                   }
 
                   String slackUserId = getSlack(r).getUserId(mail);
-                  if (slackUserId == null || slackUserId == "") {
-                      text.append("@" + mail.split("@")[0] + " ");
-                  } else {
+                  if (slackUserId != null || ! "".equals(slackUserId)) {
                       text.append("<@" + slackUserId + "> ");
                   }
               } catch (Exception e) {
