@@ -364,10 +364,10 @@ public class SlackNotifier extends Notifier {
                                                  @QueryParameter("slackApiToken") final String apiToken) {
 
             ListBoxModel items = new ListBoxModel();
-            items.add("[ job triggerd user ]", Constants.JOB_TRIGGERD_MENTION);
+            items.add("[ job triggered user ]", Constants.JOB_TRIGGERED_MENTION);
             // Skip if ghprb is not installed or disabled.
             if (Jenkins.getInstance().getPlugin("ghprb") != null) {
-                items.add("[ ghprb triggerd user ]", Constants.GHPRB_MENTION);
+                items.add("[ ghprb triggered user ]", Constants.GHPRB_MENTION);
             }
             items.add("@channel", "channel");
             items.add("@here", "here");

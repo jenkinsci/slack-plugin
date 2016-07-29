@@ -268,19 +268,19 @@ public class ActiveNotifier implements FineGrainedNotifier {
               continue;
           }
 
-          if (Constants.JOB_TRIGGERD_MENTION.equals(mention.getTo())) {
+          if (Constants.JOB_TRIGGERED_MENTION.equals(mention.getTo())) {
               Cause.UserIdCause cause = (Cause.UserIdCause)r.getCause(Cause.UserIdCause.class);
 
               if (cause == null) {
                   continue;
               }
 
-              User triggerdUser = User.get(cause.getUserId());
-              if (triggerdUser == null) {
+              User triggeredUser = User.get(cause.getUserId());
+              if (triggeredUser == null) {
                   continue;
               }
 
-              String mail = MailAddressResolver.resolve(triggerdUser);
+              String mail = MailAddressResolver.resolve(triggeredUser);
 
               if (mail == null || "".equals(mail)) {
                   continue;
