@@ -251,18 +251,26 @@ public class ActiveNotifier implements FineGrainedNotifier {
     }
 
     String getMentionText(AbstractBuild r) {
+      return getMentionText(r, null);
+    }
+
+    String getMentionText(AbstractBuild r, AbstractBuild original) {
+      if (original == null) {
+        original = r;
+      }
+
       Cause.UpstreamCause c = (Cause.UpstreamCause)r.getCause(Cause.UpstreamCause.class);
       if (c != null) {
           String upProjectName = c.getUpstreamProject();
           int buildNumber = c.getUpstreamBuild();
           AbstractProject project = Hudson.getInstance().getItemByFullName(upProjectName, AbstractProject.class);
           AbstractBuild upBuild = (AbstractBuild)project.getBuildByNumber(buildNumber);
-          return getMentionText(upBuild);
+          return getMentionText(upBuild, original);
       }
 
       StringBuffer text = new StringBuffer();
 
-      String statusMessage = MessageBuilder.getStatusMessage(r);
+      String statusMessage = MessageBuilder.getStatusMessage(original);
       for (Mention mention: notifier.getMentionList()) {
           if (! mention.getTiming().equals(NotificationTiming.forStatusMessage(statusMessage))) {
               continue;
