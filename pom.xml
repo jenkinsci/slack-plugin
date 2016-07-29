@@ -181,6 +181,12 @@
             <artifactId>mailer</artifactId>
             <version>1.8</version>
         </dependency>
+        <dependency>
+            <groupId>com.sonyericsson.hudson.plugins.rebuild</groupId>
+            <artifactId>rebuild</artifactId>
+            <version>1.25</version>
+            <optional>true</optional>
+        </dependency>
     </dependencies>
 
     <build>

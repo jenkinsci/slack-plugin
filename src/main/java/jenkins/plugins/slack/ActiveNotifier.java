@@ -260,6 +260,14 @@ public class ActiveNotifier implements FineGrainedNotifier {
       }
 
       Cause.UpstreamCause c = (Cause.UpstreamCause)r.getCause(Cause.UpstreamCause.class);
+
+      //Ignore RebuildCause for sending a mention to user who executed rebuild
+      if (Jenkins.getInstance().getPlugin("rebuild") != null) {
+          if (c instanceof com.sonyericsson.rebuild.RebuildCause) {
+            c = null;
+          }
+      }
+
       if (c != null) {
           String upProjectName = c.getUpstreamProject();
           int buildNumber = c.getUpstreamBuild();
