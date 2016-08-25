@@ -1,5 +1,7 @@
 package jenkins.plugins.slack;
 
+import com.cloudbees.plugins.credentials.common.StandardListBoxModel;
+import com.cloudbees.plugins.credentials.domains.HostnameRequirement;
 import hudson.EnvVars;
 import hudson.Extension;
 import hudson.Launcher;
@@ -8,15 +10,18 @@ import hudson.model.AbstractProject;
 import hudson.model.BuildListener;
 import hudson.model.Descriptor;
 import hudson.model.listeners.ItemListener;
+import hudson.security.ACL;
 import hudson.tasks.BuildStepDescriptor;
 import hudson.tasks.BuildStepMonitor;
 import hudson.tasks.Notifier;
 import hudson.tasks.Publisher;
 import hudson.util.FormValidation;
+import hudson.util.ListBoxModel;
 import jenkins.model.Jenkins;
 import jenkins.model.JenkinsLocationConfiguration;
 import net.sf.json.JSONObject;
 import org.apache.commons.lang.StringUtils;
+import org.jenkinsci.plugins.plaincredentials.StringCredentials;
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.QueryParameter;
 import org.kohsuke.stapler.StaplerRequest;
@@ -26,6 +31,8 @@ import java.io.IOException;
 import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+
+import static com.cloudbees.plugins.credentials.CredentialsProvider.lookupCredentials;
 
 public class SlackNotifier extends Notifier {
 
@@ -262,6 +269,21 @@ public class SlackNotifier extends Notifier {
             return sendAs;
         }
 
+        @SuppressWarnings("unused")
+        public ListBoxModel doFillTokenCredentialIdItems() {
+            if (!Jenkins.getInstance().hasPermission(Jenkins.ADMINISTER)) {
+                return new ListBoxModel();
+            }
+            return new StandardListBoxModel()
+                    .withEmptySelection()
+                    .withAll(lookupCredentials(
+                            StringCredentials.class,
+                            Jenkins.getInstance(),
+                            ACL.SYSTEM,
+                            new HostnameRequirement("*.slack.com"))
+                    );
+        }
+
         public boolean isApplicable(Class<? extends AbstractProject> aClass) {
             return true;
         }
@@ -270,7 +292,7 @@ public class SlackNotifier extends Notifier {
         public SlackNotifier newInstance(StaplerRequest sr, JSONObject json) {
             String teamDomain = sr.getParameter("slackTeamDomain");
             String token = sr.getParameter("slackToken");
-            String tokenCredentialId = sr.getParameter("slackTokenCredentialId");
+            String tokenCredentialId = json.getString("tokenCredentialId");
             String room = sr.getParameter("slackRoom");
             boolean startNotification = "true".equals(sr.getParameter("slackStartNotification"));
             boolean notifySuccess = "true".equals(sr.getParameter("slackNotifySuccess"));
@@ -293,7 +315,7 @@ public class SlackNotifier extends Notifier {
         public boolean configure(StaplerRequest sr, JSONObject formData) throws FormException {
             teamDomain = sr.getParameter("slackTeamDomain");
             token = sr.getParameter("slackToken");
-            tokenCredentialId = sr.getParameter("slackTokenCredentialId");
+            tokenCredentialId = formData.getJSONObject("slack").getString("tokenCredentialId");
             room = sr.getParameter("slackRoom");
             buildServerUrl = sr.getParameter("slackBuildServerUrl");
             sendAs = sr.getParameter("slackSendAs");
@@ -319,7 +341,7 @@ public class SlackNotifier extends Notifier {
 
         public FormValidation doTestConnection(@QueryParameter("slackTeamDomain") final String teamDomain,
                                                @QueryParameter("slackToken") final String authToken,
-                                               @QueryParameter("slackTokenCredentialId") final String authTokenCredentialId,
+                                               @QueryParameter("tokenCredentialId") final String authTokenCredentialId,
                                                @QueryParameter("slackRoom") final String room,
                                                @QueryParameter("slackBuildServerUrl") final String buildServerUrl) throws FormException {
             try {

@@ -1,5 +1,5 @@
 <j:jelly xmlns:j="jelly:core" xmlns:st="jelly:stapler" xmlns:d="jelly:define" xmlns:l="/lib/layout"
-         xmlns:t="/lib/hudson" xmlns:f="/lib/form">
+         xmlns:t="/lib/hudson" xmlns:f="/lib/form" xmlns:c="/lib/credentials">
     <f:entry title="Notify Build Start">
         <f:checkbox name="slackStartNotification" value="true" checked="${instance.getStartNotification()}"/>
     </f:entry>
@@ -38,7 +38,7 @@
         </f:entry>
 
         <f:optionalBlock name="includeCustomMessage" title="Include Custom Message" checked="${instance.includeCustomMessage()}">
-            <f:entry title="Custom Message" help="${rootURL}/plugin/slack/help-projectConfig-slackCustomMessage.html">
+            <f:entry title="Custom Message" help="/plugin/slack/help-projectConfig-slackCustomMessage.html">
                 <f:textarea name="customMessage" value="${instance.getCustomMessage()}"/>
             </f:entry>
         </f:optionalBlock>
@@ -51,23 +51,23 @@
             </select>
         </f:entry>
 
-        <f:entry title="Team Subdomain" help="${rootURL}/plugin/slack/help-projectConfig-slackTeamDomain.html">
+        <f:entry title="Team Subdomain" help="/plugin/slack/help-projectConfig-slackTeamDomain.html">
             <f:textbox name="slackTeamDomain" value="${instance.getTeamDomain()}"/>
         </f:entry>
 
-        <f:entry title="Integration Token" help="${rootURL}/plugin/slack/help-projectConfig-slackToken.html">
+        <f:entry title="Integration Token" help="/plugin/slack/help-projectConfig-slackToken.html">
             <f:textbox name="slackToken" value="${instance.getAuthToken()}"/>
         </f:entry>
 
-        <f:entry title="Integration Token Credential ID" help="${rootURL}/plugin/slack/help-projectConfig-slackTokenCredentialId.html">
-            <f:textbox name="slackTokenCredentialId" value="${instance.getAuthTokenCredentialId()}"/>
+        <f:entry title="Integration Token Credential ID" help="/plugin/slack/help-projectConfig-slackTokenCredentialId.html" field="tokenCredentialId" name="tokenCredentialId" >
+            <c:select value="${instance.getAuthTokenCredentialId()}"/>
         </f:entry>
 
-        <f:entry title="Project Channel" help="${rootURL}/plugin/slack/help-projectConfig-slackRoom.html">
+        <f:entry title="Project Channel" help="/plugin/slack/help-projectConfig-slackRoom.html">
             <f:textbox name="slackRoom" value="${instance.getRoom()}"/>
         </f:entry>
         <f:validateButton
                 title="${%Test Connection}" progress="${%Testing...}"
-                method="testConnection" with="slackTeamDomain,slackToken,slackTokenCredentialId,slackRoom"/>
+                method="testConnection" with="slackTeamDomain,slackToken,tokenCredentialId,slackRoom"/>
     </f:advanced>
 </j:jelly>
