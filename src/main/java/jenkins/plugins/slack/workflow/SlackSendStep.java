@@ -8,6 +8,7 @@ import hudson.Util;
 import hudson.model.Project;
 import hudson.model.TaskListener;
 import hudson.security.ACL;
+import hudson.util.FormValidation;
 import hudson.util.ListBoxModel;
 import jenkins.model.Jenkins;
 import jenkins.plugins.slack.Messages;
@@ -22,6 +23,7 @@ import org.jenkinsci.plugins.workflow.steps.StepContextParameter;
 import org.kohsuke.stapler.AncestorInPath;
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.DataBoundSetter;
+import org.kohsuke.stapler.QueryParameter;
 
 import javax.annotation.Nonnull;
 import javax.inject.Inject;
@@ -135,6 +137,12 @@ public class SlackSendStep extends AbstractStepImpl {
                             ACL.SYSTEM,
                             new HostnameRequirement("*.slack.com"))
                     );
+        }
+
+        //WARN users that they should not use the plain/exposed token, but rather the token credential id
+        public FormValidation doCheckToken(@QueryParameter String value) {
+            //always show the warning - TODO investigate if there is a better way to handle this
+            return FormValidation.warning("Exposing your Integration Token is a security risk. Please use the Integration Token Credential ID");
         }
     }
 

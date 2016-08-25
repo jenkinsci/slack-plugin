@@ -11,7 +11,7 @@
         <f:entry field="channel" title="Channel">
             <f:textbox />
         </f:entry>
-        <f:entry field="tokenCredentialId" title="Integration Token">
+        <f:entry field="tokenCredentialId" title="Integration Token Credential ID">
              <c:select/>
         </f:entry>
         <f:entry field="token" title="Integration Token">
