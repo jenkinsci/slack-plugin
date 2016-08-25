@@ -56,7 +56,7 @@
         </f:entry>
 
         <f:entry title="Integration Token" help="/plugin/slack/help-projectConfig-slackToken.html">
-            <f:textbox name="slackToken" value="${instance.getAuthToken()}"/>
+            <f:textbox field="token" name="slackToken" value="${instance.getAuthToken()}"/>
         </f:entry>
 
         <f:entry title="Integration Token Credential ID" help="/plugin/slack/help-projectConfig-slackTokenCredentialId.html" field="tokenCredentialId" name="tokenCredentialId" >
