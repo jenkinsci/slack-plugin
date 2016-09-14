@@ -48,6 +48,8 @@ public class SlackNotifier extends Notifier {
     private CommitInfoChoice commitInfoChoice;
     private boolean includeCustomMessage;
     private String customMessage;
+    private SlackIntegrationChoice slackIntegrationChoice;
+    private String webhookUrl;
 
     @Override
     public DescriptorImpl getDescriptor() {
@@ -128,12 +130,21 @@ public class SlackNotifier extends Notifier {
         return customMessage;
     }
 
+    public SlackIntegrationChoice getSlackIntegrationChoice() {
+        return slackIntegrationChoice;
+    }
+
+    public String getWebhookUrl() {
+        return webhookUrl;
+    }
+
     @DataBoundConstructor
     public SlackNotifier(final String teamDomain, final String authToken, final String room, final String buildServerUrl,
                          final String sendAs, final boolean startNotification, final boolean notifyAborted, final boolean notifyFailure,
                          final boolean notifyNotBuilt, final boolean notifySuccess, final boolean notifyUnstable, final boolean notifyBackToNormal,
                          final boolean notifyRepeatedFailure, final boolean includeTestSummary, CommitInfoChoice commitInfoChoice,
-                         boolean includeCustomMessage, String customMessage) {
+                         boolean includeCustomMessage, String customMessage, SlackIntegrationChoice slackIntegrationChoice,
+                         String webhookUrl) {
         super();
         this.teamDomain = teamDomain;
         this.authToken = authToken;
@@ -152,6 +163,8 @@ public class SlackNotifier extends Notifier {
         this.commitInfoChoice = commitInfoChoice;
         this.includeCustomMessage = includeCustomMessage;
         this.customMessage = customMessage;
+        this.slackIntegrationChoice = slackIntegrationChoice;
+        this.webhookUrl = webhookUrl;
     }
 
     public BuildStepMonitor getRequiredMonitorService() {
@@ -159,19 +172,6 @@ public class SlackNotifier extends Notifier {
     }
 
     public SlackService newSlackService(AbstractBuild r, BuildListener listener) {
-        String teamDomain = this.teamDomain;
-        if (StringUtils.isEmpty(teamDomain)) {
-            teamDomain = getDescriptor().getTeamDomain();
-        }
-        String authToken = this.authToken;
-        if (StringUtils.isEmpty(authToken)) {
-            authToken = getDescriptor().getToken();
-        }
-        String room = this.room;
-        if (StringUtils.isEmpty(room)) {
-            room = getDescriptor().getRoom();
-        }
-
         EnvVars env = null;
         try {
             env = r.getEnvironment(listener);
@@ -179,11 +179,40 @@ public class SlackNotifier extends Notifier {
             listener.getLogger().println("Error retrieving environment vars: " + e.getMessage());
             env = new EnvVars();
         }
-        teamDomain = env.expand(teamDomain);
-        authToken = env.expand(authToken);
-        room = env.expand(room);
 
-        return new StandardSlackService(teamDomain, authToken, room);
+        switch (this.slackIntegrationChoice) {
+            case APP:
+                String teamDomain = this.teamDomain;
+                if (StringUtils.isEmpty(teamDomain)) {
+                    teamDomain = getDescriptor().getTeamDomain();
+                }
+                String authToken = this.authToken;
+                if (StringUtils.isEmpty(authToken)) {
+                    authToken = getDescriptor().getToken();
+                }
+                String room = this.room;
+                if (StringUtils.isEmpty(room)) {
+                    room = getDescriptor().getRoom();
+                }
+
+                teamDomain = env.expand(teamDomain);
+                authToken = env.expand(authToken);
+                room = env.expand(room);
+
+                return new StandardSlackService(teamDomain, authToken, room);
+            case INCOMING_WEBHOOK:
+                String webhookUrl = this.webhookUrl;
+                if (StringUtils.isEmpty(webhookUrl)) {
+                    webhookUrl = getDescriptor().getWebhookUrl();
+                }
+
+                webhookUrl = env.expand(webhookUrl);
+
+                return new IncomingHookSlackService(webhookUrl);
+            default:
+                throw new IllegalStateException(String.format("Unrecognised %s object.",
+                        SlackIntegrationChoice.class.getSimpleName()));
+        }
     }
 
     @Override
@@ -213,8 +242,11 @@ public class SlackNotifier extends Notifier {
         private String room;
         private String buildServerUrl;
         private String sendAs;
+        private SlackIntegrationChoice slackIntegrationChoice;
+        private String webhookUrl;
 
         public static final CommitInfoChoice[] COMMIT_INFO_CHOICES = CommitInfoChoice.values();
+        public static final SlackIntegrationChoice[] SLACK_INTEGRATION_CHOICES = SlackIntegrationChoice.values();
 
         public DescriptorImpl() {
             load();
@@ -246,6 +278,14 @@ public class SlackNotifier extends Notifier {
             return sendAs;
         }
 
+        public SlackIntegrationChoice getSlackIntegrationChoice() {
+            return slackIntegrationChoice;
+        }
+
+        public String getWebhookUrl() {
+            return webhookUrl;
+        }
+
         public boolean isApplicable(Class<? extends AbstractProject> aClass) {
             return true;
         }
@@ -267,9 +307,12 @@ public class SlackNotifier extends Notifier {
             CommitInfoChoice commitInfoChoice = CommitInfoChoice.forDisplayName(sr.getParameter("slackCommitInfoChoice"));
             boolean includeCustomMessage = "on".equals(sr.getParameter("includeCustomMessage"));
             String customMessage = sr.getParameter("customMessage");
+            SlackIntegrationChoice slackIntegrationChoice = SlackIntegrationChoice.forDisplayName(sr.getParameter("slackIntegrationChoice"));
+            String webhookUrl = sr.getParameter("slackWebhookUrl");
             return new SlackNotifier(teamDomain, token, room, buildServerUrl, sendAs, startNotification, notifyAborted,
                     notifyFailure, notifyNotBuilt, notifySuccess, notifyUnstable, notifyBackToNormal, notifyRepeatedFailure,
-                    includeTestSummary, commitInfoChoice, includeCustomMessage, customMessage);
+                    includeTestSummary, commitInfoChoice, includeCustomMessage, customMessage, slackIntegrationChoice,
+                    webhookUrl);
         }
 
         @Override
@@ -286,12 +329,22 @@ public class SlackNotifier extends Notifier {
             if (buildServerUrl != null && !buildServerUrl.endsWith("/")) {
                 buildServerUrl = buildServerUrl + "/";
             }
+            slackIntegrationChoice = SlackIntegrationChoice.forDisplayName(sr.getParameter("slackIntegrationChoice"));
+            webhookUrl = sr.getParameter("slackWebhookUrl");
             save();
             return super.configure(sr, formData);
         }
 
         SlackService getSlackService(final String teamDomain, final String authToken, final String room) {
-            return new StandardSlackService(teamDomain, authToken, room);
+            switch (this.slackIntegrationChoice) {
+                case APP:
+                    return new StandardSlackService(teamDomain, authToken, room);
+                case INCOMING_WEBHOOK:
+                    return new IncomingHookSlackService(webhookUrl);
+                default:
+                    throw new IllegalStateException(String.format("Unrecognised %s object.",
+                            SlackIntegrationChoice.class.getSimpleName()));
+            }
         }
 
         @Override
@@ -348,6 +401,8 @@ public class SlackNotifier extends Notifier {
         private boolean showCommitList;
         private boolean includeCustomMessage;
         private String customMessage;
+        private SlackIntegrationChoice slackIntegrationChoice;
+        private String webhookUrl;
 
         @DataBoundConstructor
         public SlackJobProperty(String teamDomain,
@@ -364,7 +419,9 @@ public class SlackNotifier extends Notifier {
                                 boolean includeTestSummary,
                                 boolean showCommitList,
                                 boolean includeCustomMessage,
-                                String customMessage) {
+                                String customMessage,
+                                SlackIntegrationChoice slackIntegrationChoice,
+                                String webhookUrl) {
             this.teamDomain = teamDomain;
             this.token = token;
             this.room = room;
@@ -380,6 +437,8 @@ public class SlackNotifier extends Notifier {
             this.showCommitList = showCommitList;
             this.includeCustomMessage = includeCustomMessage;
             this.customMessage = customMessage;
+            this.slackIntegrationChoice = slackIntegrationChoice;
+            this.webhookUrl = webhookUrl;
         }
 
         @Exported
@@ -462,6 +521,15 @@ public class SlackNotifier extends Notifier {
             return customMessage;
         }
 
+        @Exported
+        public SlackIntegrationChoice getSlackIntegrationChoice() {
+            return slackIntegrationChoice;
+        }
+
+        @Exported
+        public String getWebhookUrl() {
+            return webhookUrl;
+        }
     }
 
     @Extension public static final class Migrator extends ItemListener {
@@ -514,6 +582,8 @@ public class SlackNotifier extends Notifier {
                     slackNotifier.commitInfoChoice = slackJobProperty.getShowCommitList() ? CommitInfoChoice.AUTHORS_AND_TITLES : CommitInfoChoice.NONE;
                     slackNotifier.includeCustomMessage = slackJobProperty.includeCustomMessage();
                     slackNotifier.customMessage = slackJobProperty.getCustomMessage();
+                    slackNotifier.slackIntegrationChoice = slackJobProperty.getSlackIntegrationChoice();
+                    slackJobProperty.webhookUrl = slackJobProperty.getWebhookUrl();
                 }
 
                 try {
