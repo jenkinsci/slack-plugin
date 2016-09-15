@@ -51,17 +51,35 @@
             </select>
         </f:entry>
 
-        <f:entry title="Team Subdomain" help="${rootURL}/plugin/slack/help-projectConfig-slackTeamDomain.html">
-            <f:textbox name="slackTeamDomain" value="${instance.getTeamDomain()}"/>
+        <f:entry title="Slack integration type" description="Type of integration used to send messages to Slack">
+            <select class="setting-input" name="slackIntegrationChoice">
+                <j:forEach var="choice" items="${descriptor.SLACK_INTEGRATION_CHOICES}">
+                    <f:option selected="${instance.getSlackIntegrationChoice() == choice}">${choice.toString()}</f:option>
+                </j:forEach>
+            </select>
         </f:entry>
 
-        <f:entry title="Integration Token" help="${rootURL}/plugin/slack/help-projectConfig-slackToken.html">
-            <f:textbox name="slackToken" value="${instance.getAuthToken()}"/>
-        </f:entry>
+        <j:choose>
+            <j:when test="${instance.getSlackIntegrationChoice() == SlackIntegrationChoice.INCOMING_WEBHOOK}">
+                <f:entry title="Webhook URL" help="${rootURL}/plugin/slack/help-projectConfig-slackWebhookUrl.html">
+                    <f:textbox name="slackWebhookUrl" value="${instance.getWebhookUrl()}"/>
+                </f:entry>
+            </j:when>
+            <j:otherwise>
+                <f:entry title="Team Subdomain" help="${rootURL}/plugin/slack/help-projectConfig-slackTeamDomain.html">
+                    <f:textbox name="slackTeamDomain" value="${instance.getTeamDomain()}"/>
+                </f:entry>
 
-        <f:entry title="Project Channel" help="${rootURL}/plugin/slack/help-projectConfig-slackRoom.html">
-            <f:textbox name="slackRoom" value="${instance.getRoom()}"/>
-        </f:entry>
+                <f:entry title="Integration Token" help="${rootURL}/plugin/slack/help-projectConfig-slackToken.html">
+                    <f:textbox name="slackToken" value="${instance.getAuthToken()}"/>
+                </f:entry>
+
+                <f:entry title="Project Channel" help="${rootURL}/plugin/slack/help-projectConfig-slackRoom.html">
+                    <f:textbox name="slackRoom" value="${instance.getRoom()}"/>
+                </f:entry>
+            </j:otherwise>
+        </j:choose>
+
         <f:validateButton
                 title="${%Test Connection}" progress="${%Testing...}"
                 method="testConnection" with="slackTeamDomain,slackToken,slackRoom"/>
