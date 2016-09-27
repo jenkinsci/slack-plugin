@@ -17,6 +17,9 @@
         <f:entry field="teamDomain" title="Team Domain">
             <f:textbox />
         </f:entry>
+        <f:entry field="proxyServerUrl" title="Proxy Server">
+            <f:textbox />
+        </f:entry>
         <f:entry field="failOnError">
             <f:checkbox title="Fail On Error" default="false"/>
         </f:entry>

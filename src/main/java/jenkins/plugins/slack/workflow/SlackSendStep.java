@@ -29,6 +29,7 @@ public class SlackSendStep extends AbstractStepImpl {
     private String token;
     private String channel;
     private String teamDomain;
+    private String proxyServerUri;
     private boolean failOnError;
 
 
@@ -71,6 +72,15 @@ public class SlackSendStep extends AbstractStepImpl {
     @DataBoundSetter
     public void setTeamDomain(String teamDomain) {
         this.teamDomain = Util.fixEmpty(teamDomain);
+    }
+
+    @DataBoundSetter
+    public void setProxyServerUri(String proxyServerUri) {
+        this.proxyServerUri = Util.fixEmpty(proxyServerUri);
+    }
+
+    public String getProxyServerUri() {
+        return proxyServerUri;
     }
 
     public boolean isFailOnError() {
@@ -132,11 +142,12 @@ public class SlackSendStep extends AbstractStepImpl {
             String token = step.token != null ? step.token : slackDesc.getToken();
             String channel = step.channel != null ? step.channel : slackDesc.getRoom();
             String color = step.color != null ? step.color : "";
+            String proxy = step.proxyServerUri != null ? step.proxyServerUri : slackDesc.getProxyServerUrl();
 
             //placing in console log to simplify testing of retrieving values from global config or from step field; also used for tests
             listener.getLogger().println(Messages.SlackSendStepConfig(step.teamDomain == null, step.token == null, step.channel == null, step.color == null));
 
-            SlackService slackService = getSlackService(team, token, channel);
+            SlackService slackService = getSlackService(team, token, channel, proxy);
             boolean publishSuccess = slackService.publish(step.message, color);
             if (!publishSuccess && step.failOnError) {
                 throw new AbortException(Messages.NotificationFailed());
@@ -147,8 +158,8 @@ public class SlackSendStep extends AbstractStepImpl {
         }
 
         //streamline unit testing
-        SlackService getSlackService(String team, String token, String channel) {
-            return new StandardSlackService(team, token, channel);
+        SlackService getSlackService(String team, String token, String channel, String proxyServerUri) {
+            return new StandardSlackService(team, token, channel, proxyServerUri);
         }
 
     }
