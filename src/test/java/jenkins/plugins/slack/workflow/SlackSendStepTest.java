@@ -58,6 +58,7 @@ public class SlackSendStepTest {
         slackSendStep.setTeamDomain("teamDomain");
         slackSendStep.setChannel("channel");
         slackSendStep.setColor("good");
+        slackSendStep.setProxyServerUri("proxy");
         stepExecution.step = slackSendStep;
 
         when(Jenkins.getInstance()).thenReturn(jenkins);
@@ -70,11 +71,11 @@ public class SlackSendStepTest {
         when(taskListenerMock.getLogger()).thenReturn(printStreamMock);
         doNothing().when(printStreamMock).println();
 
-        when(stepExecution.getSlackService(anyString(), anyString(), anyString())).thenReturn(slackServiceMock);
+        when(stepExecution.getSlackService(anyString(), anyString(), anyString(), anyString())).thenReturn(slackServiceMock);
         when(slackServiceMock.publish(anyString(), anyString())).thenReturn(true);
 
         stepExecution.run();
-        verify(stepExecution, times(1)).getSlackService("teamDomain", "token", "channel");
+        verify(stepExecution, times(1)).getSlackService("teamDomain", "token", "channel", "proxy");
         verify(slackServiceMock, times(1)).publish("message", "good");
         assertFalse(stepExecution.step.isFailOnError());
     }
@@ -92,14 +93,15 @@ public class SlackSendStepTest {
         when(slackDescMock.getTeamDomain()).thenReturn("globalTeamDomain");
         when(slackDescMock.getToken()).thenReturn("globalToken");
         when(slackDescMock.getRoom()).thenReturn("globalChannel");
+        when(slackDescMock.getProxyServerUrl()).thenReturn("globalProxy");
 
         when(taskListenerMock.getLogger()).thenReturn(printStreamMock);
         doNothing().when(printStreamMock).println();
 
-        when(stepExecution.getSlackService(anyString(), anyString(), anyString())).thenReturn(slackServiceMock);
+        when(stepExecution.getSlackService(anyString(), anyString(), anyString(), anyString())).thenReturn(slackServiceMock);
 
         stepExecution.run();
-        verify(stepExecution, times(1)).getSlackService("globalTeamDomain", "globalToken", "globalChannel");
+        verify(stepExecution, times(1)).getSlackService("globalTeamDomain", "globalToken", "globalChannel", "globalProxy");
         verify(slackServiceMock, times(1)).publish("message", "");
         assertNull(stepExecution.step.getTeamDomain());
         assertNull(stepExecution.step.getToken());
@@ -122,7 +124,7 @@ public class SlackSendStepTest {
         when(taskListenerMock.getLogger()).thenReturn(printStreamMock);
         doNothing().when(printStreamMock).println();
 
-        when(stepExecution.getSlackService(anyString(), anyString(), anyString())).thenReturn(slackServiceMock);
+        when(stepExecution.getSlackService(anyString(), anyString(), anyString(), anyString())).thenReturn(slackServiceMock);
 
         stepExecution.run();
         verify(slackServiceMock, times(1)).publish("message", "");
