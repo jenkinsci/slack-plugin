@@ -5,6 +5,7 @@ import hudson.PluginManager;
 import hudson.Util;
 import hudson.model.AbstractBuild;
 import hudson.model.AbstractProject;
+import hudson.model.Action;
 import hudson.model.BuildListener;
 import hudson.model.Cause;
 import hudson.model.CauseAction;
@@ -25,6 +26,7 @@ import org.apache.commons.lang.StringUtils;
 
 import java.lang.reflect.Method;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
@@ -259,18 +261,12 @@ public class ActiveNotifier implements FineGrainedNotifier {
         original = r;
       }
 
-      Cause.UpstreamCause c = (Cause.UpstreamCause)r.getCause(Cause.UpstreamCause.class);
+      List<Cause> causes = getCausesFromBuild(r);
 
-      //Ignore RebuildCause for sending a mention to user who executed rebuild
-      if (Jenkins.getInstance().getPlugin("rebuild") != null) {
-          if (c instanceof com.sonyericsson.rebuild.RebuildCause) {
-            c = null;
-          }
-      }
-
-      if (c != null) {
-          String upProjectName = c.getUpstreamProject();
-          int buildNumber = c.getUpstreamBuild();
+      if (causes.size() == 1 && (causes.get(0) instanceof Cause.UpstreamCause)) {
+          Cause.UpstreamCause updtreamCause = (Cause.UpstreamCause)causes.get(0);
+          String upProjectName = updtreamCause.getUpstreamProject();
+          int buildNumber = updtreamCause.getUpstreamBuild();
           AbstractProject project = Hudson.getInstance().getItemByFullName(upProjectName, AbstractProject.class);
           AbstractBuild upBuild = (AbstractBuild)project.getBuildByNumber(buildNumber);
           return getMentionText(upBuild, original);
@@ -285,7 +281,7 @@ public class ActiveNotifier implements FineGrainedNotifier {
           }
 
           if (Constants.JOB_TRIGGERED_MENTION.equals(mention.getTo())) {
-              Cause.UserIdCause cause = (Cause.UserIdCause)r.getCause(Cause.UserIdCause.class);
+              Cause.UserIdCause cause = (Cause.UserIdCause)getCauseFromBuild(r, Cause.UserIdCause.class);
 
               if (cause == null) {
                   continue;
@@ -345,6 +341,35 @@ public class ActiveNotifier implements FineGrainedNotifier {
           }
       }
       return text.toString();
+    }
+
+    private List<Cause> getCausesFromBuild(AbstractBuild build) {
+        List<Cause> causes = new ArrayList<Cause>();
+
+        for (Action action: (List<Action>)build.getActions()) {
+            if (action instanceof CauseAction) {
+                for (Cause cause: (List<Cause>)(((CauseAction)action).getCauses())) {
+                  //Ignore RebuildCause for sending a mention to user who executed rebuild
+                  if (Jenkins.getInstance().getPlugin("rebuild") != null) {
+                      if (!(cause instanceof com.sonyericsson.rebuild.RebuildCause)) {
+                          causes.add(cause);
+                      }
+                  } else {
+                      causes.add(cause);
+                  }
+                }
+            }
+        }
+        return causes;
+    }
+
+    private <T extends Cause> T getCauseFromBuild(AbstractBuild build, Class<T> type) {
+      for (Cause cause: getCausesFromBuild(build)) {
+        if (type.isInstance(cause)) {
+          return type.cast(cause);
+        }
+      }
+      return null;
     }
 
     public static class MessageBuilder {
