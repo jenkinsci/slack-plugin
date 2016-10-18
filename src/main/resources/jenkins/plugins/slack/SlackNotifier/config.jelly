@@ -59,6 +59,10 @@
             <f:textbox name="slackToken" value="${instance.getAuthToken()}"/>
         </f:entry>
 
+        <f:entry title="Is Bot User?" help="${rootURL}/plugin/slack/help-projectConfig-slackToken.html">
+            <f:checkbox name="slackBotUser" value="true" checked="${instance.getBotUser()}"/>
+        </f:entry>
+
         <f:entry title="Project Channel" help="${rootURL}/plugin/slack/help-projectConfig-slackRoom.html">
             <f:textbox name="slackRoom" value="${instance.getRoom()}"/>
         </f:entry>

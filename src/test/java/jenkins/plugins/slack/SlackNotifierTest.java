@@ -47,7 +47,7 @@ public class SlackNotifierTest extends TestCase {
         }
         descriptor.setSlackService(slackServiceStub);
         try {
-            FormValidation result = descriptor.doTestConnection("teamDomain", "authToken", "room", "buildServerUrl");
+            FormValidation result = descriptor.doTestConnection("teamDomain", "authToken", false, "room", "buildServerUrl");
             assertEquals(result.kind, expectedResult);
         } catch (Descriptor.FormException e) {
             e.printStackTrace();
