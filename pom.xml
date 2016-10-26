@@ -85,6 +85,16 @@
             <version>1.10</version>
             <scope>test</scope>
         </dependency>
+        <dependency>
+            <groupId>org.jenkins-ci.plugins</groupId>
+            <artifactId>credentials</artifactId>
+            <version>1.25</version>
+        </dependency>
+        <dependency>
+            <groupId>org.jenkins-ci.plugins</groupId>
+            <artifactId>plain-credentials</artifactId>
+            <version>1.1</version>
+        </dependency>
         <!-- only here to prevent from being included inside hpi for hudson parent, not needed by project at all -->
         <dependency>
             <groupId>log4j</groupId>
