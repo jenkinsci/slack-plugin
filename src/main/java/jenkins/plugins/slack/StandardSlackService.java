@@ -54,7 +54,7 @@ public class StandardSlackService implements SlackService {
         boolean result = true;
         for (String roomId : roomIds) {
             String url = "https://" + teamDomain + "." + host + "/services/hooks/jenkins-ci?token=" + getTokenToUse();
-            logger.info("Posting: to " + roomId + " on " + teamDomain + " using " + url +": " + message + " " + color);
+            logger.fine("Posting: to " + roomId + " on " + teamDomain + " using " + url +": " + message + " " + color);
             HttpClient client = getHttpClient();
             PostMethod post = new PostMethod(url);
             JSONObject json = new JSONObject();
@@ -92,7 +92,7 @@ public class StandardSlackService implements SlackService {
                     result = false;
                 }
                 else {
-                    logger.info("Posting succeeded");
+                    logger.fine("Posting succeeded");
                 }
             } catch (Exception e) {
                 logger.log(Level.WARNING, "Error posting to Slack", e);
@@ -108,12 +108,12 @@ public class StandardSlackService implements SlackService {
         if (authTokenCredentialId != null && !authTokenCredentialId.isEmpty()) {
             StringCredentials credentials = lookupCredentials(authTokenCredentialId);
             if (credentials != null) {
-                logger.info("Using Integration Token Credential ID.");
+                logger.fine("Using Integration Token Credential ID.");
                 return credentials.getSecret().getPlainText();
             }
         }
 
-        logger.info("Using Integration Token.");
+        logger.fine("Using Integration Token.");
 
         return token;
     }
