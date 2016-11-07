@@ -479,7 +479,7 @@ public class SlackNotifier extends Notifier {
 
     }
 
-    @Extension public static final class Migrator extends ItemListener {
+    @Extension(ordinal = 100) public static final class Migrator extends ItemListener {
         @SuppressWarnings("deprecation")
         @Override
         public void onLoaded() {
