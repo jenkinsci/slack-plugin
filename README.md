@@ -1,10 +1,27 @@
-# Slack plugin for Jenkins - [![Build Status][jenkins-status]][jenkins-builds] [![Slack Signup][slack-badge]][slack-signup]
+Slack plugin for Jenkins  [![Build Status][jenkins-status]][jenkins-builds] [![Slack Signup][slack-badge]][slack-signup]
+----------------------------------------------------------------
 
-Started with a fork of the HipChat plugin:
+Provides Jenkins notification integration with Slack.
 
-https://github.com/jlewallen/jenkins-hipchat-plugin
+## Install Instructions
 
-Which was, in turn, a fork of the Campfire plugin.
+1. Get a Slack account: https://slack.com/
+2. Configure the Jenkins integration: https://my.slack.com/services/new/jenkins-ci
+3. Install this plugin on your Jenkins server
+4. Configure it in your Jenkins job (and optionally as global configuration) and **add it as a Post-build action**.
+
+#### Security
+
+Use Jenkins Credentials and a credential ID to configure the Slack integration token. It is a security risk to expose your integration token using the previous *Integration Token* setting.
+
+Create a new ***Secret text*** credential:
+![image](https://cloud.githubusercontent.com/assets/983526/17971588/6c26dfa0-6aa9-11e6-808c-3e139446e013.png)
+
+
+Select that credential as the value for the ***Integration Token Credential ID*** field:
+![image](https://cloud.githubusercontent.com/assets/983526/17971458/ec296bf6-6aa8-11e6-8d19-06d9f1c9d611.png)
+
+#### Jenkins Pipeline Support
 
 Includes [Jenkins Pipeline](https://github.com/jenkinsci/workflow-plugin) support as of version 2.0:
 
@@ -12,14 +29,7 @@ Includes [Jenkins Pipeline](https://github.com/jenkinsci/workflow-plugin) suppor
 slackSend color: 'good', message: 'Message from Jenkins Pipeline'
 ```
 
-# Jenkins Instructions
-
-1. Get a Slack account: https://slack.com/
-2. Configure the Jenkins integration: https://my.slack.com/services/new/jenkins-ci
-3. Install this plugin on your Jenkins server
-4. Configure it in your Jenkins job and **add it as a Post-build action**.
-
-# Developer instructions
+### Developer instructions
 
 Install Maven and JDK.  This was last build with Maven 3.2.5 and OpenJDK
 1.7.0\_75 on KUbuntu 14.04.

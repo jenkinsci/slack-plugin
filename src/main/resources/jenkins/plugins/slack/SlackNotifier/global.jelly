@@ -1,4 +1,4 @@
-<j:jelly xmlns:j="jelly:core" xmlns:st="jelly:stapler" xmlns:d="jelly:define" xmlns:l="/lib/layout" xmlns:t="/lib/hudson" xmlns:f="/lib/form">
+<j:jelly xmlns:j="jelly:core" xmlns:st="jelly:stapler" xmlns:d="jelly:define" xmlns:l="/lib/layout" xmlns:t="/lib/hudson" xmlns:f="/lib/form" xmlns:c="/lib/credentials">
   <!--
     This Jelly script is used to produce the global configuration option.
 
@@ -12,20 +12,20 @@
     so it should be straightforward to find them.
   -->
 <f:section title="Global Slack Notifier Settings" name="slack">
-    <f:entry title="Team Subdomain" help="${rootURL}/plugin/slack/help-globalConfig-slackTeamDomain.html">
+    <f:entry title="Team Subdomain" help="/plugin/slack/help-globalConfig-slackTeamDomain.html">
         <f:textbox field="teamDomain" name="slackTeamDomain" value="${descriptor.getTeamDomain()}" />
     </f:entry>
-    <f:entry title="Integration Token" help="${rootURL}/plugin/slack/help-globalConfig-slackToken.html">
+    <f:entry title="Integration Token" help="/plugin/slack/help-globalConfig-slackToken.html">
         <f:textbox field="token" name="slackToken" value="${descriptor.getToken()}" />
     </f:entry>
-    <f:entry title="Channel" help="${rootURL}/plugin/slack/help-globalConfig-slackRoom.html">
-        <f:textbox field="room" name="slackRoom" value="${descriptor.getRoom()}" />
+    <f:entry title="Integration Token Credential ID" field="tokenCredentialId" name="tokenCredentialId" help="/plugin/slack/help-globalConfig-tokenCredentialId.html">
+        <c:select/>
     </f:entry>
-    <f:entry title="Build Server URL" help="${rootURL}/plugin/slack/help-globalConfig-slackBuildServerUrl.html">
-        <f:textbox field="buildServerUrl" name="slackBuildServerUrl" value="${descriptor.getBuildServerUrl()}" />
+    <f:entry title="Channel" help="/plugin/slack/help-globalConfig-slackRoom.html">
+        <f:textbox field="room" name="slackRoom" value="${descriptor.getRoom()}" />
     </f:entry>
     <f:validateButton
         title="${%Test Connection}" progress="${%Testing...}"
-        method="testConnection" with="slackTeamDomain,slackToken,slackRoom,slackBuildServerUrl" />
+        method="testConnection" with="slackTeamDomain,slackToken,tokenCredentialId,slackRoom" />
   </f:section>
 </j:jelly>
