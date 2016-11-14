@@ -1,3 +1,22 @@
+#2.1 release notes
+
+New Features:
+
+* Added Jenkins Credentials support (#247)
+* Added support for display-url-api; will allow Blue Ocean to change display URLs (#245)
+* Added support for @here and other @mentions (#241)
+* Reduced log verbosity (#252)
+* Updated `@Extension` ordinal value to force earlier migration process (#261)
+
+UI Improvements:
+
+*  Added credentials selection widget (#247)
+
+Bug Fixes:
+
+* Fixe for Security issue [JENKINS-35503](https://issues.jenkins-ci.org/browse/JENKINS-35503) (#247)
+* Fixed documentation for Pipeline step (#220)
+
 # 2.0.1 release notes
 
 Bug Fixes:
