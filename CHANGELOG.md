@@ -12,7 +12,7 @@ UI Improvements:
 
 *  Added credentials selection widget (#247)
 
-Bug Fixes
+Bug Fixes:
 
 * Fixe for Security issue [JENKINS-35503](https://issues.jenkins-ci.org/browse/JENKINS-35503) (#247)
 * Fixed documentation for Pipeline step (#220)
