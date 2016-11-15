@@ -14,7 +14,7 @@
     <parent>
         <groupId>org.jenkins-ci.plugins</groupId>
         <artifactId>plugin</artifactId>
-        <version>2.6</version>
+        <version>1.609.2</version>
     </parent>
 
     <artifactId>slack</artifactId>
@@ -45,6 +45,13 @@
         <url>https://github.com/jenkinsci/slack-plugin</url>
         <tag>head</tag>
     </scm>
+    
+    <distributionManagement>
+      <repository>
+        <id>maven.jenkins-ci.org</id>
+        <url>https://repo.jenkins-ci.org/releases</url>
+      </repository>
+    </distributionManagement>
 
     <dependencies>
         <dependency>
