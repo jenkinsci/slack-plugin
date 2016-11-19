@@ -1,19 +1,34 @@
 package jenkins.plugins.slack;
 
-import hudson.ProxyConfiguration;
-import jenkins.model.Jenkins;
+import hudson.security.ACL;
+
 import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.HttpStatus;
 import org.apache.commons.httpclient.UsernamePasswordCredentials;
 import org.apache.commons.httpclient.auth.AuthScope;
 import org.apache.commons.httpclient.methods.PostMethod;
+
+import org.jenkinsci.plugins.plaincredentials.StringCredentials;
+
+import com.cloudbees.plugins.credentials.CredentialsMatcher;
+import com.cloudbees.plugins.credentials.CredentialsMatchers;
+import com.cloudbees.plugins.credentials.CredentialsProvider;
+import com.cloudbees.plugins.credentials.domains.DomainRequirement;
+
 import org.json.JSONArray;
 import org.json.JSONObject;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
+import java.util.Collections;
+import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+
+import jenkins.model.Jenkins;
+import hudson.ProxyConfiguration;
+
+import org.apache.commons.lang.StringUtils;
 
 public class StandardSlackService implements SlackService {
 
@@ -22,13 +37,15 @@ public class StandardSlackService implements SlackService {
     private String host = "slack.com";
     private String teamDomain;
     private String token;
+    private String authTokenCredentialId;
     private boolean botUser;
     private String[] roomIds;
 
-    public StandardSlackService(String teamDomain, String token, boolean botUser, String roomId) {
+    public StandardSlackService(String teamDomain, String token, String authTokenCredentialId, boolean botUser, String roomId) {
         super();
         this.teamDomain = teamDomain;
         this.token = token;
+        this.authTokenCredentialId = StringUtils.trim(authTokenCredentialId);
         this.botUser = botUser;
         this.roomIds = roomId.split("[,; ]+");
     }
@@ -64,7 +81,7 @@ public class StandardSlackService implements SlackService {
             String url;
             //prepare post methods for both requests types
             if (!botUser) {
-                url = "https://" + teamDomain + "." + host + "/services/hooks/jenkins-ci?token=" + token;
+                url = "https://" + teamDomain + "." + host + "/services/hooks/jenkins-ci?token=" + getTokenToUse();
                 post = new PostMethod(url);
                 JSONObject json = new JSONObject();
 
@@ -75,7 +92,7 @@ public class StandardSlackService implements SlackService {
                 post.addParameter("payload", json.toString());
 
             } else {
-                url = "https://slack.com/api/chat.postMessage?token=" + token +
+                url = "https://slack.com/api/chat.postMessage?token=" + getTokenToUse() +
                         "&channel=" + roomId +
                         "&link_names=1" +
                         "&as_user=true";
@@ -86,7 +103,7 @@ public class StandardSlackService implements SlackService {
                 }
                 post = new PostMethod(url);
             }
-            logger.info("Posting: to " + roomId + " on " + teamDomain + " using " + url + ": " + message + " " + color);
+            logger.fine("Posting: to " + roomId + " on " + teamDomain + " using " + url + ": " + message + " " + color);
             HttpClient client = getHttpClient();
             post.getParams().setContentCharset("UTF-8");
 
@@ -107,6 +124,26 @@ public class StandardSlackService implements SlackService {
             }
         }
         return result;
+    }
+
+    private String getTokenToUse() {
+        if (authTokenCredentialId != null && !authTokenCredentialId.isEmpty()) {
+            StringCredentials credentials = lookupCredentials(authTokenCredentialId);
+            if (credentials != null) {
+                logger.fine("Using Integration Token Credential ID.");
+                return credentials.getSecret().getPlainText();
+            }
+        }
+
+        logger.fine("Using Integration Token.");
+
+        return token;
+    }
+
+    private StringCredentials lookupCredentials(String credentialId) {
+        List<StringCredentials> credentials = CredentialsProvider.lookupCredentials(StringCredentials.class, Jenkins.getInstance(), ACL.SYSTEM, Collections.<DomainRequirement>emptyList());
+        CredentialsMatcher matcher = CredentialsMatchers.withId(credentialId);
+        return CredentialsMatchers.firstOrNull(credentials, matcher);
     }
 
     protected HttpClient getHttpClient() {
