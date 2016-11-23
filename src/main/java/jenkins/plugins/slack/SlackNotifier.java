@@ -8,6 +8,7 @@ import hudson.Launcher;
 import hudson.model.AbstractBuild;
 import hudson.model.AbstractProject;
 import hudson.model.BuildListener;
+import hudson.model.Item;
 import hudson.model.Descriptor;
 import hudson.model.listeners.ItemListener;
 import hudson.security.ACL;
@@ -18,7 +19,9 @@ import hudson.tasks.Publisher;
 import hudson.util.FormValidation;
 import hudson.util.ListBoxModel;
 import jenkins.model.Jenkins;
+import jenkins.plugins.slack.config.ItemConfigMigrator;
 import net.sf.json.JSONObject;
+
 import org.apache.commons.lang.StringUtils;
 import org.jenkinsci.plugins.displayurlapi.DisplayURLProvider;
 import org.jenkinsci.plugins.plaincredentials.StringCredentials;
@@ -29,7 +32,6 @@ import org.kohsuke.stapler.export.Exported;
 
 import java.io.IOException;
 import java.util.Map;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import static com.cloudbees.plugins.credentials.CredentialsProvider.lookupCredentials;
@@ -66,12 +68,24 @@ public class SlackNotifier extends Notifier {
         return teamDomain;
     }
 
+    public void setTeamDomain(final String teamDomain) {
+        this.teamDomain = teamDomain;
+    }
+
     public String getRoom() {
         return room;
     }
 
+    public void setRoom(String room) {
+        this.room = room;
+    }
+
     public String getAuthToken() {
         return authToken;
+    }
+
+    public void setAuthToken(String authToken) {
+        this.authToken = authToken;
     }
 
     public String getAuthTokenCredentialId() {
@@ -132,6 +146,54 @@ public class SlackNotifier extends Notifier {
 
     public String getCustomMessage() {
         return customMessage;
+    }
+
+    public void setStartNotification(boolean startNotification) {
+        this.startNotification = startNotification;
+    }
+
+    public void setNotifySuccess(boolean notifySuccess) {
+        this.notifySuccess = notifySuccess;
+    }
+
+    public void setCommitInfoChoice(CommitInfoChoice commitInfoChoice) {
+        this.commitInfoChoice = commitInfoChoice;
+    }
+
+    public void setNotifyAborted(boolean notifyAborted) {
+        this.notifyAborted = notifyAborted;
+    }
+
+    public void setNotifyFailure(boolean notifyFailure) {
+        this.notifyFailure = notifyFailure;
+    }
+
+    public void setNotifyNotBuilt(boolean notifyNotBuilt) {
+        this.notifyNotBuilt = notifyNotBuilt;
+    }
+
+    public void setNotifyUnstable(boolean notifyUnstable) {
+        this.notifyUnstable = notifyUnstable;
+    }
+
+    public void setNotifyBackToNormal(boolean notifyBackToNormal) {
+        this.notifyBackToNormal = notifyBackToNormal;
+    }
+
+    public void setIncludeTestSummary(boolean includeTestSummary) {
+        this.includeTestSummary = includeTestSummary;
+    }
+
+    public void setNotifyRepeatedFailure(boolean notifyRepeatedFailure) {
+        this.notifyRepeatedFailure = notifyRepeatedFailure;
+    }
+
+    public void setIncludeCustomMessage(boolean includeCustomMessage) {
+        this.includeCustomMessage = includeCustomMessage;
+    }
+
+    public void setCustomMessage(String customMessage) {
+        this.customMessage = customMessage;
     }
 
     @DataBoundConstructor
@@ -259,7 +321,6 @@ public class SlackNotifier extends Notifier {
             return sendAs;
         }
 
-        @SuppressWarnings("unused")
         public ListBoxModel doFillTokenCredentialIdItems() {
             if (!Jenkins.getInstance().hasPermission(Jenkins.ADMINISTER)) {
                 return new ListBoxModel();
@@ -506,67 +567,21 @@ public class SlackNotifier extends Notifier {
     }
 
     @Extension(ordinal = 100) public static final class Migrator extends ItemListener {
-        @SuppressWarnings("deprecation")
         @Override
         public void onLoaded() {
             logger.info("Starting Settings Migration Process");
-            for (AbstractProject<?, ?> p : Jenkins.getInstance().getAllItems(AbstractProject.class)) {
-                logger.info("processing Job: " + p.getName());
 
-                final SlackJobProperty slackJobProperty = p.getProperty(SlackJobProperty.class);
+            ItemConfigMigrator migrator = new ItemConfigMigrator();
 
-                if (slackJobProperty == null) {
-                    logger.info(String
-                            .format("Configuration is already up to date for \"%s\", skipping migration",
-                                    p.getName()));
+            for (Item item : Jenkins.getInstance().getAllItems()) {
+                if (!migrator.migrate(item)) {
+                    logger.info(String.format("Skipping job \"%s\" with type %s", item.getName(),
+                            item.getClass().getName()));
                     continue;
                 }
-
-                SlackNotifier slackNotifier = p.getPublishersList().get(SlackNotifier.class);
-                
-                if (slackNotifier == null) {
-                    logger.info(String
-                            .format("Configuration does not have a notifier for \"%s\", not migrating settings",
-                                    p.getName()));
-                } else {
-
-                    //map settings
-                    if (StringUtils.isBlank(slackNotifier.teamDomain)) {
-                        slackNotifier.teamDomain = slackJobProperty.getTeamDomain();
-                    }
-                    if (StringUtils.isBlank(slackNotifier.authToken)) {
-                        slackNotifier.authToken = slackJobProperty.getToken();
-                        slackNotifier.botUser = slackJobProperty.getBotUser();
-                    }
-                    if (StringUtils.isBlank(slackNotifier.room)) {
-                        slackNotifier.room = slackJobProperty.getRoom();
-                    }
-                    
-                    slackNotifier.startNotification = slackJobProperty.getStartNotification();
-    
-                    slackNotifier.notifyAborted = slackJobProperty.getNotifyAborted();
-                    slackNotifier.notifyFailure = slackJobProperty.getNotifyFailure();
-                    slackNotifier.notifyNotBuilt = slackJobProperty.getNotifyNotBuilt();
-                    slackNotifier.notifySuccess = slackJobProperty.getNotifySuccess();
-                    slackNotifier.notifyUnstable = slackJobProperty.getNotifyUnstable();
-                    slackNotifier.notifyBackToNormal = slackJobProperty.getNotifyBackToNormal();
-                    slackNotifier.notifyRepeatedFailure = slackJobProperty.getNotifyRepeatedFailure();
-    
-                    slackNotifier.includeTestSummary = slackJobProperty.includeTestSummary();
-                    slackNotifier.commitInfoChoice = slackJobProperty.getShowCommitList() ? CommitInfoChoice.AUTHORS_AND_TITLES : CommitInfoChoice.NONE;
-                    slackNotifier.includeCustomMessage = slackJobProperty.includeCustomMessage();
-                    slackNotifier.customMessage = slackJobProperty.getCustomMessage();
-                }
-
-                try {
-                    //property section is not used anymore - remove
-                    p.removeProperty(SlackJobProperty.class);
-                    p.save();
-                    logger.info("Configuration updated successfully");
-                } catch (IOException e) {
-                    logger.log(Level.SEVERE, e.getMessage(), e);
-                }
             }
+
+            logger.info("Completed Settings Migration Process");
         }
     }
 }
