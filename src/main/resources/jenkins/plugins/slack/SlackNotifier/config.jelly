@@ -63,7 +63,7 @@
             <c:select value="${instance.getAuthTokenCredentialId()}"/>
         </f:entry>
 
-        <f:entry title="Is Bot User?" help="/plugin/slack/help-projectConfig-slackToken.html">
+        <f:entry title="Is Bot User?" help="/plugin/slack/help-projectConfig-botUser.html">
             <f:checkbox name="slackBotUser" value="true" checked="${instance.getBotUser()}"/>
         </f:entry>
 
