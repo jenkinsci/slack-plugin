@@ -26,6 +26,7 @@ import org.apache.commons.lang.StringUtils;
 import org.jenkinsci.plugins.displayurlapi.DisplayURLProvider;
 import org.jenkinsci.plugins.plaincredentials.StringCredentials;
 import org.kohsuke.stapler.DataBoundConstructor;
+import org.kohsuke.stapler.DataBoundSetter;
 import org.kohsuke.stapler.QueryParameter;
 import org.kohsuke.stapler.StaplerRequest;
 import org.kohsuke.stapler.export.Exported;
@@ -68,6 +69,7 @@ public class SlackNotifier extends Notifier {
         return teamDomain;
     }
 
+    @DataBoundSetter
     public void setTeamDomain(final String teamDomain) {
         this.teamDomain = teamDomain;
     }
@@ -76,6 +78,7 @@ public class SlackNotifier extends Notifier {
         return room;
     }
 
+    @DataBoundSetter
     public void setRoom(String room) {
         this.room = room;
     }
@@ -84,6 +87,7 @@ public class SlackNotifier extends Notifier {
         return authToken;
     }
 
+    @DataBoundSetter
     public void setAuthToken(String authToken) {
         this.authToken = authToken;
     }
@@ -92,12 +96,27 @@ public class SlackNotifier extends Notifier {
         return authTokenCredentialId;
     }
 
+    @DataBoundSetter
+    public void setAuthTokenCredentialId(String authTokenCredentialId) {
+        this.authTokenCredentialId = authTokenCredentialId;
+    }
+
     public boolean getBotUser() {
         return botUser;
     }
 
+    @DataBoundSetter
+    public void setBotUser(boolean botUser) {
+        this.botUser = botUser;
+    }
+
     public String getSendAs() {
         return sendAs;
+    }
+
+    @DataBoundSetter
+    public void setSendAs(String sendAs) {
+        this.sendAs = sendAs;
     }
 
     public boolean getStartNotification() {
@@ -148,55 +167,71 @@ public class SlackNotifier extends Notifier {
         return customMessage;
     }
 
+    @DataBoundSetter
     public void setStartNotification(boolean startNotification) {
         this.startNotification = startNotification;
     }
 
+    @DataBoundSetter
     public void setNotifySuccess(boolean notifySuccess) {
         this.notifySuccess = notifySuccess;
     }
 
+    @DataBoundSetter
     public void setCommitInfoChoice(CommitInfoChoice commitInfoChoice) {
         this.commitInfoChoice = commitInfoChoice;
     }
 
+    @DataBoundSetter
     public void setNotifyAborted(boolean notifyAborted) {
         this.notifyAborted = notifyAborted;
     }
 
+    @DataBoundSetter
     public void setNotifyFailure(boolean notifyFailure) {
         this.notifyFailure = notifyFailure;
     }
 
+    @DataBoundSetter
     public void setNotifyNotBuilt(boolean notifyNotBuilt) {
         this.notifyNotBuilt = notifyNotBuilt;
     }
 
+    @DataBoundSetter
     public void setNotifyUnstable(boolean notifyUnstable) {
         this.notifyUnstable = notifyUnstable;
     }
 
+    @DataBoundSetter
     public void setNotifyBackToNormal(boolean notifyBackToNormal) {
         this.notifyBackToNormal = notifyBackToNormal;
     }
 
+    @DataBoundSetter
     public void setIncludeTestSummary(boolean includeTestSummary) {
         this.includeTestSummary = includeTestSummary;
     }
 
+    @DataBoundSetter
     public void setNotifyRepeatedFailure(boolean notifyRepeatedFailure) {
         this.notifyRepeatedFailure = notifyRepeatedFailure;
     }
 
+    @DataBoundSetter
     public void setIncludeCustomMessage(boolean includeCustomMessage) {
         this.includeCustomMessage = includeCustomMessage;
     }
 
+    @DataBoundSetter
     public void setCustomMessage(String customMessage) {
         this.customMessage = customMessage;
     }
 
     @DataBoundConstructor
+    public SlackNotifier() {
+        super();
+    }
+
     public SlackNotifier(final String teamDomain, final String authToken, final boolean botUser, final String room, final String authTokenCredentialId,
                          final String sendAs, final boolean startNotification, final boolean notifyAborted, final boolean notifyFailure,
                          final boolean notifyNotBuilt, final boolean notifySuccess, final boolean notifyUnstable, final boolean notifyBackToNormal,
