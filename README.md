@@ -21,6 +21,13 @@ Create a new ***Secret text*** credential:
 Select that credential as the value for the ***Integration Token Credential ID*** field:
 ![image](https://cloud.githubusercontent.com/assets/983526/17971458/ec296bf6-6aa8-11e6-8d19-06d9f1c9d611.png)
 
+
+#### Bot user option
+This plugin supports sending notifications via bot users. You can enable bot user support from both 
+global and project configurations. If the notification will be sent to a user via direct message, 
+default integration sends it via @slackbot, you can use this option if you want to send messages via a bot user.
+You need to provide credentials of the bot user for integration token credentials to use this feature. 
+
 #### Jenkins Pipeline Support
 
 Includes [Jenkins Pipeline](https://github.com/jenkinsci/workflow-plugin) support as of version 2.0:

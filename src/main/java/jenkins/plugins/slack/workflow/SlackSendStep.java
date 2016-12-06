@@ -39,6 +39,7 @@ public class SlackSendStep extends AbstractStepImpl {
     private String color;
     private String token;
     private String tokenCredentialId;
+    private boolean botUser;
     private String channel;
     private String teamDomain;
     private boolean failOnError;
@@ -74,6 +75,15 @@ public class SlackSendStep extends AbstractStepImpl {
     @DataBoundSetter
     public void setTokenCredentialId(String tokenCredentialId) {
         this.tokenCredentialId = Util.fixEmpty(tokenCredentialId);
+    }
+
+    public boolean getBotUser() {
+        return botUser;
+    }
+
+    @DataBoundSetter
+    public void setBotUser(boolean botUser) {
+        this.botUser = botUser;
     }
 
     public String getChannel() {
@@ -169,16 +179,25 @@ public class SlackSendStep extends AbstractStepImpl {
                 return null;
             }
             SlackNotifier.DescriptorImpl slackDesc = jenkins.getDescriptorByType(SlackNotifier.DescriptorImpl.class);
+            listener.getLogger().println("run slackstepsend, step " + step.token+":" + step.botUser+", desc " + slackDesc.getToken()+":"+slackDesc.getBotUser());
             String team = step.teamDomain != null ? step.teamDomain : slackDesc.getTeamDomain();
-            String token = step.token != null ? step.token : slackDesc.getToken();
             String tokenCredentialId = step.tokenCredentialId != null ? step.tokenCredentialId : slackDesc.getTokenCredentialId();
+            String token;
+            boolean botUser;
+            if (step.token != null) {
+                token = step.token;
+                botUser = step.botUser;
+            } else {
+                token = slackDesc.getToken();
+                botUser = slackDesc.getBotUser();
+            }
             String channel = step.channel != null ? step.channel : slackDesc.getRoom();
             String color = step.color != null ? step.color : "";
 
             //placing in console log to simplify testing of retrieving values from global config or from step field; also used for tests
             listener.getLogger().println(Messages.SlackSendStepConfig(step.teamDomain == null, step.token == null, step.channel == null, step.color == null));
 
-            SlackService slackService = getSlackService(team, token, tokenCredentialId, channel);
+            SlackService slackService = getSlackService(team, token, tokenCredentialId, botUser, channel);
             boolean publishSuccess = slackService.publish(step.message, color);
             if (!publishSuccess && step.failOnError) {
                 throw new AbortException(Messages.NotificationFailed());
@@ -189,8 +208,8 @@ public class SlackSendStep extends AbstractStepImpl {
         }
 
         //streamline unit testing
-        SlackService getSlackService(String team, String token, String tokenCredentialId, String channel) {
-            return new StandardSlackService(team, token, tokenCredentialId, channel);
+        SlackService getSlackService(String team, String token, String tokenCredentialId, boolean botUser, String channel) {
+            return new StandardSlackService(team, token, tokenCredentialId, botUser, channel);
         }
     }
 }

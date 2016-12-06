@@ -4,6 +4,8 @@ import hudson.security.ACL;
 
 import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.HttpStatus;
+import org.apache.commons.httpclient.UsernamePasswordCredentials;
+import org.apache.commons.httpclient.auth.AuthScope;
 import org.apache.commons.httpclient.methods.PostMethod;
 
 import org.jenkinsci.plugins.plaincredentials.StringCredentials;
@@ -13,9 +15,11 @@ import com.cloudbees.plugins.credentials.CredentialsMatchers;
 import com.cloudbees.plugins.credentials.CredentialsProvider;
 import com.cloudbees.plugins.credentials.domains.DomainRequirement;
 
-import org.json.JSONObject;
 import org.json.JSONArray;
+import org.json.JSONObject;
 
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
 import java.util.Collections;
 import java.util.List;
 import java.util.logging.Level;
@@ -24,8 +28,6 @@ import java.util.logging.Logger;
 import jenkins.model.Jenkins;
 import hudson.ProxyConfiguration;
 
-import org.apache.commons.httpclient.UsernamePasswordCredentials;
-import org.apache.commons.httpclient.auth.AuthScope;
 import org.apache.commons.lang.StringUtils;
 
 public class StandardSlackService implements SlackService {
@@ -36,13 +38,15 @@ public class StandardSlackService implements SlackService {
     private String teamDomain;
     private String token;
     private String authTokenCredentialId;
+    private boolean botUser;
     private String[] roomIds;
 
-    public StandardSlackService(String teamDomain, String token, String authTokenCredentialId, String roomId) {
+    public StandardSlackService(String teamDomain, String token, String authTokenCredentialId, boolean botUser, String roomId) {
         super();
         this.teamDomain = teamDomain;
         this.token = token;
         this.authTokenCredentialId = StringUtils.trim(authTokenCredentialId);
+        this.botUser = botUser;
         this.roomIds = roomId.split("[,; ]+");
     }
 
@@ -53,46 +57,64 @@ public class StandardSlackService implements SlackService {
     public boolean publish(String message, String color) {
         boolean result = true;
         for (String roomId : roomIds) {
-            String url = "https://" + teamDomain + "." + host + "/services/hooks/jenkins-ci?token=" + getTokenToUse();
-            logger.fine("Posting: to " + roomId + " on " + teamDomain + " using " + url +": " + message + " " + color);
-            HttpClient client = getHttpClient();
-            PostMethod post = new PostMethod(url);
-            JSONObject json = new JSONObject();
+            //prepare attachments first
+            JSONObject field = new JSONObject();
+            field.put("short", false);
+            field.put("value", message);
 
-            try {
-                JSONObject field = new JSONObject();
-                field.put("short", false);
-                field.put("value", message);
+            JSONArray fields = new JSONArray();
+            fields.put(field);
 
-                JSONArray fields = new JSONArray();
-                fields.put(field);
+            JSONObject attachment = new JSONObject();
+            attachment.put("fallback", message);
+            attachment.put("color", color);
+            attachment.put("fields", fields);
+            JSONArray mrkdwn = new JSONArray();
+            mrkdwn.put("pretext");
+            mrkdwn.put("text");
+            mrkdwn.put("fields");
+            attachment.put("mrkdwn_in", mrkdwn);
+            JSONArray attachments = new JSONArray();
+            attachments.put(attachment);
 
-                JSONObject attachment = new JSONObject();
-                attachment.put("fallback", message);
-                attachment.put("color", color);
-                attachment.put("fields", fields);
-                JSONArray mrkdwn = new JSONArray();
-                mrkdwn.put("pretext");
-                mrkdwn.put("text");
-                mrkdwn.put("fields");
-                attachment.put("mrkdwn_in", mrkdwn);
-                JSONArray attachments = new JSONArray();
-                attachments.put(attachment);
+            PostMethod post;
+            String url;
+            //prepare post methods for both requests types
+            if (!botUser) {
+                url = "https://" + teamDomain + "." + host + "/services/hooks/jenkins-ci?token=" + getTokenToUse();
+                post = new PostMethod(url);
+                JSONObject json = new JSONObject();
 
                 json.put("channel", roomId);
                 json.put("attachments", attachments);
                 json.put("link_names", "1");
 
                 post.addParameter("payload", json.toString());
-                post.getParams().setContentCharset("UTF-8");
+
+            } else {
+                url = "https://slack.com/api/chat.postMessage?token=" + getTokenToUse() +
+                        "&channel=" + roomId +
+                        "&link_names=1" +
+                        "&as_user=true";
+                try {
+                    url += "&attachments=" + URLEncoder.encode(attachments.toString(), "utf-8");
+                } catch (UnsupportedEncodingException e) {
+                    logger.log(Level.ALL, "Error while encoding attachments: " + e.getMessage());
+                }
+                post = new PostMethod(url);
+            }
+            logger.fine("Posting: to " + roomId + " on " + teamDomain + " using " + url + ": " + message + " " + color);
+            HttpClient client = getHttpClient();
+            post.getParams().setContentCharset("UTF-8");
+
+            try {
                 int responseCode = client.executeMethod(post);
                 String response = post.getResponseBodyAsString();
-                if(responseCode != HttpStatus.SC_OK) {
+                if (responseCode != HttpStatus.SC_OK) {
                     logger.log(Level.WARNING, "Slack post may have failed. Response: " + response);
                     result = false;
-                }
-                else {
-                    logger.fine("Posting succeeded");
+                } else {
+                    logger.info("Posting succeeded");
                 }
             } catch (Exception e) {
                 logger.log(Level.WARNING, "Error posting to Slack", e);
@@ -139,7 +161,7 @@ public class StandardSlackService implements SlackService {
                     // and
                     // http://svn.apache.org/viewvc/httpcomponents/oac.hc3x/trunk/src/examples/BasicAuthenticationExample.java?view=markup
                     client.getState().setProxyCredentials(AuthScope.ANY,
-                        new UsernamePasswordCredentials(username, password));
+                            new UsernamePasswordCredentials(username, password));
                 }
             }
         }

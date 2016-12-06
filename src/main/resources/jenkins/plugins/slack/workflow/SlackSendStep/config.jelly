@@ -17,6 +17,9 @@
         <f:entry field="token" title="Integration Token">
             <f:textbox />
         </f:entry>
+        <f:entry field="botUser" title="Is Bot User?">
+            <f:checkbox />
+        </f:entry>
         <f:entry field="teamDomain" title="Team Domain">
             <f:textbox />
         </f:entry>
