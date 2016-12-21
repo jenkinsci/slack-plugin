@@ -58,17 +58,11 @@ public class StandardSlackService implements SlackService {
         boolean result = true;
         for (String roomId : roomIds) {
             //prepare attachments first
-            JSONObject field = new JSONObject();
-            field.put("short", false);
-            field.put("value", message);
-
-            JSONArray fields = new JSONArray();
-            fields.put(field);
-
             JSONObject attachment = new JSONObject();
+            attachment.put("text", message);
             attachment.put("fallback", message);
             attachment.put("color", color);
-            attachment.put("fields", fields);
+            
             JSONArray mrkdwn = new JSONArray();
             mrkdwn.put("pretext");
             mrkdwn.put("text");
