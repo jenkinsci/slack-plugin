@@ -17,13 +17,18 @@ import hudson.tasks.test.AbstractTestResultAction;
 import hudson.triggers.SCMTrigger;
 import hudson.util.LogTaskListener;
 import org.apache.commons.lang.StringUtils;
+import org.jenkinsci.plugins.displayurlapi.DisplayURLProvider;
 
 import java.io.IOException;
+import java.text.MessageFormat;
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 import java.util.logging.Logger;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import static java.util.logging.Level.INFO;
 import static java.util.logging.Level.SEVERE;
@@ -216,6 +221,8 @@ public class ActiveNotifier implements FineGrainedNotifier {
 
     public static class MessageBuilder {
 
+        private static final Pattern aTag = Pattern.compile("(?i)<a([^>]+)>(.+?)</a>");
+        private static final Pattern href = Pattern.compile("\\s*(?i)href\\s*=\\s*(\"([^\"]*\")|'[^']*'|([^'\">\\s]+))");
         private static final String STARTING_STATUS_MESSAGE = "Starting...",
                                     BACK_TO_NORMAL_STATUS_MESSAGE = "Back to normal",
                                     STILL_FAILING_STATUS_MESSAGE = "Still Failing",
@@ -322,7 +329,7 @@ public class ActiveNotifier implements FineGrainedNotifier {
         }
 
         public MessageBuilder appendOpenLink() {
-            String url = notifier.getBuildServerUrl() + build.getUrl();
+            String url = DisplayURLProvider.get().getRunURL(build);
             message.append(" (<").append(url).append("|Open>)");
             return this;
         }
@@ -386,12 +393,32 @@ public class ActiveNotifier implements FineGrainedNotifier {
             return Util.getTimeSpanString(backToNormalDuration);
         }
 
-        public String escape(String string) {
+        private String escapeCharacters(String string) {
             string = string.replace("&", "&amp;");
             string = string.replace("<", "&lt;");
             string = string.replace(">", "&gt;");
 
             return string;
+        }
+
+        private String[] extractReplaceLinks(Matcher aTag, StringBuffer sb) {
+            int size = 0;
+            List<String> links = new ArrayList<String>();
+            while (aTag.find()) {
+                Matcher url = href.matcher(aTag.group(1));
+                if (url.find()) {
+                    aTag.appendReplacement(sb,String.format("{%s}", size++));
+                    links.add(String.format("<%s|%s>", url.group(1).replaceAll("\"", ""), aTag.group(2)));
+                }
+            }
+            aTag.appendTail(sb);
+            return links.toArray(new String[size]);
+        }
+
+        public String escape(String string) {
+            StringBuffer pattern = new StringBuffer();
+            String[] links = extractReplaceLinks(aTag.matcher(string), pattern);
+            return MessageFormat.format(escapeCharacters(pattern.toString()), links);
         }
 
         public String toString() {
