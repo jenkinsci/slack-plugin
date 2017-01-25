@@ -20,6 +20,8 @@ import org.jenkinsci.plugins.workflow.steps.AbstractStepDescriptorImpl;
 import org.jenkinsci.plugins.workflow.steps.AbstractStepImpl;
 import org.jenkinsci.plugins.workflow.steps.AbstractSynchronousNonBlockingStepExecution;
 import org.jenkinsci.plugins.workflow.steps.StepContextParameter;
+import org.json.JSONArray;
+import org.json.JSONObject;
 import org.kohsuke.stapler.AncestorInPath;
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.DataBoundSetter;
@@ -35,7 +37,7 @@ import static com.cloudbees.plugins.credentials.CredentialsProvider.lookupCreden
  */
 public class SlackSendStep extends AbstractStepImpl {
 
-    private final @Nonnull String message;
+    private String message;
     private String color;
     private String token;
     private String tokenCredentialId;
@@ -43,6 +45,7 @@ public class SlackSendStep extends AbstractStepImpl {
     private String channel;
     private String teamDomain;
     private boolean failOnError;
+    private JSONArray attachments;
 
 
     @Nonnull
@@ -111,6 +114,15 @@ public class SlackSendStep extends AbstractStepImpl {
     @DataBoundSetter
     public void setFailOnError(boolean failOnError) {
         this.failOnError = failOnError;
+    }
+
+    @DataBoundSetter
+    public void setAttachments(JSONArray attachments){
+        this.attachments = attachments;
+    }
+
+    public JSONArray getAttachments(){
+        return attachments;
     }
 
     @DataBoundConstructor
@@ -198,7 +210,12 @@ public class SlackSendStep extends AbstractStepImpl {
             listener.getLogger().println(Messages.SlackSendStepConfig(step.teamDomain == null, step.token == null, step.channel == null, step.color == null));
 
             SlackService slackService = getSlackService(team, token, tokenCredentialId, botUser, channel);
-            boolean publishSuccess = slackService.publish(step.message, color);
+            boolean publishSuccess;
+            if(step.attachments != null){
+                publishSuccess = slackService.publish(step.attachments, color);
+            }else{
+                publishSuccess = slackService.publish(step.message, color);
+            }
             if (!publishSuccess && step.failOnError) {
                 throw new AbortException(Messages.NotificationFailed());
             } else if (!publishSuccess) {

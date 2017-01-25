@@ -6,6 +6,7 @@ import jenkins.plugins.slack.Messages;
 import jenkins.plugins.slack.SlackNotifier;
 import jenkins.plugins.slack.SlackService;
 import org.jenkinsci.plugins.workflow.steps.StepContext;
+import org.json.JSONArray;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -79,6 +80,29 @@ public class SlackSendStepTest {
         verify(stepExecution, times(1)).getSlackService("teamDomain", "token", "tokenCredentialId", false, "channel");
         verify(slackServiceMock, times(1)).publish("message", "good");
         assertFalse(stepExecution.step.isFailOnError());
+    }
+
+    @Test
+    public void testStepWithAttachments() throws Exception {
+        SlackSendStep.SlackSendStepExecution stepExecution = spy(new SlackSendStep.SlackSendStepExecution());
+        stepExecution.step = new SlackSendStep("message");
+        JSONArray attachments = new JSONArray();
+        stepExecution.step.setAttachments(attachments);
+
+        when(Jenkins.getInstance()).thenReturn(jenkins);
+
+        stepExecution.listener = taskListenerMock;
+
+
+        when(taskListenerMock.getLogger()).thenReturn(printStreamMock);
+        doNothing().when(printStreamMock).println();
+
+        when(stepExecution.getSlackService(anyString(), anyString(), anyString(), anyBoolean(), anyString())).thenReturn(slackServiceMock);
+
+        stepExecution.run();
+        verify(slackServiceMock, times(0)).publish("message", "");
+        verify(slackServiceMock, times(1)).publish(attachments, "");
+
     }
 
     @Test
