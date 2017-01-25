@@ -5,6 +5,8 @@ import jenkins.model.Jenkins;
 import jenkins.plugins.slack.Messages;
 import jenkins.plugins.slack.SlackNotifier;
 import jenkins.plugins.slack.SlackService;
+import net.sf.json.JSONArray;
+import net.sf.json.JSONObject;
 import org.jenkinsci.plugins.workflow.steps.StepContext;
 import org.junit.Before;
 import org.junit.Test;
@@ -16,6 +18,8 @@ import org.powermock.modules.junit4.PowerMockRunner;
 
 import java.io.PrintStream;
 import java.io.PrintWriter;
+import java.util.ArrayList;
+import java.util.Map;
 
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
@@ -112,6 +116,35 @@ public class SlackSendStepTest {
         verify(stepExecution, times(1)).getSlackService("baseUrl/", "teamDomain", "token", "tokenCredentialId", false, "channel");
         verify(slackServiceMock, times(1)).publish("message", "good");
         assertFalse(stepExecution.step.isFailOnError());
+    }
+
+    @Test
+    public void testStepWithAttachments() throws Exception {
+        SlackSendStep.SlackSendStepExecution stepExecution = spy(new SlackSendStep.SlackSendStepExecution());
+        stepExecution.step = new SlackSendStep("message");
+        JSONArray attachments = new JSONArray();
+        JSONObject jsonObject = new JSONObject();
+        jsonObject.put("title","Title of the message");
+        jsonObject.put("author_name","Name of the author");
+        jsonObject.put("author_icon","Avatar for author");
+        attachments.add(jsonObject);
+        stepExecution.step.setAttachments(attachments.toString());
+        ((JSONObject) attachments.get(0)).put("fallback", "message");
+
+        when(Jenkins.getInstance()).thenReturn(jenkins);
+
+        stepExecution.listener = taskListenerMock;
+
+
+        when(taskListenerMock.getLogger()).thenReturn(printStreamMock);
+        doNothing().when(printStreamMock).println();
+
+        when(stepExecution.getSlackService(anyString(), anyString(), anyString(), anyBoolean(), anyString())).thenReturn(slackServiceMock);
+
+        stepExecution.run();
+        verify(slackServiceMock, times(0)).publish("message", "");
+        verify(slackServiceMock, times(1)).publish(attachments, "");
+
     }
 
     @Test
