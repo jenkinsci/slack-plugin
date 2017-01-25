@@ -33,6 +33,10 @@
             <f:checkbox name="slackNotifyRepeatedFailure" value="true"
                         checked="${instance.getNotifyRepeatedFailure()}"/>
         </f:entry>
+        <f:entry title="Notify after N Failure">
+            <f:checkbox name="slackNotifyFailureAfter3times" value="true"
+                        checked="${instance.getNotifyFailureAfter3times()}"/>
+        </f:entry>
         <f:entry title="Include Test Summary">
             <f:checkbox name="includeTestSummary" value="true" checked="${instance.includeTestSummary()}"/>
         </f:entry>

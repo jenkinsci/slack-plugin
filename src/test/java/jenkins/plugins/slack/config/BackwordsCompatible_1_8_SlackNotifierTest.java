@@ -52,6 +52,7 @@ public class BackwordsCompatible_1_8_SlackNotifierTest {
         assertTrue(notifier.getNotifyFailure());
         assertFalse(notifier.getNotifyBackToNormal());
         assertFalse(notifier.getNotifyRepeatedFailure());
+        assertFalse(notifier.getNotifyFailureAfter3times());
         assertFalse(notifier.includeTestSummary());
         assertEquals(CommitInfoChoice.NONE, notifier.getCommitInfoChoice());
         assertFalse(notifier.includeCustomMessage());
@@ -78,6 +79,7 @@ public class BackwordsCompatible_1_8_SlackNotifierTest {
         assertTrue(notifier.getNotifyFailure());
         assertFalse(notifier.getNotifyBackToNormal());
         assertFalse(notifier.getNotifyRepeatedFailure());
+        assertFalse(notifier.getNotifyFailureAfter3times());
         assertFalse(notifier.includeTestSummary());
         assertEquals(CommitInfoChoice.NONE, notifier.getCommitInfoChoice());
         assertFalse(notifier.includeCustomMessage());
@@ -104,6 +106,7 @@ public class BackwordsCompatible_1_8_SlackNotifierTest {
         assertTrue(notifier.getNotifyFailure());
         assertFalse(notifier.getNotifyBackToNormal());
         assertFalse(notifier.getNotifyRepeatedFailure());
+        assertFalse(notifier.getNotifyFailureAfter3times());
         assertFalse(notifier.includeTestSummary());
         assertEquals(CommitInfoChoice.NONE, notifier.getCommitInfoChoice());
         assertFalse(notifier.includeCustomMessage());
@@ -158,6 +161,7 @@ public class BackwordsCompatible_1_8_SlackNotifierTest {
         assertTrue(notifier.getNotifyFailure());
         assertTrue(notifier.getNotifyBackToNormal());
         assertTrue(notifier.getNotifyRepeatedFailure());
+        assertTrue(notifier.getNotifyFailureAfter3times());
         assertTrue(notifier.includeTestSummary());
         assertEquals(CommitInfoChoice.AUTHORS_AND_TITLES, notifier.getCommitInfoChoice());
         assertTrue(notifier.includeCustomMessage());

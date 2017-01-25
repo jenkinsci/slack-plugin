@@ -16,6 +16,7 @@
       <notifyFailure>true</notifyFailure>
       <notifyBackToNormal>true</notifyBackToNormal>
       <notifyRepeatedFailure>true</notifyRepeatedFailure>
+      <notifyFailureAfter3times>false</notifyFailureAfter3times>
       <includeTestSummary>true</includeTestSummary>
       <showCommitList>true</showCommitList>
       <includeCustomMessage>true</includeCustomMessage>
