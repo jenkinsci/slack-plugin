@@ -37,7 +37,7 @@ import static com.cloudbees.plugins.credentials.CredentialsProvider.lookupCreden
  */
 public class SlackSendStep extends AbstractStepImpl {
 
-    private String message;
+    private final @Nonnull String message;
     private String color;
     private String token;
     private String tokenCredentialId;
@@ -118,6 +118,14 @@ public class SlackSendStep extends AbstractStepImpl {
 
     @DataBoundSetter
     public void setAttachments(JSONArray attachments){
+        for (int i = 0; i < attachments.length(); i++) {
+            if(attachments.get(i) instanceof JSONObject){
+                JSONObject jsonObject = (JSONObject) attachments.get(i);
+                if (!jsonObject.has("fallback")) {
+                    jsonObject.put("fallback", message);
+                }
+            }
+        }
         this.attachments = attachments;
     }
 
