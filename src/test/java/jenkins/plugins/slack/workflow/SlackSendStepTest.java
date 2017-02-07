@@ -5,8 +5,8 @@ import jenkins.model.Jenkins;
 import jenkins.plugins.slack.Messages;
 import jenkins.plugins.slack.SlackNotifier;
 import jenkins.plugins.slack.SlackService;
+import net.sf.json.JSONArray;
 import org.jenkinsci.plugins.workflow.steps.StepContext;
-import org.json.JSONArray;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -17,6 +17,8 @@ import org.powermock.modules.junit4.PowerMockRunner;
 
 import java.io.PrintStream;
 import java.io.PrintWriter;
+import java.util.ArrayList;
+import java.util.Map;
 
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
@@ -87,7 +89,8 @@ public class SlackSendStepTest {
         SlackSendStep.SlackSendStepExecution stepExecution = spy(new SlackSendStep.SlackSendStepExecution());
         stepExecution.step = new SlackSendStep("message");
         JSONArray attachments = new JSONArray();
-        stepExecution.step.setAttachments(attachments);
+        attachments.add("Test");
+        stepExecution.step.setAttachments(attachments.toString());
 
         when(Jenkins.getInstance()).thenReturn(jenkins);
 

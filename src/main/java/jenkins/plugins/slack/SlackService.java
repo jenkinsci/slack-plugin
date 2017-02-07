@@ -1,6 +1,7 @@
 package jenkins.plugins.slack;
 
-import org.json.JSONArray;
+
+import net.sf.json.JSONArray;
 
 public interface SlackService {
     boolean publish(String message);

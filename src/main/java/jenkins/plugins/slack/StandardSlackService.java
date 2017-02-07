@@ -2,6 +2,8 @@ package jenkins.plugins.slack;
 
 import hudson.security.ACL;
 
+import net.sf.json.JSONArray;
+import net.sf.json.JSONObject;
 import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.HttpStatus;
 import org.apache.commons.httpclient.UsernamePasswordCredentials;
@@ -15,8 +17,6 @@ import com.cloudbees.plugins.credentials.CredentialsMatchers;
 import com.cloudbees.plugins.credentials.CredentialsProvider;
 import com.cloudbees.plugins.credentials.domains.DomainRequirement;
 
-import org.json.JSONArray;
-import org.json.JSONObject;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
@@ -61,19 +61,19 @@ public class StandardSlackService implements SlackService {
         field.put("value", message);
 
         JSONArray fields = new JSONArray();
-        fields.put(field);
+        fields.add(field);
 
         JSONObject attachment = new JSONObject();
         attachment.put("fallback", message);
         attachment.put("color", color);
         attachment.put("fields", fields);
         JSONArray mrkdwn = new JSONArray();
-        mrkdwn.put("pretext");
-        mrkdwn.put("text");
-        mrkdwn.put("fields");
+        mrkdwn.add("pretext");
+        mrkdwn.add("text");
+        mrkdwn.add("fields");
         attachment.put("mrkdwn_in", mrkdwn);
         JSONArray attachments = new JSONArray();
-        attachments.put(attachment);
+        attachments.add(attachment);
 
         return publish(attachments, color);
     }
