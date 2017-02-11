@@ -6,6 +6,7 @@ import jenkins.plugins.slack.Messages;
 import jenkins.plugins.slack.SlackNotifier;
 import jenkins.plugins.slack.SlackService;
 import net.sf.json.JSONArray;
+import net.sf.json.JSONObject;
 import org.jenkinsci.plugins.workflow.steps.StepContext;
 import org.junit.Before;
 import org.junit.Test;
@@ -89,8 +90,13 @@ public class SlackSendStepTest {
         SlackSendStep.SlackSendStepExecution stepExecution = spy(new SlackSendStep.SlackSendStepExecution());
         stepExecution.step = new SlackSendStep("message");
         JSONArray attachments = new JSONArray();
-        attachments.add("Test");
+        JSONObject jsonObject = new JSONObject();
+        jsonObject.put("title","Title of the message");
+        jsonObject.put("author_name","Name of the author");
+        jsonObject.put("author_icon","Avatar for author");
+        attachments.add(jsonObject);
         stepExecution.step.setAttachments(attachments.toString());
+        ((JSONObject) attachments.get(0)).put("fallback", "message");
 
         when(Jenkins.getInstance()).thenReturn(jenkins);
 
