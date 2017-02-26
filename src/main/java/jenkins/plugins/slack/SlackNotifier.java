@@ -56,6 +56,7 @@ public class SlackNotifier extends Notifier {
     private boolean notifyBackToNormal;
     private boolean notifyRepeatedFailure;
     private boolean includeTestSummary;
+    private boolean includeFailedTests;
     private CommitInfoChoice commitInfoChoice;
     private boolean includeCustomMessage;
     private String customMessage;
@@ -155,6 +156,10 @@ public class SlackNotifier extends Notifier {
         return includeTestSummary;
     }
 
+    public boolean includeFailedTests() {
+        return includeFailedTests;
+    }
+
     public boolean getNotifyRepeatedFailure() {
         return notifyRepeatedFailure;
     }
@@ -235,8 +240,8 @@ public class SlackNotifier extends Notifier {
     public SlackNotifier(final String teamDomain, final String authToken, final boolean botUser, final String room, final String authTokenCredentialId,
                          final String sendAs, final boolean startNotification, final boolean notifyAborted, final boolean notifyFailure,
                          final boolean notifyNotBuilt, final boolean notifySuccess, final boolean notifyUnstable, final boolean notifyBackToNormal,
-                         final boolean notifyRepeatedFailure, final boolean includeTestSummary, CommitInfoChoice commitInfoChoice,
-                         boolean includeCustomMessage, String customMessage) {
+                         final boolean notifyRepeatedFailure, final boolean includeTestSummary, final boolean includeFailedTests,
+                         CommitInfoChoice commitInfoChoice, boolean includeCustomMessage, String customMessage) {
         super();
         this.teamDomain = teamDomain;
         this.authToken = authToken;
@@ -253,6 +258,7 @@ public class SlackNotifier extends Notifier {
         this.notifyBackToNormal = notifyBackToNormal;
         this.notifyRepeatedFailure = notifyRepeatedFailure;
         this.includeTestSummary = includeTestSummary;
+        this.includeFailedTests = includeFailedTests;
         this.commitInfoChoice = commitInfoChoice;
         this.includeCustomMessage = includeCustomMessage;
         this.customMessage = customMessage;
@@ -396,12 +402,13 @@ public class SlackNotifier extends Notifier {
             boolean notifyBackToNormal = "true".equals(sr.getParameter("slackNotifyBackToNormal"));
             boolean notifyRepeatedFailure = "true".equals(sr.getParameter("slackNotifyRepeatedFailure"));
             boolean includeTestSummary = "true".equals(sr.getParameter("includeTestSummary"));
+            boolean includeFailedTests = "true".equals(sr.getParameter("includeFailedTests"));
             CommitInfoChoice commitInfoChoice = CommitInfoChoice.forDisplayName(sr.getParameter("slackCommitInfoChoice"));
             boolean includeCustomMessage = "on".equals(sr.getParameter("includeCustomMessage"));
             String customMessage = sr.getParameter("customMessage");
             return new SlackNotifier(teamDomain, token, botUser, room, tokenCredentialId, sendAs, startNotification, notifyAborted,
                     notifyFailure, notifyNotBuilt, notifySuccess, notifyUnstable, notifyBackToNormal, notifyRepeatedFailure,
-                    includeTestSummary, commitInfoChoice, includeCustomMessage, customMessage);
+                    includeTestSummary, includeFailedTests, commitInfoChoice, includeCustomMessage, customMessage);
         }
 
         @Override
