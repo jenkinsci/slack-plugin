@@ -249,7 +249,7 @@ public class ActiveNotifier implements FineGrainedNotifier {
             return this;
         }
 
-        static String getStatusMessage(AbstractBuild r) {
+        private String getStatusMessage(AbstractBuild r) {
             if (r.isBuilding()) {
                 return STARTING_STATUS_MESSAGE;
             }
@@ -286,7 +286,7 @@ public class ActiveNotifier implements FineGrainedNotifier {
              */
             if (result == Result.SUCCESS
                     && (previousResult == Result.FAILURE || previousResult == Result.UNSTABLE) 
-                    && buildHasSucceededBefore) {
+                    && buildHasSucceededBefore && notifier.getNotifyBackToNormal()) {
                 return BACK_TO_NORMAL_STATUS_MESSAGE;
             }
             if (result == Result.FAILURE && previousResult == Result.FAILURE) {
