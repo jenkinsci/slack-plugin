@@ -17,6 +17,7 @@ import hudson.tasks.test.AbstractTestResultAction;
 import hudson.tasks.test.TestResult;
 import hudson.triggers.SCMTrigger;
 import hudson.util.LogTaskListener;
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
 import org.jenkinsci.plugins.displayurlapi.DisplayURLProvider;
 
@@ -138,7 +139,9 @@ public class ActiveNotifier implements FineGrainedNotifier {
             Entry entry = (Entry) o;
             logger.info("Entry " + o);
             entries.add(entry);
-            files.addAll(entry.getAffectedFiles());
+            if (CollectionUtils.isNotEmpty(entry.getAffectedFiles())) {
+                files.addAll(entry.getAffectedFiles());
+            }
         }
         if (entries.isEmpty()) {
             logger.info("Empty change...");
