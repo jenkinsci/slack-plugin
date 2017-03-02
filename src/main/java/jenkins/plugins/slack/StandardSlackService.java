@@ -2,6 +2,8 @@ package jenkins.plugins.slack;
 
 import hudson.security.ACL;
 
+import net.sf.json.JSONArray;
+import net.sf.json.JSONObject;
 import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.HttpStatus;
 import org.apache.commons.httpclient.UsernamePasswordCredentials;
@@ -15,8 +17,6 @@ import com.cloudbees.plugins.credentials.CredentialsMatchers;
 import com.cloudbees.plugins.credentials.CredentialsProvider;
 import com.cloudbees.plugins.credentials.domains.DomainRequirement;
 
-import org.json.JSONArray;
-import org.json.JSONObject;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
@@ -55,28 +55,33 @@ public class StandardSlackService implements SlackService {
     }
 
     public boolean publish(String message, String color) {
+        //prepare attachments first
+        JSONObject field = new JSONObject();
+        field.put("short", false);
+        field.put("value", message);
+
+        JSONArray fields = new JSONArray();
+        fields.add(field);
+
+        JSONObject attachment = new JSONObject();
+        attachment.put("fallback", message);
+        attachment.put("color", color);
+        attachment.put("fields", fields);
+        JSONArray mrkdwn = new JSONArray();
+        mrkdwn.add("pretext");
+        mrkdwn.add("text");
+        mrkdwn.add("fields");
+        attachment.put("mrkdwn_in", mrkdwn);
+        JSONArray attachments = new JSONArray();
+        attachments.add(attachment);
+
+        return publish(attachments, color);
+    }
+
+    @Override
+    public boolean publish(JSONArray attachments, String color) {
         boolean result = true;
         for (String roomId : roomIds) {
-            //prepare attachments first
-            JSONObject field = new JSONObject();
-            field.put("short", false);
-            field.put("value", message);
-
-            JSONArray fields = new JSONArray();
-            fields.put(field);
-
-            JSONObject attachment = new JSONObject();
-            attachment.put("fallback", message);
-            attachment.put("color", color);
-            attachment.put("fields", fields);
-            JSONArray mrkdwn = new JSONArray();
-            mrkdwn.put("pretext");
-            mrkdwn.put("text");
-            mrkdwn.put("fields");
-            attachment.put("mrkdwn_in", mrkdwn);
-            JSONArray attachments = new JSONArray();
-            attachments.put(attachment);
-
             PostMethod post;
             String url;
             //prepare post methods for both requests types
@@ -103,7 +108,7 @@ public class StandardSlackService implements SlackService {
                 }
                 post = new PostMethod(url);
             }
-            logger.fine("Posting: to " + roomId + " on " + teamDomain + " using " + url + ": " + message + " " + color);
+            logger.fine("Posting: to " + roomId + " on " + teamDomain + " using " + url + ": " + attachments.toString() + " " + color);
             HttpClient client = getHttpClient();
             post.getParams().setContentCharset("UTF-8");
 

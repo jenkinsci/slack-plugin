@@ -3,6 +3,7 @@ package jenkins.plugins.slack;
 import hudson.model.Descriptor;
 import hudson.util.FormValidation;
 import junit.framework.TestCase;
+import net.sf.json.JSONArray;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.Before;
@@ -69,6 +70,11 @@ public class SlackNotifierTest extends TestCase {
         }
 
         public boolean publish(String message, String color) {
+            return response;
+        }
+
+        @Override
+        public boolean publish(JSONArray attachments, String color) {
             return response;
         }
 

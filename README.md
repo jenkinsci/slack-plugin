@@ -36,6 +36,17 @@ Includes [Jenkins Pipeline](https://github.com/jenkinsci/workflow-plugin) suppor
 slackSend color: 'good', message: 'Message from Jenkins Pipeline'
 ```
 
+Additionally you can pass a JSONArray as a String in order to send complex messages
+
+```
+JSONArray jsonArray = new JSONArray()
+    .
+    .
+    .
+slackSend color: 'good', message: 'Fallback message', attachments: jsonArray.toString()
+```
+More information about slack messages [Slack Messages Api](https://api.slack.com/docs/messages)
+
 ### Developer instructions
 
 Install Maven and JDK.  This was last build with Maven 3.2.5 and OpenJDK
