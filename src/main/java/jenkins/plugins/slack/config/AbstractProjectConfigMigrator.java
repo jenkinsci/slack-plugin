@@ -79,6 +79,7 @@ public class AbstractProjectConfigMigrator {
         slackNotifier.setNotifyNotBuilt(slackJobProperty.getNotifyNotBuilt());
         slackNotifier.setNotifySuccess(slackJobProperty.getNotifySuccess());
         slackNotifier.setNotifyUnstable(slackJobProperty.getNotifyUnstable());
+        slackNotifier.setNotifyRegression(slackJobProperty.getNotifyRegression());
         slackNotifier.setNotifyBackToNormal(slackJobProperty.getNotifyBackToNormal());
         slackNotifier.setNotifyRepeatedFailure(slackJobProperty.getNotifyRepeatedFailure());
 

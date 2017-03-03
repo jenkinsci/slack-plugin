@@ -50,6 +50,7 @@ public class BackwordsCompatible_1_8_SlackNotifierTest {
         assertFalse(notifier.getNotifyAborted());
         assertFalse(notifier.getNotifyNotBuilt());
         assertFalse(notifier.getNotifyUnstable());
+        assertFalse(notifier.getNotifyRegression());
         assertTrue(notifier.getNotifyFailure());
         assertFalse(notifier.getNotifyBackToNormal());
         assertFalse(notifier.getNotifyRepeatedFailure());
@@ -77,6 +78,7 @@ public class BackwordsCompatible_1_8_SlackNotifierTest {
         assertFalse(notifier.getNotifyAborted());
         assertFalse(notifier.getNotifyNotBuilt());
         assertFalse(notifier.getNotifyUnstable());
+        assertFalse(notifier.getNotifyRegression());
         assertTrue(notifier.getNotifyFailure());
         assertFalse(notifier.getNotifyBackToNormal());
         assertFalse(notifier.getNotifyRepeatedFailure());
@@ -104,6 +106,7 @@ public class BackwordsCompatible_1_8_SlackNotifierTest {
         assertFalse(notifier.getNotifyAborted());
         assertFalse(notifier.getNotifyNotBuilt());
         assertFalse(notifier.getNotifyUnstable());
+        assertFalse(notifier.getNotifyRegression());
         assertTrue(notifier.getNotifyFailure());
         assertFalse(notifier.getNotifyBackToNormal());
         assertFalse(notifier.getNotifyRepeatedFailure());
@@ -159,6 +162,7 @@ public class BackwordsCompatible_1_8_SlackNotifierTest {
         assertTrue(notifier.getNotifyAborted());
         assertTrue(notifier.getNotifyNotBuilt());
         assertTrue(notifier.getNotifyUnstable());
+        assertTrue(notifier.getNotifyRegression());
         assertTrue(notifier.getNotifyFailure());
         assertTrue(notifier.getNotifyBackToNormal());
         assertTrue(notifier.getNotifyRepeatedFailure());

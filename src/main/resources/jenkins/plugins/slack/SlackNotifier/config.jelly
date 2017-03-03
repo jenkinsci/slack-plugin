@@ -24,6 +24,11 @@
         <f:checkbox name="slackNotifyUnstable" value="true" checked="${instance.getNotifyUnstable()}"/>
     </f:entry>
 
+    <f:entry title="Notify Regression">
+        <f:checkbox name="slackNotifyRegression" value="true" checked="${instance.getNotifyRegression()}"/>
+    </f:entry>
+
+
     <f:entry title="Notify Back To Normal">
         <f:checkbox name="slackNotifyBackToNormal" value="true" checked="${instance.getNotifyBackToNormal()}"/>
     </f:entry>
