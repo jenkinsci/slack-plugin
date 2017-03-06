@@ -2,18 +2,18 @@ package jenkins.plugins.slack;
 
 public class StandardSlackServiceStub extends StandardSlackService {
 
-    private HttpClientStub httpClientStub;
+    private CloseableHttpClientStub httpClientStub;
 
     public StandardSlackServiceStub(String baseUrl, String teamDomain, String token, String tokenCredentialId, boolean botUser, String roomId) {
         super(baseUrl, teamDomain, token, tokenCredentialId, botUser, roomId);
     }
 
     @Override
-    public HttpClientStub getHttpClient() {
+    public CloseableHttpClientStub getHttpClient() {
         return httpClientStub;
     }
 
-    public void setHttpClient(HttpClientStub httpClientStub) {
+    public void setHttpClient(CloseableHttpClientStub httpClientStub) {
         this.httpClientStub = httpClientStub;
     }
 }
