@@ -35,14 +35,19 @@ public class StandardSlackService implements SlackService {
     private static final Logger logger = Logger.getLogger(StandardSlackService.class.getName());
 
     private String host = "slack.com";
+    private String baseUrl;
     private String teamDomain;
     private String token;
     private String authTokenCredentialId;
     private boolean botUser;
     private String[] roomIds;
 
-    public StandardSlackService(String teamDomain, String token, String authTokenCredentialId, boolean botUser, String roomId) {
+    public StandardSlackService(String baseUrl, String teamDomain, String token, String authTokenCredentialId, boolean botUser, String roomId) {
         super();
+        this.baseUrl = baseUrl;
+        if(this.baseUrl != null && !this.baseUrl.isEmpty() && !this.baseUrl.endsWith("/")) {
+            this.baseUrl += "/";
+        }
         this.teamDomain = teamDomain;
         this.token = token;
         this.authTokenCredentialId = StringUtils.trim(authTokenCredentialId);
@@ -74,8 +79,11 @@ public class StandardSlackService implements SlackService {
             PostMethod post;
             String url;
             //prepare post methods for both requests types
-            if (!botUser) {
+            if (!botUser || !StringUtils.isEmpty(baseUrl)) {
                 url = "https://" + teamDomain + "." + host + "/services/hooks/jenkins-ci?token=" + getTokenToUse();
+                if (!StringUtils.isEmpty(baseUrl)) {
+                    url = baseUrl + getTokenToUse();
+                }
                 post = new PostMethod(url);
                 JSONObject json = new JSONObject();
 

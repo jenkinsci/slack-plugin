@@ -1,14 +1,20 @@
 Slack plugin for Jenkins  [![Build Status][jenkins-status]][jenkins-builds] [![Slack Signup][slack-badge]][slack-signup]
 ----------------------------------------------------------------
 
-Provides Jenkins notification integration with Slack.
+Provides Jenkins notification integration with Slack and Slack compatible application like [RocketChat](https://rocket.chat/), [Mattermost](https://about.mattermost.com/)
 
-## Install Instructions
+## Install Instructions for Slack
 
 1. Get a Slack account: https://slack.com/
 2. Configure the Jenkins integration: https://my.slack.com/services/new/jenkins-ci
 3. Install this plugin on your Jenkins server
 4. Configure it in your Jenkins job (and optionally as global configuration) and **add it as a Post-build action**.
+
+## Install Instructions for Slack compatible application
+
+1. Create a Webhook
+2. Install this plugin on your Jenkins server
+3. Configure it in your Jenkins job (and optionally as global configuration) and **add it as a Post-build action**.
 
 #### Security
 
@@ -27,6 +33,8 @@ This plugin supports sending notifications via bot users. You can enable bot use
 global and project configurations. If the notification will be sent to a user via direct message, 
 default integration sends it via @slackbot, you can use this option if you want to send messages via a bot user.
 You need to provide credentials of the bot user for integration token credentials to use this feature. 
+
+Bot user option is not supported, if you use Base Url for a Slack compatible application.
 
 #### Jenkins Pipeline Support
 
