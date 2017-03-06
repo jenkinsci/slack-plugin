@@ -102,7 +102,10 @@ public class SlackSendStep extends AbstractStepImpl {
 
     @DataBoundSetter
     public void setBaseUrl(String baseUrl) {
-        this.baseUrl= Util.fixEmpty(baseUrl);
+        this.baseUrl = Util.fixEmpty(baseUrl);
+        if(this.baseUrl != null && !this.baseUrl.isEmpty() && !this.baseUrl.endsWith("/")) {
+            this.baseUrl += "/";
+        }
     }
 
     public String getTeamDomain() {

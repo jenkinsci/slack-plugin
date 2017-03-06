@@ -249,6 +249,9 @@ public class SlackNotifier extends Notifier {
                          CommitInfoChoice commitInfoChoice, boolean includeCustomMessage, String customMessage) {
         super();
         this.baseUrl = baseUrl;
+        if(this.baseUrl != null && !this.baseUrl.isEmpty() && !this.baseUrl.endsWith("/")) {
+            this.baseUrl += "/";
+        }
         this.teamDomain = teamDomain;
         this.authToken = authToken;
         this.authTokenCredentialId = StringUtils.trim(authTokenCredentialId);
@@ -407,6 +410,9 @@ public class SlackNotifier extends Notifier {
         @Override
         public SlackNotifier newInstance(StaplerRequest sr, JSONObject json) {
             String baseUrl = sr.getParameter("slackBaseUrl");
+            if(baseUrl != null && !baseUrl.isEmpty() && ! baseUrl.endsWith("/")) {
+                baseUrl += "/";
+            }
             String teamDomain = sr.getParameter("slackTeamDomain");
             String token = sr.getParameter("slackToken");
             String tokenCredentialId = json.getString("tokenCredentialId");
@@ -433,6 +439,9 @@ public class SlackNotifier extends Notifier {
         @Override
         public boolean configure(StaplerRequest sr, JSONObject formData) throws FormException {
             baseUrl = sr.getParameter("slackBaseUrl");
+            if(baseUrl != null && !baseUrl.isEmpty() && ! baseUrl.endsWith("/")) {
+                baseUrl += "/";
+            }
             teamDomain = sr.getParameter("slackTeamDomain");
             token = sr.getParameter("slackToken");
             tokenCredentialId = formData.getJSONObject("slack").getString("tokenCredentialId");
@@ -460,6 +469,9 @@ public class SlackNotifier extends Notifier {
                                                @QueryParameter("slackRoom") final String room) throws FormException {
             try {
                 String targetUrl = baseUrl;
+                if(targetUrl != null && !targetUrl.isEmpty() && !targetUrl.endsWith("/")) {
+                    targetUrl += "/";
+                }
                 if (StringUtils.isEmpty(targetUrl)) {
                     targetUrl = this.baseUrl;
                 }

@@ -57,6 +57,38 @@ public class SlackSendStepTest {
         slackSendStep.setToken("token");
         slackSendStep.setTokenCredentialId("tokenCredentialId");
         slackSendStep.setBotUser(false);
+        slackSendStep.setBaseUrl("baseUrl/");
+        slackSendStep.setTeamDomain("teamDomain");
+        slackSendStep.setChannel("channel");
+        slackSendStep.setColor("good");
+        stepExecution.step = slackSendStep;
+
+        when(Jenkins.getInstance()).thenReturn(jenkins);
+
+        stepExecution.listener = taskListenerMock;
+
+        when(slackDescMock.getToken()).thenReturn("differentToken");
+        when(slackDescMock.getBotUser()).thenReturn(true);
+
+        when(taskListenerMock.getLogger()).thenReturn(printStreamMock);
+        doNothing().when(printStreamMock).println();
+
+        when(stepExecution.getSlackService(anyString(), anyString(), anyString(), anyString(), anyBoolean(), anyString())).thenReturn(slackServiceMock);
+        when(slackServiceMock.publish(anyString(), anyString())).thenReturn(true);
+
+        stepExecution.run();
+        verify(stepExecution, times(1)).getSlackService("baseUrl/", "teamDomain", "token", "tokenCredentialId", false, "channel");
+        verify(slackServiceMock, times(1)).publish("message", "good");
+        assertFalse(stepExecution.step.isFailOnError());
+    }
+
+    @Test
+    public void testStepOverrides2() throws Exception {
+        SlackSendStep.SlackSendStepExecution stepExecution = spy(new SlackSendStep.SlackSendStepExecution());
+        SlackSendStep slackSendStep = new SlackSendStep("message");
+        slackSendStep.setToken("token");
+        slackSendStep.setTokenCredentialId("tokenCredentialId");
+        slackSendStep.setBotUser(false);
         slackSendStep.setBaseUrl("baseUrl");
         slackSendStep.setTeamDomain("teamDomain");
         slackSendStep.setChannel("channel");
@@ -77,7 +109,7 @@ public class SlackSendStepTest {
         when(slackServiceMock.publish(anyString(), anyString())).thenReturn(true);
 
         stepExecution.run();
-        verify(stepExecution, times(1)).getSlackService("baseUrl", "teamDomain", "token", "tokenCredentialId", false, "channel");
+        verify(stepExecution, times(1)).getSlackService("baseUrl/", "teamDomain", "token", "tokenCredentialId", false, "channel");
         verify(slackServiceMock, times(1)).publish("message", "good");
         assertFalse(stepExecution.step.isFailOnError());
     }

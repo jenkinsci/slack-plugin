@@ -45,6 +45,9 @@ public class StandardSlackService implements SlackService {
     public StandardSlackService(String baseUrl, String teamDomain, String token, String authTokenCredentialId, boolean botUser, String roomId) {
         super();
         this.baseUrl = baseUrl;
+        if(this.baseUrl != null && !this.baseUrl.isEmpty() && !this.baseUrl.endsWith("/")) {
+            this.baseUrl += "/";
+        }
         this.teamDomain = teamDomain;
         this.token = token;
         this.authTokenCredentialId = StringUtils.trim(authTokenCredentialId);
