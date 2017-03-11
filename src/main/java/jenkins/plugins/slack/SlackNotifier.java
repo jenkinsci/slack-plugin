@@ -53,6 +53,7 @@ public class SlackNotifier extends Notifier {
     private boolean notifyAborted;
     private boolean notifyNotBuilt;
     private boolean notifyUnstable;
+    private boolean notifyRegression;
     private boolean notifyFailure;
     private boolean notifyBackToNormal;
     private boolean notifyRepeatedFailure;
@@ -153,6 +154,10 @@ public class SlackNotifier extends Notifier {
         return notifyUnstable;
     }
 
+    public boolean getNotifyRegression() {
+        return notifyRegression;
+    }
+
     public boolean getNotifyBackToNormal() {
         return notifyBackToNormal;
     }
@@ -213,6 +218,11 @@ public class SlackNotifier extends Notifier {
     }
 
     @DataBoundSetter
+    public void setNotifyRegression(boolean notifyRegression) {
+        this.notifyRegression = notifyRegression;
+    }
+
+    @DataBoundSetter
     public void setNotifyBackToNormal(boolean notifyBackToNormal) {
         this.notifyBackToNormal = notifyBackToNormal;
     }
@@ -244,7 +254,7 @@ public class SlackNotifier extends Notifier {
 
     public SlackNotifier(final String baseUrl, final String teamDomain, final String authToken, final boolean botUser, final String room, final String authTokenCredentialId,
                          final String sendAs, final boolean startNotification, final boolean notifyAborted, final boolean notifyFailure,
-                         final boolean notifyNotBuilt, final boolean notifySuccess, final boolean notifyUnstable, final boolean notifyBackToNormal,
+                         final boolean notifyNotBuilt, final boolean notifySuccess, final boolean notifyUnstable, final boolean notifyRegression, final boolean notifyBackToNormal,
                          final boolean notifyRepeatedFailure, final boolean includeTestSummary, final boolean includeFailedTests,
                          CommitInfoChoice commitInfoChoice, boolean includeCustomMessage, String customMessage) {
         super();
@@ -264,6 +274,7 @@ public class SlackNotifier extends Notifier {
         this.notifyNotBuilt = notifyNotBuilt;
         this.notifySuccess = notifySuccess;
         this.notifyUnstable = notifyUnstable;
+        this.notifyRegression = notifyRegression;
         this.notifyBackToNormal = notifyBackToNormal;
         this.notifyRepeatedFailure = notifyRepeatedFailure;
         this.includeTestSummary = includeTestSummary;
@@ -423,6 +434,7 @@ public class SlackNotifier extends Notifier {
             boolean notifyAborted = "true".equals(sr.getParameter("slackNotifyAborted"));
             boolean notifyNotBuilt = "true".equals(sr.getParameter("slackNotifyNotBuilt"));
             boolean notifyUnstable = "true".equals(sr.getParameter("slackNotifyUnstable"));
+            boolean notifyRegression = "true".equals(sr.getParameter("slackNotifyRegression"));
             boolean notifyFailure = "true".equals(sr.getParameter("slackNotifyFailure"));
             boolean notifyBackToNormal = "true".equals(sr.getParameter("slackNotifyBackToNormal"));
             boolean notifyRepeatedFailure = "true".equals(sr.getParameter("slackNotifyRepeatedFailure"));
@@ -432,7 +444,7 @@ public class SlackNotifier extends Notifier {
             boolean includeCustomMessage = "on".equals(sr.getParameter("includeCustomMessage"));
             String customMessage = sr.getParameter("customMessage");
             return new SlackNotifier(baseUrl, teamDomain, token, botUser, room, tokenCredentialId, sendAs, startNotification, notifyAborted,
-                    notifyFailure, notifyNotBuilt, notifySuccess, notifyUnstable, notifyBackToNormal, notifyRepeatedFailure,
+                    notifyFailure, notifyNotBuilt, notifySuccess, notifyUnstable, notifyRegression, notifyBackToNormal, notifyRepeatedFailure,
                     includeTestSummary, includeFailedTests, commitInfoChoice, includeCustomMessage, customMessage);
         }
 
@@ -515,6 +527,7 @@ public class SlackNotifier extends Notifier {
         private boolean notifyAborted;
         private boolean notifyNotBuilt;
         private boolean notifyUnstable;
+        private boolean notifyRegression;
         private boolean notifyFailure;
         private boolean notifyBackToNormal;
         private boolean notifyRepeatedFailure;
@@ -534,6 +547,7 @@ public class SlackNotifier extends Notifier {
                                 boolean notifyNotBuilt,
                                 boolean notifySuccess,
                                 boolean notifyUnstable,
+                                boolean notifyRegression,
                                 boolean notifyBackToNormal,
                                 boolean notifyRepeatedFailure,
                                 boolean includeTestSummary,
@@ -550,6 +564,7 @@ public class SlackNotifier extends Notifier {
             this.notifyNotBuilt = notifyNotBuilt;
             this.notifySuccess = notifySuccess;
             this.notifyUnstable = notifyUnstable;
+            this.notifyRegression = notifyRegression;
             this.notifyBackToNormal = notifyBackToNormal;
             this.notifyRepeatedFailure = notifyRepeatedFailure;
             this.includeTestSummary = includeTestSummary;
@@ -616,6 +631,11 @@ public class SlackNotifier extends Notifier {
         @Exported
         public boolean getNotifyUnstable() {
             return notifyUnstable;
+        }
+
+        @Exported
+        public boolean getNotifyRegression() {
+            return notifyRegression;
         }
 
         @Exported

@@ -13,6 +13,7 @@ import hudson.model.Run;
 import hudson.scm.ChangeLogSet;
 import hudson.scm.ChangeLogSet.AffectedFile;
 import hudson.scm.ChangeLogSet.Entry;
+import hudson.tasks.junit.TestResultAction;
 import hudson.tasks.test.AbstractTestResultAction;
 import hudson.tasks.test.TestResult;
 import hudson.triggers.SCMTrigger;
@@ -96,6 +97,20 @@ public class ActiveNotifier implements FineGrainedNotifier {
     }
 
     public void finalized(AbstractBuild r) {
+        AbstractProject<?, ?> project = r.getProject();
+        Result result = r.getResult();
+        AbstractBuild<?, ?> previousBuild = project.getLastBuild();
+        do {
+            previousBuild = previousBuild.getPreviousCompletedBuild();
+        } while (previousBuild != null && previousBuild.getResult() == Result.ABORTED);
+        Result previousResult = (previousBuild != null) ? previousBuild.getResult() : Result.SUCCESS;
+        if((result.isWorseThan(previousResult) || moreTestFailuresThanPreviousBuild(r, previousBuild)) && notifier.getNotifyRegression()) {
+            getSlack(r).publish(getBuildStatusMessage(r, notifier.includeTestSummary(),
+                    notifier.includeFailedTests(), notifier.includeCustomMessage()), getBuildColor(r));
+            if (notifier.getCommitInfoChoice().showAnything()) {
+                getSlack(r).publish(getCommitList(r), getBuildColor(r));
+            }
+        }
     }
 
     public void completed(AbstractBuild r) {
@@ -125,6 +140,31 @@ public class ActiveNotifier implements FineGrainedNotifier {
                 getSlack(r).publish(getCommitList(r), getBuildColor(r));
             }
         }
+    }
+
+    private boolean moreTestFailuresThanPreviousBuild(AbstractBuild currentBuild, AbstractBuild<?, ?> previousBuild) {
+        if (getTestResult(currentBuild) != null && getTestResult(previousBuild) != null) {
+            if (getTestResult(currentBuild).getFailCount() > getTestResult(previousBuild).getFailCount())
+                return true;
+
+            // test if different tests failed.
+            return !getFailedTestIds(currentBuild).equals(getFailedTestIds(previousBuild));
+        }
+        return false;
+    }
+
+    private TestResultAction getTestResult(AbstractBuild build) {
+        return build.getAction(TestResultAction.class);
+    }
+
+    private Set<String> getFailedTestIds(AbstractBuild currentBuild) {
+        Set<String> failedTestIds = new HashSet<String>();
+        List<? extends TestResult> failedTests = getTestResult(currentBuild).getFailedTests();
+        for(TestResult result : failedTests) {
+            failedTestIds.add(result.getId());
+        }
+
+        return failedTestIds;
     }
 
     String getChanges(AbstractBuild r, boolean includeCustomMessage) {
@@ -242,6 +282,7 @@ public class ActiveNotifier implements FineGrainedNotifier {
                                     ABORTED_STATUS_MESSAGE = "Aborted",
                                     NOT_BUILT_STATUS_MESSAGE = "Not built",
                                     UNSTABLE_STATUS_MESSAGE = "Unstable",
+                                    REGRESSION_STATUS_MESSAGE = "Regression",
                                     UNKNOWN_STATUS_MESSAGE = "Unknown";
         
         private StringBuffer message;
@@ -317,6 +358,9 @@ public class ActiveNotifier implements FineGrainedNotifier {
             }
             if (result == Result.UNSTABLE) {
                 return UNSTABLE_STATUS_MESSAGE;
+            }
+            if (lastNonAbortedBuild != null && result.isWorseThan(previousResult)) {
+                return REGRESSION_STATUS_MESSAGE;
             }
             return UNKNOWN_STATUS_MESSAGE;
         }

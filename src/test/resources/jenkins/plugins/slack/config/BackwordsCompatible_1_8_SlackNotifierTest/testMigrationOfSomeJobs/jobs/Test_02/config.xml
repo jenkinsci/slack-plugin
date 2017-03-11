@@ -13,6 +13,7 @@
       <notifyAborted>true</notifyAborted>
       <notifyNotBuilt>true</notifyNotBuilt>
       <notifyUnstable>true</notifyUnstable>
+      <notifyRegression>true</notifyRegression>
       <notifyFailure>true</notifyFailure>
       <notifyBackToNormal>true</notifyBackToNormal>
       <notifyRepeatedFailure>true</notifyRepeatedFailure>
