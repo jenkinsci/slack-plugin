@@ -9,6 +9,7 @@ New Features:
   ([#275][#275])
 - Add baseUrl parameter to support slack-compatible integrations like Mattermost
   or Rocket Chat ([#293][#293])
+- Regression notification implemented ([#294][#294])
 
 Bug Fixes:
 
@@ -41,6 +42,7 @@ Bug Fixes:
 [#274]: https://github.com/jenkinsci/slack-plugin/issues/274
 [#275]: https://github.com/jenkinsci/slack-plugin/issues/275
 [#293]: https://github.com/jenkinsci/slack-plugin/issues/293
+[#294]: https://github.com/jenkinsci/slack-plugin/issues/294
 [#62]: https://github.com/jenkinsci/slack-plugin/issues/62
 
 # 2.1 release notes
