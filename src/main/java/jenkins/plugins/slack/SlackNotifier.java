@@ -334,7 +334,7 @@ public class SlackNotifier extends Notifier {
         room = env.expand(room);
         apiToken = env.expand(apiToken);
 
-        return new StandardSlackService(teamDomain, authToken, authTokenCredentialId, botUser, room, apiToken);
+        return new StandardSlackService(baseUrl, teamDomain, authToken, authTokenCredentialId, botUser, room, apiToken);
     }
 
     @Override
