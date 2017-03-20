@@ -51,7 +51,7 @@ public class WebhookEndpointTest {
 
     private final String URL = "webook";
     private final String ENDPOINT = URL+"/";
-    private final String LONG_PROJECT_NAME = "¶12345678  90怒qwertyuioplkjhgfdsazxcvbnm~()-_=+7{},.\"'    5";
+    private final String LONG_PROJECT_NAME = "0123456780900qwertyuioplkjhgfdsazxcvbnm0";
 
     private List<NameValuePair> data;
 

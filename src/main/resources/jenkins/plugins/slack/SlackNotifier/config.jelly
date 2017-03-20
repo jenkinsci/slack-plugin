@@ -33,6 +33,10 @@
         <f:checkbox name="slackNotifyBackToNormal" value="true" checked="${instance.getNotifyBackToNormal()}"/>
     </f:entry>
 
+    <f:entry title="Number of lines of log file to include">
+        <f:textbox name="numberOfLogLines" value="${instance.getNumberOfLogLines()}"/>
+    </f:entry>
+
     <f:advanced>
         <f:entry title="Notify Repeated Failure">
             <f:checkbox name="slackNotifyRepeatedFailure" value="true"

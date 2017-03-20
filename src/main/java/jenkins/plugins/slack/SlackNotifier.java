@@ -62,6 +62,7 @@ public class SlackNotifier extends Notifier {
     private CommitInfoChoice commitInfoChoice;
     private boolean includeCustomMessage;
     private String customMessage;
+    private String numberOfLogLines;
 
     @Override
     public DescriptorImpl getDescriptor() {
@@ -182,6 +183,9 @@ public class SlackNotifier extends Notifier {
         return customMessage;
     }
 
+    public String getNumberOfLogLines() { return numberOfLogLines; }
+
+
     @DataBoundSetter
     public void setStartNotification(boolean startNotification) {
         this.startNotification = startNotification;
@@ -256,7 +260,7 @@ public class SlackNotifier extends Notifier {
                          final String sendAs, final boolean startNotification, final boolean notifyAborted, final boolean notifyFailure,
                          final boolean notifyNotBuilt, final boolean notifySuccess, final boolean notifyUnstable, final boolean notifyRegression, final boolean notifyBackToNormal,
                          final boolean notifyRepeatedFailure, final boolean includeTestSummary, final boolean includeFailedTests,
-                         CommitInfoChoice commitInfoChoice, boolean includeCustomMessage, String customMessage) {
+                         CommitInfoChoice commitInfoChoice, boolean includeCustomMessage, String customMessage, String numberOfLogLines) {
         super();
         this.baseUrl = baseUrl;
         if(this.baseUrl != null && !this.baseUrl.isEmpty() && !this.baseUrl.endsWith("/")) {
@@ -282,6 +286,7 @@ public class SlackNotifier extends Notifier {
         this.commitInfoChoice = commitInfoChoice;
         this.includeCustomMessage = includeCustomMessage;
         this.customMessage = customMessage;
+        this.numberOfLogLines = numberOfLogLines;
     }
 
     public BuildStepMonitor getRequiredMonitorService() {
@@ -443,9 +448,10 @@ public class SlackNotifier extends Notifier {
             CommitInfoChoice commitInfoChoice = CommitInfoChoice.forDisplayName(sr.getParameter("slackCommitInfoChoice"));
             boolean includeCustomMessage = "on".equals(sr.getParameter("includeCustomMessage"));
             String customMessage = sr.getParameter("customMessage");
+            String numberOfLogLines = sr.getParameter("numberOfLogLines");
             return new SlackNotifier(baseUrl, teamDomain, token, botUser, room, tokenCredentialId, sendAs, startNotification, notifyAborted,
                     notifyFailure, notifyNotBuilt, notifySuccess, notifyUnstable, notifyRegression, notifyBackToNormal, notifyRepeatedFailure,
-                    includeTestSummary, includeFailedTests, commitInfoChoice, includeCustomMessage, customMessage);
+                    includeTestSummary, includeFailedTests, commitInfoChoice, includeCustomMessage, customMessage, numberOfLogLines);
         }
 
         @Override
@@ -535,6 +541,7 @@ public class SlackNotifier extends Notifier {
         private boolean showCommitList;
         private boolean includeCustomMessage;
         private String customMessage;
+        private String numberOfLogLines;
 
         @DataBoundConstructor
         public SlackJobProperty(String teamDomain,
@@ -553,7 +560,8 @@ public class SlackNotifier extends Notifier {
                                 boolean includeTestSummary,
                                 boolean showCommitList,
                                 boolean includeCustomMessage,
-                                String customMessage) {
+                                String customMessage,
+                                String numberOfLogLines) {
             this.teamDomain = teamDomain;
             this.token = token;
             this.botUser = botUser;
@@ -571,6 +579,7 @@ public class SlackNotifier extends Notifier {
             this.showCommitList = showCommitList;
             this.includeCustomMessage = includeCustomMessage;
             this.customMessage = customMessage;
+            this.numberOfLogLines = numberOfLogLines;
         }
 
         @Exported
@@ -663,6 +672,10 @@ public class SlackNotifier extends Notifier {
             return customMessage;
         }
 
+        @Exported
+        public String getNumberOfLogLines() {
+            return numberOfLogLines;
+        }
     }
 
     @Extension(ordinal = 100) public static final class Migrator extends ItemListener {

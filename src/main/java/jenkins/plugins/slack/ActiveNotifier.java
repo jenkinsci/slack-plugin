@@ -258,6 +258,7 @@ public class ActiveNotifier implements FineGrainedNotifier {
         message.appendStatusMessage();
         message.appendDuration();
         message.appendOpenLink();
+        message.appendLog();
         if (includeTestSummary) {
             message.appendTestSummary();
         }
@@ -386,6 +387,35 @@ public class ActiveNotifier implements FineGrainedNotifier {
         public MessageBuilder appendOpenLink() {
             String url = DisplayURLProvider.get().getRunURL(build);
             message.append(" (<").append(url).append("|Open>)");
+            return this;
+        }
+
+        public MessageBuilder appendLog() {
+            List<String> lines;
+            try {
+                lines = build.getLog(Integer.MAX_VALUE);
+            } catch (IOException e) {
+                e.printStackTrace();
+                //Just print the stack trace and return
+                return this;
+            }
+            int maxLines;
+            try {
+                maxLines = Integer.parseInt(notifier.getNumberOfLogLines());
+            } catch (NumberFormatException e) {
+                //Ignore no integer values
+                maxLines = 0;
+            }
+
+            int startIndex = lines.size() - maxLines;
+
+            if (startIndex < 0) {
+                startIndex = 0;
+            }
+
+            for (int i = startIndex; i < lines.size(); ++i) {
+                message.append("\n").append(lines.get(i));
+            }
             return this;
         }
 
