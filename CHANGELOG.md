@@ -10,6 +10,7 @@ New Features:
 - Add baseUrl parameter to support slack-compatible integrations like Mattermost
   or Rocket Chat ([#293][#293])
 - Regression notification implemented ([#294][#294])
+- Add capability to include N lines from the tail of the console log ([#306][#306])
 
 Bug Fixes:
 
