@@ -42,8 +42,8 @@ public class SlackListener extends RunListener<AbstractBuild> {
 
     @Override
     public void onFinalized(AbstractBuild r) {
-        // getNotifier(r.getProject()).finalized(r);
-        // super.onFinalized(r);
+         getNotifier(r.getProject(), null).finalized(r);
+         super.onFinalized(r);
     }
 
     @SuppressWarnings("unchecked")

@@ -1,5 +1,5 @@
 <j:jelly xmlns:j="jelly:core" xmlns:st="jelly:stapler" xmlns:d="jelly:define" xmlns:l="/lib/layout"
-         xmlns:t="/lib/hudson" xmlns:f="/lib/form">
+         xmlns:t="/lib/hudson" xmlns:f="/lib/form" xmlns:c="/lib/credentials">
     <f:entry title="Notify Build Start">
         <f:checkbox name="slackStartNotification" value="true" checked="${instance.getStartNotification()}"/>
     </f:entry>
@@ -24,6 +24,11 @@
         <f:checkbox name="slackNotifyUnstable" value="true" checked="${instance.getNotifyUnstable()}"/>
     </f:entry>
 
+    <f:entry title="Notify Regression">
+        <f:checkbox name="slackNotifyRegression" value="true" checked="${instance.getNotifyRegression()}"/>
+    </f:entry>
+
+
     <f:entry title="Notify Back To Normal">
         <f:checkbox name="slackNotifyBackToNormal" value="true" checked="${instance.getNotifyBackToNormal()}"/>
     </f:entry>
@@ -36,9 +41,12 @@
         <f:entry title="Include Test Summary">
             <f:checkbox name="includeTestSummary" value="true" checked="${instance.includeTestSummary()}"/>
         </f:entry>
+        <f:entry title="Include Failed Tests">
+            <f:checkbox name="includeFailedTests" value="true" checked="${instance.includeFailedTests()}"/>
+        </f:entry>
 
         <f:optionalBlock name="includeCustomMessage" title="Include Custom Message" checked="${instance.includeCustomMessage()}">
-            <f:entry title="Custom Message" help="${rootURL}/plugin/slack/help-projectConfig-slackCustomMessage.html">
+            <f:entry title="Custom Message" help="/plugin/slack/help-projectConfig-slackCustomMessage.html">
                 <f:textarea name="customMessage" value="${instance.getCustomMessage()}"/>
             </f:entry>
         </f:optionalBlock>
@@ -67,19 +75,31 @@
             </select>
         </f:entry>
 
-        <f:entry title="Team Subdomain" help="${rootURL}/plugin/slack/help-projectConfig-slackTeamDomain.html">
+        <f:entry title="Base URL" help="/plugin/slack/help-projectConfig-slackBaseUrl.html">
+            <f:textbox name="slackBaseUrl" value="${instance.getBaseUrl()}"/>
+        </f:entry>
+
+        <f:entry title="Team Subdomain" help="/plugin/slack/help-projectConfig-slackTeamDomain.html">
             <f:textbox name="slackTeamDomain" value="${instance.getTeamDomain()}"/>
         </f:entry>
 
-        <f:entry title="Integration Token" help="${rootURL}/plugin/slack/help-projectConfig-slackToken.html">
-            <f:textbox name="slackToken" value="${instance.getAuthToken()}"/>
+        <f:entry title="Integration Token" help="/plugin/slack/help-projectConfig-slackToken.html">
+            <f:textbox field="token" name="slackToken" value="${instance.getAuthToken()}"/>
         </f:entry>
 
-        <f:entry title="Project Channel" help="${rootURL}/plugin/slack/help-projectConfig-slackRoom.html">
+        <f:entry title="Integration Token Credential ID" help="/plugin/slack/help-projectConfig-slackTokenCredentialId.html" field="tokenCredentialId" name="tokenCredentialId" >
+            <c:select value="${instance.getAuthTokenCredentialId()}"/>
+        </f:entry>
+
+        <f:entry title="Is Bot User?" help="/plugin/slack/help-projectConfig-botUser.html">
+            <f:checkbox name="slackBotUser" value="true" checked="${instance.getBotUser()}"/>
+        </f:entry>
+
+        <f:entry title="Project Channel" help="/plugin/slack/help-projectConfig-slackRoom.html">
             <f:textbox name="slackRoom" value="${instance.getRoom()}"/>
         </f:entry>
         <f:validateButton
                 title="${%Test Connection}" progress="${%Testing...}"
-                method="testConnection" with="slackTeamDomain,slackToken,slackRoom"/>
+                method="testConnection" with="slackBaseUrl,slackTeamDomain,slackToken,tokenCredentialId,slackRoom"/>
     </f:advanced>
 </j:jelly>

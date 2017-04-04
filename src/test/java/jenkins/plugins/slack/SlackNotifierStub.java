@@ -4,14 +4,14 @@ import java.util.List;
 
 public class SlackNotifierStub extends SlackNotifier {
 
-    public SlackNotifierStub(String teamDomain, String authToken, String room, String apiToken, String buildServerUrl,
+    public SlackNotifierStub(String baseUrl, String teamDomain, String authToken, boolean botUser, String room, String authTokenCredentialId, String apiToken,
                              String sendAs, boolean startNotification, boolean notifyAborted, boolean notifyFailure,
-                             boolean notifyNotBuilt, boolean notifySuccess, boolean notifyUnstable, boolean notifyBackToNormal,
-                             boolean notifyRepeatedFailure, boolean includeTestSummary, CommitInfoChoice commitInfoChoice,
-                             boolean includeCustomMessage, String customMessage, boolean includeMention, List<Mention> mentionList) {
-        super(teamDomain, authToken, room, apiToken, buildServerUrl, sendAs, startNotification, notifyAborted, notifyFailure,
-                notifyNotBuilt, notifySuccess, notifyUnstable, notifyBackToNormal, notifyRepeatedFailure,
-                includeTestSummary, commitInfoChoice, includeCustomMessage, customMessage, includeMention, mentionList);
+                             boolean notifyNotBuilt, boolean notifySuccess, boolean notifyUnstable, boolean notifyRegression, boolean notifyBackToNormal,
+                             boolean notifyRepeatedFailure, boolean includeTestSummary, boolean includeFailedTests,
+                             CommitInfoChoice commitInfoChoice, boolean includeCustomMessage, String customMessage, boolean includeMention, List<Mention> mentionList) {
+        super(baseUrl, teamDomain, authToken, botUser, room, apiToken, authTokenCredentialId, sendAs, startNotification, notifyAborted, notifyFailure,
+                notifyNotBuilt, notifySuccess, notifyUnstable, notifyRegression, notifyBackToNormal, notifyRepeatedFailure,
+                includeTestSummary, includeFailedTests, commitInfoChoice, includeCustomMessage, customMessage, includeMention, mentionList);
     }
 
     public static class DescriptorImplStub extends SlackNotifier.DescriptorImpl {
@@ -23,7 +23,7 @@ public class SlackNotifierStub extends SlackNotifier {
         }
 
         @Override
-        SlackService getSlackService(final String teamDomain, final String authToken, final String room, final String apiToken) {
+        SlackService getSlackService(final String baseUrl, final String teamDomain, final String authToken, final String authTokenCredentialId, final boolean botUser, final String room, final String apiToken) {
             return slackService;
         }
 

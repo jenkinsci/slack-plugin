@@ -16,16 +16,21 @@ import hudson.model.User;
 import hudson.scm.ChangeLogSet;
 import hudson.scm.ChangeLogSet.AffectedFile;
 import hudson.scm.ChangeLogSet.Entry;
+import hudson.tasks.junit.TestResultAction;
 import hudson.tasks.MailAddressResolver;
 import hudson.tasks.Mailer;
 import hudson.tasks.test.AbstractTestResultAction;
+import hudson.tasks.test.TestResult;
 import hudson.triggers.SCMTrigger;
 import hudson.util.LogTaskListener;
 import jenkins.model.Jenkins;
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
+import org.jenkinsci.plugins.displayurlapi.DisplayURLProvider;
 
 import java.lang.reflect.Method;
 import java.io.IOException;
+import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -33,6 +38,8 @@ import java.util.List;
 import java.util.ListIterator;
 import java.util.Set;
 import java.util.logging.Logger;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import static java.util.logging.Level.INFO;
 import static java.util.logging.Level.SEVERE;
@@ -69,7 +76,11 @@ public class ActiveNotifier implements FineGrainedNotifier {
             if (scmCause == null) {
                 MessageBuilder message = new MessageBuilder(notifier, build);
                 message.append(causeAction.getShortDescription());
-                notifyStart(build, message.appendOpenLink().toString());
+                message.appendOpenLink();
+                if (notifier.includeCustomMessage()) {
+                  message.appendCustomMessage();
+                }
+                notifyStart(build, message.toString());
                 // Cause was found, exit early to prevent double-message
                 return;
             }
@@ -79,7 +90,7 @@ public class ActiveNotifier implements FineGrainedNotifier {
         if (changes != null) {
             notifyStart(build, changes);
         } else {
-            notifyStart(build, getBuildStatusMessage(build, false, notifier.includeCustomMessage()));
+            notifyStart(build, getBuildStatusMessage(build, false, false, notifier.includeCustomMessage()));
         }
     }
 
@@ -94,6 +105,20 @@ public class ActiveNotifier implements FineGrainedNotifier {
     }
 
     public void finalized(AbstractBuild r) {
+        AbstractProject<?, ?> project = r.getProject();
+        Result result = r.getResult();
+        AbstractBuild<?, ?> previousBuild = project.getLastBuild();
+        do {
+            previousBuild = previousBuild.getPreviousCompletedBuild();
+        } while (previousBuild != null && previousBuild.getResult() == Result.ABORTED);
+        Result previousResult = (previousBuild != null) ? previousBuild.getResult() : Result.SUCCESS;
+        if((result.isWorseThan(previousResult) || moreTestFailuresThanPreviousBuild(r, previousBuild)) && notifier.getNotifyRegression()) {
+            getSlack(r).publish(getBuildStatusMessage(r, notifier.includeTestSummary(),
+                    notifier.includeFailedTests(), notifier.includeCustomMessage()), getBuildColor(r));
+            if (notifier.getCommitInfoChoice().showAnything()) {
+                getSlack(r).publish(getCommitList(r), getBuildColor(r));
+            }
+        }
     }
 
     public void completed(AbstractBuild r) {
@@ -118,17 +143,41 @@ public class ActiveNotifier implements FineGrainedNotifier {
                 || (result == Result.SUCCESS && notifier.getNotifySuccess())
                 || (result == Result.UNSTABLE && notifier.getNotifyUnstable())) {
             if (notifier.includeMention()) {
-                getSlack(r).publish(getMentionText(r),
-                        getBuildStatusMessage(r, notifier.includeTestSummary(),
-                        notifier.includeCustomMessage()), getBuildColor(r));
+              getSlack(r).publish(getMentionText(r), getBuildStatusMessage(r, notifier.includeTestSummary(),
+                      notifier.includeFailedTests(), notifier.includeCustomMessage()), getBuildColor(r));
             } else {
-                getSlack(r).publish(getBuildStatusMessage(r, notifier.includeTestSummary(),
-                        notifier.includeCustomMessage()), getBuildColor(r));
+              getSlack(r).publish(getBuildStatusMessage(r, notifier.includeTestSummary(),
+                      notifier.includeFailedTests(), notifier.includeCustomMessage()), getBuildColor(r));
             }
             if (notifier.getCommitInfoChoice().showAnything()) {
                 getSlack(r).publish(getCommitList(r), getBuildColor(r));
             }
         }
+    }
+
+    private boolean moreTestFailuresThanPreviousBuild(AbstractBuild currentBuild, AbstractBuild<?, ?> previousBuild) {
+        if (getTestResult(currentBuild) != null && getTestResult(previousBuild) != null) {
+            if (getTestResult(currentBuild).getFailCount() > getTestResult(previousBuild).getFailCount())
+                return true;
+
+            // test if different tests failed.
+            return !getFailedTestIds(currentBuild).equals(getFailedTestIds(previousBuild));
+        }
+        return false;
+    }
+
+    private TestResultAction getTestResult(AbstractBuild build) {
+        return build.getAction(TestResultAction.class);
+    }
+
+    private Set<String> getFailedTestIds(AbstractBuild currentBuild) {
+        Set<String> failedTestIds = new HashSet<String>();
+        List<? extends TestResult> failedTests = getTestResult(currentBuild).getFailedTests();
+        for(TestResult result : failedTests) {
+            failedTestIds.add(result.getId());
+        }
+
+        return failedTestIds;
     }
 
     String getChanges(AbstractBuild r, boolean includeCustomMessage) {
@@ -143,7 +192,9 @@ public class ActiveNotifier implements FineGrainedNotifier {
             Entry entry = (Entry) o;
             logger.info("Entry " + o);
             entries.add(entry);
-            files.addAll(entry.getAffectedFiles());
+            if (CollectionUtils.isNotEmpty(entry.getAffectedFiles())) {
+                files.addAll(entry.getAffectedFiles());
+            }
         }
         if (entries.isEmpty()) {
             logger.info("Empty change...");
@@ -238,13 +289,16 @@ public class ActiveNotifier implements FineGrainedNotifier {
         }
     }
 
-    String getBuildStatusMessage(AbstractBuild r, boolean includeTestSummary, boolean includeCustomMessage) {
+    String getBuildStatusMessage(AbstractBuild r, boolean includeTestSummary, boolean includeFailedTests, boolean includeCustomMessage) {
         MessageBuilder message = new MessageBuilder(notifier, r);
         message.appendStatusMessage();
         message.appendDuration();
         message.appendOpenLink();
         if (includeTestSummary) {
             message.appendTestSummary();
+        }
+        if (includeFailedTests) {
+            message.appendFailedTests();
         }
         if (includeCustomMessage) {
             message.appendCustomMessage();
@@ -253,94 +307,92 @@ public class ActiveNotifier implements FineGrainedNotifier {
     }
 
     String getMentionText(AbstractBuild r) {
-      return getMentionText(r, null);
+        return getMentionText(r, null);
     }
 
     String getMentionText(AbstractBuild r, AbstractBuild original) {
-      if (original == null) {
-        original = r;
-      }
+        if (original == null) {
+          original = r;
+        }
 
-      List<Cause> causes = getCausesFromBuild(r);
+        List<Cause> causes = getCausesFromBuild(r);
 
-      if (causes.size() == 1 && (causes.get(0) instanceof Cause.UpstreamCause)) {
-          Cause.UpstreamCause updtreamCause = (Cause.UpstreamCause)causes.get(0);
-          String upProjectName = updtreamCause.getUpstreamProject();
-          int buildNumber = updtreamCause.getUpstreamBuild();
-          AbstractProject project = Hudson.getInstance().getItemByFullName(upProjectName, AbstractProject.class);
-          AbstractBuild upBuild = (AbstractBuild)project.getBuildByNumber(buildNumber);
-          return getMentionText(upBuild, original);
-      }
+        if (causes.size() == 1 && (causes.get(0) instanceof Cause.UpstreamCause)) {
+            Cause.UpstreamCause updtreamCause = (Cause.UpstreamCause)causes.get(0);
+            String upProjectName = updtreamCause.getUpstreamProject();
+            int buildNumber = updtreamCause.getUpstreamBuild();
+            AbstractProject project = Hudson.getInstance().getItemByFullName(upProjectName, AbstractProject.class);
+            AbstractBuild upBuild = (AbstractBuild)project.getBuildByNumber(buildNumber);
+            return getMentionText(upBuild, original);
+        }
 
-      StringBuffer text = new StringBuffer();
+        StringBuffer text = new StringBuffer();
+        for (Mention mention: notifier.getMentionList()) {
+            if (! mention.getTiming().equals(NotificationTiming.forBuildResult(original, notifier))) {
+                continue;
+            }
 
-      String statusMessage = MessageBuilder.getStatusMessage(original);
-      for (Mention mention: notifier.getMentionList()) {
-          if (! mention.getTiming().equals(NotificationTiming.forStatusMessage(statusMessage))) {
-              continue;
-          }
+            if (Constants.JOB_TRIGGERED_MENTION.equals(mention.getTo())) {
+                Cause.UserIdCause cause = (Cause.UserIdCause)getCauseFromBuild(r, Cause.UserIdCause.class);
 
-          if (Constants.JOB_TRIGGERED_MENTION.equals(mention.getTo())) {
-              Cause.UserIdCause cause = (Cause.UserIdCause)getCauseFromBuild(r, Cause.UserIdCause.class);
+                if (cause == null) {
+                    continue;
+                }
 
-              if (cause == null) {
-                  continue;
-              }
+                User triggeredUser = User.get(cause.getUserId());
+                if (triggeredUser == null) {
+                    continue;
+                }
 
-              User triggeredUser = User.get(cause.getUserId());
-              if (triggeredUser == null) {
-                  continue;
-              }
+                String mail = MailAddressResolver.resolve(triggeredUser);
 
-              String mail = MailAddressResolver.resolve(triggeredUser);
+                if (mail == null || "".equals(mail)) {
+                    continue;
+                }
 
-              if (mail == null || "".equals(mail)) {
-                  continue;
-              }
+                String slackUserId = getSlack(r).getUserId(mail);
+                if (slackUserId != null && ! "".equals(slackUserId)) {
+                    text.append("<@" + slackUserId + "> ");
+                }
+            } else if (Constants.GHPRB_MENTION.equals(mention.getTo())) {
+                // Skip if ghprb is not installed or disabled.
+                if (Jenkins.getInstance().getPlugin("ghprb") == null) {
+                    continue;
+                }
 
-              String slackUserId = getSlack(r).getUserId(mail);
-              if (slackUserId != null && ! "".equals(slackUserId)) {
-                  text.append("<@" + slackUserId + "> ");
-              }
-          } else if (Constants.GHPRB_MENTION.equals(mention.getTo())) {
-              // Skip if ghprb is not installed or disabled.
-              if (Jenkins.getInstance().getPlugin("ghprb") == null) {
-                  continue;
-              }
+                try {
+                    ClassLoader classLoader = Jenkins.getInstance().pluginManager.uberClassLoader;
+                    Class<?> clazz = Class.forName("org.jenkinsci.plugins.ghprb.GhprbCause", true, classLoader);
+                    Cause ghprbCause = r.getCause(clazz);
 
-              try {
-                  ClassLoader classLoader = Jenkins.getInstance().pluginManager.uberClassLoader;
-                  Class<?> clazz = Class.forName("org.jenkinsci.plugins.ghprb.GhprbCause", true, classLoader);
-                  Cause ghprbCause = r.getCause(clazz);
+                    if (ghprbCause == null) {
+                        continue;
+                    }
 
-                  if (ghprbCause == null) {
-                      continue;
-                  }
+                    Method getCommitAuthor = ghprbCause.getClass().getMethod("getCommitAuthor", null);
+                    Object commitUser = getCommitAuthor.invoke(ghprbCause, null);
 
-                  Method getCommitAuthor = ghprbCause.getClass().getMethod("getCommitAuthor", null);
-                  Object commitUser = getCommitAuthor.invoke(ghprbCause, null);
+                    Method getEmail = commitUser.getClass().getMethod("getEmail", null);
+                    String mail = getEmail.invoke(commitUser, null).toString();
 
-                  Method getEmail = commitUser.getClass().getMethod("getEmail", null);
-                  String mail = getEmail.invoke(commitUser, null).toString();
+                    if (mail == null || "".equals(mail)) {
+                        continue;
+                    }
 
-                  if (mail == null || "".equals(mail)) {
-                      continue;
-                  }
-
-                  String slackUserId = getSlack(r).getUserId(mail);
-                  if (slackUserId != null && ! "".equals(slackUserId)) {
-                      text.append("<@" + slackUserId + "> ");
-                  }
-              } catch (Exception e) {
-                  continue;
-              }
-          } else if ("here".equals(mention.getTo()) || "channel".equals(mention.getTo())) {
-              text.append("<!" + mention.getTo() + "|" + mention.getTo() + "> ");
-          } else {
-              text.append("<@" + mention.getTo() + "> ");
-          }
-      }
-      return text.toString();
+                    String slackUserId = getSlack(r).getUserId(mail);
+                    if (slackUserId != null && ! "".equals(slackUserId)) {
+                        text.append("<@" + slackUserId + "> ");
+                    }
+                } catch (Exception e) {
+                    continue;
+                }
+            } else if ("here".equals(mention.getTo()) || "channel".equals(mention.getTo())) {
+                text.append("<!" + mention.getTo() + "|" + mention.getTo() + "> ");
+            } else {
+                text.append("<@" + mention.getTo() + "> ");
+            }
+        }
+        return text.toString();
     }
 
     private List<Cause> getCausesFromBuild(AbstractBuild build) {
@@ -374,15 +426,18 @@ public class ActiveNotifier implements FineGrainedNotifier {
 
     public static class MessageBuilder {
 
-        static final String STARTING_STATUS_MESSAGE = "Starting...",
-                            BACK_TO_NORMAL_STATUS_MESSAGE = "Back to normal",
-                            STILL_FAILING_STATUS_MESSAGE = "Still Failing",
-                            SUCCESS_STATUS_MESSAGE = "Success",
-                            FAILURE_STATUS_MESSAGE = "Failure",
-                            ABORTED_STATUS_MESSAGE = "Aborted",
-                            NOT_BUILT_STATUS_MESSAGE = "Not built",
-                            UNSTABLE_STATUS_MESSAGE = "Unstable",
-                            UNKNOWN_STATUS_MESSAGE = "Unknown";
+        private static final Pattern aTag = Pattern.compile("(?i)<a([^>]+)>(.+?)</a>");
+        private static final Pattern href = Pattern.compile("\\s*(?i)href\\s*=\\s*(\"([^\"]*\")|'[^']*'|([^'\">\\s]+))");
+        private static final String STARTING_STATUS_MESSAGE = "Starting...",
+                                    BACK_TO_NORMAL_STATUS_MESSAGE = "Back to normal",
+                                    STILL_FAILING_STATUS_MESSAGE = "Still Failing",
+                                    SUCCESS_STATUS_MESSAGE = "Success",
+                                    FAILURE_STATUS_MESSAGE = "Failure",
+                                    ABORTED_STATUS_MESSAGE = "Aborted",
+                                    NOT_BUILT_STATUS_MESSAGE = "Not built",
+                                    UNSTABLE_STATUS_MESSAGE = "Unstable",
+                                    REGRESSION_STATUS_MESSAGE = "Regression",
+                                    UNKNOWN_STATUS_MESSAGE = "Unknown";
 
         private StringBuffer message;
         private SlackNotifier notifier;
@@ -400,7 +455,7 @@ public class ActiveNotifier implements FineGrainedNotifier {
             return this;
         }
 
-        static String getStatusMessage(AbstractBuild r) {
+        private String getStatusMessage(AbstractBuild r) {
             if (r.isBuilding()) {
                 return STARTING_STATUS_MESSAGE;
             }
@@ -437,7 +492,7 @@ public class ActiveNotifier implements FineGrainedNotifier {
              */
             if (result == Result.SUCCESS
                     && (previousResult == Result.FAILURE || previousResult == Result.UNSTABLE)
-                    && buildHasSucceededBefore) {
+                    && buildHasSucceededBefore && notifier.getNotifyBackToNormal()) {
                 return BACK_TO_NORMAL_STATUS_MESSAGE;
             }
             if (result == Result.FAILURE && previousResult == Result.FAILURE) {
@@ -457,6 +512,9 @@ public class ActiveNotifier implements FineGrainedNotifier {
             }
             if (result == Result.UNSTABLE) {
                 return UNSTABLE_STATUS_MESSAGE;
+            }
+            if (lastNonAbortedBuild != null && result.isWorseThan(previousResult)) {
+                return REGRESSION_STATUS_MESSAGE;
             }
             return UNKNOWN_STATUS_MESSAGE;
         }
@@ -488,7 +546,7 @@ public class ActiveNotifier implements FineGrainedNotifier {
         }
 
         public MessageBuilder appendOpenLink() {
-            String url = notifier.getBuildServerUrl() + build.getUrl();
+            String url = DisplayURLProvider.get().getRunURL(build);
             message.append(" (<").append(url).append("|Open>)");
             return this;
         }
@@ -522,6 +580,20 @@ public class ActiveNotifier implements FineGrainedNotifier {
             return this;
         }
 
+        public MessageBuilder appendFailedTests() {
+            AbstractTestResultAction<?> action = this.build
+                    .getAction(AbstractTestResultAction.class);
+            if (action != null) {
+                int failed = action.getFailCount();
+                message.append("\n").append(failed).append(" Failed Tests:\n");
+                for(TestResult result : action.getFailedTests()) {
+                    message.append("\t").append(result.getName()).append(" after ")
+                            .append(result.getDurationString()).append("\n");
+                }
+            }
+            return this;
+        }
+
         public MessageBuilder appendCustomMessage() {
             String customMessage = notifier.getCustomMessage();
             EnvVars envVars = new EnvVars();
@@ -538,23 +610,46 @@ public class ActiveNotifier implements FineGrainedNotifier {
         }
 
         private String createBackToNormalDurationString(){
+            // This status code guarantees that the previous build fails and has been successful before
+            // The back to normal time is the time since the build first broke
             Run previousSuccessfulBuild = build.getPreviousSuccessfulBuild();
-            long previousSuccessStartTime = previousSuccessfulBuild.getStartTimeInMillis();
-            long previousSuccessDuration = previousSuccessfulBuild.getDuration();
-            long previousSuccessEndTime = previousSuccessStartTime + previousSuccessDuration;
+            Run initialFailureAfterPreviousSuccessfulBuild = previousSuccessfulBuild.getNextBuild();
+            long initialFailureStartTime = initialFailureAfterPreviousSuccessfulBuild.getStartTimeInMillis();
+            long initialFailureDuration = initialFailureAfterPreviousSuccessfulBuild.getDuration();
+            long initialFailureEndTime = initialFailureStartTime + initialFailureDuration;
             long buildStartTime = build.getStartTimeInMillis();
             long buildDuration = build.getDuration();
             long buildEndTime = buildStartTime + buildDuration;
-            long backToNormalDuration = buildEndTime - previousSuccessEndTime;
+            long backToNormalDuration = buildEndTime - initialFailureEndTime;
             return Util.getTimeSpanString(backToNormalDuration);
         }
 
-        public String escape(String string) {
+        private String escapeCharacters(String string) {
             string = string.replace("&", "&amp;");
             string = string.replace("<", "&lt;");
             string = string.replace(">", "&gt;");
 
             return string;
+        }
+
+        private String[] extractReplaceLinks(Matcher aTag, StringBuffer sb) {
+            int size = 0;
+            List<String> links = new ArrayList<String>();
+            while (aTag.find()) {
+                Matcher url = href.matcher(aTag.group(1));
+                if (url.find()) {
+                    aTag.appendReplacement(sb,String.format("{%s}", size++));
+                    links.add(String.format("<%s|%s>", url.group(1).replaceAll("\"", ""), aTag.group(2)));
+                }
+            }
+            aTag.appendTail(sb);
+            return links.toArray(new String[size]);
+        }
+
+        public String escape(String string) {
+            StringBuffer pattern = new StringBuffer();
+            String[] links = extractReplaceLinks(aTag.matcher(string), pattern);
+            return MessageFormat.format(escapeCharacters(pattern.toString()), links);
         }
 
         public String toString() {

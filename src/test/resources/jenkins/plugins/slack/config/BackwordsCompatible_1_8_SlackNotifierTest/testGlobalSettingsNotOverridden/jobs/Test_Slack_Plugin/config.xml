@@ -13,6 +13,7 @@
       <notifyAborted>false</notifyAborted>
       <notifyNotBuilt>false</notifyNotBuilt>
       <notifyUnstable>false</notifyUnstable>
+      <notifyRegration>false</notifyRegration>
       <notifyFailure>true</notifyFailure>
       <notifyBackToNormal>false</notifyBackToNormal>
       <notifyRepeatedFailure>false</notifyRepeatedFailure>
@@ -38,6 +39,7 @@
     <jenkins.plugins.slack.SlackNotifier plugin="slack@1.8.1-SNAPSHOT">
       <teamDomain></teamDomain>
       <authToken></authToken>
+      <botUser></botUser>
       <buildServerUrl></buildServerUrl>
       <room></room>
     </jenkins.plugins.slack.SlackNotifier>
