@@ -25,6 +25,7 @@ import net.sf.json.JSONObject;
 import org.apache.commons.lang.StringUtils;
 import org.jenkinsci.plugins.displayurlapi.DisplayURLProvider;
 import org.jenkinsci.plugins.plaincredentials.StringCredentials;
+import org.kohsuke.stapler.AncestorInPath;
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.DataBoundSetter;
 import org.kohsuke.stapler.QueryParameter;
@@ -394,15 +395,15 @@ public class SlackNotifier extends Notifier {
             return sendAs;
         }
 
-        public ListBoxModel doFillTokenCredentialIdItems() {
-            if (!Jenkins.getInstance().hasPermission(Jenkins.ADMINISTER)) {
+        public ListBoxModel doFillTokenCredentialIdItems(@AncestorInPath Item owner) {
+            if (owner == null || !owner.hasPermission(Item.CONFIGURE)) {
                 return new ListBoxModel();
             }
             return new StandardListBoxModel()
                     .withEmptySelection()
                     .withAll(lookupCredentials(
                             StringCredentials.class,
-                            Jenkins.getInstance(),
+                            owner,
                             ACL.SYSTEM,
                             new HostnameRequirement("*.slack.com"))
                     );
