@@ -33,7 +33,7 @@ public class AbstractProjectConfigMigrator {
         final SlackJobProperty slackJobProperty = project.getProperty(SlackJobProperty.class);
 
         if (slackJobProperty == null) {
-            logger.info(String.format(
+            logger.finest(String.format(
                     "Configuration is already up to date for \"%s\", skipping migration",
                     project.getName()));
             return;
