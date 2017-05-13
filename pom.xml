@@ -251,15 +251,5 @@
             </roles>
             <timezone>America/New_York</timezone>
         </developer>
-        <developer>
-            <id>sag47</id>
-            <name>Sam Gleske</name>
-            <email>sam.mxracer@gmail.com</email>
-            <url>https://github.com/samrocketman</url>
-            <roles>
-                <role>committer</role>
-            </roles>
-            <timezone>America/Los_Angeles</timezone>
-        </developer>
     </developers>
 </project>
