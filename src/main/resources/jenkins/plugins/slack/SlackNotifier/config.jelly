@@ -82,6 +82,11 @@
         <f:entry title="Project Channel" help="/plugin/slack/help-projectConfig-slackRoom.html">
             <f:textbox name="slackRoom" value="${instance.getRoom()}"/>
         </f:entry>
+
+        <f:entry title="API Token" help="/plugin/slack/help-projectConfig-slackApiToken.html">
+            <f:textbox field="apiToken" name="slackApiToken" value="${instance.getApiToken()}"/>
+        </f:entry>
+
         <f:validateButton
                 title="${%Test Connection}" progress="${%Testing...}"
                 method="testConnection" with="slackBaseUrl,slackTeamDomain,slackToken,tokenCredentialId,slackRoom"/>

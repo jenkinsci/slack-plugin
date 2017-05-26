@@ -118,6 +118,15 @@ public class SlackNotifier extends Notifier {
         this.botUser = botUser;
     }
 
+    public String getApiToken() {
+        return apiToken;
+    }
+
+    @DataBoundSetter
+    public void setApiToken(String apiToken) {
+        this.apiToken = apiToken;
+    }
+
     public String getSendAs() {
         return sendAs;
     }
