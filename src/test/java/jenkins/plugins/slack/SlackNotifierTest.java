@@ -77,6 +77,8 @@ public class SlackNotifierTest extends TestCase {
             return null;
         }
 
+        public void testApi() throws Exception { }
+
         public void setResponse(boolean response) {
             this.response = response;
         }

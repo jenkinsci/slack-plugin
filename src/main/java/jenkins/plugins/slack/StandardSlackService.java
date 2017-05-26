@@ -170,6 +170,33 @@ public class StandardSlackService implements SlackService {
         return null;
     }
 
+    public void testApi() throws Exception {
+
+        if (StringUtils.isEmpty(apiToken)) {
+            throw new Exception("API request to Slack failed: API token is empty");
+        }
+
+        String url = "https://" + host + "/api/auth.test?token=" + apiToken;
+        Client client = getClient();
+        GetMethod get = new GetMethod(url);
+        try {
+            ClientResponse response = client.request(get);
+            String responseBody = response.getBody();
+            if (response.getStatusCode() != HttpStatus.SC_OK) {
+                throw new Exception("request failed: " + responseBody);
+            }
+            JSONObject responseJSON = new JSONObject(responseBody);
+
+            Boolean ok = responseJSON.getBoolean("ok");
+            if (!ok) {
+                String error = responseJSON.getString("error");
+                throw new Exception(error);
+            }
+        } finally {
+            get.releaseConnection();
+        }
+    }
+
     private String getTokenToUse() {
         if (authTokenCredentialId != null && !authTokenCredentialId.isEmpty()) {
             StringCredentials credentials = lookupCredentials(authTokenCredentialId);

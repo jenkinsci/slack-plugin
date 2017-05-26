@@ -35,6 +35,6 @@
     </f:entry>
     <f:validateButton
         title="${%Test Connection}" progress="${%Testing...}"
-        method="testConnection" with="slackBaseUrl,slackTeamDomain,slackToken,tokenCredentialId,slackRoom" />
+        method="testConnection" with="slackBaseUrl,slackTeamDomain,slackToken,tokenCredentialId,slackRoom,slackApiToken" />
   </f:section>
 </j:jelly>

@@ -163,4 +163,26 @@ public class StandardSlackServiceTest {
         assertNull(service.getUserId("john.doe@example.com"));
     }
 
+    @Test
+    public void testApiReturnsWhenStatusBodyIsOk() throws Exception {
+        StandardSlackServiceStub service = new StandardSlackServiceStub("", "domain", "token", null, false, "", "apiToken");
+        ClientStub clientStub = new ClientStub();
+        clientStub.setClientResponse(new ClientResponse(HttpStatus.SC_OK, "{\"ok\":true}"));
+        service.setClientStub(clientStub);
+        service.testApi();
+    }
+
+    @Test
+    public void testApiThrowsExceptionWhenStatusBodyNotOk() {
+        StandardSlackServiceStub service = new StandardSlackServiceStub("", "domain", "token", null, false, "", "apiToken");
+        ClientStub clientStub = new ClientStub();
+        clientStub.setClientResponse(new ClientResponse(HttpStatus.SC_OK, "{\"ok\":false,\"error\":\"invalid_auth\"}"));
+        service.setClientStub(clientStub);
+        try {
+            service.testApi();
+        } catch (Exception e) {
+            assertEquals("invalid_auth", e.getMessage());
+        }
+    }
+
 }

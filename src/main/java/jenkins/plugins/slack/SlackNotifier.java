@@ -535,8 +535,19 @@ public class SlackNotifier extends Notifier {
                 }
                 SlackService testSlackService = getSlackService(targetUrl, targetDomain, targetToken, targetTokenCredentialId, targetBotUser, targetRoom, targetApiToken);
                 String message = "Slack/Jenkins plugin: you're all set on " + DisplayURLProvider.get().getRoot();
+
                 boolean success = testSlackService.publish(message, "good");
-                return success ? FormValidation.ok("Success") : FormValidation.error("Failure");
+                if (!success) {
+                    return FormValidation.error("Failure with integration token");
+                }
+
+                try {
+                    if (StringUtils.isNotEmpty(targetApiToken)) testSlackService.testApi();
+                } catch (Exception e) {
+                    return FormValidation.error("Failure with API token : " + e.getMessage());
+                }
+
+                return FormValidation.ok("Success");
             } catch (Exception e) {
                 return FormValidation.error("Client error : " + e.getMessage());
             }
