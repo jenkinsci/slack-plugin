@@ -35,8 +35,9 @@ public class StandardSlackService implements SlackService {
     private boolean botUser;
     private String[] roomIds;
     private String apiToken;
+    private String apiTokenCredentialId;
 
-    public StandardSlackService(String baseUrl, String teamDomain, String token, String authTokenCredentialId, boolean botUser, String roomId, String apiToken) {
+    public StandardSlackService(String baseUrl, String teamDomain, String token, String authTokenCredentialId, boolean botUser, String roomId, String apiToken, String apiTokenCredentialId) {
         super();
         this.baseUrl = baseUrl;
         if(this.baseUrl != null && !this.baseUrl.isEmpty() && !this.baseUrl.endsWith("/")) {
@@ -48,6 +49,7 @@ public class StandardSlackService implements SlackService {
         this.botUser = botUser;
         this.roomIds = roomId.split("[,; ]+");
         this.apiToken = apiToken;
+        this.apiTokenCredentialId = StringUtils.trim(apiTokenCredentialId);
     }
 
     public boolean publish(String message) {
@@ -128,11 +130,11 @@ public class StandardSlackService implements SlackService {
 
     public String getUserId(String email) {
 
-        if (StringUtils.isEmpty(apiToken)) {
+        if (StringUtils.isEmpty(getApiTokenToUse())) {
             return null;
         }
 
-        String url = "https://" + host + "/api/users.list?token=" + apiToken;
+        String url = "https://" + host + "/api/users.list?token=" + getApiTokenToUse();
         logger.info("Getting: users list");
         Client client = getClient();
         GetMethod get = new GetMethod(url);
@@ -172,11 +174,11 @@ public class StandardSlackService implements SlackService {
 
     public void testApi() throws Exception {
 
-        if (StringUtils.isEmpty(apiToken)) {
+        if (StringUtils.isEmpty(getApiTokenToUse())) {
             throw new Exception("API request to Slack failed: API token is empty");
         }
 
-        String url = "https://" + host + "/api/auth.test?token=" + apiToken;
+        String url = "https://" + host + "/api/auth.test?token=" + getApiTokenToUse();
         Client client = getClient();
         GetMethod get = new GetMethod(url);
         try {
@@ -209,6 +211,16 @@ public class StandardSlackService implements SlackService {
         logger.fine("Using Integration Token.");
 
         return token;
+    }
+
+    private String getApiTokenToUse() {
+        if (apiTokenCredentialId != null && !apiTokenCredentialId.isEmpty()) {
+            StringCredentials credentials = lookupCredentials(apiTokenCredentialId);
+            if (credentials != null) {
+                return credentials.getSecret().getPlainText();
+            }
+        }
+        return apiToken;
     }
 
     private StringCredentials lookupCredentials(String credentialId) {

@@ -33,8 +33,11 @@
     <f:entry title="API Token" help="${rootURL}/plugin/slack/help-globalConfig-slackApiToken.html">
         <f:textbox field="apiToken" name="slackApiToken" value="${descriptor.getApiToken()}" />
     </f:entry>
+    <f:entry title="API Token Credential ID" field="apiTokenCredentialId" name="slackApiTokenCredentialId" help="/plugin/slack/help-globalConfig-slackApiTokenCredentialId.html">
+        <c:select/>
+    </f:entry>
     <f:validateButton
         title="${%Test Connection}" progress="${%Testing...}"
-        method="testConnection" with="slackBaseUrl,slackTeamDomain,slackToken,tokenCredentialId,slackRoom,slackApiToken" />
+        method="testConnection" with="slackBaseUrl,slackTeamDomain,slackToken,tokenCredentialId,slackRoom,slackApiToken,slackApiTokenCredentialId" />
   </f:section>
 </j:jelly>

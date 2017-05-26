@@ -43,6 +43,7 @@ public class SlackSendStep extends AbstractStepImpl {
     private String channel;
     private String baseUrl;
     private String apiToken;
+    private String apiTokenCredentialId;
     private String teamDomain;
     private boolean failOnError;
 
@@ -104,6 +105,15 @@ public class SlackSendStep extends AbstractStepImpl {
     @DataBoundSetter
     public void setApiToken(String apiToken) {
         this.apiToken = Util.fixEmpty(apiToken);
+    }
+
+    public String getApiTokenCredentialId() {
+        return apiTokenCredentialId;
+    }
+
+    @DataBoundSetter
+    public void setApiTokenCredentialId(String apiTokenCredentialId) {
+        this.apiTokenCredentialId = Util.fixEmpty(apiTokenCredentialId);
     }
 
     public String getBaseUrl() {
@@ -217,12 +227,13 @@ public class SlackSendStep extends AbstractStepImpl {
             }
             String channel = step.channel != null ? step.channel : slackDesc.getRoom();
             String apiToken = step.apiToken != null ? step.apiToken : slackDesc.getApiToken();
+            String apiTokenCredentialId = step.apiTokenCredentialId != null ? step.apiTokenCredentialId : slackDesc.getApiTokenCredentialId();
             String color = step.color != null ? step.color : "";
 
             //placing in console log to simplify testing of retrieving values from global config or from step field; also used for tests
             listener.getLogger().println(Messages.SlackSendStepConfig(step.baseUrl == null, step.teamDomain == null, step.token == null, step.channel == null, step.color == null));
 
-            SlackService slackService = getSlackService(baseUrl, team, token, tokenCredentialId, botUser, channel, apiToken);
+            SlackService slackService = getSlackService(baseUrl, team, token, tokenCredentialId, botUser, channel, apiToken, apiTokenCredentialId);
             boolean publishSuccess = slackService.publish(step.message, color);
             if (!publishSuccess && step.failOnError) {
                 throw new AbortException(Messages.NotificationFailed());
@@ -233,8 +244,8 @@ public class SlackSendStep extends AbstractStepImpl {
         }
 
         //streamline unit testing
-        SlackService getSlackService(String baseUrl, String team, String token, String tokenCredentialId, boolean botUser, String channel, String apiToken) {
-            return new StandardSlackService(baseUrl, team, token, tokenCredentialId, botUser, channel, apiToken);
+        SlackService getSlackService(String baseUrl, String team, String token, String tokenCredentialId, boolean botUser, String channel, String apiToken, String apiTokenCredentialId) {
+            return new StandardSlackService(baseUrl, team, token, tokenCredentialId, botUser, channel, apiToken, apiTokenCredentialId);
         }
     }
 }

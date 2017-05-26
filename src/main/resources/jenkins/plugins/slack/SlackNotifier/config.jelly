@@ -87,8 +87,12 @@
             <f:textbox field="apiToken" name="slackApiToken" value="${instance.getApiToken()}"/>
         </f:entry>
 
+        <f:entry title="API Token Credential ID" help="/plugin/slack/help-projectConfig-slackApiTokenCredentialId.html" field="apiTokenCredentialId" name="slackApiTokenCredentialId" >
+            <c:select value="${instance.getApiTokenCredentialId()}"/>
+        </f:entry>
+
         <f:validateButton
                 title="${%Test Connection}" progress="${%Testing...}"
-                method="testConnection" with="slackBaseUrl,slackTeamDomain,slackToken,tokenCredentialId,slackRoom,slackApiToken"/>
+                method="testConnection" with="slackBaseUrl,slackTeamDomain,slackToken,tokenCredentialId,slackRoom,slackApiToken,slackApiTokenCredentialId"/>
     </f:advanced>
 </j:jelly>
