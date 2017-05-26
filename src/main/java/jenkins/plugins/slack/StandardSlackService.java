@@ -128,7 +128,7 @@ public class StandardSlackService implements SlackService {
 
     public String getUserId(String email) {
 
-        if (apiToken.equals("")) {
+        if (StringUtils.isEmpty(apiToken)) {
             return null;
         }
 
