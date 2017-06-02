@@ -65,16 +65,26 @@ support as of version 2.0:
 slackSend color: 'good', message: 'Message from Jenkins Pipeline'
 ```
 
-Additionally you can pass a JSONArray as a String in order to send complex messages
+Additionally you can pass a JSONArray as a String in order to send complex
+messages, as per the example:
 
 ```
-JSONArray jsonArray = new JSONArray()
-    .
-    .
-    .
-slackSend color: 'good', message: 'Fallback message', attachments: jsonArray.toString()
+import net.sf.json.JSONArray;
+import net.sf.json.JSONObject;
+node {
+    JSONArray attachments = new JSONArray();
+    JSONObject attachment = new JSONObject();
+
+    attachment.put('text','I find your lack of faith disturbing!');
+    attachment.put('fallback','Hey, Vader seems to be mad at you.');
+    attachment.put('color','#ff0000');
+
+    attachments.add(attachment);
+    slackSend(color: '#00FF00', channel: '@gustavo.maia', attachments: attachments.toString())
+}
 ```
-More information about slack messages [Slack Messages Api](https://api.slack.com/docs/messages)
+For more information about slack messages see [Slack Messages Api](https://api.slack.com/docs/messages)
+and [Slack attachments Api](https://api.slack.com/docs/message-attachments)
 
 # Developer instructions
 
