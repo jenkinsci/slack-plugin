@@ -45,7 +45,7 @@
         <url>https://github.com/jenkinsci/slack-plugin</url>
         <tag>head</tag>
     </scm>
-    
+
     <distributionManagement>
       <repository>
         <id>maven.jenkins-ci.org</id>
@@ -250,6 +250,16 @@
                 <role>maintainer</role>
             </roles>
             <timezone>America/New_York</timezone>
+        </developer>
+        <developer>
+            <id>gurumaia</id>
+            <name>Gustavo Maia</name>
+            <email>gurumaia@gmail.com</email>
+            <url>https://github.com/gurumaia</url>
+            <roles>
+                <role>maintainer</role>
+            </roles>
+            <timezone>America/Sao_Paulo</timezone>
         </developer>
     </developers>
 </project>
