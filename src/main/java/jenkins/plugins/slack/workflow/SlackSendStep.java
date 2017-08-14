@@ -15,11 +15,17 @@ import jenkins.plugins.slack.Messages;
 import jenkins.plugins.slack.SlackNotifier;
 import jenkins.plugins.slack.SlackService;
 import jenkins.plugins.slack.StandardSlackService;
+import net.sf.json.JSON;
+import net.sf.json.JSONArray;
+import net.sf.json.JSONException;
+import net.sf.json.JSONObject;
+import net.sf.json.groovy.JsonSlurper;
 import org.jenkinsci.plugins.plaincredentials.StringCredentials;
 import org.jenkinsci.plugins.workflow.steps.AbstractStepDescriptorImpl;
 import org.jenkinsci.plugins.workflow.steps.AbstractStepImpl;
 import org.jenkinsci.plugins.workflow.steps.AbstractSynchronousNonBlockingStepExecution;
 import org.jenkinsci.plugins.workflow.steps.StepContextParameter;
+
 import org.kohsuke.stapler.AncestorInPath;
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.DataBoundSetter;
@@ -27,6 +33,7 @@ import org.kohsuke.stapler.QueryParameter;
 
 import javax.annotation.Nonnull;
 import javax.inject.Inject;
+
 
 import static com.cloudbees.plugins.credentials.CredentialsProvider.lookupCredentials;
 
@@ -44,6 +51,7 @@ public class SlackSendStep extends AbstractStepImpl {
     private String baseUrl;
     private String teamDomain;
     private boolean failOnError;
+    private String attachments;
 
 
     @Nonnull
@@ -124,6 +132,15 @@ public class SlackSendStep extends AbstractStepImpl {
     @DataBoundSetter
     public void setFailOnError(boolean failOnError) {
         this.failOnError = failOnError;
+    }
+
+    @DataBoundSetter
+    public void setAttachments(String attachments){
+        this.attachments = attachments;
+    }
+
+    public String getAttachments(){
+        return attachments;
     }
 
     @DataBoundConstructor
@@ -212,7 +229,34 @@ public class SlackSendStep extends AbstractStepImpl {
             listener.getLogger().println(Messages.SlackSendStepConfig(step.baseUrl == null, step.teamDomain == null, step.token == null, step.channel == null, step.color == null));
 
             SlackService slackService = getSlackService(baseUrl, team, token, tokenCredentialId, botUser, channel);
-            boolean publishSuccess = slackService.publish(step.message, color);
+            boolean publishSuccess;
+            if(step.attachments != null){
+                JsonSlurper jsonSlurper = new JsonSlurper();
+                JSON json = null;
+                try {
+                    json = jsonSlurper.parseText(step.attachments);
+                } catch (JSONException e) {
+                    listener.error(Messages.NotificationFailedWithException(e));
+                    return null;
+                }
+                if(!(json instanceof JSONArray)){
+                    listener.error(Messages.NotificationFailedWithException(new IllegalArgumentException("Attachments must be JSONArray")));
+                    return null;
+                }
+                JSONArray jsonArray = (JSONArray) json;
+                for (int i = 0; i < jsonArray.size(); i++) {
+                    Object object = jsonArray.get(i);
+                    if(object instanceof JSONObject){
+                        JSONObject jsonNode = ((JSONObject) object);
+                        if (!jsonNode.has("fallback")) {
+                            jsonNode.put("fallback", step.message);
+                        }
+                    }
+                }
+                publishSuccess = slackService.publish(jsonArray, color);
+            }else{
+                publishSuccess = slackService.publish(step.message, color);
+            }
             if (!publishSuccess && step.failOnError) {
                 throw new AbortException(Messages.NotificationFailed());
             } else if (!publishSuccess) {
