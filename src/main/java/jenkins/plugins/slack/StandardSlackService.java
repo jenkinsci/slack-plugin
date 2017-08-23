@@ -156,7 +156,7 @@ public class StandardSlackService implements SlackService {
     }
 
     private String getTokenToUse() {
-        if (authTokenCredentialId != null && !authTokenCredentialId.isEmpty()) {
+        if (token == null && authTokenCredentialId != null && !authTokenCredentialId.isEmpty()) {
             StringCredentials credentials = lookupCredentials(authTokenCredentialId);
             if (credentials != null) {
                 logger.fine("Using Integration Token Credential ID.");
