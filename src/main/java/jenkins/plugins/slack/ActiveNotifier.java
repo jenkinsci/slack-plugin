@@ -60,7 +60,6 @@ public class ActiveNotifier implements FineGrainedNotifier {
 
     public void started(AbstractBuild build) {
         if (!(build instanceof MatrixRun)) {
-
             AbstractProject<?, ?> project = build.getProject();
 
             CauseAction causeAction = build.getAction(CauseAction.class);
@@ -101,7 +100,6 @@ public class ActiveNotifier implements FineGrainedNotifier {
 
     public void finalized(AbstractBuild r) {
         if (!(r instanceof MatrixRun)) {
-
             AbstractProject<?, ?> project = r.getProject();
             Result result = r.getResult();
             AbstractBuild<?, ?> previousBuild = project.getLastBuild();
@@ -292,7 +290,7 @@ public class ActiveNotifier implements FineGrainedNotifier {
                                     UNSTABLE_STATUS_MESSAGE = "Unstable",
                                     REGRESSION_STATUS_MESSAGE = "Regression",
                                     UNKNOWN_STATUS_MESSAGE = "Unknown";
-        
+
         private StringBuffer message;
         private SlackNotifier notifier;
         private AbstractBuild build;
@@ -318,7 +316,7 @@ public class ActiveNotifier implements FineGrainedNotifier {
             Run previousBuild = r.getProject().getLastBuild().getPreviousBuild();
             Run previousSuccessfulBuild = r.getPreviousSuccessfulBuild();
             boolean buildHasSucceededBefore = previousSuccessfulBuild != null;
-            
+
             /*
              * If the last build was aborted, go back to find the last non-aborted build.
              * This is so that aborted builds do not affect build transitions.
@@ -345,7 +343,7 @@ public class ActiveNotifier implements FineGrainedNotifier {
              * "Back to normal"
              */
             if (result == Result.SUCCESS
-                    && (previousResult == Result.FAILURE || previousResult == Result.UNSTABLE) 
+                    && (previousResult == Result.FAILURE || previousResult == Result.UNSTABLE)
                     && buildHasSucceededBefore && notifier.getNotifyBackToNormal()) {
                 return BACK_TO_NORMAL_STATUS_MESSAGE;
             }
@@ -454,7 +452,7 @@ public class ActiveNotifier implements FineGrainedNotifier {
             message.append(envVars.expand(customMessage));
             return this;
         }
-        
+
         private String createBackToNormalDurationString(){
             // This status code guarantees that the previous build fails and has been successful before
             // The back to normal time is the time since the build first broke
