@@ -78,15 +78,14 @@ public class WebhookEndpoint implements UnprotectedRootAction {
                 StaplerResponse.SC_OK);
 
         String triggerWord = data.getTrigger_word();
-        if (triggerWord == null || triggerWord.isEmpty())
-            return new JsonResponse(new SlackTextMessage("Invalid command, trigger_word field required"),
-                StaplerResponse.SC_OK);
-
-        if (!commandText.startsWith(triggerWord))
-            return new JsonResponse(new SlackTextMessage("Invalid command, invalid trigger_word"),
-                StaplerResponse.SC_OK);
-
-        commandText = commandText.trim().replaceFirst(triggerWord, "").trim();
+        if (triggerWord != null && ! triggerWord.isEmpty()) {
+            // A trigger word is present, which is the case when Slack "outgoing webhooks" are used,
+            // as opposed to "slash commands", when the trigger word is absent
+            if (!commandText.startsWith(triggerWord))
+                return new JsonResponse(new SlackTextMessage("Invalid command, invalid trigger_word"),
+                        StaplerResponse.SC_OK);
+            commandText = commandText.trim().replaceFirst(triggerWord, "").trim();
+        }
 
         CommandRouter<SlackTextMessage> router =
             new CommandRouter<SlackTextMessage>();
