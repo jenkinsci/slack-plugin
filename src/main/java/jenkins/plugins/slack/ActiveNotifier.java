@@ -110,11 +110,12 @@ public class ActiveNotifier implements FineGrainedNotifier {
             } while (previousBuild != null && previousBuild.getResult() == Result.ABORTED);
             Result previousResult = (previousBuild != null) ? previousBuild.getResult() : Result.SUCCESS;
             if(null != previousResult && (result.isWorseThan(previousResult) || moreTestFailuresThanPreviousBuild(r, previousBuild)) && notifier.getNotifyRegression()) {
-                getSlack(r).publish(getBuildStatusMessage(r, notifier.getIncludeTestSummary(),
-                        notifier.getIncludeFailedTests(), notifier.getIncludeCustomMessage()), getBuildColor(r));
+                String message = getBuildStatusMessage(r, notifier.getIncludeTestSummary(),
+                        notifier.getIncludeFailedTests(), notifier.getIncludeCustomMessage());
                 if (notifier.getCommitInfoChoice().showAnything()) {
-                    getSlack(r).publish(getCommitList(r), getBuildColor(r));
-                }
+                    message = message + "\n" + getCommitList(r);
+                }            
+                getSlack(r).publish(message, getBuildColor(r));
             }
         }
     }
@@ -141,11 +142,12 @@ public class ActiveNotifier implements FineGrainedNotifier {
                         && notifier.getNotifyBackToNormal())
                     || (result == Result.SUCCESS && notifier.getNotifySuccess())
                     || (result == Result.UNSTABLE && notifier.getNotifyUnstable())) {
-                getSlack(r).publish(getBuildStatusMessage(r, notifier.getIncludeTestSummary(),
-                        notifier.getIncludeFailedTests(), notifier.getIncludeCustomMessage()), getBuildColor(r));
+                String message = getBuildStatusMessage(r, notifier.getIncludeTestSummary(),
+                        notifier.getIncludeFailedTests(), notifier.getIncludeCustomMessage());
                 if (notifier.getCommitInfoChoice().showAnything()) {
-                    getSlack(r).publish(getCommitList(r), getBuildColor(r));
+                    message = message + "\n" + getCommitList(r);
                 }
+                getSlack(r).publish(message, getBuildColor(r));
             }
         }
     }
