@@ -331,7 +331,18 @@ public class SlackNotifier extends Notifier {
     }
 
     @Override
+    public boolean needsToRunAfterFinalized() {
+        return notifyRegression;
+    }
+
+    @Override
     public boolean perform(AbstractBuild<?, ?> build, Launcher launcher, BuildListener listener) throws InterruptedException, IOException {
+        logger.info("Performing complete notifications");
+        new ActiveNotifier((SlackNotifier) this, listener).completed(build);
+        if (notifyRegression) {
+            logger.info("Performing finalize notifications");
+            new ActiveNotifier((SlackNotifier) this, listener).finalized(build);
+        }
         return true;
     }
 
