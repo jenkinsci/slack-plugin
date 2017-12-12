@@ -338,13 +338,8 @@ public class SlackNotifier extends Notifier {
     @Override
     public boolean prebuild(AbstractBuild<?, ?> build, BuildListener listener) {
         if (startNotification) {
-            Map<Descriptor<Publisher>, Publisher> map = build.getProject().getPublishersList().toMap();
-            for (Publisher publisher : map.values()) {
-                if (publisher instanceof SlackNotifier) {
-                    logger.info("Invoking Started...");
-                    new ActiveNotifier((SlackNotifier) publisher, listener).started(build);
-                }
-            }
+            logger.info("Performing start notifications");
+            new ActiveNotifier((SlackNotifier) this, listener).started(build);
         }
         return super.prebuild(build, listener);
     }
