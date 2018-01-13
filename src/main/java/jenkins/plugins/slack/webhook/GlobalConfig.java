@@ -12,9 +12,6 @@ import org.kohsuke.stapler.StaplerRequest;
 
 import hudson.util.FormValidation;
 
-import hudson.model.Descriptor.FormException;
-
-
 
 
 
@@ -63,5 +60,9 @@ public class GlobalConfig extends GlobalConfiguration {
         req.bindJSON(this, json);
         save();
         return true;
+    }
+
+    public static GlobalConfig get() {
+        return GlobalConfiguration.all().get(GlobalConfig.class);
     }
 }

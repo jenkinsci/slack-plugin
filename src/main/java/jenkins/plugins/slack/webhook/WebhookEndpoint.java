@@ -1,9 +1,6 @@
 package jenkins.plugins.slack.webhook;
 
 
-import jenkins.model.Jenkins;
-import jenkins.model.GlobalConfiguration;
-
 import hudson.Extension;
 
 import hudson.model.UnprotectedRootAction;
@@ -12,9 +9,7 @@ import javax.servlet.ServletException;
 
 import java.io.IOException;
 
-import java.util.List;
 import java.util.UUID;
-import java.util.ArrayList;
 
 import java.util.logging.Logger;
 
@@ -37,18 +32,12 @@ import jenkins.plugins.slack.webhook.exception.RouteNotFoundException;
 @Extension
 public class WebhookEndpoint implements UnprotectedRootAction {
 
-    private GlobalConfig globalConfig;
-
     private static final Logger LOGGER =
         Logger.getLogger(WebhookEndpoint.class.getName());
 
-    public WebhookEndpoint() {
-        globalConfig = GlobalConfiguration.all().get(GlobalConfig.class);
-    }
-
     @Override
     public String getUrlName() {
-        String url = globalConfig.getSlackOutgoingWebhookURL();
+        String url = GlobalConfig.get().getSlackOutgoingWebhookURL();
         if (url == null || url.equals(""))
             return UUID.randomUUID().toString().replaceAll("-", "");
 
@@ -58,7 +47,7 @@ public class WebhookEndpoint implements UnprotectedRootAction {
     @RequirePOST
     public HttpResponse doIndex(StaplerRequest req) throws IOException,
         ServletException {
-
+        GlobalConfig globalConfig=GlobalConfig.get();
         if (globalConfig.getSlackOutgoingWebhookToken() == null ||
             globalConfig.getSlackOutgoingWebhookToken().equals("")) {
             return new JsonResponse(new SlackTextMessage("Slack token not set"),
