@@ -18,6 +18,8 @@ import hudson.tasks.test.AbstractTestResultAction;
 import hudson.tasks.test.TestResult;
 import hudson.triggers.SCMTrigger;
 import hudson.util.LogTaskListener;
+import jenkins.model.Jenkins;
+import jenkins.plugins.slack.extension.SlackMessageExtensions;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
 import org.jenkinsci.plugins.displayurlapi.DisplayURLProvider;
@@ -443,8 +445,21 @@ public class ActiveNotifier implements FineGrainedNotifier {
                 logger.log(SEVERE, e.getMessage(), e);
             }
             message.append("\n");
+            customMessage = handleExtensionReplacements(customMessage);
             message.append(envVars.expand(customMessage));
             return this;
+        }
+
+        public String handleExtensionReplacements(String message) {
+            String temp = message;
+            Jenkins jenkins = Jenkins.getInstance();
+            if (jenkins != null) {
+                List<SlackMessageExtensions> extensions = jenkins.getExtensionList(SlackMessageExtensions.class);
+                for (SlackMessageExtensions extension : extensions) {
+                    temp = extension.doReplacement(temp);
+                }
+            }
+            return temp;
         }
         
         private String createBackToNormalDurationString(){
