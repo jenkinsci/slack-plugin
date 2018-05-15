@@ -22,7 +22,7 @@ import java.util.List;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyString;
 
-public class SlackMessageExtensionsTest {
+public class SlackMessageExtensionTest {
 
     private Jenkins jenkins;
     @Rule
@@ -35,7 +35,7 @@ public class SlackMessageExtensionsTest {
 
     @Test
     public void testSlackExtensions() {
-        List<SlackMessageExtensions> extensions = jenkins.getExtensionList(SlackMessageExtensions.class);
+        List<SlackMessageExtension> extensions = jenkins.getExtensionList(SlackMessageExtension.class);
         Assert.assertEquals(1, extensions.size());
         Assert.assertEquals(InternalExtension.class, extensions.get(0).getClass());
     }
@@ -75,7 +75,7 @@ public class SlackMessageExtensionsTest {
     }
 
     @Extension
-    public static class InternalExtension extends SlackMessageExtensions {
+    public static class InternalExtension extends SlackMessageExtension {
         @Override
         public String doReplacement(String message) {
             return message.replace("${INTERNAL_STRING}","100%");

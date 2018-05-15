@@ -19,7 +19,7 @@ import hudson.tasks.test.TestResult;
 import hudson.triggers.SCMTrigger;
 import hudson.util.LogTaskListener;
 import jenkins.model.Jenkins;
-import jenkins.plugins.slack.extension.SlackMessageExtensions;
+import jenkins.plugins.slack.extension.SlackMessageExtension;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
 import org.jenkinsci.plugins.displayurlapi.DisplayURLProvider;
@@ -454,8 +454,8 @@ public class ActiveNotifier implements FineGrainedNotifier {
             String temp = message;
             Jenkins jenkins = Jenkins.getInstance();
             if (jenkins != null) {
-                List<SlackMessageExtensions> extensions = jenkins.getExtensionList(SlackMessageExtensions.class);
-                for (SlackMessageExtensions extension : extensions) {
+                List<SlackMessageExtension> extensions = jenkins.getExtensionList(SlackMessageExtension.class);
+                for (SlackMessageExtension extension : extensions) {
                     temp = extension.doReplacement(temp);
                 }
             }
