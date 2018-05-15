@@ -456,7 +456,7 @@ public class ActiveNotifier implements FineGrainedNotifier {
             if (jenkins != null) {
                 List<SlackMessageExtension> extensions = jenkins.getExtensionList(SlackMessageExtension.class);
                 for (SlackMessageExtension extension : extensions) {
-                    temp = extension.doReplacement(temp);
+                    temp = extension.doReplacement(temp, build);
                 }
             }
             return temp;

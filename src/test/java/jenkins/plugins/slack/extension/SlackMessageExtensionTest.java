@@ -2,6 +2,8 @@ package jenkins.plugins.slack.extension;
 
 import hudson.EnvVars;
 import hudson.Extension;
+import hudson.model.AbstractBuild;
+import hudson.model.Build;
 import hudson.model.FreeStyleBuild;
 import hudson.model.FreeStyleProject;
 import hudson.model.ItemGroup;
@@ -77,7 +79,7 @@ public class SlackMessageExtensionTest {
     @Extension
     public static class InternalExtension extends SlackMessageExtension {
         @Override
-        public String doReplacement(String message) {
+        public String doReplacement(String message, AbstractBuild build) {
             return message.replace("${INTERNAL_STRING}","100%");
         }
     }
