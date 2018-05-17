@@ -272,7 +272,7 @@ public class ActiveNotifier implements FineGrainedNotifier {
 
     public static class MessageBuilder {
 
-        private static final Pattern aTag = Pattern.compile("(?i)<a([^>]+)>(.+?)</a>");
+        private static final Pattern aTag = Pattern.compile("(?i)<a([^>]+)>(.+?)</a>|(\\{)");
         private static final Pattern href = Pattern.compile("\\s*(?i)href\\s*=\\s*(\"([^\"]*\")|'[^']*'|([^'\">\\s]+))");
         private static final String STARTING_STATUS_MESSAGE = "Starting...",
                                     BACK_TO_NORMAL_STATUS_MESSAGE = "Back to normal",
@@ -476,8 +476,14 @@ public class ActiveNotifier implements FineGrainedNotifier {
             while (aTag.find()) {
                 Matcher url = href.matcher(aTag.group(1));
                 if (url.find()) {
-                    aTag.appendReplacement(sb,String.format("{%s}", size++));
-                    links.add(String.format("<%s|%s>", url.group(1).replaceAll("\"", ""), aTag.group(2)));
+                    String escapeThis = aTag.group(3);
+                    if (escapeThis != null) {
+                        aTag.appendReplacement(sb,String.format("{%s}", size++));
+                        links.add("{");
+                    } else {
+                        aTag.appendReplacement(sb,String.format("{%s}", size++));
+                        links.add(String.format("<%s|%s>", url.group(1).replaceAll("\"", ""), aTag.group(2)));
+                    }
                 }
             }
             aTag.appendTail(sb);
