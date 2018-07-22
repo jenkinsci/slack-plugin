@@ -11,6 +11,7 @@ import hudson.model.BuildListener;
 import hudson.model.Item;
 import hudson.model.Descriptor;
 import hudson.model.listeners.ItemListener;
+import hudson.model.Result;
 import hudson.security.ACL;
 import hudson.tasks.BuildStepDescriptor;
 import hudson.tasks.BuildStepMonitor;
@@ -32,6 +33,8 @@ import org.kohsuke.stapler.StaplerRequest;
 import org.kohsuke.stapler.export.Exported;
 
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
 import java.util.logging.Logger;
 
@@ -62,6 +65,7 @@ public class SlackNotifier extends Notifier {
     private CommitInfoChoice commitInfoChoice;
     private boolean includeCustomMessage;
     private String customMessage;
+    private Map<String, String> customMessageMap = new HashMap<String, String>();
 
     @Override
     public DescriptorImpl getDescriptor() {
@@ -245,6 +249,38 @@ public class SlackNotifier extends Notifier {
     @DataBoundSetter
     public void setCustomMessage(String customMessage) {
         this.customMessage = customMessage;
+    } 
+   
+   /**
+     * Returns a custom message for a specific build type
+     * @param buildType
+     * @return String
+     */
+    public String getCustomMessage(Result buildType) {
+        return this.getCustomMessage(buildType.toString());
+    }
+
+    /**
+     * Returns a custom message for a specific build type
+     * @param buildType
+     * @return String
+     */
+    public String getCustomMessage(String buildType) {
+        String message = null;
+
+        for (Map.Entry pair : customMessageMap.entrySet()) {
+            if ( pair.getKey().toString().equals(buildType) )
+            {
+                message = pair.getValue().toString();
+            }
+        }
+
+        // If there's no specific message, use the generic custom message
+        if ( message == null || message.equals("") )
+        {
+            message = getCustomMessage();
+        }
+        return message;
     }
 
     @DataBoundConstructor
@@ -256,7 +292,7 @@ public class SlackNotifier extends Notifier {
                          final String sendAs, final boolean startNotification, final boolean notifyAborted, final boolean notifyFailure,
                          final boolean notifyNotBuilt, final boolean notifySuccess, final boolean notifyUnstable, final boolean notifyRegression, final boolean notifyBackToNormal,
                          final boolean notifyRepeatedFailure, final boolean includeTestSummary, final boolean includeFailedTests,
-                         CommitInfoChoice commitInfoChoice, boolean includeCustomMessage, String customMessage) {
+                         CommitInfoChoice commitInfoChoice, boolean includeCustomMessage, String customMessage, HashMap<String, String> customMessageMap) {
         super();
         this.baseUrl = baseUrl;
         if(this.baseUrl != null && !this.baseUrl.isEmpty() && !this.baseUrl.endsWith("/")) {
@@ -282,6 +318,7 @@ public class SlackNotifier extends Notifier {
         this.commitInfoChoice = commitInfoChoice;
         this.includeCustomMessage = includeCustomMessage;
         this.customMessage = customMessage;
+        this.customMessageMap = customMessageMap;
     }
 
     public BuildStepMonitor getRequiredMonitorService() {
@@ -443,9 +480,17 @@ public class SlackNotifier extends Notifier {
             CommitInfoChoice commitInfoChoice = CommitInfoChoice.forDisplayName(sr.getParameter("slackCommitInfoChoice"));
             boolean includeCustomMessage = "on".equals(sr.getParameter("includeCustomMessage"));
             String customMessage = sr.getParameter("customMessage");
+
+            HashMap<String,String> customMessageMap = new HashMap<String,String>();
+            customMessageMap.put("SUCCESS", sr.getParameter("customMessageBuildSuccess"));
+            customMessageMap.put("FAILURE", sr.getParameter("customMessageBuildFailure"));
+            customMessageMap.put("ABORTED", sr.getParameter("customMessageBuildAborted"));
+            customMessageMap.put("NOT_BUILT", sr.getParameter("customMessageBuildNotBuilt"));
+            customMessageMap.put("UNSTABLE", sr.getParameter("customMessageBuildUnstable"));
+
             return new SlackNotifier(baseUrl, teamDomain, token, botUser, room, tokenCredentialId, sendAs, startNotification, notifyAborted,
                     notifyFailure, notifyNotBuilt, notifySuccess, notifyUnstable, notifyRegression, notifyBackToNormal, notifyRepeatedFailure,
-                    includeTestSummary, includeFailedTests, commitInfoChoice, includeCustomMessage, customMessage);
+                    includeTestSummary, includeFailedTests, commitInfoChoice, includeCustomMessage, customMessage, customMessageMap);
         }
 
         @Override
