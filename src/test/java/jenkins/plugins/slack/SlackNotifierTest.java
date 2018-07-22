@@ -46,7 +46,8 @@ public class SlackNotifierTest extends TestCase {
         customMessageMap.put("ABORTED", "This is the Aborted Result Message");
         customMessageMap.put("FAILURE", "This is the Failure Result Message");
 
-        this.slackNotifier = new SlackNotifierStub( "teamDomain", "authToken", true, "room", "buildServerUrl", "sendAs", true, true, true, true, true, true, true, true, false, false, CommitInfoChoice.NONE, true, "Custom Message String", customMessageMap);
+        this.slackNotifier = new SlackNotifierStub("baseUrl", "teamDomain", "authToken", true, "room", "buildServerUrl", "sendAs", true, true,
+                true, true, true, true, false, true, true, false, false, CommitInfoChoice.NONE, true, "Custom Message String", customMessageMap);
     }
 
     @Parameterized.Parameters

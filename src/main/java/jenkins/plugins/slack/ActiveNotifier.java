@@ -433,6 +433,21 @@ public class ActiveNotifier implements FineGrainedNotifier {
             return this;
         }
 
+        public MessageBuilder appendCustomMessage() {
+            String customMessage = notifier.getCustomMessage();
+            EnvVars envVars = new EnvVars();
+            try {
+                envVars = build.getEnvironment(new LogTaskListener(logger, INFO));
+            } catch (IOException e) {
+                logger.log(SEVERE, e.getMessage(), e);
+            } catch (InterruptedException e) {
+                logger.log(SEVERE, e.getMessage(), e);
+            }
+            message.append("\n");
+            message.append(envVars.expand(customMessage));
+            return this;
+        }
+
         public MessageBuilder appendCustomMessage(Result buildResult) {
             String customMessage = notifier.getCustomMessage(buildResult);
             EnvVars envVars = new EnvVars();
