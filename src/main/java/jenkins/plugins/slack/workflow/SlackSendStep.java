@@ -5,6 +5,7 @@ import com.cloudbees.plugins.credentials.domains.HostnameRequirement;
 import hudson.AbortException;
 import hudson.Extension;
 import hudson.Util;
+import hudson.model.Item;
 import hudson.model.Project;
 import hudson.model.TaskListener;
 import hudson.security.ACL;
@@ -166,9 +167,12 @@ public class SlackSendStep extends AbstractStepImpl {
         }
 
         public ListBoxModel doFillTokenCredentialIdItems(@AncestorInPath Project project) {
-            if (!Jenkins.getInstance().hasPermission(Jenkins.ADMINISTER)) {
-                return new ListBoxModel();
+
+            if(project == null && !Jenkins.getInstance().hasPermission(Jenkins.ADMINISTER) ||
+                    project != null && !project.hasPermission(Item.EXTENDED_READ)) {
+                return new StandardListBoxModel();
             }
+
             return new StandardListBoxModel()
                     .withEmptySelection()
                     .withAll(lookupCredentials(
