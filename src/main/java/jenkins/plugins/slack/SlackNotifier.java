@@ -234,6 +234,11 @@ public class SlackNotifier extends Notifier {
     }
 
     @DataBoundSetter
+    public void setIncludeFailedTests(boolean includeFailedTests) {
+        this.includeFailedTests = includeFailedTests;
+    }
+
+    @DataBoundSetter
     public void setNotifyRepeatedFailure(boolean notifyRepeatedFailure) {
         this.notifyRepeatedFailure = notifyRepeatedFailure;
     }
