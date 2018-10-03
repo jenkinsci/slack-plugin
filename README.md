@@ -86,6 +86,28 @@ node {
 For more information about slack messages see [Slack Messages Api](https://api.slack.com/docs/messages)
 and [Slack attachments Api](https://api.slack.com/docs/message-attachments)
 
+# Configuration as code
+
+This plugin supports configuration as code
+Add to your yaml file:
+```yaml
+credentials:
+  system:
+    domainCredentials:
+      - credentials:
+          - string:
+              scope: GLOBAL
+              id: slack-token
+              secret: '${SLACK_TOKEN}'
+              description: Slack token
+
+
+unclassified:
+  slacknotifier:
+    teamDomain: <your-domain>
+    tokenCredentialId: <secret-text-token>
+```
+
 # Developer instructions
 
 Install Maven and JDK.

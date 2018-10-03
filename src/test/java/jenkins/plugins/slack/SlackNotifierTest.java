@@ -1,12 +1,11 @@
 package jenkins.plugins.slack;
 
-import hudson.model.Descriptor;
 import hudson.util.FormValidation;
 import junit.framework.TestCase;
 import net.sf.json.JSONArray;
+import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
-import org.junit.Before;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 import org.jvnet.hudson.test.JenkinsRule;
@@ -52,13 +51,9 @@ public class SlackNotifierTest extends TestCase {
             slackServiceStub.setResponse(response);
         }
         descriptor.setSlackService(slackServiceStub);
-        try {
-            FormValidation result = descriptor.doTestConnection("baseUrl", "teamDomain", "authToken", "authTokenCredentialId", false,"room");
-            assertEquals(result.kind, expectedResult);
-        } catch (Descriptor.FormException e) {
-            e.printStackTrace();
-            assertTrue(false);
-        }
+        FormValidation result = descriptor
+                .doTestConnection("baseUrl", "teamDomain", "authToken", "authTokenCredentialId", false, "room");
+        assertEquals(result.kind, expectedResult);
     }
 
     public static class SlackServiceStub implements SlackService {

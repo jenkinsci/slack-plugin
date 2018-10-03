@@ -213,7 +213,7 @@ public class SlackSendStep extends AbstractStepImpl {
                 return null;
             }
             SlackNotifier.DescriptorImpl slackDesc = jenkins.getDescriptorByType(SlackNotifier.DescriptorImpl.class);
-            listener.getLogger().println("run slackstepsend, step " + step.token+":" + step.botUser+", desc " + slackDesc.getToken()+":"+slackDesc.getBotUser());
+            listener.getLogger().println("run slackstepsend, step " + step.token+":" + step.botUser+", desc " + slackDesc.getToken()+":"+slackDesc.isBotUser());
             String baseUrl = step.baseUrl != null ? step.baseUrl : slackDesc.getBaseUrl();
             String team = step.teamDomain != null ? step.teamDomain : slackDesc.getTeamDomain();
             String tokenCredentialId = step.tokenCredentialId != null ? step.tokenCredentialId : slackDesc.getTokenCredentialId();
@@ -224,7 +224,7 @@ public class SlackSendStep extends AbstractStepImpl {
                 botUser = step.botUser;
             } else {
                 token = slackDesc.getToken();
-                botUser = slackDesc.getBotUser();
+                botUser = slackDesc.isBotUser();
             }
             String channel = step.channel != null ? step.channel : slackDesc.getRoom();
             String color = step.color != null ? step.color : "";
