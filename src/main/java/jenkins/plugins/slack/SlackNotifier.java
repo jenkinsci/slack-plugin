@@ -22,6 +22,7 @@ import jenkins.model.Jenkins;
 import jenkins.plugins.slack.config.ItemConfigMigrator;
 import net.sf.json.JSONObject;
 import org.apache.commons.lang.StringUtils;
+import org.jenkinsci.Symbol;
 import org.jenkinsci.plugins.displayurlapi.DisplayURLProvider;
 import org.jenkinsci.plugins.plaincredentials.StringCredentials;
 import org.kohsuke.stapler.AncestorInPath;
@@ -359,7 +360,7 @@ public class SlackNotifier extends Notifier {
         return super.prebuild(build, listener);
     }
 
-    @Extension
+    @Extension @Symbol("slackNotifier")
     public static class DescriptorImpl extends BuildStepDescriptor<Publisher> {
 
         private String baseUrl;

@@ -103,7 +103,7 @@ credentials:
 
 
 unclassified:
-  slacknotifier:
+  slackNotifier:
     teamDomain: <your-domain>
     tokenCredentialId: <secret-text-token>
 ```
