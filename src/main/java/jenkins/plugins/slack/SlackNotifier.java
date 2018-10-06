@@ -356,6 +356,10 @@ public class SlackNotifier extends Notifier {
         private String room;
         private String sendAs;
 
+        public DescriptorImpl() {
+            load();
+        }
+
         public String getBaseUrl() {
             return baseUrl;
         }
