@@ -63,6 +63,20 @@ public class SlackNotifier extends Notifier {
     private boolean includeCustomMessage;
     private String customMessage;
 
+    /** @deprecated use {@link #tokenCredentialId} */
+    private transient String authTokenCredentialId;
+
+    public String getAuthTokenCredentialId() {
+        return tokenCredentialId;
+    }
+
+    private Object readResolve() {
+        if (this.authTokenCredentialId != null) {
+            this.tokenCredentialId = authTokenCredentialId;
+        }
+        return this;
+    }
+
     @Override
     public DescriptorImpl getDescriptor() {
         return (DescriptorImpl) super.getDescriptor();
