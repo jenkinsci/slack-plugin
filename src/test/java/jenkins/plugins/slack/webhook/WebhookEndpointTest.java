@@ -30,7 +30,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import static java.net.HttpURLConnection.HTTP_OK;
 import static java.net.HttpURLConnection.HTTP_NOT_FOUND;
 
-import org.apache.commons.httpclient.NameValuePair;
+import com.gargoylesoftware.htmlunit.util.NameValuePair;
 
 import java.util.List;
 import java.util.ArrayList;
