@@ -103,7 +103,7 @@ public class ActiveNotifier implements FineGrainedNotifier {
             previousBuild = previousBuild.getPreviousCompletedBuild();
         } while (previousBuild != null && previousBuild.getResult() == Result.ABORTED);
         Result previousResult = (previousBuild != null) ? previousBuild.getResult() : Result.SUCCESS;
-        if((result.isWorseThan(previousResult) || moreTestFailuresThanPreviousBuild(r, previousBuild)) && notifier.getNotifyRegression()) {
+        if(null != previousResult && (result.isWorseThan(previousResult) || moreTestFailuresThanPreviousBuild(r, previousBuild)) && notifier.getNotifyRegression()) {
             getSlack(r).publish(getBuildStatusMessage(r, notifier.includeTestSummary(),
                     notifier.includeFailedTests(), notifier.includeCustomMessage()), getBuildColor(r));
             if (notifier.getCommitInfoChoice().showAnything()) {
@@ -118,8 +118,8 @@ public class ActiveNotifier implements FineGrainedNotifier {
         AbstractBuild<?, ?> previousBuild = project.getLastBuild();
         do {
             previousBuild = previousBuild.getPreviousCompletedBuild();
-        } while (previousBuild != null && previousBuild.getResult() == Result.ABORTED);
-        Result previousResult = (previousBuild != null) ? previousBuild.getResult() : Result.SUCCESS;
+        } while (null != previousBuild && previousBuild.getResult() == Result.ABORTED);
+        Result previousResult = (null != previousBuild) ? previousBuild.getResult() : Result.SUCCESS;
         if ((result == Result.ABORTED && notifier.getNotifyAborted())
                 || (result == Result.FAILURE //notify only on single failed build
                     && previousResult != Result.FAILURE
