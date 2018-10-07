@@ -80,7 +80,7 @@ public class ListProjectsCommand extends SlackRouterCommand implements RouterCom
         }
         response += buf.toString();
 
-        if (jobs == null || jobs.size() == 0)
+        if (jobs.size() == 0)
             response += ">_No projects found_";
 
         return new SlackTextMessage(response);

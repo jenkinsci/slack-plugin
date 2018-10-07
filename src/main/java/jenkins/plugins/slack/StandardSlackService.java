@@ -181,7 +181,12 @@ public class StandardSlackService implements SlackService {
     	clientBuilder.setDefaultCredentialsProvider(credentialsProvider);
     	
         if (Jenkins.getInstance() != null) {
-            ProxyConfiguration proxy = Jenkins.getInstance().proxy;
+            Jenkins j = Jenkins.getInstance();
+            if (j == null) {
+                throw new IllegalStateException();
+            }
+
+            ProxyConfiguration proxy = j.proxy;
             if (proxy != null) {
                 final HttpHost proxyHost = new HttpHost(proxy.name, proxy.port);
                 final HttpRoutePlanner routePlanner = new DefaultProxyRoutePlanner(proxyHost);
