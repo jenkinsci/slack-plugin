@@ -38,6 +38,7 @@ public class ListProjectsCommand extends SlackRouterCommand implements RouterCom
 
         SecurityContextHolder.setContext(ctx);
 
+        StringBuffer buf = new StringBuffer();
         for (AbstractProject job : jobs) {
             if (job.isBuildable()) {
                 AbstractBuild lastBuild = job.getLastBuild();
@@ -59,14 +60,25 @@ public class ListProjectsCommand extends SlackRouterCommand implements RouterCom
                 }
 
                 if (jobs.size() <= 10) {
-                    response += ">*"+job.getDisplayName() + "*\n>*Last Build:* #"+buildNumber+"\n>*Status:* "+status;
-                    response += "\n\n\n";
+                    buf.append(">*")
+                        .append(job.getDisplayName())
+                        .append("*\n>*Last Build:* #")
+                        .append(buildNumber)
+                        .append("\n>*Status:* ")
+                        .append(status)
+                        .append("\n\n\n");
                 } else {
-                    response += ">*"+job.getDisplayName() + "* :: *Last Build:* #"+buildNumber+" :: *Status:* "+status;
-                    response += "\n\n";
+                    buf.append(">*")
+                        .append(job.getDisplayName())
+                        .append("* :: *Last Build:* #")
+                        .append(buildNumber)
+                        .append(" :: *Status:* ")
+                        .append(status)
+                        .append("\n\n");
                 }
             }
         }
+        response += buf.toString();
 
         if (jobs == null || jobs.size() == 0)
             response += ">_No projects found_";
