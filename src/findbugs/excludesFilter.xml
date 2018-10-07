@@ -5,4 +5,8 @@
 		<Method name="execute" />
 		<Bug pattern="DLS_DEAD_LOCAL_STORE" />
 	</Match>
+	<Match>
+		<Class name="jenkins.plugins.slack.ActiveNotifier" />
+		<Bug pattern="NP_NULL_ON_SOME_PATH_FROM_RETURN_VALUE" />
+	</Match>
 </FindBugsFilter>

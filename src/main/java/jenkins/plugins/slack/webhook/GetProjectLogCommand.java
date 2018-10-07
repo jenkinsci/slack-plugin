@@ -1,29 +1,19 @@
 package jenkins.plugins.slack.webhook;
 
 
-import jenkins.model.Jenkins;
-
-import hudson.model.Build;
-import hudson.model.Result;
-import hudson.model.Project;
-import hudson.model.AbstractBuild;
-import hudson.model.AbstractProject;
-
-import hudson.security.ACL;
-
 import java.io.IOException;
-
-import java.util.List;
 import java.util.ArrayList;
-
-import org.kohsuke.stapler.interceptor.RequirePOST;
-
-import jenkins.plugins.slack.webhook.model.SlackPostData;
-import jenkins.plugins.slack.webhook.model.SlackTextMessage;
-import jenkins.plugins.slack.webhook.model.SlackWebhookCause;
+import java.util.List;
 
 import org.acegisecurity.context.SecurityContext;
 import org.acegisecurity.context.SecurityContextHolder;
+
+import hudson.model.AbstractBuild;
+import hudson.model.Project;
+import hudson.security.ACL;
+import jenkins.model.Jenkins;
+import jenkins.plugins.slack.webhook.model.SlackPostData;
+import jenkins.plugins.slack.webhook.model.SlackTextMessage;
 
 
 
@@ -66,10 +56,11 @@ public class GetProjectLogCommand extends SlackRouterCommand implements RouterCo
 
         String response = "*"+projectName+"* *#"+buildNumber+"*\n";
         response += "```";
+        StringBuffer buf = new StringBuffer();
         for (String line : log) {
-            response += line + "\n";
+            buf.append(line).append("\n");
         }
-        response += "```";
+        response += buf.toString() + "```";
 
         return new SlackTextMessage(response);
     }

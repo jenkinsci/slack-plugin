@@ -3,24 +3,16 @@ package jenkins.plugins.slack.webhook;
 
 import jenkins.model.Jenkins;
 
-import hudson.model.Build;
 import hudson.model.Result;
-import hudson.model.Project;
 import hudson.model.AbstractBuild;
 import hudson.model.AbstractProject;
 
 import hudson.security.ACL;
 
-import java.io.IOException;
-
 import java.util.List;
-import java.util.ArrayList;
-
-import org.kohsuke.stapler.interceptor.RequirePOST;
 
 import jenkins.plugins.slack.webhook.model.SlackPostData;
 import jenkins.plugins.slack.webhook.model.SlackTextMessage;
-import jenkins.plugins.slack.webhook.model.SlackWebhookCause;
 
 import org.acegisecurity.context.SecurityContext;
 import org.acegisecurity.context.SecurityContextHolder;
