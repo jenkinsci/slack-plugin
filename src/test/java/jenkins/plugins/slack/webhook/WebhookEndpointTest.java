@@ -5,8 +5,6 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.Before;
 
-import static org.junit.Assert.assertEquals;
-
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.nullValue;
@@ -19,9 +17,6 @@ import com.gargoylesoftware.htmlunit.WebRequest;
 import static com.gargoylesoftware.htmlunit.HttpMethod.POST;
 
 import com.gargoylesoftware.htmlunit.html.HtmlForm;
-import com.gargoylesoftware.htmlunit.html.HtmlInput;
-
-import hudson.tasks.Shell;
 
 import org.jvnet.hudson.test.JenkinsRule;
 
@@ -166,7 +161,7 @@ public class WebhookEndpointTest {
     @Test
     public void testRunProject() throws Exception {
         setConfigSettings();
-        FreeStyleProject project = jenkinsRule.createFreeStyleProject(LONG_PROJECT_NAME);
+        jenkinsRule.createFreeStyleProject(LONG_PROJECT_NAME);
         data.add(new NameValuePair("text", "jenkins run "+LONG_PROJECT_NAME));
         WebResponse response = makeRequest(data);
         assertThat(getSlackMessage(response).getText(), is("Build scheduled for project "+LONG_PROJECT_NAME+"\n"));

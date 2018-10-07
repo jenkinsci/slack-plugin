@@ -1,6 +1,5 @@
 package jenkins.plugins.slack.config;
 
-import jenkins.model.AbstractTopLevelItem;
 import jenkins.model.Jenkins;
 import hudson.model.Descriptor;
 import hudson.model.Item;
