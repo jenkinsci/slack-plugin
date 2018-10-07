@@ -55,7 +55,7 @@ public class WebhookEndpoint implements UnprotectedRootAction {
         if (url == null || url.equals(""))
             return UUID.randomUUID().toString().replaceAll("-", "");
 
-        return "/"+url;
+        return url;
     }
 
     @RequirePOST
