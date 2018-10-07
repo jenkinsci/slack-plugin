@@ -30,6 +30,8 @@ import com.gargoylesoftware.htmlunit.util.NameValuePair;
 import java.util.List;
 import java.util.ArrayList;
 
+import java.nio.charset.Charset;
+
 import hudson.model.FreeStyleProject;
 import jenkins.model.GlobalConfiguration;
 
@@ -202,7 +204,7 @@ public class WebhookEndpointTest {
         if (postData != null)
             request.setRequestParameters(postData);
 
-        request.setCharset("UTF-8");
+        request.setCharset(Charset.forName("UTF-8"));
 
         return client.loadWebResponse(request);
     } 
