@@ -5,7 +5,7 @@
     <parent>
         <groupId>org.jenkins-ci.plugins</groupId>
         <artifactId>plugin</artifactId>
-        <version>2.17</version>
+        <version>3.25</version>
     </parent>
 
     <artifactId>slack</artifactId>
@@ -16,7 +16,7 @@
     <url>http://wiki.jenkins-ci.org/display/JENKINS/Slack+Plugin</url>
 
     <properties>
-        <jenkins.version>2.17</jenkins.version>
+        <jenkins.version>1.642.3</jenkins.version>
         <revision>2.4</revision>
         <changelist>-SNAPSHOT</changelist>
         <java.level>8</java.level>
