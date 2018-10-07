@@ -99,15 +99,17 @@ public class ActiveNotifier implements FineGrainedNotifier {
         AbstractProject<?, ?> project = r.getProject();
         Result result = r.getResult();
         AbstractBuild<?, ?> previousBuild = project.getLastBuild();
-        do {
-            previousBuild = previousBuild.getPreviousCompletedBuild();
-        } while (previousBuild != null && previousBuild.getResult() == Result.ABORTED);
-        Result previousResult = (previousBuild != null) ? previousBuild.getResult() : Result.SUCCESS;
-        if(null != previousResult && (result.isWorseThan(previousResult) || moreTestFailuresThanPreviousBuild(r, previousBuild)) && notifier.getNotifyRegression()) {
-            getSlack(r).publish(getBuildStatusMessage(r, notifier.includeTestSummary(),
-                    notifier.includeFailedTests(), notifier.includeCustomMessage()), getBuildColor(r));
-            if (notifier.getCommitInfoChoice().showAnything()) {
-                getSlack(r).publish(getCommitList(r), getBuildColor(r));
+        if (null != previousBuild) {
+            do {
+                previousBuild = previousBuild.getPreviousCompletedBuild();
+            } while (previousBuild != null && previousBuild.getResult() == Result.ABORTED);
+            Result previousResult = (previousBuild != null) ? previousBuild.getResult() : Result.SUCCESS;
+            if(null != previousResult && (result.isWorseThan(previousResult) || moreTestFailuresThanPreviousBuild(r, previousBuild)) && notifier.getNotifyRegression()) {
+                getSlack(r).publish(getBuildStatusMessage(r, notifier.includeTestSummary(),
+                        notifier.includeFailedTests(), notifier.includeCustomMessage()), getBuildColor(r));
+                if (notifier.getCommitInfoChoice().showAnything()) {
+                    getSlack(r).publish(getCommitList(r), getBuildColor(r));
+                }
             }
         }
     }
@@ -116,27 +118,29 @@ public class ActiveNotifier implements FineGrainedNotifier {
         AbstractProject<?, ?> project = r.getProject();
         Result result = r.getResult();
         AbstractBuild<?, ?> previousBuild = project.getLastBuild();
-        do {
-            previousBuild = previousBuild.getPreviousCompletedBuild();
-        } while (null != previousBuild && previousBuild.getResult() == Result.ABORTED);
-        Result previousResult = (null != previousBuild) ? previousBuild.getResult() : Result.SUCCESS;
-        if ((result == Result.ABORTED && notifier.getNotifyAborted())
-                || (result == Result.FAILURE //notify only on single failed build
-                    && previousResult != Result.FAILURE
-                    && notifier.getNotifyFailure())
-                || (result == Result.FAILURE //notify only on repeated failures
-                    && previousResult == Result.FAILURE
-                    && notifier.getNotifyRepeatedFailure())
-                || (result == Result.NOT_BUILT && notifier.getNotifyNotBuilt())
-                || (result == Result.SUCCESS
-                    && (previousResult == Result.FAILURE || previousResult == Result.UNSTABLE)
-                    && notifier.getNotifyBackToNormal())
-                || (result == Result.SUCCESS && notifier.getNotifySuccess())
-                || (result == Result.UNSTABLE && notifier.getNotifyUnstable())) {
-            getSlack(r).publish(getBuildStatusMessage(r, notifier.includeTestSummary(),
-                    notifier.includeFailedTests(), notifier.includeCustomMessage()), getBuildColor(r));
-            if (notifier.getCommitInfoChoice().showAnything()) {
-                getSlack(r).publish(getCommitList(r), getBuildColor(r));
+        if (null != previousBuild) {
+            do {
+                previousBuild = previousBuild.getPreviousCompletedBuild();
+            } while (null != previousBuild && previousBuild.getResult() == Result.ABORTED);
+            Result previousResult = (null != previousBuild) ? previousBuild.getResult() : Result.SUCCESS;
+            if ((result == Result.ABORTED && notifier.getNotifyAborted())
+                    || (result == Result.FAILURE //notify only on single failed build
+                        && previousResult != Result.FAILURE
+                        && notifier.getNotifyFailure())
+                    || (result == Result.FAILURE //notify only on repeated failures
+                        && previousResult == Result.FAILURE
+                        && notifier.getNotifyRepeatedFailure())
+                    || (result == Result.NOT_BUILT && notifier.getNotifyNotBuilt())
+                    || (result == Result.SUCCESS
+                        && (previousResult == Result.FAILURE || previousResult == Result.UNSTABLE)
+                        && notifier.getNotifyBackToNormal())
+                    || (result == Result.SUCCESS && notifier.getNotifySuccess())
+                    || (result == Result.UNSTABLE && notifier.getNotifyUnstable())) {
+                getSlack(r).publish(getBuildStatusMessage(r, notifier.includeTestSummary(),
+                        notifier.includeFailedTests(), notifier.includeCustomMessage()), getBuildColor(r));
+                if (notifier.getCommitInfoChoice().showAnything()) {
+                    getSlack(r).publish(getCommitList(r), getBuildColor(r));
+                }
             }
         }
     }
@@ -451,15 +455,18 @@ public class ActiveNotifier implements FineGrainedNotifier {
             // This status code guarantees that the previous build fails and has been successful before
             // The back to normal time is the time since the build first broke
             Run previousSuccessfulBuild = build.getPreviousSuccessfulBuild();
-            Run initialFailureAfterPreviousSuccessfulBuild = previousSuccessfulBuild.getNextBuild();
-            long initialFailureStartTime = initialFailureAfterPreviousSuccessfulBuild.getStartTimeInMillis();
-            long initialFailureDuration = initialFailureAfterPreviousSuccessfulBuild.getDuration();
-            long initialFailureEndTime = initialFailureStartTime + initialFailureDuration;
-            long buildStartTime = build.getStartTimeInMillis();
-            long buildDuration = build.getDuration();
-            long buildEndTime = buildStartTime + buildDuration;
-            long backToNormalDuration = buildEndTime - initialFailureEndTime;
-            return Util.getTimeSpanString(backToNormalDuration);
+            if (null != previousSuccessfulBuild) {
+                Run initialFailureAfterPreviousSuccessfulBuild = previousSuccessfulBuild.getNextBuild();
+                long initialFailureStartTime = initialFailureAfterPreviousSuccessfulBuild.getStartTimeInMillis();
+                long initialFailureDuration = initialFailureAfterPreviousSuccessfulBuild.getDuration();
+                long initialFailureEndTime = initialFailureStartTime + initialFailureDuration;
+                long buildStartTime = build.getStartTimeInMillis();
+                long buildDuration = build.getDuration();
+                long buildEndTime = buildStartTime + buildDuration;
+                long backToNormalDuration = buildEndTime - initialFailureEndTime;
+                return Util.getTimeSpanString(backToNormalDuration);
+            }
+            return null;
         }
 
         private String escapeCharacters(String string) {

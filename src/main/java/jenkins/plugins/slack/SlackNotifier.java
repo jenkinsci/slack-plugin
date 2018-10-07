@@ -32,6 +32,7 @@ import org.kohsuke.stapler.StaplerRequest;
 import org.kohsuke.stapler.export.Exported;
 
 import java.io.IOException;
+import java.util.List;
 import java.util.logging.Logger;
 
 import static com.cloudbees.plugins.credentials.CredentialsProvider.lookupCredentials;
@@ -702,11 +703,16 @@ public class SlackNotifier extends Notifier {
 
             ItemConfigMigrator migrator = new ItemConfigMigrator();
 
-            for (Item item : Jenkins.getInstance().getAllItems()) {
-                if (!migrator.migrate(item)) {
-                    logger.info(String.format("Skipping job \"%s\" with type %s", item.getName(),
-                            item.getClass().getName()));
-                    continue;
+            List<Item> items = Jenkins.getInstance().getAllItems();
+
+
+            if (null != items) {
+                for (Item item : items) {
+                    if (!migrator.migrate(item)) {
+                        logger.info(String.format("Skipping job \"%s\" with type %s", item.getName(),
+                                item.getClass().getName()));
+                        continue;
+                    }
                 }
             }
 
