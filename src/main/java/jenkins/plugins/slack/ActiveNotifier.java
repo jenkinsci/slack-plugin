@@ -60,15 +60,13 @@ public class ActiveNotifier implements FineGrainedNotifier {
 
     public void started(AbstractBuild build) {
 
-        AbstractProject<?, ?> project = build.getProject();
-
         CauseAction causeAction = build.getAction(CauseAction.class);
 
         if (causeAction != null) {
             Cause scmCause = causeAction.findCause(SCMTrigger.SCMTriggerCause.class);
             if (scmCause == null) {
                 MessageBuilder message = new MessageBuilder(notifier, build);
-                message.append(causeAction.getShortDescription());
+                message.append(causeAction.getCauses().get(0).getShortDescription());
                 message.appendOpenLink();
                 if (notifier.includeCustomMessage()) {
                   message.appendCustomMessage();

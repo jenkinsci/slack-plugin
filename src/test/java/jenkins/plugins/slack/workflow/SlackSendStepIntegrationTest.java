@@ -9,6 +9,7 @@ import org.jenkinsci.plugins.workflow.job.WorkflowRun;
 import org.jenkinsci.plugins.workflow.steps.StepConfigTester;
 import org.junit.Rule;
 import org.junit.Test;
+import org.junit.runners.model.Statement;
 import org.jvnet.hudson.test.RestartableJenkinsRule;
 
 public class SlackSendStepIntegrationTest {
@@ -17,17 +18,22 @@ public class SlackSendStepIntegrationTest {
 
     @Test
     public void configRoundTrip() throws Exception {
-        SlackSendStep step1 = new SlackSendStep("message");
-        step1.setColor("good");
-        step1.setChannel("#channel");
-        step1.setToken("token");
-        step1.setTokenCredentialId("tokenCredentialId");
-        step1.setTeamDomain("teamDomain");
-        step1.setBaseUrl("baseUrl");
-        step1.setFailOnError(true);
+        rr.addStep(new Statement() {
+            @Override
+            public void evaluate() throws Throwable {
+                SlackSendStep step1 = new SlackSendStep("message");
+                step1.setColor("good");
+                step1.setChannel("#channel");
+                step1.setToken("token");
+                step1.setTokenCredentialId("tokenCredentialId");
+                step1.setTeamDomain("teamDomain");
+                step1.setBaseUrl("baseUrl");
+                step1.setFailOnError(true);
 
-        SlackSendStep step2 = new StepConfigTester(rr.j).configRoundTrip(step1);
-        rr.j.assertEqualDataBoundBeans(step1, step2);
+                SlackSendStep step2 = new StepConfigTester(rr.j).configRoundTrip(step1);
+                rr.j.assertEqualDataBoundBeans(step1, step2);
+            }
+        });
     }
 
     @Test
