@@ -25,7 +25,6 @@ public class SlackSendStepIntegrationTest {
                 step1.setColor("good");
                 step1.setChannel("#channel");
                 step1.setToken("token");
-                step1.setTokenCredentialId("tokenCredentialId");
                 step1.setTeamDomain("teamDomain");
                 step1.setBaseUrl("baseUrl");
                 step1.setFailOnError(true);
@@ -38,21 +37,31 @@ public class SlackSendStepIntegrationTest {
 
     @Test
     public void test_global_config_override() throws Exception {
-        WorkflowJob job = rr.j.jenkins.createProject(WorkflowJob.class, "workflow");
-        //just define message
-        job.setDefinition(new CpsFlowDefinition("slackSend(message: 'message', baseUrl: 'baseUrl', teamDomain: 'teamDomain', token: 'token', tokenCredentialId: 'tokenCredentialId', channel: '#channel', color: 'good');", true));
-        WorkflowRun run = rr.j.assertBuildStatusSuccess(job.scheduleBuild2(0).get());
-        //everything should come from step configuration
-        rr.j.assertLogContains(Messages.SlackSendStepConfig(false, false, false, false, false), run);
+        rr.addStep(new Statement() {
+            @Override
+            public void evaluate() throws Throwable {
+                WorkflowJob job = rr.j.jenkins.createProject(WorkflowJob.class, "workflow");
+                //just define message
+                job.setDefinition(new CpsFlowDefinition("slackSend(message: 'message', baseUrl: 'baseUrl', teamDomain: 'teamDomain', token: 'token', tokenCredentialId: 'tokenCredentialId', channel: '#channel', color: 'good');", true));
+                WorkflowRun run = rr.j.assertBuildStatusSuccess(job.scheduleBuild2(0).get());
+                //everything should come from step configuration
+                rr.j.assertLogContains(Messages.SlackSendStepConfig(false, false, false, false, false), run);
+            }
+        });
     }
 
     @Test
     public void test_fail_on_error() throws Exception {
-        WorkflowJob job = rr.j.jenkins.createProject(WorkflowJob.class, "workflow");
-        //just define message
-        job.setDefinition(new CpsFlowDefinition("slackSend(message: 'message', baseUrl: 'baseUrl', teamDomain: 'teamDomain', token: 'token', tokenCredentialId: 'tokenCredentialId', channel: '#channel', color: 'good', failOnError: true);", true));
-        WorkflowRun run = rr.j.assertBuildStatus(Result.FAILURE, job.scheduleBuild2(0).get());
-        //everything should come from step configuration
-        rr.j.assertLogContains(Messages.NotificationFailed(), run);
+        rr.addStep(new Statement() {
+            @Override
+            public void evaluate() throws Throwable {
+                WorkflowJob job = rr.j.jenkins.createProject(WorkflowJob.class, "workflow");
+                //just define message
+                job.setDefinition(new CpsFlowDefinition("slackSend(message: 'message', baseUrl: 'baseUrl', teamDomain: 'teamDomain', token: 'token', tokenCredentialId: 'tokenCredentialId', channel: '#channel', color: 'good', failOnError: true);", true));
+                WorkflowRun run = rr.j.assertBuildStatus(Result.FAILURE, job.scheduleBuild2(0).get());
+                //everything should come from step configuration
+                rr.j.assertLogContains(Messages.NotificationFailed(), run);
+            }
+        });
     }
 }
