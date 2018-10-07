@@ -704,8 +704,6 @@ public class SlackNotifier extends Notifier {
             ItemConfigMigrator migrator = new ItemConfigMigrator();
 
             List<Item> items = Jenkins.getInstance().getAllItems();
-
-
             if (null != items) {
                 for (Item item : items) {
                     if (!migrator.migrate(item)) {

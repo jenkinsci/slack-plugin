@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<FindBugsFilter>
+	<Match>
+		<Class name="jenkins.plugins.slack.webhook.GetProjectLogCommand" />
+		<Method name="execute" />
+		<Bug pattern="DLS_DEAD_LOCAL_STORE" />
+	</Match>
+</FindBugsFilter>
