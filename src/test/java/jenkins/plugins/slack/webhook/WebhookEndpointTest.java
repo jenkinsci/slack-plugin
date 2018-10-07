@@ -15,7 +15,7 @@ import static org.hamcrest.Matchers.containsString;
 import static org.junit.Assert.assertThat;
 
 import com.gargoylesoftware.htmlunit.WebResponse;
-import com.gargoylesoftware.htmlunit.WebRequestSettings;
+import com.gargoylesoftware.htmlunit.WebRequest;
 import static com.gargoylesoftware.htmlunit.HttpMethod.POST;
 
 import com.gargoylesoftware.htmlunit.html.HtmlForm;
@@ -201,8 +201,8 @@ public class WebhookEndpointTest {
     }
 
     private WebResponse makeRequest(List<NameValuePair> postData) throws Exception {
-        WebRequestSettings request =
-            new WebRequestSettings(client.createCrumbedUrl(ENDPOINT), POST);
+        WebRequest request =
+            new WebRequest(client.createCrumbedUrl(ENDPOINT), POST);
 
         if (postData != null)
             request.setRequestParameters(postData);
