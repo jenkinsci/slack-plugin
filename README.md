@@ -1,7 +1,7 @@
 Slack plugin for Jenkins
 ------------------------
 
-- [![Build Status](https://ci.jenkins.io/job/Plugins/job/slack-plugin/job/master/badge/icon)](https://ci.jenkins.io/job/Plugins/job/slack-plugin/job/master/)
+[![Build Status](https://ci.jenkins.io/job/Plugins/job/slack-plugin/job/master/badge/icon)](https://ci.jenkins.io/job/Plugins/job/slack-plugin/job/master/)
 
 Provides Jenkins notification integration with Slack or Slack compatible
 applications like [RocketChat][rocketchat] and [Mattermost][mattermost].
