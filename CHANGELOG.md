@@ -2,24 +2,24 @@
 
 ## New Features:
 
-- Support JCasC ([#404][#https://github.com/jenkinsci/slack-plugin/pull/404]) [JENKINS-53641](https://issues.jenkins-ci.org/browse/JENKINS-53641)
+- Support JCasC [PR #404](https://github.com/jenkinsci/slack-plugin/pull/404) [JENKINS-53641](https://issues.jenkins-ci.org/browse/JENKINS-53641)
   - [example](/README.md#configuration-as-code)
-- Add Token Macro support ([#401][https://github.com/jenkinsci/slack-plugin/pull/401])
+- Add Token Macro support [PR #401](https://github.com/jenkinsci/slack-plugin/pull/401)
 
 ## Bug Fixes:
 
-- [JENKINS-50706] Fix permission check for credentials checkbox ([#372][https://github.com/jenkinsci/slack-plugin/pull/372])
-- [JENKINS-37339] Prevent NPE after plugin installation ([#403][https://github.com/jenkinsci/slack-plugin/pull/403])
-- [JENKINS-53450] Rename the variable that fails the tests on Windows ([#394][https://github.com/jenkinsci/slack-plugin/pull/394])
-- added @DataBoundSetter for includeTestSummary ([#393][https://github.com/jenkinsci/slack-plugin/pull/393])
-- Reduce verbosity for standard case when the migrator does nothing ([#395][https://github.com/jenkinsci/slack-plugin/pull/395])
-- Updated docs - Added multiple channel comment to slackSend ([#399][https://github.com/jenkinsci/slack-plugin/pull/399])
-- Create Jenkinsfile ([#405][https://github.com/jenkinsci/slack-plugin/pull/405])
+- [JENKINS-50706] Fix permission check for credentials checkbox [PR #372](https://github.com/jenkinsci/slack-plugin/pull/372)
+- [JENKINS-37339] Prevent NPE after plugin installation [PR #403](https://github.com/jenkinsci/slack-plugin/pull/403)
+- [JENKINS-53450] Rename the variable that fails the tests on Windows [PR #394](https://github.com/jenkinsci/slack-plugin/pull/394)
+- added @DataBoundSetter for includeTestSummary [PR #393](https://github.com/jenkinsci/slack-plugin/pull/393)
+- Reduce verbosity for standard case when the migrator does nothing [PR #395](https://github.com/jenkinsci/slack-plugin/pull/395)
+- Updated docs - Added multiple channel comment to slackSend [PR #399](https://github.com/jenkinsci/slack-plugin/pull/399)
+- Create Jenkinsfile [PR #405](https://github.com/jenkinsci/slack-plugin/pull/405)
 - slack outgoing webhook isn't working [PR #344](https://github.com/jenkinsci/slack-plugin/pull/344)
 
 ## Security Related:
 
-- jackson-databind -> 2.8.11.2, security fix ([#400][https://github.com/jenkinsci/slack-plugin/pull/400])
+- jackson-databind -> 2.8.11.2, security fix [PR #400](https://github.com/jenkinsci/slack-plugin/pull/400)
 
 # 2.2 release notes
 
