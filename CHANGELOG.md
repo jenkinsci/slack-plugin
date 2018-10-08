@@ -15,7 +15,7 @@
 - Reduce verbosity for standard case when the migrator does nothing ([#395][#395])
 - Updated docs - Added multiple channel comment to slackSend ([#399][#399])
 - Create Jenkinsfile ([#405][#405])
-- slack outgoing webhook isn't working ([#344][#344])
+- slack outgoing webhook isn't working ([#344](#344)
 
 ## Security Related:
 
