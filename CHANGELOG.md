@@ -1,3 +1,25 @@
+# 2.4 release notes
+
+## New Features:
+
+- Support JCasC ([#404][#404]) [JENKINS-53641](https://issues.jenkins-ci.org/browse/JENKINS-53641)
+  - [example](/README.md#configuration-as-code)
+- Add Token Macro support ([#401][#401])
+
+## Bug Fixes:
+
+- [JENKINS-50706] Fix permission check for credentials checkbox ([#372][#372])
+- [JENKINS-37339] Prevent NPE after plugin installation ([#403][#403])
+- [JENKINS-53450] Rename the variable that fails the tests on Windows ([#394][#394])
+- added @DataBoundSetter for includeTestSummary ([#393][#393])
+- Reduce verbosity for standard case when the migrator does nothing ([#395][#395])
+- Updated docs - Added multiple channel comment to slackSend ([#399][#399])
+- Create Jenkinsfile ([#405][#405])
+
+## Security Related:
+
+- jackson-databind -> 2.8.11.2, security fix ([#400][#400])
+
 # 2.2 release notes
 
 New Features:
