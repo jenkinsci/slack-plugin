@@ -8,7 +8,7 @@
 
 ## Bug Fixes:
 
-- [JENKINS-50706] Fix permission check for credentials checkbox #372]
+- [JENKINS-50706] Fix permission check for credentials checkbox #372
 - [JENKINS-37339] Prevent NPE after plugin installation #403
 - [JENKINS-53450] Rename the variable that fails the tests on Windows #394
 - added @DataBoundSetter for includeTestSummary #393
