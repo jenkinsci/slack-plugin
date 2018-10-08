@@ -42,8 +42,13 @@ public class ScheduleJobCommand extends SlackRouterCommand implements RouterComm
 
         String response = "";
 
+        Jenkins j = Jenkins.getInstance();
+        if (j == null) {
+            throw new IllegalStateException();
+        }
+
         Project project =
-            Jenkins.getInstance().getItemByFullName(projectName, Project.class);
+            j.getItemByFullName(projectName, Project.class);
 
         try {
             if (project == null)

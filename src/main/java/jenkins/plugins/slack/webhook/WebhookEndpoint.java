@@ -128,7 +128,7 @@ public class WebhookEndpoint implements UnprotectedRootAction {
             for (CommandRouter.Route route : router.getRoutes()) {
                 buf.append("`"+route.command+"`\n```").append(route.commandDescription).append("```").append("\n\n");
             }
-            response = response += buf.toString();
+            response += buf.toString();
 
             return new JsonResponse(new SlackTextMessage(response), StaplerResponse.SC_OK);
 

@@ -168,7 +168,12 @@ public class SlackSendStep extends AbstractStepImpl {
 
         public ListBoxModel doFillTokenCredentialIdItems(@AncestorInPath Project project) {
 
-            if(project == null && !Jenkins.getInstance().hasPermission(Jenkins.ADMINISTER) ||
+            Jenkins j = Jenkins.getInstance();
+            if (j == null) {
+                throw new IllegalStateException();
+            }
+
+            if(project == null && !j.hasPermission(Jenkins.ADMINISTER) ||
                     project != null && !project.hasPermission(Item.EXTENDED_READ)) {
                 return new StandardListBoxModel();
             }
@@ -203,16 +208,11 @@ public class SlackSendStep extends AbstractStepImpl {
         @Override
         protected Void run() throws Exception {
 
-            //default to global config values if not set in step, but allow step to override all global settings
-            Jenkins jenkins;
-            //Jenkins.getInstance() may return null, no message sent in that case
-            try {
-                jenkins = Jenkins.getInstance();
-            } catch (NullPointerException ne) {
-                listener.error(Messages.NotificationFailedWithException(ne));
-                return null;
+            Jenkins j = Jenkins.getInstance();
+            if (j == null) {
+                throw new IllegalStateException();
             }
-            SlackNotifier.DescriptorImpl slackDesc = jenkins.getDescriptorByType(SlackNotifier.DescriptorImpl.class);
+            SlackNotifier.DescriptorImpl slackDesc = j.getDescriptorByType(SlackNotifier.DescriptorImpl.class);
             listener.getLogger().println("run slackstepsend, step " + step.token+":" + step.botUser+", desc " + slackDesc.getToken()+":"+slackDesc.isBotUser());
             String baseUrl = step.baseUrl != null ? step.baseUrl : slackDesc.getBaseUrl();
             String team = step.teamDomain != null ? step.teamDomain : slackDesc.getTeamDomain();

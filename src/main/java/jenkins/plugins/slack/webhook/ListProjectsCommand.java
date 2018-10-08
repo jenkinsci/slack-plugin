@@ -33,8 +33,13 @@ public class ListProjectsCommand extends SlackRouterCommand implements RouterCom
 
         String response = "*Projects:*\n";
 
+        Jenkins j = Jenkins.getInstance();
+        if (j == null) {
+            throw new IllegalStateException();
+        }
+
         List<AbstractProject> jobs =
-            Jenkins.getInstance().getAllItems(AbstractProject.class);
+            j.getAllItems(AbstractProject.class);
 
         SecurityContextHolder.setContext(ctx);
 

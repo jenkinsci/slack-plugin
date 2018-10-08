@@ -33,9 +33,14 @@ public class GetProjectLogCommand extends SlackRouterCommand implements RouterCo
 
         List<String> log = new ArrayList<String>();
 
+        Jenkins j = Jenkins.getInstance();
+        if (j == null) {
+            throw new IllegalStateException();
+        }
+
         try {
             Project project =
-                Jenkins.getInstance().getItemByFullName(projectName, Project.class);
+                j.getItemByFullName(projectName, Project.class);
 
             if (project == null)
                 return new SlackTextMessage("Could not find project ("+projectName+")\n");
