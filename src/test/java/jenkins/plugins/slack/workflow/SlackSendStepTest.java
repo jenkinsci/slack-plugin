@@ -204,21 +204,4 @@ public class SlackSendStepTest {
         verify(slackServiceMock, times(1)).publish("message", "");
         assertNull(stepExecution.step.getColor());
     }
-
-    @Test
-    public void testNullJenkinsInstance() throws Exception {
-
-        SlackSendStep.SlackSendStepExecution stepExecution = spy(new SlackSendStep.SlackSendStepExecution());
-        stepExecution.step = new SlackSendStep("message");
-
-        when(Jenkins.getInstance()).thenThrow(NullPointerException.class);
-
-        stepExecution.listener = taskListenerMock;
-
-        when(taskListenerMock.error(anyString())).thenReturn(printWriterMock);
-        doNothing().when(printStreamMock).println();
-
-        stepExecution.run();
-        verify(taskListenerMock, times(1)).error(Messages.NotificationFailedWithException(anyString()));
-    }
 }
