@@ -192,7 +192,7 @@ public class SlackSendStep extends AbstractStepImpl {
         }
     }
 
-    public static class SlackSendStepExecution extends AbstractSynchronousNonBlockingStepExecution<Void> {
+    public static class SlackSendStepExecution extends AbstractSynchronousNonBlockingStepExecution<SlackResponse> {
 
         private static final long serialVersionUID = 1L;
 
@@ -203,7 +203,7 @@ public class SlackSendStep extends AbstractStepImpl {
         transient TaskListener listener;
 
         @Override
-        protected Void run() throws Exception {
+        protected SlackResponse run() throws Exception {
 
             Jenkins jenkins = Jenkins.getActiveInstance();
 
@@ -257,12 +257,19 @@ public class SlackSendStep extends AbstractStepImpl {
             }else{
                 publishSuccess = slackService.publish(step.message, color);
             }
-            if (!publishSuccess && step.failOnError) {
+            SlackResponse response = null;
+            if (publishSuccess) {
+                StandardSlackService standardSlackService = (StandardSlackService) slackService;
+                String responseString = standardSlackService.getResponseString();
+                if (responseString != null) {
+                    response = new SlackResponse(responseString);
+                }
+            } else if (step.failOnError) {
                 throw new AbortException(Messages.NotificationFailed());
-            } else if (!publishSuccess) {
+            } else {
                 listener.error(Messages.NotificationFailed());
             }
-            return null;
+            return response;
         }
 
         //streamline unit testing
