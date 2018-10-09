@@ -18,12 +18,15 @@ import org.powermock.modules.junit4.PowerMockRunner;
 
 import java.io.PrintStream;
 import java.io.PrintWriter;
-import java.util.ArrayList;
-import java.util.Map;
 
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.anyBoolean;
+import static org.mockito.Mockito.anyString;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 import static org.powermock.api.mockito.PowerMockito.spy;
 
 /**
@@ -72,7 +75,7 @@ public class SlackSendStepTest {
         stepExecution.listener = taskListenerMock;
 
         when(slackDescMock.getToken()).thenReturn("differentToken");
-        when(slackDescMock.getBotUser()).thenReturn(true);
+        when(slackDescMock.isBotUser()).thenReturn(true);
 
         when(taskListenerMock.getLogger()).thenReturn(printStreamMock);
         doNothing().when(printStreamMock).println();
@@ -104,7 +107,7 @@ public class SlackSendStepTest {
         stepExecution.listener = taskListenerMock;
 
         when(slackDescMock.getToken()).thenReturn("differentToken");
-        when(slackDescMock.getBotUser()).thenReturn(true);
+        when(slackDescMock.isBotUser()).thenReturn(true);
 
         when(taskListenerMock.getLogger()).thenReturn(printStreamMock);
         doNothing().when(printStreamMock).println();
@@ -161,7 +164,7 @@ public class SlackSendStepTest {
         when(slackDescMock.getTeamDomain()).thenReturn("globalTeamDomain");
         when(slackDescMock.getToken()).thenReturn("globalToken");
         when(slackDescMock.getTokenCredentialId()).thenReturn("globalTokenCredentialId");
-        when(slackDescMock.getBotUser()).thenReturn(false);
+        when(slackDescMock.isBotUser()).thenReturn(false);
         when(slackDescMock.getRoom()).thenReturn("globalChannel");
 
         when(taskListenerMock.getLogger()).thenReturn(printStreamMock);

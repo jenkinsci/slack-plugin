@@ -1,3 +1,4 @@
+<?jelly escape-by-default='true'?>
 <j:jelly xmlns:j="jelly:core" xmlns:st="jelly:stapler" xmlns:d="jelly:define" xmlns:l="/lib/layout" xmlns:t="/lib/hudson" xmlns:f="/lib/form" xmlns:c="/lib/credentials">
   <!--
     This Jelly script is used to produce the global configuration option.
@@ -11,27 +12,27 @@
     tags they use. Views are always organized according to its owner class,
     so it should be straightforward to find them.
   -->
-<f:section title="Global Slack Notifier Settings" name="slack">
+<f:section title="Global Slack Notifier Settings">
     <f:entry title="Base URL" help="/plugin/slack/help-projectConfig-slackBaseUrl.html">
-        <f:textbox field="baseUrl" name="slackBaseUrl" value="${descriptor.getBaseUrl()}"/>
+        <f:textbox field="baseUrl" />
     </f:entry>
     <f:entry title="Team Subdomain" help="/plugin/slack/help-globalConfig-slackTeamDomain.html">
-        <f:textbox field="teamDomain" name="slackTeamDomain" value="${descriptor.getTeamDomain()}" />
+        <f:textbox field="teamDomain" />
     </f:entry>
     <f:entry title="Integration Token" help="/plugin/slack/help-globalConfig-slackToken.html">
-        <f:textbox field="token" name="slackToken" value="${descriptor.getToken()}" />
+        <f:textbox field="token" />
     </f:entry>
-    <f:entry title="Integration Token Credential ID" field="tokenCredentialId" name="tokenCredentialId" help="/plugin/slack/help-globalConfig-tokenCredentialId.html">
+    <f:entry title="Integration Token Credential ID" field="tokenCredentialId" help="/plugin/slack/help-globalConfig-tokenCredentialId.html">
         <c:select/>
     </f:entry>
     <f:entry title="Is Bot User?" help="/plugin/slack/help-globalConfig-botUser.html">
-        <f:checkbox field="botUser" name="slackBotUser" value="true" checked="${descriptor.getBotUser()}" />
+        <f:checkbox field="botUser" />
     </f:entry>
     <f:entry title="Channel" help="/plugin/slack/help-globalConfig-slackRoom.html">
-        <f:textbox field="room" name="slackRoom" value="${descriptor.getRoom()}" />
+        <f:textbox field="room" />
     </f:entry>
     <f:validateButton
         title="${%Test Connection}" progress="${%Testing...}"
-        method="testConnection" with="slackBaseUrl,slackTeamDomain,slackToken,tokenCredentialId,slackBotUser,slackRoom" />
+        method="testConnection" with="baseUrl,teamDomain,token,tokenCredentialId,botUser,room" />
   </f:section>
 </j:jelly>

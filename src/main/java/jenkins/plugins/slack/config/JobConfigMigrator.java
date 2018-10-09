@@ -26,7 +26,7 @@ public class JobConfigMigrator {
 
     public void migrate(final Job<?, ?> job) {
 
-        logger.info(String.format("Migrating job \"%s\" with type %s", job.getName(), job
+        logger.finest(String.format("Migrating job \"%s\" with type %s", job.getName(), job
                 .getClass().getName()));
 
         final SlackJobProperty slackJobProperty = job.getProperty(SlackJobProperty.class);
