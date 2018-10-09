@@ -42,25 +42,28 @@ public class WebhookEndpoint implements UnprotectedRootAction {
     private static final Logger LOGGER =
         Logger.getLogger(WebhookEndpoint.class.getName());
 
-    public WebhookEndpoint() {
-        globalConfig = GlobalConfiguration.all().get(GlobalConfig.class);
+    private GlobalConfig getGlobalConfig(){
+        if (globalConfig == null) {
+            this.globalConfig = GlobalConfiguration.all().get(GlobalConfig.class);
+        }
+        return globalConfig;
     }
 
     @Override
     public String getUrlName() {
-        String url = globalConfig.getSlackOutgoingWebhookURL();
+        String url = getGlobalConfig().getSlackOutgoingWebhookURL();
         if (url == null || url.equals(""))
             return UUID.randomUUID().toString().replaceAll("-", "");
 
-        return "/"+url;
+        return url;
     }
 
     @RequirePOST
     public HttpResponse doIndex(StaplerRequest req) throws IOException,
         ServletException {
 
-        if (globalConfig.getSlackOutgoingWebhookToken() == null ||
-            globalConfig.getSlackOutgoingWebhookToken().equals("")) {
+        if (getGlobalConfig().getSlackOutgoingWebhookToken() == null ||
+            getGlobalConfig().getSlackOutgoingWebhookToken().equals("")) {
             return new JsonResponse(new SlackTextMessage("Slack token not set"),
                 StaplerResponse.SC_OK); 
         }
@@ -68,7 +71,7 @@ public class WebhookEndpoint implements UnprotectedRootAction {
         SlackPostData data = new SlackPostData();
         req.bindParameters(data);
 
-        if (!globalConfig.getSlackOutgoingWebhookToken().equals(data.getToken()))
+        if (!getGlobalConfig().getSlackOutgoingWebhookToken().equals(data.getToken()))
             return new JsonResponse(new SlackTextMessage("Invalid Slack token"),
                 StaplerResponse.SC_OK); 
     
