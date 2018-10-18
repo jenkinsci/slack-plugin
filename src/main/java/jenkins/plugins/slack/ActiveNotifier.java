@@ -1,6 +1,5 @@
 package jenkins.plugins.slack;
 
-import hudson.EnvVars;
 import hudson.Util;
 import hudson.model.AbstractBuild;
 import hudson.model.AbstractProject;
@@ -23,6 +22,8 @@ import jenkins.plugins.slack.extension.SlackMessageExtension;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
 import org.jenkinsci.plugins.displayurlapi.DisplayURLProvider;
+import org.jenkinsci.plugins.tokenmacro.MacroEvaluationException;
+import org.jenkinsci.plugins.tokenmacro.TokenMacro;
 
 import java.io.IOException;
 import java.text.MessageFormat;
@@ -41,7 +42,7 @@ import static java.util.logging.Level.SEVERE;
 @SuppressWarnings("rawtypes")
 public class ActiveNotifier implements FineGrainedNotifier {
 
-    private static final Logger logger = Logger.getLogger(SlackListener.class.getName());
+    private static final Logger logger = Logger.getLogger(SlackNotifier.class.getName());
 
     SlackNotifier notifier;
     BuildListener listener;
@@ -274,10 +275,9 @@ public class ActiveNotifier implements FineGrainedNotifier {
 
     public static class MessageBuilder {
 
-        private static final Pattern aTag = Pattern.compile("(?i)<a([^>]+)>(.+?)</a>");
+        private static final Pattern aTag = Pattern.compile("(?i)<a([^>]+)>(.+?)</a>|(\\{)");
         private static final Pattern href = Pattern.compile("\\s*(?i)href\\s*=\\s*(\"([^\"]*\")|'[^']*'|([^'\">\\s]+))");
-        private static final String STARTING_STATUS_MESSAGE = "Starting...",
-                                    BACK_TO_NORMAL_STATUS_MESSAGE = "Back to normal",
+        private static final String BACK_TO_NORMAL_STATUS_MESSAGE = "Back to normal",
                                     STILL_FAILING_STATUS_MESSAGE = "Still Failing",
                                     SUCCESS_STATUS_MESSAGE = "Success",
                                     FAILURE_STATUS_MESSAGE = "Failure",
@@ -304,9 +304,6 @@ public class ActiveNotifier implements FineGrainedNotifier {
         }
 
         private String getStatusMessage(AbstractBuild r) {
-            if (r.isBuilding()) {
-                return STARTING_STATUS_MESSAGE;
-            }
             Result result = r.getResult();
             Result previousResult;
             Run previousBuild = r.getProject().getLastBuild().getPreviousBuild();
@@ -436,17 +433,22 @@ public class ActiveNotifier implements FineGrainedNotifier {
 
         public MessageBuilder appendCustomMessage() {
             String customMessage = notifier.getCustomMessage();
-            EnvVars envVars = new EnvVars();
+
             try {
-                envVars = build.getEnvironment(new LogTaskListener(logger, INFO));
-            } catch (IOException e) {
-                logger.log(SEVERE, e.getMessage(), e);
-            } catch (InterruptedException e) {
+                String replaced = handleExtensionReplacements(customMessage);
+                replaced = TokenMacro.expandAll(build, new LogTaskListener(logger, INFO), replaced);
+                message.append("\n");
+                message.append(replaced);
+            }
+            catch (MacroEvaluationException e) {
                 logger.log(SEVERE, e.getMessage(), e);
             }
-            message.append("\n");
-            customMessage = handleExtensionReplacements(customMessage);
-            message.append(envVars.expand(customMessage));
+            catch (IOException e) {
+                logger.log(SEVERE, e.getMessage(), e);
+            }
+            catch (InterruptedException e) {
+                logger.log(SEVERE, e.getMessage(), e);
+            }
             return this;
         }
 
@@ -491,8 +493,14 @@ public class ActiveNotifier implements FineGrainedNotifier {
             while (aTag.find()) {
                 Matcher url = href.matcher(aTag.group(1));
                 if (url.find()) {
-                    aTag.appendReplacement(sb,String.format("{%s}", size++));
-                    links.add(String.format("<%s|%s>", url.group(1).replaceAll("\"", ""), aTag.group(2)));
+                    String escapeThis = aTag.group(3);
+                    if (escapeThis != null) {
+                        aTag.appendReplacement(sb,String.format("{%s}", size++));
+                        links.add("{");
+                    } else {
+                        aTag.appendReplacement(sb,String.format("{%s}", size++));
+                        links.add(String.format("<%s|%s>", url.group(1).replaceAll("\"", ""), aTag.group(2)));
+                    }
                 }
             }
             aTag.appendTail(sb);
