@@ -75,7 +75,7 @@
             <f:checkbox field="botUser"/>
         </f:entry>
 
-        <f:entry title="Project Channel" help="/plugin/slack/help-projectConfig-slackRoom.html">
+        <f:entry title="Project Channel or Slack User ID" help="/plugin/slack/help-projectConfig-slackRoom.html">
             <f:textbox field="room" />
         </f:entry>
         <f:validateButton
