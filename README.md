@@ -104,8 +104,8 @@ credentials:
 
 unclassified:
   slackNotifier:
-    teamDomain: <your-domain>
-    tokenCredentialId: <secret-text-token>
+    teamDomain: <your-slack-workspace-name> # i.e. your-company (just the workspace name not the full url)
+    tokenCredentialId: slack-token
 ```
 
 # Developer instructions
