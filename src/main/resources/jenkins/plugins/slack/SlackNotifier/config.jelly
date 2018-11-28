@@ -1,89 +1,85 @@
+<?jelly escape-by-default='true'?>
 <j:jelly xmlns:j="jelly:core" xmlns:st="jelly:stapler" xmlns:d="jelly:define" xmlns:l="/lib/layout"
          xmlns:t="/lib/hudson" xmlns:f="/lib/form" xmlns:c="/lib/credentials">
     <f:entry title="Notify Build Start">
-        <f:checkbox name="slackStartNotification" value="true" checked="${instance.getStartNotification()}"/>
+        <f:checkbox field="startNotification" />
     </f:entry>
 
     <f:entry title="Notify Aborted">
-        <f:checkbox name="slackNotifyAborted" value="true" checked="${instance.getNotifyAborted()}"/>
+        <f:checkbox field="notifyAborted" />
     </f:entry>
 
     <f:entry title="Notify Failure">
-        <f:checkbox name="slackNotifyFailure" value="true" checked="${instance.getNotifyFailure()}"/>
+        <f:checkbox field="notifyFailure" />
     </f:entry>
 
     <f:entry title="Notify Not Built">
-        <f:checkbox name="slackNotifyNotBuilt" value="true" checked="${instance.getNotifyNotBuilt()}"/>
+        <f:checkbox field="notifyNotBuilt"/>
     </f:entry>
 
     <f:entry title="Notify Success">
-        <f:checkbox name="slackNotifySuccess" value="true" checked="${instance.getNotifySuccess()}"/>
+        <f:checkbox field="notifySuccess" />
     </f:entry>
 
     <f:entry title="Notify Unstable">
-        <f:checkbox name="slackNotifyUnstable" value="true" checked="${instance.getNotifyUnstable()}"/>
+        <f:checkbox field="notifyUnstable" />
     </f:entry>
 
     <f:entry title="Notify Regression">
-        <f:checkbox name="slackNotifyRegression" value="true" checked="${instance.getNotifyRegression()}"/>
+        <f:checkbox field="notifyRegression" />
     </f:entry>
 
 
     <f:entry title="Notify Back To Normal">
-        <f:checkbox name="slackNotifyBackToNormal" value="true" checked="${instance.getNotifyBackToNormal()}"/>
+        <f:checkbox field="notifyBackToNormal" />
     </f:entry>
 
     <f:advanced>
         <f:entry title="Notify Repeated Failure">
-            <f:checkbox name="slackNotifyRepeatedFailure" value="true"
-                        checked="${instance.getNotifyRepeatedFailure()}"/>
+            <f:checkbox field="notifyRepeatedFailure" />
         </f:entry>
         <f:entry title="Include Test Summary">
-            <f:checkbox name="includeTestSummary" value="true" checked="${instance.includeTestSummary()}"/>
+            <f:checkbox field="includeTestSummary" />
         </f:entry>
         <f:entry title="Include Failed Tests">
-            <f:checkbox name="includeFailedTests" value="true" checked="${instance.includeFailedTests()}"/>
+            <f:checkbox field="includeFailedTests" />
         </f:entry>
 
-        <f:optionalBlock name="includeCustomMessage" title="Include Custom Message" checked="${instance.includeCustomMessage()}">
+        <f:optionalBlock title="Include Custom Message">
             <f:entry title="Custom Message" help="/plugin/slack/help-projectConfig-slackCustomMessage.html">
-                <f:textarea name="customMessage" value="${instance.getCustomMessage()}"/>
+                <f:textarea field="customMessage" />
             </f:entry>
         </f:optionalBlock>
 
-        <f:entry title="Notification message includes" description="What commit information to include into notification message">
-            <select class="setting-input" name="slackCommitInfoChoice">
-                <j:forEach var="i" items="${descriptor.COMMIT_INFO_CHOICES}">
-                    <f:option selected="${instance.getCommitInfoChoice()==i}">${i.getDisplayName()}</f:option>
-                </j:forEach>
-            </select>
+        <f:entry field="commitInfoChoice" title="Notification message includes" description="What commit information to include into notification message">
+            <f:select/>
         </f:entry>
 
         <f:entry title="Base URL" help="/plugin/slack/help-projectConfig-slackBaseUrl.html">
-            <f:textbox name="slackBaseUrl" value="${instance.getBaseUrl()}"/>
+            <f:textbox field="baseUrl" />
         </f:entry>
 
         <f:entry title="Team Subdomain" help="/plugin/slack/help-projectConfig-slackTeamDomain.html">
-            <f:textbox name="slackTeamDomain" value="${instance.getTeamDomain()}"/>
+            <f:textbox field="teamDomain" />
         </f:entry>
 
         <f:entry title="Integration Token" help="/plugin/slack/help-projectConfig-slackToken.html">
-            <f:textbox field="token" name="slackToken" value="${instance.getAuthToken()}"/>
+            <f:textbox field="token" />
         </f:entry>
 
-        <f:entry title="Integration Token Credential ID" help="/plugin/slack/help-projectConfig-slackTokenCredentialId.html" field="tokenCredentialId" name="tokenCredentialId" >
-            <c:select value="${instance.getAuthTokenCredentialId()}"/>
+        <f:entry title="Integration Token Credential ID" help="/plugin/slack/help-projectConfig-slackTokenCredentialId.html" field="tokenCredentialId">
+            <c:select />
         </f:entry>
 
         <f:entry title="Is Bot User?" help="/plugin/slack/help-projectConfig-botUser.html">
-            <f:checkbox name="slackBotUser" value="true" checked="${instance.getBotUser()}"/>
+            <f:checkbox field="botUser"/>
         </f:entry>
 
-        <f:entry title="Project Channel" help="/plugin/slack/help-projectConfig-slackRoom.html">
-            <f:textbox name="slackRoom" value="${instance.getRoom()}"/>
+        <f:entry title="Project Channel or Slack User ID" help="/plugin/slack/help-projectConfig-slackRoom.html">
+            <f:textbox field="room" />
         </f:entry>
         <f:validateButton
                 title="${%Test Connection}" progress="${%Testing...}"
-                method="testConnection" with="slackBaseUrl,slackTeamDomain,slackToken,tokenCredentialId,slackRoom"/>
+                method="testConnection" with="baseUrl,teamDomain,token,tokenCredentialId,botUser,room"/>
     </f:advanced>
 </j:jelly>

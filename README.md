@@ -44,6 +44,13 @@ ID*** field:
 
 ![image][img-token-credential]
 
+# Direct Message
+
+You can send messages to channels or you can notify individual users via their
+slackbot.  In order to notify an individual user, use the syntax `@user_id` in
+place of the project channel.  Mentioning users by display name may work, but it
+is not unique and will not work if it is an ambiguous match.    
+
 # Bot user option
 
 This plugin supports sending notifications via bot users. You can enable bot
@@ -85,6 +92,28 @@ node {
 ```
 For more information about slack messages see [Slack Messages Api](https://api.slack.com/docs/messages)
 and [Slack attachments Api](https://api.slack.com/docs/message-attachments)
+
+# Configuration as code
+
+This plugin supports configuration as code
+Add to your yaml file:
+```yaml
+credentials:
+  system:
+    domainCredentials:
+      - credentials:
+          - string:
+              scope: GLOBAL
+              id: slack-token
+              secret: '${SLACK_TOKEN}'
+              description: Slack token
+
+
+unclassified:
+  slackNotifier:
+    teamDomain: <your-slack-workspace-name> # i.e. your-company (just the workspace name not the full url)
+    tokenCredentialId: slack-token
+```
 
 # Developer instructions
 

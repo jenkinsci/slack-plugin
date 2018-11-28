@@ -5,6 +5,7 @@ import com.cloudbees.plugins.credentials.domains.HostnameRequirement;
 import hudson.AbortException;
 import hudson.Extension;
 import hudson.Util;
+import hudson.model.Item;
 import hudson.model.Project;
 import hudson.model.TaskListener;
 import hudson.security.ACL;
@@ -166,9 +167,12 @@ public class SlackSendStep extends AbstractStepImpl {
         }
 
         public ListBoxModel doFillTokenCredentialIdItems(@AncestorInPath Project project) {
-            if (!Jenkins.getInstance().hasPermission(Jenkins.ADMINISTER)) {
-                return new ListBoxModel();
+
+            if(project == null && !Jenkins.getInstance().hasPermission(Jenkins.ADMINISTER) ||
+                    project != null && !project.hasPermission(Item.EXTENDED_READ)) {
+                return new StandardListBoxModel();
             }
+
             return new StandardListBoxModel()
                     .withEmptySelection()
                     .withAll(lookupCredentials(
@@ -209,7 +213,7 @@ public class SlackSendStep extends AbstractStepImpl {
                 return null;
             }
             SlackNotifier.DescriptorImpl slackDesc = jenkins.getDescriptorByType(SlackNotifier.DescriptorImpl.class);
-            listener.getLogger().println("run slackstepsend, step " + step.token+":" + step.botUser+", desc " + slackDesc.getToken()+":"+slackDesc.getBotUser());
+            listener.getLogger().println("run slackstepsend, step " + step.botUser + ", desc " + slackDesc.isBotUser());
             String baseUrl = step.baseUrl != null ? step.baseUrl : slackDesc.getBaseUrl();
             String team = step.teamDomain != null ? step.teamDomain : slackDesc.getTeamDomain();
             String tokenCredentialId = step.tokenCredentialId != null ? step.tokenCredentialId : slackDesc.getTokenCredentialId();
@@ -220,7 +224,7 @@ public class SlackSendStep extends AbstractStepImpl {
                 botUser = step.botUser;
             } else {
                 token = slackDesc.getToken();
-                botUser = slackDesc.getBotUser();
+                botUser = slackDesc.isBotUser();
             }
             String channel = step.channel != null ? step.channel : slackDesc.getRoom();
             String color = step.color != null ? step.color : "";
