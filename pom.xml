@@ -271,5 +271,14 @@
             </roles>
             <timezone>America/Sao_Paulo</timezone>
         </developer>
+        <developer>
+            <id>timja</id>
+            <name>Tim Jacomb</name>
+            <url>https://github.com/timja</url>
+            <roles>
+                <role>maintainer</role>
+            </roles>
+            <timezone>Europe/London</timezone>
+        </developer>
     </developers>
 </project>
