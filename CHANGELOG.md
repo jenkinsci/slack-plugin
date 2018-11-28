@@ -1,3 +1,42 @@
+# 2.4 (Unreleased) release notes
+
+## New Features:
+
+- Support JCasC [PR #404](https://github.com/jenkinsci/slack-plugin/pull/404) [JENKINS-53641](https://issues.jenkins-ci.org/browse/JENKINS-53641)
+  - [example](/README.md#configuration-as-code)
+- Add Token Macro support [PR #401](https://github.com/jenkinsci/slack-plugin/pull/401)
+- Add slash command support [PR #345](https://github.com/jenkinsci/slack-plugin/pull/345)
+
+## Bug Fixes:
+
+- [JENKINS-50706] Fix permission check for credentials checkbox [PR #372](https://github.com/jenkinsci/slack-plugin/pull/372)
+- [JENKINS-37339] Prevent NPE after plugin installation [PR #403](https://github.com/jenkinsci/slack-plugin/pull/403)
+- [JENKINS-53450] Rename the variable that fails the tests on Windows [PR #394](https://github.com/jenkinsci/slack-plugin/pull/394)
+- added @DataBoundSetter for includeTestSummary [PR #393](https://github.com/jenkinsci/slack-plugin/pull/393)
+- Reduce verbosity for standard case when the migrator does nothing [PR #395](https://github.com/jenkinsci/slack-plugin/pull/395)
+- Create Jenkinsfile [PR #405](https://github.com/jenkinsci/slack-plugin/pull/405)
+- slack outgoing webhook isn't working [PR #344](https://github.com/jenkinsci/slack-plugin/pull/344)
+- integration credential logging removed [PR #407](https://github.com/jenkinsci/slack-plugin/pull/407)
+
+## Dependency upgrades:
+
+- jackson-databind -> 2.8.11.2, [PR #400](https://github.com/jenkinsci/slack-plugin/pull/400)
+
+## Documentation updates:
+
+- Added multiple channel comment to slackSend [PR #399](https://github.com/jenkinsci/slack-plugin/pull/399)
+- Send to users wording tweak [PR #408](https://github.com/jenkinsci/slack-plugin/pull/408)
+
+# 2.3 release notes
+
+## New Features:
+
+- Send more advanced slack messages v2 [PR #324](https://github.com/jenkinsci/slack-plugin/pull/324)
+
+## Bug Fixes:
+
+- Stop log spam [PR #316](https://github.com/jenkinsci/slack-plugin/pull/316)
+
 # 2.2 release notes
 
 New Features:

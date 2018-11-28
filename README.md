@@ -1,8 +1,8 @@
 Slack plugin for Jenkins
 ------------------------
 
-- Stability: [![Build Status][jenkins-status]][jenkins-builds]
-- Slack: [![Slack Signup][slack-badge]][slack-signup] (click to sign up)
+[![Build Status](https://ci.jenkins.io/buildStatus/icon?job=Plugins/slack-plugin/master)](https://ci.jenkins.io/job/Plugins/slack-plugin/master)
+[![Slack Signup][slack-badge]][slack-signup] (click to sign up)
 
 Provides Jenkins notification integration with Slack or Slack compatible
 applications like [RocketChat][rocketchat] and [Mattermost][mattermost].
@@ -43,6 +43,13 @@ Select that credential as the value for the ***Integration Token Credential
 ID*** field:
 
 ![image][img-token-credential]
+
+# Direct Message
+
+You can send messages to channels or you can notify individual users via their
+slackbot.  In order to notify an individual user, use the syntax `@user_id` in
+place of the project channel.  Mentioning users by display name may work, but it
+is not unique and will not work if it is an ambiguous match.    
 
 # Bot user option
 
@@ -104,8 +111,8 @@ credentials:
 
 unclassified:
   slackNotifier:
-    teamDomain: <your-domain>
-    tokenCredentialId: <secret-text-token>
+    teamDomain: <your-slack-workspace-name> # i.e. your-company (just the workspace name not the full url)
+    tokenCredentialId: slack-token
 ```
 
 # Developer instructions
