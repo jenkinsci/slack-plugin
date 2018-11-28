@@ -6,7 +6,6 @@ import hudson.model.AbstractProject;
 import hudson.model.BuildListener;
 import hudson.model.Cause;
 import hudson.model.CauseAction;
-import hudson.model.Hudson;
 import hudson.model.Result;
 import hudson.model.Run;
 import hudson.scm.ChangeLogSet;
@@ -17,6 +16,7 @@ import hudson.tasks.test.AbstractTestResultAction;
 import hudson.tasks.test.TestResult;
 import hudson.triggers.SCMTrigger;
 import hudson.util.LogTaskListener;
+import jenkins.model.Jenkins;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
 import org.jenkinsci.plugins.displayurlapi.DisplayURLProvider;
@@ -87,11 +87,16 @@ public class ActiveNotifier implements FineGrainedNotifier {
 
     private void notifyStart(AbstractBuild build, String message) {
         AbstractProject<?, ?> project = build.getProject();
-        AbstractBuild<?, ?> previousBuild = project.getLastBuild().getPreviousCompletedBuild();
-        if (previousBuild == null) {
-            getSlack(build).publish(message, "good");
+        AbstractBuild<?, ?> lastBuild = project.getLastBuild();
+        if (lastBuild != null) {
+            AbstractBuild<?, ?> previousBuild = lastBuild.getPreviousCompletedBuild();
+            if (previousBuild == null) {
+                getSlack(build).publish(message, "good");
+            } else {
+                getSlack(build).publish(message, getBuildColor(previousBuild));
+            }
         } else {
-            getSlack(build).publish(message, getBuildColor(previousBuild));
+            getSlack(build).publish(message, "good");
         }
     }
 
@@ -223,13 +228,15 @@ public class ActiveNotifier implements FineGrainedNotifier {
             }
             String upProjectName = c.getUpstreamProject();
             int buildNumber = c.getUpstreamBuild();
-            AbstractProject project = Hudson.getInstance().getItemByFullName(upProjectName, AbstractProject.class);
-            AbstractBuild upBuild = (AbstractBuild)project.getBuildByNumber(buildNumber);
-            return getCommitList(upBuild);
+            AbstractProject project = Jenkins.getActiveInstance().getItemByFullName(upProjectName, AbstractProject.class);
+            if (project != null) {
+                AbstractBuild upBuild = project.getBuildByNumber(buildNumber);
+                return getCommitList(upBuild);
+            }
         }
         Set<String> commits = new HashSet<String>();
         for (Entry entry : entries) {
-            StringBuffer commit = new StringBuffer();
+            StringBuilder commit = new StringBuilder();
             CommitInfoChoice commitInfoChoice = notifier.getCommitInfoChoice();
             if (commitInfoChoice.showTitle()) {
                 commit.append(entry.getMsg());
@@ -462,14 +469,16 @@ public class ActiveNotifier implements FineGrainedNotifier {
             Run previousSuccessfulBuild = build.getPreviousSuccessfulBuild();
             if (null != previousSuccessfulBuild && null != previousSuccessfulBuild.getNextBuild()) {
                 Run initialFailureAfterPreviousSuccessfulBuild = previousSuccessfulBuild.getNextBuild();
-                long initialFailureStartTime = initialFailureAfterPreviousSuccessfulBuild.getStartTimeInMillis();
-                long initialFailureDuration = initialFailureAfterPreviousSuccessfulBuild.getDuration();
-                long initialFailureEndTime = initialFailureStartTime + initialFailureDuration;
-                long buildStartTime = build.getStartTimeInMillis();
-                long buildDuration = build.getDuration();
-                long buildEndTime = buildStartTime + buildDuration;
-                long backToNormalDuration = buildEndTime - initialFailureEndTime;
-                return Util.getTimeSpanString(backToNormalDuration);
+                if (initialFailureAfterPreviousSuccessfulBuild != null) {
+                    long initialFailureStartTime = initialFailureAfterPreviousSuccessfulBuild.getStartTimeInMillis();
+                    long initialFailureDuration = initialFailureAfterPreviousSuccessfulBuild.getDuration();
+                    long initialFailureEndTime = initialFailureStartTime + initialFailureDuration;
+                    long buildStartTime = build.getStartTimeInMillis();
+                    long buildDuration = build.getDuration();
+                    long buildEndTime = buildStartTime + buildDuration;
+                    long backToNormalDuration = buildEndTime - initialFailureEndTime;
+                    return Util.getTimeSpanString(backToNormalDuration);
+                }
             }
             return null;
         }
