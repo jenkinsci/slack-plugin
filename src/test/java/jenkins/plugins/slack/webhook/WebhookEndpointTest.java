@@ -27,20 +27,14 @@ import static java.net.HttpURLConnection.HTTP_NOT_FOUND;
 
 import com.gargoylesoftware.htmlunit.util.NameValuePair;
 
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.ArrayList;
-
-import java.nio.charset.Charset;
 
 import hudson.model.FreeStyleProject;
 import jenkins.model.GlobalConfiguration;
 
 import jenkins.plugins.slack.webhook.model.SlackTextMessage;
-
-import jenkins.plugins.slack.webhook.WebhookEndpoint;
-
-
-
 
 public class WebhookEndpointTest {
 
@@ -204,7 +198,7 @@ public class WebhookEndpointTest {
         if (postData != null)
             request.setRequestParameters(postData);
 
-        request.setCharset(Charset.forName("UTF-8"));
+        request.setCharset(StandardCharsets.UTF_8);
 
         return client.loadWebResponse(request);
     } 

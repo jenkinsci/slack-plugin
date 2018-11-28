@@ -17,9 +17,19 @@
 - Create Jenkinsfile [PR #405](https://github.com/jenkinsci/slack-plugin/pull/405)
 - slack outgoing webhook isn't working [PR #344](https://github.com/jenkinsci/slack-plugin/pull/344)
 
-## Security Related:
+## Dependency upgrades:
 
-- jackson-databind -> 2.8.11.2, security fix [PR #400](https://github.com/jenkinsci/slack-plugin/pull/400)
+- jackson-databind -> 2.8.11.2, [PR #400](https://github.com/jenkinsci/slack-plugin/pull/400)
+
+# 2.3 release notes
+
+## New Features:
+
+- Send more advanced slack messages v2 [PR #324](https://github.com/jenkinsci/slack-plugin/pull/324)
+
+## Bug Fixes:
+
+- Stop log spam [PR #316](https://github.com/jenkinsci/slack-plugin/pull/316)
 
 # 2.2 release notes
 

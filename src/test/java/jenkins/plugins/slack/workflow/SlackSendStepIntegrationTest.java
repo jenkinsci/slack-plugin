@@ -9,59 +9,43 @@ import org.jenkinsci.plugins.workflow.job.WorkflowRun;
 import org.jenkinsci.plugins.workflow.steps.StepConfigTester;
 import org.junit.Rule;
 import org.junit.Test;
-import org.junit.runners.model.Statement;
-import org.jvnet.hudson.test.RestartableJenkinsRule;
+import org.jvnet.hudson.test.JenkinsRule;
 
 public class SlackSendStepIntegrationTest {
     @Rule
-    public RestartableJenkinsRule rr = new RestartableJenkinsRule();
+    public JenkinsRule jenkinsRule = new JenkinsRule();
 
     @Test
     public void configRoundTrip() throws Exception {
-        rr.addStep(new Statement() {
-            @Override
-            public void evaluate() throws Throwable {
-                SlackSendStep step1 = new SlackSendStep("message");
-                step1.setColor("good");
-                step1.setChannel("#channel");
-                step1.setToken("token");
-                step1.setTeamDomain("teamDomain");
-                step1.setBaseUrl("baseUrl");
-                step1.setFailOnError(true);
+        SlackSendStep step1 = new SlackSendStep("message");
+        step1.setColor("good");
+        step1.setChannel("#channel");
+        step1.setToken("token");
+        step1.setTeamDomain("teamDomain");
+        step1.setBaseUrl("baseUrl");
+        step1.setFailOnError(true);
 
-                SlackSendStep step2 = new StepConfigTester(rr.j).configRoundTrip(step1);
-                rr.j.assertEqualDataBoundBeans(step1, step2);
-            }
-        });
+        SlackSendStep step2 = new StepConfigTester(jenkinsRule).configRoundTrip(step1);
+        jenkinsRule.assertEqualDataBoundBeans(step1, step2);
     }
 
     @Test
     public void test_global_config_override() throws Exception {
-        rr.addStep(new Statement() {
-            @Override
-            public void evaluate() throws Throwable {
-                WorkflowJob job = rr.j.jenkins.createProject(WorkflowJob.class, "workflow");
-                //just define message
-                job.setDefinition(new CpsFlowDefinition("slackSend(message: 'message', baseUrl: 'baseUrl', teamDomain: 'teamDomain', token: 'token', tokenCredentialId: 'tokenCredentialId', channel: '#channel', color: 'good');", true));
-                WorkflowRun run = rr.j.assertBuildStatusSuccess(job.scheduleBuild2(0).get());
-                //everything should come from step configuration
-                rr.j.assertLogContains(Messages.SlackSendStepConfig(false, false, false, false, false), run);
-            }
-        });
+        WorkflowJob job = jenkinsRule.jenkins.createProject(WorkflowJob.class, "workflow");
+        //just define message
+        job.setDefinition(new CpsFlowDefinition("slackSend(message: 'message', baseUrl: 'baseUrl', teamDomain: 'teamDomain', token: 'token', tokenCredentialId: 'tokenCredentialId', channel: '#channel', color: 'good');", true));
+        WorkflowRun run = jenkinsRule.assertBuildStatusSuccess(job.scheduleBuild2(0).get());
+        //everything should come from step configuration
+        jenkinsRule.assertLogContains(Messages.SlackSendStepConfig(false, false, false, false, false), run);
     }
 
     @Test
     public void test_fail_on_error() throws Exception {
-        rr.addStep(new Statement() {
-            @Override
-            public void evaluate() throws Throwable {
-                WorkflowJob job = rr.j.jenkins.createProject(WorkflowJob.class, "workflow");
-                //just define message
-                job.setDefinition(new CpsFlowDefinition("slackSend(message: 'message', baseUrl: 'baseUrl', teamDomain: 'teamDomain', token: 'token', tokenCredentialId: 'tokenCredentialId', channel: '#channel', color: 'good', failOnError: true);", true));
-                WorkflowRun run = rr.j.assertBuildStatus(Result.FAILURE, job.scheduleBuild2(0).get());
-                //everything should come from step configuration
-                rr.j.assertLogContains(Messages.NotificationFailed(), run);
-            }
-        });
+        WorkflowJob job = jenkinsRule.jenkins.createProject(WorkflowJob.class, "workflow");
+        //just define message
+        job.setDefinition(new CpsFlowDefinition("slackSend(message: 'message', baseUrl: 'baseUrl', teamDomain: 'teamDomain', token: 'token', tokenCredentialId: 'tokenCredentialId', channel: '#channel', color: 'good', failOnError: true);", true));
+        WorkflowRun run = jenkinsRule.assertBuildStatus(Result.FAILURE, job.scheduleBuild2(0).get());
+        //everything should come from step configuration
+        jenkinsRule.assertLogContains(Messages.NotificationFailed(), run);
     }
 }
