@@ -44,6 +44,13 @@ ID*** field:
 
 ![image][img-token-credential]
 
+# Direct Message
+
+You can send messages to channels or you can notify individual users via their
+slackbot.  In order to notify an individual user, use the syntax `@user_id` in
+place of the project channel.  Mentioning users by display name may work, but it
+is not unique and will not work if it is an ambiguous match.    
+
 # Bot user option
 
 This plugin supports sending notifications via bot users. You can enable bot
