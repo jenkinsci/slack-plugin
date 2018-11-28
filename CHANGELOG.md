@@ -16,6 +16,7 @@
 - Create Jenkinsfile [PR #405](https://github.com/jenkinsci/slack-plugin/pull/405)
 - slack outgoing webhook isn't working [PR #344](https://github.com/jenkinsci/slack-plugin/pull/344)
 - integration credential logging removed [PR #407](https://github.com/jenkinsci/slack-plugin/pull/407)
+- only send matrix build notifications to parent build [PR #341](https://github.com/jenkinsci/slack-plugin/pull/341)
 
 ## Dependency upgrades:
 
