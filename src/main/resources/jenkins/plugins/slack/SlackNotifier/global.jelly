@@ -28,7 +28,7 @@
     <f:entry title="Is Bot User?" help="/plugin/slack/help-globalConfig-botUser.html">
         <f:checkbox field="botUser" />
     </f:entry>
-    <f:entry title="Project Channel or Slack ID" help="/plugin/slack/help-globalConfig-slackRoom.html">
+    <f:entry title="Channel or Slack ID" help="/plugin/slack/help-globalConfig-slackRoom.html">
         <f:textbox field="room" />
     </f:entry>
     <f:validateButton
