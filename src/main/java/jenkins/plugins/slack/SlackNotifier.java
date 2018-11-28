@@ -316,12 +316,12 @@ public class SlackNotifier extends Notifier {
         }
 
         String authToken = this.authToken;
-        boolean botUser = this.botUser;
         if (StringUtils.isEmpty(authToken)) {
             authToken = getDescriptor().getToken();
             botUser = getDescriptor().isBotUser();
         }
         String authTokenCredentialId = this.tokenCredentialId;
+
         if (StringUtils.isEmpty(authTokenCredentialId)) {
             authTokenCredentialId = getDescriptor().getTokenCredentialId();
         }
@@ -524,11 +524,15 @@ public class SlackNotifier extends Notifier {
                     targetDomain = this.teamDomain;
                 }
                 String targetToken = authToken;
-                boolean targetBotUser = botUser;
                 if (StringUtils.isEmpty(targetToken)) {
                     targetToken = this.token;
+                }
+
+                boolean targetBotUser = botUser;
+                if (!targetBotUser) {
                     targetBotUser = this.botUser;
                 }
+
                 String targetTokenCredentialId = tokenCredentialId;
                 if (StringUtils.isEmpty(targetTokenCredentialId)) {
                     targetTokenCredentialId = this.tokenCredentialId;
