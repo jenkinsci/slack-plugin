@@ -1,4 +1,4 @@
-# 2.4 release notes
+# 2.4 (Unreleased) release notes
 
 ## New Features:
 
@@ -13,13 +13,18 @@
 - [JENKINS-53450] Rename the variable that fails the tests on Windows [PR #394](https://github.com/jenkinsci/slack-plugin/pull/394)
 - added @DataBoundSetter for includeTestSummary [PR #393](https://github.com/jenkinsci/slack-plugin/pull/393)
 - Reduce verbosity for standard case when the migrator does nothing [PR #395](https://github.com/jenkinsci/slack-plugin/pull/395)
-- Updated docs - Added multiple channel comment to slackSend [PR #399](https://github.com/jenkinsci/slack-plugin/pull/399)
 - Create Jenkinsfile [PR #405](https://github.com/jenkinsci/slack-plugin/pull/405)
 - slack outgoing webhook isn't working [PR #344](https://github.com/jenkinsci/slack-plugin/pull/344)
+- integration credential logging removed [PR #407](https://github.com/jenkinsci/slack-plugin/pull/407)
 
 ## Dependency upgrades:
 
 - jackson-databind -> 2.8.11.2, [PR #400](https://github.com/jenkinsci/slack-plugin/pull/400)
+
+## Documentation updates:
+
+- Added multiple channel comment to slackSend [PR #399](https://github.com/jenkinsci/slack-plugin/pull/399)
+- Send to users wording tweak [PR #408](https://github.com/jenkinsci/slack-plugin/pull/408)
 
 # 2.3 release notes
 
