@@ -31,19 +31,14 @@ public class ListProjectsCommand extends SlackRouterCommand implements RouterCom
 
         SecurityContext ctx = ACL.impersonate(ACL.SYSTEM);
 
-        String response = "*Projects:*\n";
-
-        Jenkins j = Jenkins.getInstance();
-        if (j == null) {
-            throw new IllegalStateException();
-        }
+        Jenkins jenkins = Jenkins.getActiveInstance();
 
         List<AbstractProject> jobs =
-            j.getAllItems(AbstractProject.class);
+            jenkins.getAllItems(AbstractProject.class);
 
         SecurityContextHolder.setContext(ctx);
 
-        StringBuffer buf = new StringBuffer();
+        StringBuilder builder = new StringBuilder("*Projects:*\n");
         for (AbstractProject job : jobs) {
             if (job.isBuildable()) {
                 AbstractBuild lastBuild = job.getLastBuild();
@@ -65,7 +60,7 @@ public class ListProjectsCommand extends SlackRouterCommand implements RouterCom
                 }
 
                 if (jobs.size() <= 10) {
-                    buf.append(">*")
+                    builder.append(">*")
                         .append(job.getDisplayName())
                         .append("*\n>*Last Build:* #")
                         .append(buildNumber)
@@ -73,7 +68,7 @@ public class ListProjectsCommand extends SlackRouterCommand implements RouterCom
                         .append(status)
                         .append("\n\n\n");
                 } else {
-                    buf.append(">*")
+                    builder.append(">*")
                         .append(job.getDisplayName())
                         .append("* :: *Last Build:* #")
                         .append(buildNumber)
@@ -83,12 +78,10 @@ public class ListProjectsCommand extends SlackRouterCommand implements RouterCom
                 }
             }
         }
-        response += buf.toString();
-
         if (jobs.size() == 0)
-            response += ">_No projects found_";
+            builder.append(">_No projects found_");
 
-        return new SlackTextMessage(response);
+        return new SlackTextMessage(builder.toString());
     }
 }
 

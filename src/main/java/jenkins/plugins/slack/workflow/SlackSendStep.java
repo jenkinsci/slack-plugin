@@ -168,12 +168,9 @@ public class SlackSendStep extends AbstractStepImpl {
 
         public ListBoxModel doFillTokenCredentialIdItems(@AncestorInPath Project project) {
 
-            Jenkins j = Jenkins.getInstance();
-            if (j == null) {
-                throw new IllegalStateException();
-            }
+            Jenkins jenkins = Jenkins.getActiveInstance();
 
-            if(project == null && !j.hasPermission(Jenkins.ADMINISTER) ||
+            if(project == null && !jenkins.hasPermission(Jenkins.ADMINISTER) ||
                     project != null && !project.hasPermission(Item.EXTENDED_READ)) {
                 return new StandardListBoxModel();
             }
@@ -208,12 +205,9 @@ public class SlackSendStep extends AbstractStepImpl {
         @Override
         protected Void run() throws Exception {
 
-            Jenkins j = Jenkins.getInstance();
-            if (j == null) {
-                throw new IllegalStateException();
-            }
+            Jenkins jenkins = Jenkins.getActiveInstance();
 
-            SlackNotifier.DescriptorImpl slackDesc = j.getDescriptorByType(SlackNotifier.DescriptorImpl.class);
+            SlackNotifier.DescriptorImpl slackDesc = jenkins.getDescriptorByType(SlackNotifier.DescriptorImpl.class);
             listener.getLogger().println("run slackstepsend, step " + step.botUser + ", desc " + slackDesc.isBotUser());
 
             String baseUrl = step.baseUrl != null ? step.baseUrl : slackDesc.getBaseUrl();

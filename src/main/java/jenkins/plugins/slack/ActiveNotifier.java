@@ -307,60 +307,63 @@ public class ActiveNotifier implements FineGrainedNotifier {
             Result result = r.getResult();
             Result previousResult;
             if(null != result) {
-                Run previousBuild = r.getProject().getLastBuild().getPreviousBuild();
-                Run previousSuccessfulBuild = r.getPreviousSuccessfulBuild();
-                boolean buildHasSucceededBefore = previousSuccessfulBuild != null;
-                
-                /*
-                * If the last build was aborted, go back to find the last non-aborted build.
-                * This is so that aborted builds do not affect build transitions.
-                * I.e. if build 1 was failure, build 2 was aborted and build 3 was a success the transition
-                * should be failure -> success (and therefore back to normal) not aborted -> success. 
-                */
-                Run lastNonAbortedBuild = previousBuild;
-                while(lastNonAbortedBuild != null && lastNonAbortedBuild.getResult() == Result.ABORTED) {
-                    lastNonAbortedBuild = lastNonAbortedBuild.getPreviousBuild();
-                }
-                
-                
-                /* If all previous builds have been aborted, then use 
-                * SUCCESS as a default status so an aborted message is sent
-                */
-                if(lastNonAbortedBuild == null) {
-                    previousResult = Result.SUCCESS;
-                } else {
-                    previousResult = lastNonAbortedBuild.getResult();
-                }
-                
-                /* Back to normal should only be shown if the build has actually succeeded at some point.
-                * Also, if a build was previously unstable and has now succeeded the status should be 
-                * "Back to normal"
-                */
-                if (result == Result.SUCCESS
-                        && (previousResult == Result.FAILURE || previousResult == Result.UNSTABLE) 
-                        && buildHasSucceededBefore && notifier.getNotifyBackToNormal()) {
-                    return BACK_TO_NORMAL_STATUS_MESSAGE;
-                }
-                if (result == Result.FAILURE && previousResult == Result.FAILURE) {
-                    return STILL_FAILING_STATUS_MESSAGE;
-                }
-                if (result == Result.SUCCESS) {
-                    return SUCCESS_STATUS_MESSAGE;
-                }
-                if (result == Result.FAILURE) {
-                    return FAILURE_STATUS_MESSAGE;
-                }
-                if (result == Result.ABORTED) {
-                    return ABORTED_STATUS_MESSAGE;
-                }
-                if (result == Result.NOT_BUILT) {
-                    return NOT_BUILT_STATUS_MESSAGE;
-                }
-                if (result == Result.UNSTABLE) {
-                    return UNSTABLE_STATUS_MESSAGE;
-                }
-                if (lastNonAbortedBuild != null && result.isWorseThan(previousResult)) {
-                    return REGRESSION_STATUS_MESSAGE;
+                AbstractBuild lastBuild = r.getProject().getLastBuild();
+                if (lastBuild != null) {
+                    Run previousBuild = lastBuild.getPreviousBuild();
+                    Run previousSuccessfulBuild = r.getPreviousSuccessfulBuild();
+                    boolean buildHasSucceededBefore = previousSuccessfulBuild != null;
+
+                    /*
+                     * If the last build was aborted, go back to find the last non-aborted build.
+                     * This is so that aborted builds do not affect build transitions.
+                     * I.e. if build 1 was failure, build 2 was aborted and build 3 was a success the transition
+                     * should be failure -> success (and therefore back to normal) not aborted -> success.
+                     */
+                    Run lastNonAbortedBuild = previousBuild;
+                    while (lastNonAbortedBuild != null && lastNonAbortedBuild.getResult() == Result.ABORTED) {
+                        lastNonAbortedBuild = lastNonAbortedBuild.getPreviousBuild();
+                    }
+
+
+                    /* If all previous builds have been aborted, then use
+                     * SUCCESS as a default status so an aborted message is sent
+                     */
+                    if (lastNonAbortedBuild == null) {
+                        previousResult = Result.SUCCESS;
+                    } else {
+                        previousResult = lastNonAbortedBuild.getResult();
+                    }
+
+                    /* Back to normal should only be shown if the build has actually succeeded at some point.
+                     * Also, if a build was previously unstable and has now succeeded the status should be
+                     * "Back to normal"
+                     */
+                    if (result == Result.SUCCESS
+                            && (previousResult == Result.FAILURE || previousResult == Result.UNSTABLE)
+                            && buildHasSucceededBefore && notifier.getNotifyBackToNormal()) {
+                        return BACK_TO_NORMAL_STATUS_MESSAGE;
+                    }
+                    if (result == Result.FAILURE && previousResult == Result.FAILURE) {
+                        return STILL_FAILING_STATUS_MESSAGE;
+                    }
+                    if (result == Result.SUCCESS) {
+                        return SUCCESS_STATUS_MESSAGE;
+                    }
+                    if (result == Result.FAILURE) {
+                        return FAILURE_STATUS_MESSAGE;
+                    }
+                    if (result == Result.ABORTED) {
+                        return ABORTED_STATUS_MESSAGE;
+                    }
+                    if (result == Result.NOT_BUILT) {
+                        return NOT_BUILT_STATUS_MESSAGE;
+                    }
+                    if (result == Result.UNSTABLE) {
+                        return UNSTABLE_STATUS_MESSAGE;
+                    }
+                    if (lastNonAbortedBuild != null && result.isWorseThan(previousResult)) {
+                        return REGRESSION_STATUS_MESSAGE;
+                    }
                 }
             }
             return UNKNOWN_STATUS_MESSAGE;

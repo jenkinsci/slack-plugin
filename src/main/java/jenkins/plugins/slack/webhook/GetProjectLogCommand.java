@@ -1,19 +1,17 @@
 package jenkins.plugins.slack.webhook;
 
 
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-
-import org.acegisecurity.context.SecurityContext;
-import org.acegisecurity.context.SecurityContextHolder;
-
 import hudson.model.AbstractBuild;
 import hudson.model.Project;
 import hudson.security.ACL;
 import jenkins.model.Jenkins;
 import jenkins.plugins.slack.webhook.model.SlackPostData;
 import jenkins.plugins.slack.webhook.model.SlackTextMessage;
+import org.acegisecurity.context.SecurityContext;
+import org.acegisecurity.context.SecurityContextHolder;
+
+import java.io.IOException;
+import java.util.List;
 
 
 
@@ -31,16 +29,13 @@ public class GetProjectLogCommand extends SlackRouterCommand implements RouterCo
 
         SecurityContext ctx = ACL.impersonate(ACL.SYSTEM);
 
-        List<String> log = new ArrayList<String>();
+        List<String> log;
 
-        Jenkins j = Jenkins.getInstance();
-        if (j == null) {
-            throw new IllegalStateException();
-        }
+        Jenkins jenkins = Jenkins.getActiveInstance();
 
         try {
             Project project =
-                j.getItemByFullName(projectName, Project.class);
+                jenkins.getItemByFullName(projectName, Project.class);
 
             if (project == null)
                 return new SlackTextMessage("Could not find project ("+projectName+")\n");
@@ -59,14 +54,12 @@ public class GetProjectLogCommand extends SlackRouterCommand implements RouterCo
             SecurityContextHolder.setContext(ctx);
         }
 
-        String response = "*"+projectName+"* *#"+buildNumber+"*\n";
-        response += "```";
-        StringBuffer buf = new StringBuffer();
+        StringBuilder builder = new StringBuilder("*" + projectName + "* *#" + buildNumber + "*\n```");
         for (String line : log) {
-            buf.append(line).append("\n");
+            builder.append(line).append("\n");
         }
-        response += buf.toString() + "```";
+        builder.append("```");
 
-        return new SlackTextMessage(response);
+        return new SlackTextMessage(builder.toString());
     }
 }

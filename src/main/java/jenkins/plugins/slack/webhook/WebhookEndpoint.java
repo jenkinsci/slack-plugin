@@ -1,35 +1,23 @@
 package jenkins.plugins.slack.webhook;
 
 
-import jenkins.model.Jenkins;
-import jenkins.model.GlobalConfiguration;
-
 import hudson.Extension;
-
 import hudson.model.UnprotectedRootAction;
-
-import javax.servlet.ServletException;
-
-import java.io.IOException;
-
-import java.util.List;
-import java.util.UUID;
-import java.util.ArrayList;
-
-import java.util.logging.Logger;
-
-import org.kohsuke.stapler.HttpResponse;
-import org.kohsuke.stapler.StaplerRequest;
-import org.kohsuke.stapler.StaplerResponse;
-
-import org.kohsuke.stapler.interceptor.RequirePOST;
-
+import jenkins.model.GlobalConfiguration;
+import jenkins.plugins.slack.webhook.exception.CommandRouterException;
+import jenkins.plugins.slack.webhook.exception.RouteNotFoundException;
 import jenkins.plugins.slack.webhook.model.JsonResponse;
 import jenkins.plugins.slack.webhook.model.SlackPostData;
 import jenkins.plugins.slack.webhook.model.SlackTextMessage;
+import org.kohsuke.stapler.HttpResponse;
+import org.kohsuke.stapler.StaplerRequest;
+import org.kohsuke.stapler.StaplerResponse;
+import org.kohsuke.stapler.interceptor.RequirePOST;
 
-import jenkins.plugins.slack.webhook.exception.CommandRouterException;
-import jenkins.plugins.slack.webhook.exception.RouteNotFoundException;
+import java.io.IOException;
+import java.util.UUID;
+import java.util.logging.Logger;
+import javax.servlet.ServletException;
 
 
 
@@ -118,19 +106,25 @@ public class WebhookEndpoint implements UnprotectedRootAction {
 
             String command = ex.getRouteCommand();
 
-            String response = "*Help:*\n";
-            if (command.split("\\s+").length > 1)
-                response += "`"+command+"` _is an unknown command, try one of the following:_\n\n";
-            else
-                response += "\n";
-
-            StringBuffer buf = new StringBuffer();
-            for (CommandRouter.Route route : router.getRoutes()) {
-                buf.append("`"+route.command+"`\n```").append(route.commandDescription).append("```").append("\n\n");
+            StringBuilder builder = new StringBuilder("*Help:*\n");
+            if (command.split("\\s+").length > 1) {
+                builder.append("`")
+                        .append(command)
+                        .append("` _is an unknown command, try one of the following:_\n\n");
+            } else {
+                builder.append("\n");
             }
-            response += buf.toString();
 
-            return new JsonResponse(new SlackTextMessage(response), StaplerResponse.SC_OK);
+            for (CommandRouter.Route route : router.getRoutes()) {
+                builder.append("`")
+                        .append(route.command)
+                        .append("`\n```")
+                        .append(route.commandDescription)
+                        .append("```")
+                        .append("\n\n");
+            }
+
+            return new JsonResponse(new SlackTextMessage(builder.toString()), StaplerResponse.SC_OK);
 
         } catch (CommandRouterException ex) {
             LOGGER.warning(ex.getMessage());

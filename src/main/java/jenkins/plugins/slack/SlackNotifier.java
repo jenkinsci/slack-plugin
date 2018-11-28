@@ -460,12 +460,9 @@ public class SlackNotifier extends Notifier {
 
         public ListBoxModel doFillTokenCredentialIdItems(@AncestorInPath Item context) {
 
-            Jenkins j = Jenkins.getInstance();
-            if (j == null) {
-                throw new IllegalStateException();
-            }
+            Jenkins jenkins = Jenkins.getActiveInstance();
 
-            if(context == null && !j.hasPermission(Jenkins.ADMINISTER) ||
+            if(context == null && !jenkins.hasPermission(Jenkins.ADMINISTER) ||
                     context != null && !context.hasPermission(Item.EXTENDED_READ)) {
                 return new StandardListBoxModel();
             }
@@ -708,12 +705,9 @@ public class SlackNotifier extends Notifier {
 
             ItemConfigMigrator migrator = new ItemConfigMigrator();
 
-            Jenkins j = Jenkins.getInstance();
-            if (j == null) {
-                throw new IllegalStateException();
-            }
+            Jenkins jenkins = Jenkins.getActiveInstance();
 
-            List<Item> items = j.getAllItems();
+            List<Item> items = jenkins.getAllItems();
             if (null != items) {
                 for (Item item : items) {
                     if (!migrator.migrate(item)) {
