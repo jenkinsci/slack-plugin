@@ -5,6 +5,16 @@
     While names are more readable, channel ids will not change over time and are therefore more resilient.
   </p>
   <p>
+    Thread support is available for slack APPs that handle requests using "chat.postMessage" method.
+    Besides to the channel ID, thread_ts must be passed to the SlackRoom parameter, separated by a colon (:).
+  </p>
+  <p>
+    Ex: ABCD1234S:1528273109
+  </p>
+  <p>
+    "chat.postMessage" endpoint could not handle `names of channels`, `channel id numbers` need to be used.
+  </p>
+  <p>
 	This overrides the global setting.
   </p>
 </div>

@@ -96,13 +96,14 @@ public class WebhookEndpointTest {
 
     @Test
     public void testNoTriggerWordPostData() throws Exception {
+        // No trigger word is present, which is the case when Slack "slash commands" are used
         setConfigSettings();
         List<NameValuePair> goodToken = new ArrayList<NameValuePair>();
         goodToken.add(new NameValuePair("token", "GOOD_TOKEN"));
-        goodToken.add(new NameValuePair("text", "jenkins"));
+        goodToken.add(new NameValuePair("text", "list projects"));
 
         WebResponse response = makeRequest(goodToken);
-        assertThat(getSlackMessage(response).getText(), is("Invalid command, trigger_word field required"));
+        assertThat(getSlackMessage(response).getText(), is("*Projects:*\n>_No projects found_"));
     }
 
     @Test

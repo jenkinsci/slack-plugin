@@ -99,9 +99,18 @@ public class StandardSlackService implements SlackService {
     public boolean publish(JSONArray attachments, String color) {
         boolean result = true;
         for (String roomId : roomIds) {
-                        HttpPost post;
+            HttpPost post;
             String url;
+            String threadTs = "";
             List<NameValuePair> nvps = new ArrayList<NameValuePair>();
+
+            //thread_ts is passed once with roomId: Ex: roomId:threadTs
+            String[] splitThread = roomId.split("[:]+");
+            if (splitThread.length > 1) {
+                roomId = splitThread[0];
+                threadTs = splitThread[1];
+            }
+
             //prepare post methods for both requests types
             if (!botUser || !StringUtils.isEmpty(baseUrl)) {
                 url = "https://" + teamDomain + "." + host + "/services/hooks/jenkins-ci?token=" + getTokenToUse();
@@ -121,6 +130,9 @@ public class StandardSlackService implements SlackService {
                         "&channel=" + roomId +
                         "&link_names=1" +
                         "&as_user=true";
+                if (threadTs.length() > 1) {
+                    url += "&thread_ts=" + threadTs;
+                }
                 try {
                     url += "&attachments=" + URLEncoder.encode(attachments.toString(), "utf-8");
                 } catch (UnsupportedEncodingException e) {

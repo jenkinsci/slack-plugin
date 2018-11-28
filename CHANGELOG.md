@@ -5,6 +5,8 @@
 - Support JCasC [PR #404](https://github.com/jenkinsci/slack-plugin/pull/404) [JENKINS-53641](https://issues.jenkins-ci.org/browse/JENKINS-53641)
   - [example](/README.md#configuration-as-code)
 - Add Token Macro support [PR #401](https://github.com/jenkinsci/slack-plugin/pull/401)
+- Add slash command support [PR #345](https://github.com/jenkinsci/slack-plugin/pull/345)
+- Add thread support [PR #377](https://github.com/jenkinsci/slack-plugin/pull/377)
 
 ## Bug Fixes:
 
