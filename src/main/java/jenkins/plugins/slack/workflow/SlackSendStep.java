@@ -212,8 +212,10 @@ public class SlackSendStep extends AbstractStepImpl {
             if (j == null) {
                 throw new IllegalStateException();
             }
+
             SlackNotifier.DescriptorImpl slackDesc = j.getDescriptorByType(SlackNotifier.DescriptorImpl.class);
-            listener.getLogger().println("run slackstepsend, step " + step.token+":" + step.botUser+", desc " + slackDesc.getToken()+":"+slackDesc.isBotUser());
+            listener.getLogger().println("run slackstepsend, step " + step.botUser + ", desc " + slackDesc.isBotUser());
+
             String baseUrl = step.baseUrl != null ? step.baseUrl : slackDesc.getBaseUrl();
             String team = step.teamDomain != null ? step.teamDomain : slackDesc.getTeamDomain();
             String tokenCredentialId = step.tokenCredentialId != null ? step.tokenCredentialId : slackDesc.getTokenCredentialId();
