@@ -1,4 +1,4 @@
-# 2.4 (Unreleased) release notes
+# 2.4 release notes
 
 ## New Features:
 
