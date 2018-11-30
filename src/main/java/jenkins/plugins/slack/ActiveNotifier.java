@@ -6,7 +6,6 @@ import hudson.model.AbstractProject;
 import hudson.model.BuildListener;
 import hudson.model.Cause;
 import hudson.model.CauseAction;
-import hudson.model.Hudson;
 import hudson.model.Result;
 import hudson.model.Run;
 import hudson.scm.ChangeLogSet;
@@ -17,6 +16,7 @@ import hudson.tasks.test.AbstractTestResultAction;
 import hudson.tasks.test.TestResult;
 import hudson.triggers.SCMTrigger;
 import hudson.util.LogTaskListener;
+import jenkins.model.Jenkins;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
 import org.jenkinsci.plugins.displayurlapi.DisplayURLProvider;
@@ -60,15 +60,13 @@ public class ActiveNotifier implements FineGrainedNotifier {
 
     public void started(AbstractBuild build) {
 
-        AbstractProject<?, ?> project = build.getProject();
-
         CauseAction causeAction = build.getAction(CauseAction.class);
 
         if (causeAction != null) {
             Cause scmCause = causeAction.findCause(SCMTrigger.SCMTriggerCause.class);
             if (scmCause == null) {
                 MessageBuilder message = new MessageBuilder(notifier, build);
-                message.append(causeAction.getShortDescription());
+                message.append(causeAction.getCauses().get(0).getShortDescription());
                 message.appendOpenLink();
                 if (notifier.includeCustomMessage()) {
                   message.appendCustomMessage();
@@ -89,11 +87,16 @@ public class ActiveNotifier implements FineGrainedNotifier {
 
     private void notifyStart(AbstractBuild build, String message) {
         AbstractProject<?, ?> project = build.getProject();
-        AbstractBuild<?, ?> previousBuild = project.getLastBuild().getPreviousCompletedBuild();
-        if (previousBuild == null) {
-            getSlack(build).publish(message, "good");
+        AbstractBuild<?, ?> lastBuild = project.getLastBuild();
+        if (lastBuild != null) {
+            AbstractBuild<?, ?> previousBuild = lastBuild.getPreviousCompletedBuild();
+            if (previousBuild == null) {
+                getSlack(build).publish(message, "good");
+            } else {
+                getSlack(build).publish(message, getBuildColor(previousBuild));
+            }
         } else {
-            getSlack(build).publish(message, getBuildColor(previousBuild));
+            getSlack(build).publish(message, "good");
         }
     }
 
@@ -101,15 +104,17 @@ public class ActiveNotifier implements FineGrainedNotifier {
         AbstractProject<?, ?> project = r.getProject();
         Result result = r.getResult();
         AbstractBuild<?, ?> previousBuild = project.getLastBuild();
-        do {
-            previousBuild = previousBuild.getPreviousCompletedBuild();
-        } while (previousBuild != null && previousBuild.getResult() == Result.ABORTED);
-        Result previousResult = (previousBuild != null) ? previousBuild.getResult() : Result.SUCCESS;
-        if((result.isWorseThan(previousResult) || moreTestFailuresThanPreviousBuild(r, previousBuild)) && notifier.getNotifyRegression()) {
-            getSlack(r).publish(getBuildStatusMessage(r, notifier.includeTestSummary(),
-                    notifier.includeFailedTests(), notifier.includeCustomMessage()), getBuildColor(r));
-            if (notifier.getCommitInfoChoice().showAnything()) {
-                getSlack(r).publish(getCommitList(r), getBuildColor(r));
+        if (null != previousBuild) {
+            do {
+                previousBuild = previousBuild.getPreviousCompletedBuild();
+            } while (previousBuild != null && previousBuild.getResult() == Result.ABORTED);
+            Result previousResult = (previousBuild != null) ? previousBuild.getResult() : Result.SUCCESS;
+            if(null != previousResult && (result.isWorseThan(previousResult) || moreTestFailuresThanPreviousBuild(r, previousBuild)) && notifier.getNotifyRegression()) {
+                getSlack(r).publish(getBuildStatusMessage(r, notifier.includeTestSummary(),
+                        notifier.includeFailedTests(), notifier.includeCustomMessage()), getBuildColor(r));
+                if (notifier.getCommitInfoChoice().showAnything()) {
+                    getSlack(r).publish(getCommitList(r), getBuildColor(r));
+                }
             }
         }
     }
@@ -118,27 +123,29 @@ public class ActiveNotifier implements FineGrainedNotifier {
         AbstractProject<?, ?> project = r.getProject();
         Result result = r.getResult();
         AbstractBuild<?, ?> previousBuild = project.getLastBuild();
-        do {
-            previousBuild = previousBuild.getPreviousCompletedBuild();
-        } while (previousBuild != null && previousBuild.getResult() == Result.ABORTED);
-        Result previousResult = (previousBuild != null) ? previousBuild.getResult() : Result.SUCCESS;
-        if ((result == Result.ABORTED && notifier.getNotifyAborted())
-                || (result == Result.FAILURE //notify only on single failed build
-                    && previousResult != Result.FAILURE
-                    && notifier.getNotifyFailure())
-                || (result == Result.FAILURE //notify only on repeated failures
-                    && previousResult == Result.FAILURE
-                    && notifier.getNotifyRepeatedFailure())
-                || (result == Result.NOT_BUILT && notifier.getNotifyNotBuilt())
-                || (result == Result.SUCCESS
-                    && (previousResult == Result.FAILURE || previousResult == Result.UNSTABLE)
-                    && notifier.getNotifyBackToNormal())
-                || (result == Result.SUCCESS && notifier.getNotifySuccess())
-                || (result == Result.UNSTABLE && notifier.getNotifyUnstable())) {
-            getSlack(r).publish(getBuildStatusMessage(r, notifier.includeTestSummary(),
-                    notifier.includeFailedTests(), notifier.includeCustomMessage()), getBuildColor(r));
-            if (notifier.getCommitInfoChoice().showAnything()) {
-                getSlack(r).publish(getCommitList(r), getBuildColor(r));
+        if (null != previousBuild) {
+            do {
+                previousBuild = previousBuild.getPreviousCompletedBuild();
+            } while (null != previousBuild && previousBuild.getResult() == Result.ABORTED);
+            Result previousResult = (null != previousBuild) ? previousBuild.getResult() : Result.SUCCESS;
+            if ((result == Result.ABORTED && notifier.getNotifyAborted())
+                    || (result == Result.FAILURE //notify only on single failed build
+                        && previousResult != Result.FAILURE
+                        && notifier.getNotifyFailure())
+                    || (result == Result.FAILURE //notify only on repeated failures
+                        && previousResult == Result.FAILURE
+                        && notifier.getNotifyRepeatedFailure())
+                    || (result == Result.NOT_BUILT && notifier.getNotifyNotBuilt())
+                    || (result == Result.SUCCESS
+                        && (previousResult == Result.FAILURE || previousResult == Result.UNSTABLE)
+                        && notifier.getNotifyBackToNormal())
+                    || (result == Result.SUCCESS && notifier.getNotifySuccess())
+                    || (result == Result.UNSTABLE && notifier.getNotifyUnstable())) {
+                getSlack(r).publish(getBuildStatusMessage(r, notifier.includeTestSummary(),
+                        notifier.includeFailedTests(), notifier.includeCustomMessage()), getBuildColor(r));
+                if (notifier.getCommitInfoChoice().showAnything()) {
+                    getSlack(r).publish(getCommitList(r), getBuildColor(r));
+                }
             }
         }
     }
@@ -221,13 +228,15 @@ public class ActiveNotifier implements FineGrainedNotifier {
             }
             String upProjectName = c.getUpstreamProject();
             int buildNumber = c.getUpstreamBuild();
-            AbstractProject project = Hudson.getInstance().getItemByFullName(upProjectName, AbstractProject.class);
-            AbstractBuild upBuild = (AbstractBuild)project.getBuildByNumber(buildNumber);
-            return getCommitList(upBuild);
+            AbstractProject project = Jenkins.getActiveInstance().getItemByFullName(upProjectName, AbstractProject.class);
+            if (project != null) {
+                AbstractBuild upBuild = project.getBuildByNumber(buildNumber);
+                return getCommitList(upBuild);
+            }
         }
         Set<String> commits = new HashSet<String>();
         for (Entry entry : entries) {
-            StringBuffer commit = new StringBuffer();
+            StringBuilder commit = new StringBuilder();
             CommitInfoChoice commitInfoChoice = notifier.getCommitInfoChoice();
             if (commitInfoChoice.showTitle()) {
                 commit.append(entry.getMsg());
@@ -304,60 +313,65 @@ public class ActiveNotifier implements FineGrainedNotifier {
         private String getStatusMessage(AbstractBuild r) {
             Result result = r.getResult();
             Result previousResult;
-            Run previousBuild = r.getProject().getLastBuild().getPreviousBuild();
-            Run previousSuccessfulBuild = r.getPreviousSuccessfulBuild();
-            boolean buildHasSucceededBefore = previousSuccessfulBuild != null;
-            
-            /*
-             * If the last build was aborted, go back to find the last non-aborted build.
-             * This is so that aborted builds do not affect build transitions.
-             * I.e. if build 1 was failure, build 2 was aborted and build 3 was a success the transition
-             * should be failure -> success (and therefore back to normal) not aborted -> success. 
-             */
-            Run lastNonAbortedBuild = previousBuild;
-            while(lastNonAbortedBuild != null && lastNonAbortedBuild.getResult() == Result.ABORTED) {
-                lastNonAbortedBuild = lastNonAbortedBuild.getPreviousBuild();
-            }
-            
-            
-            /* If all previous builds have been aborted, then use 
-             * SUCCESS as a default status so an aborted message is sent
-             */
-            if(lastNonAbortedBuild == null) {
-                previousResult = Result.SUCCESS;
-            } else {
-                previousResult = lastNonAbortedBuild.getResult();
-            }
-            
-            /* Back to normal should only be shown if the build has actually succeeded at some point.
-             * Also, if a build was previously unstable and has now succeeded the status should be 
-             * "Back to normal"
-             */
-            if (result == Result.SUCCESS
-                    && (previousResult == Result.FAILURE || previousResult == Result.UNSTABLE) 
-                    && buildHasSucceededBefore && notifier.getNotifyBackToNormal()) {
-                return BACK_TO_NORMAL_STATUS_MESSAGE;
-            }
-            if (result == Result.FAILURE && previousResult == Result.FAILURE) {
-                return STILL_FAILING_STATUS_MESSAGE;
-            }
-            if (result == Result.SUCCESS) {
-                return SUCCESS_STATUS_MESSAGE;
-            }
-            if (result == Result.FAILURE) {
-                return FAILURE_STATUS_MESSAGE;
-            }
-            if (result == Result.ABORTED) {
-                return ABORTED_STATUS_MESSAGE;
-            }
-            if (result == Result.NOT_BUILT) {
-                return NOT_BUILT_STATUS_MESSAGE;
-            }
-            if (result == Result.UNSTABLE) {
-                return UNSTABLE_STATUS_MESSAGE;
-            }
-            if (lastNonAbortedBuild != null && result.isWorseThan(previousResult)) {
-                return REGRESSION_STATUS_MESSAGE;
+            if(null != result) {
+                AbstractBuild lastBuild = r.getProject().getLastBuild();
+                if (lastBuild != null) {
+                    Run previousBuild = lastBuild.getPreviousBuild();
+                    Run previousSuccessfulBuild = r.getPreviousSuccessfulBuild();
+                    boolean buildHasSucceededBefore = previousSuccessfulBuild != null;
+
+                    /*
+                     * If the last build was aborted, go back to find the last non-aborted build.
+                     * This is so that aborted builds do not affect build transitions.
+                     * I.e. if build 1 was failure, build 2 was aborted and build 3 was a success the transition
+                     * should be failure -> success (and therefore back to normal) not aborted -> success.
+                     */
+                    Run lastNonAbortedBuild = previousBuild;
+                    while (lastNonAbortedBuild != null && lastNonAbortedBuild.getResult() == Result.ABORTED) {
+                        lastNonAbortedBuild = lastNonAbortedBuild.getPreviousBuild();
+                    }
+
+
+                    /* If all previous builds have been aborted, then use
+                     * SUCCESS as a default status so an aborted message is sent
+                     */
+                    if (lastNonAbortedBuild == null) {
+                        previousResult = Result.SUCCESS;
+                    } else {
+                        previousResult = lastNonAbortedBuild.getResult();
+                    }
+
+                    /* Back to normal should only be shown if the build has actually succeeded at some point.
+                     * Also, if a build was previously unstable and has now succeeded the status should be
+                     * "Back to normal"
+                     */
+                    if (result == Result.SUCCESS
+                            && (previousResult == Result.FAILURE || previousResult == Result.UNSTABLE)
+                            && buildHasSucceededBefore && notifier.getNotifyBackToNormal()) {
+                        return BACK_TO_NORMAL_STATUS_MESSAGE;
+                    }
+                    if (result == Result.FAILURE && previousResult == Result.FAILURE) {
+                        return STILL_FAILING_STATUS_MESSAGE;
+                    }
+                    if (result == Result.SUCCESS) {
+                        return SUCCESS_STATUS_MESSAGE;
+                    }
+                    if (result == Result.FAILURE) {
+                        return FAILURE_STATUS_MESSAGE;
+                    }
+                    if (result == Result.ABORTED) {
+                        return ABORTED_STATUS_MESSAGE;
+                    }
+                    if (result == Result.NOT_BUILT) {
+                        return NOT_BUILT_STATUS_MESSAGE;
+                    }
+                    if (result == Result.UNSTABLE) {
+                        return UNSTABLE_STATUS_MESSAGE;
+                    }
+                    if (lastNonAbortedBuild != null && result.isWorseThan(previousResult)) {
+                        return REGRESSION_STATUS_MESSAGE;
+                    }
+                }
             }
             return UNKNOWN_STATUS_MESSAGE;
         }
@@ -453,15 +467,20 @@ public class ActiveNotifier implements FineGrainedNotifier {
             // This status code guarantees that the previous build fails and has been successful before
             // The back to normal time is the time since the build first broke
             Run previousSuccessfulBuild = build.getPreviousSuccessfulBuild();
-            Run initialFailureAfterPreviousSuccessfulBuild = previousSuccessfulBuild.getNextBuild();
-            long initialFailureStartTime = initialFailureAfterPreviousSuccessfulBuild.getStartTimeInMillis();
-            long initialFailureDuration = initialFailureAfterPreviousSuccessfulBuild.getDuration();
-            long initialFailureEndTime = initialFailureStartTime + initialFailureDuration;
-            long buildStartTime = build.getStartTimeInMillis();
-            long buildDuration = build.getDuration();
-            long buildEndTime = buildStartTime + buildDuration;
-            long backToNormalDuration = buildEndTime - initialFailureEndTime;
-            return Util.getTimeSpanString(backToNormalDuration);
+            if (null != previousSuccessfulBuild && null != previousSuccessfulBuild.getNextBuild()) {
+                Run initialFailureAfterPreviousSuccessfulBuild = previousSuccessfulBuild.getNextBuild();
+                if (initialFailureAfterPreviousSuccessfulBuild != null) {
+                    long initialFailureStartTime = initialFailureAfterPreviousSuccessfulBuild.getStartTimeInMillis();
+                    long initialFailureDuration = initialFailureAfterPreviousSuccessfulBuild.getDuration();
+                    long initialFailureEndTime = initialFailureStartTime + initialFailureDuration;
+                    long buildStartTime = build.getStartTimeInMillis();
+                    long buildDuration = build.getDuration();
+                    long buildEndTime = buildStartTime + buildDuration;
+                    long backToNormalDuration = buildEndTime - initialFailureEndTime;
+                    return Util.getTimeSpanString(backToNormalDuration);
+                }
+            }
+            return null;
         }
 
         private String escapeCharacters(String string) {

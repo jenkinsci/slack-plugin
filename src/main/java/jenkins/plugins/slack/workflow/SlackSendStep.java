@@ -168,7 +168,9 @@ public class SlackSendStep extends AbstractStepImpl {
 
         public ListBoxModel doFillTokenCredentialIdItems(@AncestorInPath Project project) {
 
-            if(project == null && !Jenkins.getInstance().hasPermission(Jenkins.ADMINISTER) ||
+            Jenkins jenkins = Jenkins.getActiveInstance();
+
+            if(project == null && !jenkins.hasPermission(Jenkins.ADMINISTER) ||
                     project != null && !project.hasPermission(Item.EXTENDED_READ)) {
                 return new StandardListBoxModel();
             }
@@ -203,17 +205,11 @@ public class SlackSendStep extends AbstractStepImpl {
         @Override
         protected Void run() throws Exception {
 
-            //default to global config values if not set in step, but allow step to override all global settings
-            Jenkins jenkins;
-            //Jenkins.getInstance() may return null, no message sent in that case
-            try {
-                jenkins = Jenkins.getInstance();
-            } catch (NullPointerException ne) {
-                listener.error(Messages.NotificationFailedWithException(ne));
-                return null;
-            }
+            Jenkins jenkins = Jenkins.getActiveInstance();
+
             SlackNotifier.DescriptorImpl slackDesc = jenkins.getDescriptorByType(SlackNotifier.DescriptorImpl.class);
             listener.getLogger().println("run slackstepsend, step " + step.botUser + ", desc " + slackDesc.isBotUser());
+
             String baseUrl = step.baseUrl != null ? step.baseUrl : slackDesc.getBaseUrl();
             String team = step.teamDomain != null ? step.teamDomain : slackDesc.getTeamDomain();
             String tokenCredentialId = step.tokenCredentialId != null ? step.tokenCredentialId : slackDesc.getTokenCredentialId();

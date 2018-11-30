@@ -5,8 +5,6 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.Before;
 
-import static org.junit.Assert.assertEquals;
-
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.nullValue;
@@ -15,13 +13,10 @@ import static org.hamcrest.Matchers.containsString;
 import static org.junit.Assert.assertThat;
 
 import com.gargoylesoftware.htmlunit.WebResponse;
-import com.gargoylesoftware.htmlunit.WebRequestSettings;
+import com.gargoylesoftware.htmlunit.WebRequest;
 import static com.gargoylesoftware.htmlunit.HttpMethod.POST;
 
 import com.gargoylesoftware.htmlunit.html.HtmlForm;
-import com.gargoylesoftware.htmlunit.html.HtmlInput;
-
-import hudson.tasks.Shell;
 
 import org.jvnet.hudson.test.JenkinsRule;
 
@@ -30,8 +25,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import static java.net.HttpURLConnection.HTTP_OK;
 import static java.net.HttpURLConnection.HTTP_NOT_FOUND;
 
-import org.apache.commons.httpclient.NameValuePair;
+import com.gargoylesoftware.htmlunit.util.NameValuePair;
 
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.ArrayList;
 
@@ -39,11 +35,6 @@ import hudson.model.FreeStyleProject;
 import jenkins.model.GlobalConfiguration;
 
 import jenkins.plugins.slack.webhook.model.SlackTextMessage;
-
-import jenkins.plugins.slack.webhook.WebhookEndpoint;
-
-
-
 
 public class WebhookEndpointTest {
 
@@ -165,7 +156,7 @@ public class WebhookEndpointTest {
     @Test
     public void testRunProject() throws Exception {
         setConfigSettings();
-        FreeStyleProject project = jenkinsRule.createFreeStyleProject(LONG_PROJECT_NAME);
+        jenkinsRule.createFreeStyleProject(LONG_PROJECT_NAME);
         data.add(new NameValuePair("text", "jenkins run "+LONG_PROJECT_NAME));
         WebResponse response = makeRequest(data);
         assertThat(getSlackMessage(response).getText(), is("Build scheduled for project "+LONG_PROJECT_NAME+"\n"));
@@ -202,13 +193,13 @@ public class WebhookEndpointTest {
     }
 
     private WebResponse makeRequest(List<NameValuePair> postData) throws Exception {
-        WebRequestSettings request =
-            new WebRequestSettings(client.createCrumbedUrl(ENDPOINT), POST);
+        WebRequest request =
+            new WebRequest(client.createCrumbedUrl(ENDPOINT), POST);
 
         if (postData != null)
             request.setRequestParameters(postData);
 
-        request.setCharset("utf-8");
+        request.setCharset(StandardCharsets.UTF_8);
 
         return client.loadWebResponse(request);
     } 

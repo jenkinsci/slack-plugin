@@ -3,24 +3,16 @@ package jenkins.plugins.slack.webhook;
 
 import jenkins.model.Jenkins;
 
-import hudson.model.Build;
 import hudson.model.Result;
-import hudson.model.Project;
 import hudson.model.AbstractBuild;
 import hudson.model.AbstractProject;
 
 import hudson.security.ACL;
 
-import java.io.IOException;
-
 import java.util.List;
-import java.util.ArrayList;
-
-import org.kohsuke.stapler.interceptor.RequirePOST;
 
 import jenkins.plugins.slack.webhook.model.SlackPostData;
 import jenkins.plugins.slack.webhook.model.SlackTextMessage;
-import jenkins.plugins.slack.webhook.model.SlackWebhookCause;
 
 import org.acegisecurity.context.SecurityContext;
 import org.acegisecurity.context.SecurityContextHolder;
@@ -39,13 +31,14 @@ public class ListProjectsCommand extends SlackRouterCommand implements RouterCom
 
         SecurityContext ctx = ACL.impersonate(ACL.SYSTEM);
 
-        String response = "*Projects:*\n";
+        Jenkins jenkins = Jenkins.getActiveInstance();
 
         List<AbstractProject> jobs =
-            Jenkins.getInstance().getAllItems(AbstractProject.class);
+            jenkins.getAllItems(AbstractProject.class);
 
         SecurityContextHolder.setContext(ctx);
 
+        StringBuilder builder = new StringBuilder("*Projects:*\n");
         for (AbstractProject job : jobs) {
             if (job.isBuildable()) {
                 AbstractBuild lastBuild = job.getLastBuild();
@@ -67,19 +60,28 @@ public class ListProjectsCommand extends SlackRouterCommand implements RouterCom
                 }
 
                 if (jobs.size() <= 10) {
-                    response += ">*"+job.getDisplayName() + "*\n>*Last Build:* #"+buildNumber+"\n>*Status:* "+status;
-                    response += "\n\n\n";
+                    builder.append(">*")
+                        .append(job.getDisplayName())
+                        .append("*\n>*Last Build:* #")
+                        .append(buildNumber)
+                        .append("\n>*Status:* ")
+                        .append(status)
+                        .append("\n\n\n");
                 } else {
-                    response += ">*"+job.getDisplayName() + "* :: *Last Build:* #"+buildNumber+" :: *Status:* "+status;
-                    response += "\n\n";
+                    builder.append(">*")
+                        .append(job.getDisplayName())
+                        .append("* :: *Last Build:* #")
+                        .append(buildNumber)
+                        .append(" :: *Status:* ")
+                        .append(status)
+                        .append("\n\n");
                 }
             }
         }
+        if (jobs.size() == 0)
+            builder.append(">_No projects found_");
 
-        if (jobs == null || jobs.size() == 0)
-            response += ">_No projects found_";
-
-        return new SlackTextMessage(response);
+        return new SlackTextMessage(builder.toString());
     }
 }
 

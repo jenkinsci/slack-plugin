@@ -21,7 +21,6 @@ public class SlackSendStepIntegrationTest {
         step1.setColor("good");
         step1.setChannel("#channel");
         step1.setToken("token");
-        step1.setTokenCredentialId("tokenCredentialId");
         step1.setTeamDomain("teamDomain");
         step1.setBaseUrl("baseUrl");
         step1.setFailOnError(true);
