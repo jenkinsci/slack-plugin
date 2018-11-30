@@ -1,3 +1,9 @@
+# 2.5 (Unreleased) release notes
+
+## Internal updates:
+
+- Re-enable windows tests on CI [PR #424](https://github.com/jenkinsci/slack-plugin/pull/424)
+
 # 2.4 release notes
 
 ## New Features:
