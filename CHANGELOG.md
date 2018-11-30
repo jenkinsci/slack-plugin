@@ -28,6 +28,10 @@
 - Added multiple channel comment to slackSend [PR #399](https://github.com/jenkinsci/slack-plugin/pull/399)
 - Send to users wording tweak [PR #408](https://github.com/jenkinsci/slack-plugin/pull/408)
 
+## Internal updates:
+
+- Parent pom update, new jenkins baseline (2.60.3) and java 8 required  [PR #406](https://github.com/jenkinsci/slack-plugin/pull/406)
+
 # 2.3 release notes
 
 ## New Features:
