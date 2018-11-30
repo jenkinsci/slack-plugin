@@ -253,8 +253,8 @@ public class SlackSendStep extends AbstractStepImpl {
                         }
                     }
                 }
-                publishSuccess = slackService.publish(jsonArray, color);
-            }else{
+                publishSuccess = slackService.publish(step.message, jsonArray, color);
+            } else {
                 publishSuccess = slackService.publish(step.message, color);
             }
             if (!publishSuccess && step.failOnError) {

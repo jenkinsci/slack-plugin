@@ -92,11 +92,11 @@ public class StandardSlackService implements SlackService {
         JSONArray attachments = new JSONArray();
         attachments.add(attachment);
 
-        return publish(attachments, color);
+        return publish(null, attachments, color);
     }
 
     @Override
-    public boolean publish(JSONArray attachments, String color) {
+    public boolean publish(String message, JSONArray attachments, String color) {
         boolean result = true;
         for (String roomId : roomIds) {
             HttpPost post;
@@ -121,6 +121,9 @@ public class StandardSlackService implements SlackService {
                 JSONObject json = new JSONObject();
 
                 json.put("channel", roomId);
+                if (StringUtils.isNotEmpty(message)) {
+                    json.put("text", message);
+                }
                 json.put("attachments", attachments);
                 json.put("link_names", "1");
 
