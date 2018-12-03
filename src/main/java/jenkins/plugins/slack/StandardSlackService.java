@@ -154,7 +154,7 @@ public class StandardSlackService implements SlackService {
 
             	int responseCode = response.getStatusLine().getStatusCode();
             	HttpEntity entity = response.getEntity();
-                responseString = EntityUtils.toString(entity);
+            	responseString = EntityUtils.toString(entity);
             	if(responseCode != HttpStatus.SC_OK) {
             		 logger.log(Level.WARNING, "Slack post may have failed. Response: " + responseString);
             		 logger.log(Level.WARNING, "Response Code: " + responseCode);
@@ -203,14 +203,14 @@ public class StandardSlackService implements SlackService {
             if (proxy != null) {
                 final HttpHost proxyHost = new HttpHost(proxy.name, proxy.port);
                 final HttpRoutePlanner routePlanner = new DefaultProxyRoutePlanner(proxyHost);
-                clientBuilder.setRoutePlanner(routePlanner);                
+                clientBuilder.setRoutePlanner(routePlanner);
 
                 String username = proxy.getUserName();
                 String password = proxy.getPassword();
                 // Consider it to be passed if username specified. Sufficient?
                 if (username != null && !"".equals(username.trim())) {
                     logger.info("Using proxy authentication (user=" + username + ")");
-                    credentialsProvider.setCredentials(new AuthScope(proxyHost), 
+                    credentialsProvider.setCredentials(new AuthScope(proxyHost),
                     								   new UsernamePasswordCredentials(username, password));
                 }
             }
