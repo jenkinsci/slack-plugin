@@ -260,7 +260,7 @@ public class SlackSendStep extends AbstractStepImpl {
             } else if (step.message != null) {
                 publishSuccess = slackService.publish(step.message, color);
             } else {
-                listener.error(Messages.NotificationFailedWithException(new IllegalArgumentException("No message or attachment provided")));
+                listener.error(Messages.NotificationFailedWithException(new IllegalArgumentException("No message or attachments provided")));
                 return null;
             }
             if (!publishSuccess && step.failOnError) {
