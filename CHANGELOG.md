@@ -1,4 +1,8 @@
-# 2.5 (Unreleased) release notes
+# 2.5 release notes
+
+## Bug fixes:
+
+- Fix serialisation of some fields [PR #430](https://github.com/jenkinsci/slack-plugin/pull/430)
 
 ## Internal updates:
 
