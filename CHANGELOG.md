@@ -1,4 +1,4 @@
-# 2.5 (Unreleased) release notes
+# 2.6 (Unreleased) release notes
 
 # 2.5 release notes
 
