@@ -68,7 +68,7 @@ public class ActiveNotifier implements FineGrainedNotifier {
                 MessageBuilder message = new MessageBuilder(notifier, build);
                 message.append(causeAction.getCauses().get(0).getShortDescription());
                 message.appendOpenLink();
-                if (notifier.includeCustomMessage()) {
+                if (notifier.getIncludeCustomMessage()) {
                   message.appendCustomMessage();
                 }
                 notifyStart(build, message.toString());
@@ -77,11 +77,11 @@ public class ActiveNotifier implements FineGrainedNotifier {
             }
         }
 
-        String changes = getChanges(build, notifier.includeCustomMessage());
+        String changes = getChanges(build, notifier.getIncludeCustomMessage());
         if (changes != null) {
             notifyStart(build, changes);
         } else {
-            notifyStart(build, getBuildStatusMessage(build, false, false, notifier.includeCustomMessage()));
+            notifyStart(build, getBuildStatusMessage(build, false, false, notifier.getIncludeCustomMessage()));
         }
     }
 
@@ -110,8 +110,8 @@ public class ActiveNotifier implements FineGrainedNotifier {
             } while (previousBuild != null && previousBuild.getResult() == Result.ABORTED);
             Result previousResult = (previousBuild != null) ? previousBuild.getResult() : Result.SUCCESS;
             if(null != previousResult && (result.isWorseThan(previousResult) || moreTestFailuresThanPreviousBuild(r, previousBuild)) && notifier.getNotifyRegression()) {
-                getSlack(r).publish(getBuildStatusMessage(r, notifier.includeTestSummary(),
-                        notifier.includeFailedTests(), notifier.includeCustomMessage()), getBuildColor(r));
+                getSlack(r).publish(getBuildStatusMessage(r, notifier.getIncludeTestSummary(),
+                        notifier.getIncludeFailedTests(), notifier.getIncludeCustomMessage()), getBuildColor(r));
                 if (notifier.getCommitInfoChoice().showAnything()) {
                     getSlack(r).publish(getCommitList(r), getBuildColor(r));
                 }
@@ -141,8 +141,8 @@ public class ActiveNotifier implements FineGrainedNotifier {
                         && notifier.getNotifyBackToNormal())
                     || (result == Result.SUCCESS && notifier.getNotifySuccess())
                     || (result == Result.UNSTABLE && notifier.getNotifyUnstable())) {
-                getSlack(r).publish(getBuildStatusMessage(r, notifier.includeTestSummary(),
-                        notifier.includeFailedTests(), notifier.includeCustomMessage()), getBuildColor(r));
+                getSlack(r).publish(getBuildStatusMessage(r, notifier.getIncludeTestSummary(),
+                        notifier.getIncludeFailedTests(), notifier.getIncludeCustomMessage()), getBuildColor(r));
                 if (notifier.getCommitInfoChoice().showAnything()) {
                     getSlack(r).publish(getCommitList(r), getBuildColor(r));
                 }
