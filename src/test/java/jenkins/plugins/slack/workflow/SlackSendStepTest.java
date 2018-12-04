@@ -19,7 +19,9 @@ import org.powermock.modules.junit4.PowerMockRunner;
 import java.io.PrintStream;
 import java.io.PrintWriter;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.mockito.Mockito.anyBoolean;
 import static org.mockito.Mockito.anyString;
@@ -50,6 +52,14 @@ public class SlackSendStepTest {
     Jenkins jenkins;
     @Mock
     SlackNotifier.DescriptorImpl slackDescMock;
+
+    String savedResponse = "{\"ok\":true,\"channel\":\"F4KE1DABC\",\"ts\":\"1543931401.000500\"," +
+            "\"message\":{\"bot_id\":\"F4KEB0T\",\"type\":\"message\",\"text\":\"\",\"user\":\"F4KEUSR\"," +
+            "\"ts\":\"1543931401.000500\",\"attachments\":[{\"fallback\":\"hi\",\"id\":1," +
+            "\"fields\":[{\"title\":\"\",\"value\":\"hi\",\"short\":false}]," +
+            "\"mrkdwn_in\":[\"pretext\",\"text\",\"fields\"]}]}," +
+            "\"warning\":\"superfluous_charset\"," +
+            "\"response_metadata\":{\"warnings\":[\"superfluous_charset\"]}}";
 
     @Before
     public void setUp() {
@@ -203,5 +213,37 @@ public class SlackSendStepTest {
         stepExecution.run();
         verify(slackServiceMock, times(1)).publish("message", "");
         assertNull(stepExecution.step.getColor());
+    }
+
+    @Test
+    public void testSlackResponseObject() throws Exception {
+
+        SlackSendStep.SlackSendStepExecution stepExecution = spy(new SlackSendStep.SlackSendStepExecution());
+        SlackSendStep slackSendStep = new SlackSendStep("message");
+        slackSendStep.setToken("token");
+        slackSendStep.setTokenCredentialId("tokenCredentialId");
+        slackSendStep.setBotUser(true);
+        slackSendStep.setBaseUrl("baseUrl/");
+        slackSendStep.setTeamDomain("teamDomain");
+        slackSendStep.setChannel("channel");
+        slackSendStep.setColor("good");
+        stepExecution.step = slackSendStep;
+
+        when(Jenkins.getActiveInstance()).thenReturn(jenkins);
+
+        stepExecution.listener = taskListenerMock;
+        when(taskListenerMock.getLogger()).thenReturn(printStreamMock);
+        doNothing().when(printStreamMock).println();
+
+        when(stepExecution.getSlackService(anyString(), anyString(), anyString(), anyString(), anyBoolean(), anyString())).thenReturn(slackServiceMock);
+        when(slackServiceMock.getResponseString()).thenReturn(savedResponse);
+        when(slackServiceMock.publish(anyString(), anyString())).thenReturn(true);
+
+        SlackResponse response = stepExecution.run();
+        String expectedId = "F4KE1DABC";
+        String expectedTs = "1543931401.000500";
+        assertNotNull(response);
+        assertEquals(expectedId, response.getChannelId());
+        assertEquals(expectedTs, response.getTs());
     }
 }
