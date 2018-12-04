@@ -2,6 +2,7 @@
 
 ## Bug fixes:
 
+- replace # with nothing in chat.postMessage [PR #433](https://github.com/jenkinsci/slack-plugin/pull/433)
 - Fix serialisation of some fields [PR #430](https://github.com/jenkinsci/slack-plugin/pull/430)
 
 ## Internal updates:
