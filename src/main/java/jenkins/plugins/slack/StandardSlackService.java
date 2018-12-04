@@ -127,7 +127,7 @@ public class StandardSlackService implements SlackService {
                 nvps.add(new BasicNameValuePair("payload", json.toString()));
             } else {
                 url = "https://slack.com/api/chat.postMessage?token=" + getTokenToUse() +
-                        "&channel=" + roomId +
+                        "&channel=" + roomId.replace("#", "") +
                         "&link_names=1" +
                         "&as_user=true";
                 if (threadTs.length() > 1) {
