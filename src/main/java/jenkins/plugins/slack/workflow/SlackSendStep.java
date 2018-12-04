@@ -259,8 +259,7 @@ public class SlackSendStep extends AbstractStepImpl {
             }
             SlackResponse response = null;
             if (publishSuccess) {
-                StandardSlackService standardSlackService = (StandardSlackService) slackService;
-                String responseString = standardSlackService.getResponseString();
+                String responseString = slackService.getResponseString();
                 if (responseString != null) {
                     response = new SlackResponse(responseString);
                 }

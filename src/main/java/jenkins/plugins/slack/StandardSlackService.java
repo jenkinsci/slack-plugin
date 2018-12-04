@@ -154,7 +154,9 @@ public class StandardSlackService implements SlackService {
 
             	int responseCode = response.getStatusLine().getStatusCode();
             	HttpEntity entity = response.getEntity();
-            	responseString = EntityUtils.toString(entity);
+            	if (entity != null) {
+                    responseString = EntityUtils.toString(entity);
+                }
             	if(responseCode != HttpStatus.SC_OK) {
             		 logger.log(Level.WARNING, "Slack post may have failed. Response: " + responseString);
             		 logger.log(Level.WARNING, "Response Code: " + responseCode);
