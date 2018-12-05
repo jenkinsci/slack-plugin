@@ -93,6 +93,23 @@ node {
 For more information about slack messages see [Slack Messages Api](https://api.slack.com/docs/messages)
 and [Slack attachments Api](https://api.slack.com/docs/message-attachments)
 
+## Threads Support
+
+You can send a message and create a thread on that message using the pipeline step.
+The step returns an object which you can use to retrieve the thread ID. Send new messages with that thread ID as the
+target channel to create a thread. All messages of a thread should use the same thread ID.
+
+Example:
+```
+node {
+    def slackResponse = slackSend(channel: "cool-threads", message: "Here is the primary message")
+    slackSend(channel: slackResponse.threadId, message: "Thread reply #1")
+    slackSend(channel: slackResponse.threadId, message: "Thread reply #2")
+}
+```
+
+This feature requires botUser mode.
+
 # Configuration as code
 
 This plugin supports configuration as code
