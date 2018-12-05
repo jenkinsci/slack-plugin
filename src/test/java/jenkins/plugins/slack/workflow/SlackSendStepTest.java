@@ -7,6 +7,7 @@ import jenkins.plugins.slack.SlackNotifier;
 import jenkins.plugins.slack.SlackService;
 import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
+import org.apache.commons.io.IOUtils;
 import org.jenkinsci.plugins.workflow.steps.StepContext;
 import org.junit.Before;
 import org.junit.Test;
@@ -52,14 +53,6 @@ public class SlackSendStepTest {
     Jenkins jenkins;
     @Mock
     SlackNotifier.DescriptorImpl slackDescMock;
-
-    String savedResponse = "{\"ok\":true,\"channel\":\"F4KE1DABC\",\"ts\":\"1543931401.000500\"," +
-            "\"message\":{\"bot_id\":\"F4KEB0T\",\"type\":\"message\",\"text\":\"\",\"user\":\"F4KEUSR\"," +
-            "\"ts\":\"1543931401.000500\",\"attachments\":[{\"fallback\":\"hi\",\"id\":1," +
-            "\"fields\":[{\"title\":\"\",\"value\":\"hi\",\"short\":false}]," +
-            "\"mrkdwn_in\":[\"pretext\",\"text\",\"fields\"]}]}," +
-            "\"warning\":\"superfluous_charset\"," +
-            "\"response_metadata\":{\"warnings\":[\"superfluous_charset\"]}}";
 
     @Before
     public void setUp() {
@@ -236,6 +229,10 @@ public class SlackSendStepTest {
         doNothing().when(printStreamMock).println();
 
         when(stepExecution.getSlackService(anyString(), anyString(), anyString(), anyString(), anyBoolean(), anyString())).thenReturn(slackServiceMock);
+
+        String savedResponse = IOUtils.toString(
+                this.getClass().getResourceAsStream("response.json")
+        );
         when(slackServiceMock.getResponseString()).thenReturn(savedResponse);
         when(slackServiceMock.publish(anyString(), anyString())).thenReturn(true);
 

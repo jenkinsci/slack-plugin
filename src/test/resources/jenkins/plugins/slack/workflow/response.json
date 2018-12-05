@@ -1,0 +1,1 @@
+{"ok":true,"channel":"F4KE1DABC","ts":"1543931401.000500","message":{"bot_id":"F4KEB0T","type":"message","text":"","user":"F4KEUSR","ts":"1543931401.000500","attachments":[{"fallback":"hi","id":1,"fields":[{"title":"","value":"hi","short":false}],"mrkdwn_in":["pretext","text","fields"]}]},"warning":"superfluous_charset","response_metadata":{"warnings":["superfluous_charset"]}}
