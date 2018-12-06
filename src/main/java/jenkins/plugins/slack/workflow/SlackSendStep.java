@@ -43,7 +43,7 @@ import static com.cloudbees.plugins.credentials.CredentialsProvider.lookupCreden
  */
 public class SlackSendStep extends AbstractStepImpl {
 
-    private final @Nonnull String message;
+    private String message;
     private String color;
     private String token;
     private String tokenCredentialId;
@@ -144,10 +144,13 @@ public class SlackSendStep extends AbstractStepImpl {
         return attachments;
     }
 
-    @DataBoundConstructor
-    public SlackSendStep(@Nonnull String message) {
+    @DataBoundSetter
+    public void setMessage(String message) {
         this.message = message;
     }
+
+    @DataBoundConstructor
+    public SlackSendStep() { }
 
     @Extension
     public static class DescriptorImpl extends AbstractStepDescriptorImpl {
@@ -254,8 +257,11 @@ public class SlackSendStep extends AbstractStepImpl {
                     }
                 }
                 publishSuccess = slackService.publish(jsonArray, color);
-            }else{
+            } else if (step.message != null) {
                 publishSuccess = slackService.publish(step.message, color);
+            } else {
+                listener.error(Messages.NotificationFailedWithException(new IllegalArgumentException("No message or attachments provided")));
+                return null;
             }
             if (!publishSuccess && step.failOnError) {
                 throw new AbortException(Messages.NotificationFailed());
