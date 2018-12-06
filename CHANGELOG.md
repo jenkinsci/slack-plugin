@@ -1,4 +1,7 @@
-# 2.6 (Unreleased) release notes
+# 2.6 release notes
+
+Bug fixes:
+- slack send should not require message [PR #434](https://github.com/jenkinsci/slack-plugin/pull/434)
 
 # 2.5 release notes
 
