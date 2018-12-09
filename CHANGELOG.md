@@ -1,4 +1,14 @@
-# 2.5 (Unreleased) release notes
+# 2.6 release notes
+
+Bug fixes:
+- slack send should not require message [PR #434](https://github.com/jenkinsci/slack-plugin/pull/434)
+
+# 2.5 release notes
+
+## Bug fixes:
+
+- replace # with nothing in chat.postMessage [PR #433](https://github.com/jenkinsci/slack-plugin/pull/433)
+- Fix serialisation of some fields [PR #430](https://github.com/jenkinsci/slack-plugin/pull/430)
 
 ## Internal updates:
 

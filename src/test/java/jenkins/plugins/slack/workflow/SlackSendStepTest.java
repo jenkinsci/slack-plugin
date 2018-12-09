@@ -63,7 +63,8 @@ public class SlackSendStepTest {
     @Test
     public void testStepOverrides() throws Exception {
         SlackSendStep.SlackSendStepExecution stepExecution = spy(new SlackSendStep.SlackSendStepExecution());
-        SlackSendStep slackSendStep = new SlackSendStep("message");
+        SlackSendStep slackSendStep = new SlackSendStep();
+        slackSendStep.setMessage("message");
         slackSendStep.setToken("token");
         slackSendStep.setTokenCredentialId("tokenCredentialId");
         slackSendStep.setBotUser(false);
@@ -95,7 +96,8 @@ public class SlackSendStepTest {
     @Test
     public void testStepOverrides2() throws Exception {
         SlackSendStep.SlackSendStepExecution stepExecution = spy(new SlackSendStep.SlackSendStepExecution());
-        SlackSendStep slackSendStep = new SlackSendStep("message");
+        SlackSendStep slackSendStep = new SlackSendStep();
+        slackSendStep.setMessage("message");
         slackSendStep.setToken("token");
         slackSendStep.setTokenCredentialId("tokenCredentialId");
         slackSendStep.setBotUser(false);
@@ -127,7 +129,8 @@ public class SlackSendStepTest {
     @Test
     public void testStepWithAttachments() throws Exception {
         SlackSendStep.SlackSendStepExecution stepExecution = spy(new SlackSendStep.SlackSendStepExecution());
-        stepExecution.step = new SlackSendStep("message");
+        stepExecution.step = new SlackSendStep();
+        stepExecution.step.setMessage("message");
         JSONArray attachments = new JSONArray();
         JSONObject jsonObject = new JSONObject();
         jsonObject.put("title","Title of the message");
@@ -157,7 +160,8 @@ public class SlackSendStepTest {
     public void testValuesForGlobalConfig() throws Exception {
 
         SlackSendStep.SlackSendStepExecution stepExecution = spy(new SlackSendStep.SlackSendStepExecution());
-        stepExecution.step = new SlackSendStep("message");
+        stepExecution.step = new SlackSendStep();
+        stepExecution.step.setMessage("message");
 
         when(Jenkins.getActiveInstance()).thenReturn(jenkins);
 
@@ -190,7 +194,8 @@ public class SlackSendStepTest {
     public void testNonNullEmptyColor() throws Exception {
 
         SlackSendStep.SlackSendStepExecution stepExecution = spy(new SlackSendStep.SlackSendStepExecution());
-        SlackSendStep slackSendStep = new SlackSendStep("message");
+        SlackSendStep slackSendStep = new SlackSendStep();
+        slackSendStep.setMessage("message");
         slackSendStep.setColor("");
         stepExecution.step = slackSendStep;
 

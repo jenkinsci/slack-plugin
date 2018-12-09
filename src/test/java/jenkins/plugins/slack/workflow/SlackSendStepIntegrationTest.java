@@ -17,7 +17,8 @@ public class SlackSendStepIntegrationTest {
 
     @Test
     public void configRoundTrip() throws Exception {
-        SlackSendStep step1 = new SlackSendStep("message");
+        SlackSendStep step1 = new SlackSendStep();
+        step1.setMessage("message");
         step1.setColor("good");
         step1.setChannel("#channel");
         step1.setToken("token");
