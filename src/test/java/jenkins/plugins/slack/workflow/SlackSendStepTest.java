@@ -217,7 +217,8 @@ public class SlackSendStepTest {
     public void testSlackResponseObject() throws Exception {
 
         SlackSendStep.SlackSendStepExecution stepExecution = spy(new SlackSendStep.SlackSendStepExecution());
-        SlackSendStep slackSendStep = new SlackSendStep("message");
+        SlackSendStep slackSendStep = new SlackSendStep();
+        slackSendStep.setMessage("message");
         slackSendStep.setToken("token");
         slackSendStep.setTokenCredentialId("tokenCredentialId");
         slackSendStep.setBotUser(true);
@@ -244,8 +245,10 @@ public class SlackSendStepTest {
         SlackResponse response = stepExecution.run();
         String expectedId = "F4KE1DABC";
         String expectedTs = "1543931401.000500";
+        String expectedThreadId = "F4KE1DABC:1543931401.000500";
         assertNotNull(response);
         assertEquals(expectedId, response.getChannelId());
         assertEquals(expectedTs, response.getTs());
+        assertEquals(expectedThreadId, response.getThreadId());
     }
 }
