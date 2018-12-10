@@ -1,5 +1,6 @@
 package jenkins.plugins.slack.workflow;
 
+import org.apache.commons.lang.StringUtils;
 import org.jenkinsci.plugins.scriptsecurity.sandbox.whitelists.Whitelisted;
 import org.json.JSONObject;
 
@@ -10,9 +11,11 @@ public class SlackResponse implements Serializable {
     private String ts;
 
     public SlackResponse(String slackResponseString) {
-        JSONObject result = new JSONObject(slackResponseString);
-        channelId = result.getString("channel");
-        ts = result.getString("ts");
+        if (StringUtils.isEmpty(slackResponseString)) {
+            JSONObject result = new JSONObject(slackResponseString);
+            channelId = result.getString("channel");
+            ts = result.getString("ts");
+        }
     }
 
     @Whitelisted
@@ -27,6 +30,10 @@ public class SlackResponse implements Serializable {
 
     @Whitelisted
     public String getThreadId() {
-        return channelId + ":" + ts;
+        if (!StringUtils.isEmpty(channelId) && !StringUtils.isEmpty(ts)) {
+            return channelId + ":" + ts;
+        } else {
+            return null;
+        }
     }
 }

@@ -154,7 +154,7 @@ public class StandardSlackService implements SlackService {
 
             	int responseCode = response.getStatusLine().getStatusCode();
             	HttpEntity entity = response.getEntity();
-            	if (entity != null) {
+            	if (botUser && entity != null) {
                     responseString = EntityUtils.toString(entity);
                 }
             	if(responseCode != HttpStatus.SC_OK) {

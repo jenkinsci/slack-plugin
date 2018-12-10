@@ -250,5 +250,39 @@ public class SlackSendStepTest {
         assertEquals(expectedId, response.getChannelId());
         assertEquals(expectedTs, response.getTs());
         assertEquals(expectedThreadId, response.getThreadId());
+
+    }
+
+    @Test
+    public void testSlackResponseObjectNullNonBotUser() throws Exception {
+
+        SlackSendStep.SlackSendStepExecution stepExecution = spy(new SlackSendStep.SlackSendStepExecution());
+        SlackSendStep slackSendStep = new SlackSendStep();
+        slackSendStep.setMessage("message");
+        slackSendStep.setToken("token");
+        slackSendStep.setTokenCredentialId("tokenCredentialId");
+        slackSendStep.setBotUser(false);
+        slackSendStep.setBaseUrl("baseUrl/");
+        slackSendStep.setTeamDomain("teamDomain");
+        slackSendStep.setChannel("channel");
+        slackSendStep.setColor("good");
+        stepExecution.step = slackSendStep;
+
+        when(Jenkins.getActiveInstance()).thenReturn(jenkins);
+
+        stepExecution.listener = taskListenerMock;
+        when(taskListenerMock.getLogger()).thenReturn(printStreamMock);
+        doNothing().when(printStreamMock).println();
+
+        when(stepExecution.getSlackService(anyString(), anyString(), anyString(), anyString(), anyBoolean(), anyString())).thenReturn(slackServiceMock);
+
+        when(slackServiceMock.getResponseString()).thenReturn("ok");
+        when(slackServiceMock.publish(anyString(), anyString())).thenReturn(true);
+
+        SlackResponse response = stepExecution.run();
+        assertNotNull(response);
+        assertNull(response.getChannelId());
+        assertNull(response.getTs());
+        assertNull(response.getThreadId());
     }
 }
