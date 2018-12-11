@@ -276,7 +276,7 @@ public class SlackSendStepTest {
 
         when(stepExecution.getSlackService(anyString(), anyString(), anyString(), anyString(), anyBoolean(), anyString())).thenReturn(slackServiceMock);
 
-        when(slackServiceMock.getResponseString()).thenReturn("ok");
+        when(slackServiceMock.getResponseString()).thenReturn(null);
         when(slackServiceMock.publish(anyString(), anyString())).thenReturn(true);
 
         SlackResponse response = stepExecution.run();

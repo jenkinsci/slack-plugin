@@ -11,7 +11,7 @@ public class SlackResponse implements Serializable {
     private String ts;
 
     public SlackResponse(String slackResponseString) {
-        if (StringUtils.isEmpty(slackResponseString)) {
+        if (!StringUtils.isEmpty(slackResponseString)) {
             JSONObject result = new JSONObject(slackResponseString);
             channelId = result.getString("channel");
             ts = result.getString("ts");
