@@ -431,6 +431,25 @@ public class SlackNotifier extends Notifier {
     @Override
     public boolean perform(AbstractBuild<?, ?> build, Launcher launcher, BuildListener listener) throws InterruptedException, IOException {
         logger.info("Performing complete notifications");
+        String teamDomain = this.getTeamDomain();
+        if (StringUtils.isEmpty(teamDomain)) {
+            teamDomain = getDescriptor().getTeamDomain();
+        }
+        if (StringUtils.isEmpty(teamDomain)) {
+            teamDomain = "";
+        } else {
+            teamDomain = " on Team Subdomain: " + teamDomain;
+        }
+        String room = this.getRoom();
+        if (StringUtils.isEmpty(room)) {
+            room = getDescriptor().getRoom();
+        }
+        if (StringUtils.isEmpty(room)) {
+            listener.getLogger().println("[INFO] Slack notifications enabled in post-build but no Channel was found in the job or global config");
+        } else {
+            listener.getLogger().println("[INFO] Slack notifications will be sent to the following channels: " + room + teamDomain);
+        }
+
         new ActiveNotifier((SlackNotifier) this, listener).completed(build);
         if (notifyRegression) {
             logger.info("Performing finalize notifications");

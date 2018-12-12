@@ -14,6 +14,8 @@ public class SlackNotifierStub extends SlackNotifier {
                 customMessageAborted, customMessageNotBuilt, customMessageUnstable, customMessageFailure);
     }
 
+    public DescriptorImplStub descriptorImplStub;
+
     public static class DescriptorImplStub extends SlackNotifier.DescriptorImpl {
 
         private SlackService slackService;
@@ -30,5 +32,14 @@ public class SlackNotifierStub extends SlackNotifier {
         public void setSlackService(SlackService slackService) {
             this.slackService = slackService;
         }
+    }
+
+    public void setDescriptor(DescriptorImplStub descriptorImplStub) {
+        this.descriptorImplStub = descriptorImplStub;
+    }
+
+    @Override
+    public DescriptorImpl getDescriptor() {
+        return descriptorImplStub;
     }
 }

@@ -1,5 +1,6 @@
 package jenkins.plugins.slack;
 
+import hudson.model.*;
 import hudson.util.FormValidation;
 import junit.framework.TestCase;
 import net.sf.json.JSONArray;
@@ -54,6 +55,110 @@ public class SlackNotifierTest extends TestCase {
         FormValidation result = descriptor
                 .doTestConnection("baseUrl", "teamDomain", "authToken", "authTokenCredentialId", false, "room");
         assertEquals(result.kind, expectedResult);
+    }
+
+    @Test
+    public void testPerformConsoleLogEmptyGlobalConfig() {
+        if (slackServiceStub != null) {
+            slackServiceStub.setResponse(response);
+        }
+        descriptor.setSlackService(slackServiceStub);
+        SlackNotifierStub Sn = new SlackNotifierStub("","","",false,"", "", "",
+                false, false, false, false, false, false, false,
+                false, false, false, false, null, false, "",
+                "", "", "", "", "");
+        Sn.setDescriptor(descriptor);
+        java.io.ByteArrayOutputStream ba = new java.io.ByteArrayOutputStream(40);
+        StreamBuildListener listener = new StreamBuildListener(ba);
+        try {
+            Boolean result = Sn.perform((AbstractBuild) null, null, listener);
+            System.out.println(ba);
+        } catch (Exception e)
+        {
+            System.out.println(e);
+            assertEquals("[INFO] Slack notifications enabled in post-build but no Channel was found in the job or global config", ba.toString().trim());
+        }
+
+        //job room is set
+        ba = new java.io.ByteArrayOutputStream(40);
+        listener = new StreamBuildListener(ba);
+        Sn.setRoom("foo");
+        try {
+            Boolean result = Sn.perform((AbstractBuild) null, null, listener);
+            System.out.println(ba);
+        } catch (Exception e)
+        {
+            System.out.println(e);
+            assertEquals("[INFO] Slack notifications will be sent to the following channels: foo", ba.toString().trim());
+        }
+
+        //job room and subdomain set
+        ba = new java.io.ByteArrayOutputStream(40);
+        listener = new StreamBuildListener(ba);
+        Sn.setRoom("bar");
+        Sn.setTeamDomain("baz");
+        try {
+            Boolean result = Sn.perform((AbstractBuild) null, null, listener);
+            System.out.println(ba);
+        } catch (Exception e)
+        {
+            System.out.println(e);
+            assertEquals("[INFO] Slack notifications will be sent to the following channels: bar on Team Subdomain: baz", ba.toString().trim());
+        }
+    }
+
+    @Test
+    public void testPerformConsoleLogWithGlobalConfig() {
+        if (slackServiceStub != null) {
+            slackServiceStub.setResponse(response);
+        }
+        descriptor.setSlackService(slackServiceStub);
+        descriptor.setRoom("GlobalFoo, GlobalBar");
+        descriptor.setTeamDomain("GlobalBaz");
+        SlackNotifierStub Sn = new SlackNotifierStub("","","",false,"", "", "",
+                false, false, false, false, false, false, false,
+                false, false, false, false, null, false, "",
+                "", "", "", "", "");
+        Sn.setDescriptor(descriptor);
+        java.io.ByteArrayOutputStream ba = new java.io.ByteArrayOutputStream(40);
+        StreamBuildListener listener = new StreamBuildListener(ba);
+        try {
+            Boolean result = Sn.perform((AbstractBuild) null, null, listener);
+            System.out.println(ba);
+        } catch (Exception e)
+        {
+            System.out.println(e);
+            assertEquals("[INFO] Slack notifications will be sent to the following channels: GlobalFoo, GlobalBar on Team Subdomain: GlobalBaz", ba.toString().trim());
+        }
+
+        //job room is set takes precedence
+        ba = new java.io.ByteArrayOutputStream(40);
+        listener = new StreamBuildListener(ba);
+        Sn.setRoom("foo");
+        try {
+            Boolean result = Sn.perform((AbstractBuild) null, null, listener);
+            System.out.println(ba);
+        } catch (Exception e)
+        {
+            System.out.println(e);
+            assertEquals("[INFO] Slack notifications will be sent to the following channels: foo on Team Subdomain: GlobalBaz", ba.toString().trim());
+        }
+
+        //job room and subdomain set
+        ba = new java.io.ByteArrayOutputStream(40);
+        listener = new StreamBuildListener(ba);
+        Sn.setRoom("bar");
+        Sn.setTeamDomain("baz");
+        try {
+            Boolean result = Sn.perform((AbstractBuild) null, null, listener);
+            System.out.println(ba);
+        } catch (Exception e)
+        {
+            System.out.println(e);
+            assertEquals("[INFO] Slack notifications will be sent to the following channels: bar on Team Subdomain: baz", ba.toString().trim());
+        }
+
+
     }
 
     public static class SlackServiceStub implements SlackService {
