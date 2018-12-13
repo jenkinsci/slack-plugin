@@ -2,6 +2,7 @@
 
 ## New features:
 - Pipeline response object (threading enhancement) [PR #429](https://github.com/jenkinsci/slack-plugin/pull/429)
+- Add message when attachments are present [PR #426](https://github.com/jenkinsci/slack-plugin/pull/426)
 
 # 2.6 release notes
 
