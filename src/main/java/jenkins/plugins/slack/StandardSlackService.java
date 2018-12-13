@@ -53,6 +53,7 @@ public class StandardSlackService implements SlackService {
     private String authTokenCredentialId;
     private boolean botUser;
     private String[] roomIds;
+    private String responseString = null;
 
     public StandardSlackService(String baseUrl, String teamDomain, String token, String authTokenCredentialId, boolean botUser, String roomId) {
         super();
@@ -65,6 +66,10 @@ public class StandardSlackService implements SlackService {
         this.authTokenCredentialId = StringUtils.trim(authTokenCredentialId);
         this.botUser = botUser;
         this.roomIds = roomId.split("[,; ]+");
+    }
+
+    public String getResponseString() {
+        return responseString;
     }
 
     public boolean publish(String message) {
@@ -146,11 +151,13 @@ public class StandardSlackService implements SlackService {
             try {
             	post.setEntity(new UrlEncodedFormEntity(nvps, "UTF-8"));
             	CloseableHttpResponse response = client.execute(post);
-            	
+
             	int responseCode = response.getStatusLine().getStatusCode();
+            	HttpEntity entity = response.getEntity();
+            	if (botUser && entity != null) {
+                    responseString = EntityUtils.toString(entity);
+                }
             	if(responseCode != HttpStatus.SC_OK) {
-            		 HttpEntity entity = response.getEntity();
-            		 String responseString = EntityUtils.toString(entity);
             		 logger.log(Level.WARNING, "Slack post may have failed. Response: " + responseString);
             		 logger.log(Level.WARNING, "Response Code: " + responseCode);
             		 result = false;
@@ -198,14 +205,14 @@ public class StandardSlackService implements SlackService {
             if (proxy != null) {
                 final HttpHost proxyHost = new HttpHost(proxy.name, proxy.port);
                 final HttpRoutePlanner routePlanner = new DefaultProxyRoutePlanner(proxyHost);
-                clientBuilder.setRoutePlanner(routePlanner);                
+                clientBuilder.setRoutePlanner(routePlanner);
 
                 String username = proxy.getUserName();
                 String password = proxy.getPassword();
                 // Consider it to be passed if username specified. Sufficient?
                 if (username != null && !"".equals(username.trim())) {
                     logger.info("Using proxy authentication (user=" + username + ")");
-                    credentialsProvider.setCredentials(new AuthScope(proxyHost), 
+                    credentialsProvider.setCredentials(new AuthScope(proxyHost),
                     								   new UsernamePasswordCredentials(username, password));
                 }
             }

@@ -9,4 +9,6 @@ public interface SlackService {
     boolean publish(String message, String color);
 
     boolean publish(JSONArray attachments, String color);
+
+    String getResponseString();
 }
