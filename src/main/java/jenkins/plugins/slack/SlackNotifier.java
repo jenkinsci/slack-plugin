@@ -176,11 +176,11 @@ public class SlackNotifier extends Notifier {
         return notifyBackToNormal;
     }
 
-    public boolean includeTestSummary() {
+    public boolean getIncludeTestSummary() {
         return includeTestSummary;
     }
 
-    public boolean includeFailedTests() {
+    public boolean getIncludeFailedTests() {
         return includeFailedTests;
     }
 
@@ -188,7 +188,7 @@ public class SlackNotifier extends Notifier {
         return notifyRepeatedFailure;
     }
 
-    public boolean includeCustomMessage() {
+    public boolean getIncludeCustomMessage() {
         return includeCustomMessage;
     }
 
@@ -296,7 +296,11 @@ public class SlackNotifier extends Notifier {
         this.includeFailedTests = includeFailedTests;
         this.commitInfoChoice = commitInfoChoice;
         this.includeCustomMessage = includeCustomMessage;
-        this.customMessage = customMessage;
+        if (includeCustomMessage) {
+            this.customMessage = customMessage;
+        } else {
+            this.customMessage = null;
+        }
     }
 
     public BuildStepMonitor getRequiredMonitorService() {
@@ -681,7 +685,7 @@ public class SlackNotifier extends Notifier {
         }
 
         @Exported
-        public boolean includeTestSummary() {
+        public boolean getIncludeTestSummary() {
             return includeTestSummary;
         }
 
@@ -691,7 +695,7 @@ public class SlackNotifier extends Notifier {
         }
 
         @Exported
-        public boolean includeCustomMessage() {
+        public boolean getIncludeCustomMessage() {
             return includeCustomMessage;
         }
 

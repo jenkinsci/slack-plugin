@@ -54,9 +54,9 @@ public class BackwordsCompatible_1_8_SlackNotifierTest {
         assertTrue(notifier.getNotifyFailure());
         assertFalse(notifier.getNotifyBackToNormal());
         assertFalse(notifier.getNotifyRepeatedFailure());
-        assertFalse(notifier.includeTestSummary());
+        assertFalse(notifier.getIncludeTestSummary());
         assertEquals(CommitInfoChoice.NONE, notifier.getCommitInfoChoice());
-        assertFalse(notifier.includeCustomMessage());
+        assertFalse(notifier.getIncludeCustomMessage());
         assertEquals("", notifier.getCustomMessage());
 
         assertNull(project.getProperty(SlackJobProperty.class));
@@ -82,9 +82,9 @@ public class BackwordsCompatible_1_8_SlackNotifierTest {
         assertTrue(notifier.getNotifyFailure());
         assertFalse(notifier.getNotifyBackToNormal());
         assertFalse(notifier.getNotifyRepeatedFailure());
-        assertFalse(notifier.includeTestSummary());
+        assertFalse(notifier.getIncludeTestSummary());
         assertEquals(CommitInfoChoice.NONE, notifier.getCommitInfoChoice());
-        assertFalse(notifier.includeCustomMessage());
+        assertFalse(notifier.getIncludeCustomMessage());
         assertEquals("", notifier.getCustomMessage());
 
         assertNull(project.getProperty(SlackJobProperty.class));
@@ -110,9 +110,9 @@ public class BackwordsCompatible_1_8_SlackNotifierTest {
         assertTrue(notifier.getNotifyFailure());
         assertFalse(notifier.getNotifyBackToNormal());
         assertFalse(notifier.getNotifyRepeatedFailure());
-        assertFalse(notifier.includeTestSummary());
+        assertFalse(notifier.getIncludeTestSummary());
         assertEquals(CommitInfoChoice.NONE, notifier.getCommitInfoChoice());
-        assertFalse(notifier.includeCustomMessage());
+        assertFalse(notifier.getIncludeCustomMessage());
         assertEquals("", notifier.getCustomMessage());
 
         assertNull(project.getProperty(SlackJobProperty.class));
@@ -166,9 +166,9 @@ public class BackwordsCompatible_1_8_SlackNotifierTest {
         assertTrue(notifier.getNotifyFailure());
         assertTrue(notifier.getNotifyBackToNormal());
         assertTrue(notifier.getNotifyRepeatedFailure());
-        assertTrue(notifier.includeTestSummary());
+        assertTrue(notifier.getIncludeTestSummary());
         assertEquals(CommitInfoChoice.AUTHORS_AND_TITLES, notifier.getCommitInfoChoice());
-        assertTrue(notifier.includeCustomMessage());
+        assertTrue(notifier.getIncludeCustomMessage());
         assertEquals("Custom message for 1.8 plugin.", notifier.getCustomMessage());
 
         assertNull(project2.getProperty(SlackJobProperty.class));

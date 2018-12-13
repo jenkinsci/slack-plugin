@@ -76,5 +76,7 @@ public class SlackNotifierTest extends TestCase {
         public void setResponse(boolean response) {
             this.response = response;
         }
+
+        public String getResponseString() { return null; }
     }
 }
