@@ -26,7 +26,6 @@ import org.jenkinsci.plugins.workflow.steps.AbstractStepDescriptorImpl;
 import org.jenkinsci.plugins.workflow.steps.AbstractStepImpl;
 import org.jenkinsci.plugins.workflow.steps.AbstractSynchronousNonBlockingStepExecution;
 import org.jenkinsci.plugins.workflow.steps.StepContextParameter;
-
 import org.kohsuke.stapler.AncestorInPath;
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.DataBoundSetter;
@@ -34,7 +33,6 @@ import org.kohsuke.stapler.QueryParameter;
 
 import javax.annotation.Nonnull;
 import javax.inject.Inject;
-
 
 import static com.cloudbees.plugins.credentials.CredentialsProvider.lookupCredentials;
 
@@ -112,7 +110,7 @@ public class SlackSendStep extends AbstractStepImpl {
     @DataBoundSetter
     public void setBaseUrl(String baseUrl) {
         this.baseUrl = Util.fixEmpty(baseUrl);
-        if(this.baseUrl != null && !this.baseUrl.isEmpty() && !this.baseUrl.endsWith("/")) {
+        if (this.baseUrl != null && !this.baseUrl.isEmpty() && !this.baseUrl.endsWith("/")) {
             this.baseUrl += "/";
         }
     }
@@ -136,11 +134,11 @@ public class SlackSendStep extends AbstractStepImpl {
     }
 
     @DataBoundSetter
-    public void setAttachments(String attachments){
+    public void setAttachments(String attachments) {
         this.attachments = attachments;
     }
 
-    public String getAttachments(){
+    public String getAttachments() {
         return attachments;
     }
 
@@ -150,7 +148,8 @@ public class SlackSendStep extends AbstractStepImpl {
     }
 
     @DataBoundConstructor
-    public SlackSendStep() { }
+    public SlackSendStep() {
+    }
 
     @Extension
     public static class DescriptorImpl extends AbstractStepDescriptorImpl {
@@ -173,7 +172,7 @@ public class SlackSendStep extends AbstractStepImpl {
 
             Jenkins jenkins = Jenkins.getActiveInstance();
 
-            if(project == null && !jenkins.hasPermission(Jenkins.ADMINISTER) ||
+            if (project == null && !jenkins.hasPermission(Jenkins.ADMINISTER) ||
                     project != null && !project.hasPermission(Item.EXTENDED_READ)) {
                 return new StandardListBoxModel();
             }
@@ -191,7 +190,8 @@ public class SlackSendStep extends AbstractStepImpl {
         //WARN users that they should not use the plain/exposed token, but rather the token credential id
         public FormValidation doCheckToken(@QueryParameter String value) {
             //always show the warning - TODO investigate if there is a better way to handle this
-            return FormValidation.warning("Exposing your Integration Token is a security risk. Please use the Integration Token Credential ID");
+            return FormValidation
+                    .warning("Exposing your Integration Token is a security risk. Please use the Integration Token Credential ID");
         }
     }
 
@@ -215,7 +215,8 @@ public class SlackSendStep extends AbstractStepImpl {
 
             String baseUrl = step.baseUrl != null ? step.baseUrl : slackDesc.getBaseUrl();
             String team = step.teamDomain != null ? step.teamDomain : slackDesc.getTeamDomain();
-            String tokenCredentialId = step.tokenCredentialId != null ? step.tokenCredentialId : slackDesc.getTokenCredentialId();
+            String tokenCredentialId = step.tokenCredentialId != null ? step.tokenCredentialId : slackDesc
+                    .getTokenCredentialId();
             String token;
             boolean botUser;
             if (step.token != null) {
@@ -229,38 +230,40 @@ public class SlackSendStep extends AbstractStepImpl {
             String color = step.color != null ? step.color : "";
 
             //placing in console log to simplify testing of retrieving values from global config or from step field; also used for tests
-            listener.getLogger().println(Messages.SlackSendStepConfig(step.baseUrl == null, step.teamDomain == null, step.token == null, step.channel == null, step.color == null));
+            listener.getLogger().println(Messages
+                    .SlackSendStepConfig(step.baseUrl == null, step.teamDomain == null, step.token == null, step.channel == null, step.color == null));
 
             SlackService slackService = getSlackService(baseUrl, team, token, tokenCredentialId, botUser, channel);
             boolean publishSuccess;
-            if(step.attachments != null){
+            if (step.attachments != null) {
                 JsonSlurper jsonSlurper = new JsonSlurper();
-                JSON json = null;
+                JSON json;
                 try {
                     json = jsonSlurper.parseText(step.attachments);
                 } catch (JSONException e) {
                     listener.error(Messages.NotificationFailedWithException(e));
                     return null;
                 }
-                if(!(json instanceof JSONArray)){
-                    listener.error(Messages.NotificationFailedWithException(new IllegalArgumentException("Attachments must be JSONArray")));
+                if (!(json instanceof JSONArray)) {
+                    listener.error(Messages
+                            .NotificationFailedWithException(new IllegalArgumentException("Attachments must be JSONArray")));
                     return null;
                 }
                 JSONArray jsonArray = (JSONArray) json;
-                for (int i = 0; i < jsonArray.size(); i++) {
-                    Object object = jsonArray.get(i);
-                    if(object instanceof JSONObject){
+                for (Object object : jsonArray) {
+                    if (object instanceof JSONObject) {
                         JSONObject jsonNode = ((JSONObject) object);
                         if (!jsonNode.has("fallback")) {
                             jsonNode.put("fallback", step.message);
                         }
                     }
                 }
-                publishSuccess = slackService.publish(jsonArray, color);
+                publishSuccess = slackService.publish(step.message, jsonArray, color);
             } else if (step.message != null) {
                 publishSuccess = slackService.publish(step.message, color);
             } else {
-                listener.error(Messages.NotificationFailedWithException(new IllegalArgumentException("No message or attachments provided")));
+                listener.error(Messages
+                        .NotificationFailedWithException(new IllegalArgumentException("No message or attachments provided")));
                 return null;
             }
             SlackResponse response = null;

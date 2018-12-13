@@ -2,7 +2,6 @@ package jenkins.plugins.slack.workflow;
 
 import hudson.model.TaskListener;
 import jenkins.model.Jenkins;
-import jenkins.plugins.slack.Messages;
 import jenkins.plugins.slack.SlackNotifier;
 import jenkins.plugins.slack.SlackService;
 import net.sf.json.JSONArray;
@@ -152,7 +151,7 @@ public class SlackSendStepTest {
 
         stepExecution.run();
         verify(slackServiceMock, times(0)).publish("message", "");
-        verify(slackServiceMock, times(1)).publish(attachments, "");
+        verify(slackServiceMock, times(1)).publish("message", attachments, "");
 
     }
 
