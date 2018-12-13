@@ -1,6 +1,11 @@
+# 2.7 release notes
+
+## New features:
+- Pipeline response object (threading enhancement) [PR #429](https://github.com/jenkinsci/slack-plugin/pull/429)
+
 # 2.6 release notes
 
-Bug fixes:
+## Bug fixes:
 - slack send should not require message [PR #434](https://github.com/jenkinsci/slack-plugin/pull/434)
 
 # 2.5 release notes
