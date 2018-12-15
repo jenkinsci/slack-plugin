@@ -1,3 +1,9 @@
+# 2.9 release notes
+
+## Bug fixes:
+
+- Don't hide custom message if var unset [PR #442](https://github.com/jenkinsci/slack-plugin/pull/442)
+
 # 2.8 release notes
 
 ## Bug fixes:
