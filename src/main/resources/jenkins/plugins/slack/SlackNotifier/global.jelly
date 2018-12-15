@@ -13,7 +13,7 @@
     so it should be straightforward to find them.
   -->
 <f:section title="Global Slack Notifier Settings">
-    <f:entry title="Base URL" help="/plugin/slack/help-projectConfig-slackBaseUrl.html">
+    <f:entry title="Slack compatible app URL (optional)" help="/plugin/slack/help-globalConfig-slackBaseUrl.html">
         <f:textbox field="baseUrl" />
     </f:entry>
     <f:entry title="Team Subdomain" help="/plugin/slack/help-globalConfig-slackTeamDomain.html">

@@ -23,7 +23,7 @@ applications like [RocketChat][rocketchat] and [Mattermost][mattermost].
    Integrations.
 3. You should now have a URL with a token.  Something like
    `https://mydomain.com/hooks/xxxx` where `xxxx` is the integration token and
-   `https://mydomain.com/hooks/` is the `Base URL`.
+   `https://mydomain.com/hooks/` is the `Slack compatible app URL`.
 4. Install this plugin on your Jenkins server.
 5. Configure it in your Jenkins job (and optionally as global configuration) and
    **add it as a Post-build action**.

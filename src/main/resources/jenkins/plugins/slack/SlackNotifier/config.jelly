@@ -56,7 +56,7 @@
             <f:select/>
         </f:entry>
 
-        <f:entry title="Base URL" help="/plugin/slack/help-projectConfig-slackBaseUrl.html">
+        <f:entry title="Slack compatible app URL (optional)" help="/plugin/slack/help-projectConfig-slackBaseUrl.html">
             <f:textbox field="baseUrl" />
         </f:entry>
 
