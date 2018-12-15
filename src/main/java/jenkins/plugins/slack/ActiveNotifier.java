@@ -447,17 +447,10 @@ public class ActiveNotifier implements FineGrainedNotifier {
             String customMessage = notifier.getCustomMessage();
 
             try {
-                String replaced = TokenMacro.expandAll(build, new LogTaskListener(logger, INFO), customMessage);
+                String replaced = TokenMacro.expandAll(build, new LogTaskListener(logger, INFO), customMessage, false, null);
                 message.append("\n");
                 message.append(replaced);
-            }
-            catch (MacroEvaluationException e) {
-                logger.log(SEVERE, e.getMessage(), e);
-            }
-            catch (IOException e) {
-                logger.log(SEVERE, e.getMessage(), e);
-            }
-            catch (InterruptedException e) {
+            } catch (MacroEvaluationException | IOException | InterruptedException e) {
                 logger.log(SEVERE, e.getMessage(), e);
             }
             return this;
