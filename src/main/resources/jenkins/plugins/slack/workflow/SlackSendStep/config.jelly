@@ -23,7 +23,7 @@
         <f:entry field="teamDomain" title="Team Domain">
             <f:textbox />
         </f:entry>
-        <f:entry field="baseUrl" title="Base URL">
+        <f:entry field="baseUrl" title="Slack compatible app URL (optional)">
              <f:textbox />
         </f:entry>
         <f:entry field="failOnError">
