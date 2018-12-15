@@ -7,14 +7,21 @@ import org.json.JSONObject;
 import java.io.Serializable;
 
 public class SlackResponse implements Serializable {
+    private static final String THREAD_ID = "ts";
+    private static final String CHANNEL = "channel";
+
     private String channelId;
     private String ts;
 
-    public SlackResponse(String slackResponseString) {
-        if (!StringUtils.isEmpty(slackResponseString)) {
-            JSONObject result = new JSONObject(slackResponseString);
-            channelId = result.getString("channel");
-            ts = result.getString("ts");
+    public SlackResponse() {
+    }
+
+    public SlackResponse(JSONObject slackResponseObject) {
+        if (slackResponseObject.has(CHANNEL)) {
+            channelId = slackResponseObject.getString(CHANNEL);
+        }
+        if (slackResponseObject.has(THREAD_ID)) {
+            this.ts = slackResponseObject.getString(THREAD_ID);
         }
     }
 

@@ -269,7 +269,19 @@ public class SlackSendStep extends AbstractStepImpl {
             SlackResponse response = null;
             if (publishSuccess) {
                 String responseString = slackService.getResponseString();
-                response = new SlackResponse(responseString);
+                if (responseString != null) {
+                    try {
+                        org.json.JSONObject result = new org.json.JSONObject(responseString);
+                        response = new SlackResponse(result);
+                    } catch (org.json.JSONException ex) {
+                        listener.error(Messages.FailedToParseSlackResponse());
+                        if (step.failOnError) {
+                            throw ex;
+                        }
+                    }
+                } else {
+                    return new SlackResponse();
+                }
             } else if (step.failOnError) {
                 throw new AbortException(Messages.NotificationFailed());
             } else {
