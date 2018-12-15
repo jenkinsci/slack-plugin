@@ -1,3 +1,9 @@
+# 2.8 release notes
+
+## Bug fixes:
+
+- Make pipeline response object safer [PR #439](https://github.com/jenkinsci/slack-plugin/pull/439)
+
 # 2.7 release notes
 
 ## New features:
