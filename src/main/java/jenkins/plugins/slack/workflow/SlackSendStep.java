@@ -41,6 +41,9 @@ import static com.cloudbees.plugins.credentials.CredentialsProvider.lookupCreden
  */
 public class SlackSendStep extends AbstractStepImpl {
 
+    private static final String ERROR_PARSING_SLACK_RESPONSE = "Could not parse response from slack, potentially "
+            + "because of invalid configuration (botUser: true and baseUrl set)";
+
     private String message;
     private String color;
     private String token;
@@ -269,7 +272,21 @@ public class SlackSendStep extends AbstractStepImpl {
             SlackResponse response = null;
             if (publishSuccess) {
                 String responseString = slackService.getResponseString();
-                response = new SlackResponse(responseString);
+                if (responseString != null) {
+                    try {
+                        org.json.JSONObject result = new org.json.JSONObject(responseString);
+                        response = new SlackResponse(result);
+                    } catch (org.json.JSONException ex) {
+                        if (step.failOnError) {
+                            listener.error(ERROR_PARSING_SLACK_RESPONSE);
+                            throw ex;
+                        } else {
+                            listener.getLogger().println(ERROR_PARSING_SLACK_RESPONSE);
+                        }
+                    }
+                } else {
+                    return new SlackResponse();
+                }
             } else if (step.failOnError) {
                 throw new AbortException(Messages.NotificationFailed());
             } else {
