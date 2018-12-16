@@ -3,6 +3,7 @@
 ## Bug fixes:
 
 - Don't hide custom message if var unset [PR #442](https://github.com/jenkinsci/slack-plugin/pull/442)
+- Rename base url to slack compatible app url [PR #443](https://github.com/jenkinsci/slack-plugin/pull/443)
 
 # 2.8 release notes
 
