@@ -4,20 +4,16 @@
         <f:checkbox field="startNotification" />
     </f:entry>
 
+    <f:entry title="Notify Success">
+        <f:checkbox field="notifySuccess" />
+    </f:entry>
+
     <f:entry title="Notify Aborted">
         <f:checkbox field="notifyAborted" />
     </f:entry>
 
-    <f:entry title="Notify Failure">
-        <f:checkbox field="notifyFailure" />
-    </f:entry>
-
     <f:entry title="Notify Not Built">
         <f:checkbox field="notifyNotBuilt"/>
-    </f:entry>
-
-    <f:entry title="Notify Success">
-        <f:checkbox field="notifySuccess" />
     </f:entry>
 
     <f:entry title="Notify Unstable">
@@ -28,6 +24,9 @@
         <f:checkbox field="notifyRegression" />
     </f:entry>
 
+    <f:entry title="Notify Failure">
+        <f:checkbox field="notifyFailure" />
+    </f:entry>
 
     <f:entry title="Notify Back To Normal">
         <f:checkbox field="notifyBackToNormal" />
@@ -49,20 +48,25 @@
             <f:entry title="Custom Message" field="customMessage" help="/plugin/slack/help-projectConfig-slackCustomMessage.html">
                 <f:textarea />
             </f:entry>
-            <f:entry title="Custom Message - Build Unstable" help="/plugin/slack/help-projectConfig-slackCustomMessage.html">
-                <f:textarea field="customMessageUnstable" />
+
+            <f:entry title="Custom Message - Success" help="/plugin/slack/help-projectConfig-slackCustomMessage.html">
+                <f:textarea field="customMessageSuccess" />
             </f:entry>
+
             <f:entry title="Custom Message - Build Aborted" help="/plugin/slack/help-projectConfig-slackCustomMessage.html">
                 <f:textarea field="customMessageAborted" />
             </f:entry>
-            <f:entry title="Custom Message - Build Failure" help="/plugin/slack/help-projectConfig-slackCustomMessage.html">
-                <f:textarea field="customMessageFailure" />
-            </f:entry>
+
             <f:entry title="Custom Message - Build Not Built" help="/plugin/slack/help-projectConfig-slackCustomMessage.html">
                 <f:textarea field="customMessageNotBuilt" />
             </f:entry>
-            <f:entry title="Custom Message - Success" help="/plugin/slack/help-projectConfig-slackCustomMessage.html">
-                <f:textarea field="customMessageSuccess" />
+
+            <f:entry title="Custom Message - Build Unstable" help="/plugin/slack/help-projectConfig-slackCustomMessage.html">
+                <f:textarea field="customMessageUnstable" />
+            </f:entry>
+
+            <f:entry title="Custom Message - Build Failure" help="/plugin/slack/help-projectConfig-slackCustomMessage.html">
+                <f:textarea field="customMessageFailure" />
             </f:entry>
         </f:optionalBlock>
 
