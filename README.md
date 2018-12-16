@@ -1,5 +1,4 @@
-Slack plugin for Jenkins
-------------------------
+# Slack plugin for Jenkins
 
 [![Build Status](https://ci.jenkins.io/buildStatus/icon?job=Plugins/slack-plugin/master)](https://ci.jenkins.io/job/Plugins/slack-plugin/master)
 [![Slack Signup][slack-badge]][slack-signup] (click to sign up)
@@ -7,66 +6,18 @@ Slack plugin for Jenkins
 Provides Jenkins notification integration with Slack or Slack compatible
 applications like [RocketChat][rocketchat] and [Mattermost][mattermost].
 
-# Install Instructions for Slack
+## Install Instructions for Slack
 
 1. Get a Slack account: https://slack.com/
 2. Configure the Jenkins integration:
    https://my.slack.com/services/new/jenkins-ci
 3. Install this plugin on your Jenkins server.
-4. Configure it in your Jenkins job (and optionally as global configuration) and
+
+### Freestyle job
+1. Configure it in your Jenkins job (and optionally as global configuration) and
    **add it as a Post-build action**.
-
-### Install Instructions for Slack compatible application
-
-1. Log into Slack compatible application.
-2. Create a Webhook (it may need to be enabled in system console) by visiting
-   Integrations.
-3. You should now have a URL with a token.  Something like
-   `https://mydomain.com/hooks/xxxx` where `xxxx` is the integration token and
-   `https://mydomain.com/hooks/` is the `Slack compatible app URL`.
-4. Install this plugin on your Jenkins server.
-5. Configure it in your Jenkins job (and optionally as global configuration) and
-   **add it as a Post-build action**.
-
-# Security
-
-Use Jenkins Credentials and a credential ID to configure the Slack integration
-token. It is a security risk to expose your integration token using the previous
-*Integration Token* setting.
-
-Create a new ***Secret text*** credential:
-
-![image][img-secret-text]
-
-
-Select that credential as the value for the ***Integration Token Credential
-ID*** field:
-
-![image][img-token-credential]
-
-# Direct Message
-
-You can send messages to channels or you can notify individual users via their
-slackbot.  In order to notify an individual user, use the syntax `@user_id` in
-place of the project channel.  Mentioning users by display name may work, but it
-is not unique and will not work if it is an ambiguous match.    
-
-# Bot user option
-
-This plugin supports sending notifications via bot users. You can enable bot
-user support from both global and project configurations. If the notification
-will be sent to a user via direct message, default integration sends it via
-@slackbot, you can use this option if you want to send messages via a bot user.
-You need to provide credentials of the bot user for integration token
-credentials to use this feature.
-
-Bot user option is not supported, if you use Base Url for a Slack compatible
-application.
-
-# Jenkins Pipeline Support
-
-Includes [Jenkins Pipeline](https://github.com/jenkinsci/workflow-plugin)
-support as of version 2.0:
+   
+### Pipeline job
 
 ```
 slackSend color: 'good', message: 'Message from Jenkins Pipeline'
@@ -93,7 +44,7 @@ node {
 For more information about slack messages see [Slack Messages Api](https://api.slack.com/docs/messages)
 and [Slack attachments Api](https://api.slack.com/docs/message-attachments)
 
-## Threads Support
+#### Threads Support
 
 You can send a message and create a thread on that message using the pipeline step.
 The step returns an object which you can use to retrieve the thread ID. Send new messages with that thread ID as the
@@ -110,7 +61,55 @@ node {
 
 This feature requires botUser mode.
 
-# Configuration as code
+
+## Install Instructions for Slack compatible application
+
+1. Log into Slack compatible application.
+2. Create a Webhook (it may need to be enabled in system console) by visiting
+   Integrations.
+3. You should now have a URL with a token.  Something like
+   `https://mydomain.com/hooks/xxxx` where `xxxx` is the integration token and
+   `https://mydomain.com/hooks/` is the `Slack compatible app URL`.
+4. Install this plugin on your Jenkins server.
+5. Configure it in your Jenkins job (and optionally as global configuration) and
+   **add it as a Post-build action**.
+
+## Security
+
+Use Jenkins Credentials and a credential ID to configure the Slack integration
+token. It is a security risk to expose your integration token using the previous
+*Integration Token* setting.
+
+Create a new ***Secret text*** credential:
+
+![image][img-secret-text]
+
+
+Select that credential as the value for the ***Integration Token Credential
+ID*** field:
+
+![image][img-token-credential]
+
+## Direct Message
+
+You can send messages to channels or you can notify individual users via their
+slackbot.  In order to notify an individual user, use the syntax `@user_id` in
+place of the project channel.  Mentioning users by display name may work, but it
+is not unique and will not work if it is an ambiguous match.    
+
+## Bot user option
+
+This plugin supports sending notifications via bot users. You can enable bot
+user support from both global and project configurations. If the notification
+will be sent to a user via direct message, default integration sends it via
+@slackbot, you can use this option if you want to send messages via a bot user.
+You need to provide credentials of the bot user for integration token
+credentials to use this feature.
+
+Bot user option is not supported, if you use Base Url for a Slack compatible
+application.
+
+## Configuration as code
 
 This plugin supports configuration as code
 Add to your yaml file:
@@ -132,7 +131,7 @@ unclassified:
     tokenCredentialId: slack-token
 ```
 
-# Developer instructions
+## Developer instructions
 
 Install Maven and JDK.
 
