@@ -1,5 +1,4 @@
 # Slack plugin for Jenkins
-------------------------
 
 [![Build Status](https://ci.jenkins.io/buildStatus/icon?job=Plugins/slack-plugin/master)](https://ci.jenkins.io/job/Plugins/slack-plugin/master)
 [![Slack Signup][slack-badge]][slack-signup] (click to sign up)
