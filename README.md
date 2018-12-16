@@ -62,7 +62,7 @@ node {
 This feature requires botUser mode.
 
 
-### Install Instructions for Slack compatible application
+## Install Instructions for Slack compatible application
 
 1. Log into Slack compatible application.
 2. Create a Webhook (it may need to be enabled in system console) by visiting
