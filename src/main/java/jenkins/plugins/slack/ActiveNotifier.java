@@ -444,7 +444,7 @@ public class ActiveNotifier implements FineGrainedNotifier {
         }
 
         public MessageBuilder appendCustomMessage(Result buildResult) {
-            String customMessage = notifier.getCustomMessage();
+            String customMessage = "";
             if (buildResult != null) {
                 if (buildResult == Result.SUCCESS) {
                     customMessage = notifier.getCustomMessageSuccess();
@@ -457,6 +457,9 @@ public class ActiveNotifier implements FineGrainedNotifier {
                 } else if (buildResult == Result.FAILURE) {
                     customMessage = notifier.getCustomMessageFailure();
                 }
+            }
+            if (customMessage.isEmpty()) {
+                customMessage = notifier.getCustomMessage();
             }
             try {
                 String replaced = TokenMacro.expandAll(build, new LogTaskListener(logger, INFO), customMessage, false, null);
