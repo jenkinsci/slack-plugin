@@ -1,3 +1,14 @@
+# 2.10 (unreleased) release notes
+
+## New features:
+
+- Send only one message with commit list [PR #448](https://github.com/jenkinsci/slack-plugin/pull/448)
+- Custom messages per Build result [PR #445](https://github.com/jenkinsci/slack-plugin/pull/445)
+
+## Bug fixes:
+
+- Don't publish twice, while the build isn't finished yet [PR #446](https://github.com/jenkinsci/slack-plugin/pull/446)
+
 # 2.9 release notes
 
 ## Bug fixes:
