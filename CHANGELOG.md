@@ -8,6 +8,7 @@
 ## Bug fixes:
 
 - Don't publish twice, while the build isn't finished yet [PR #446](https://github.com/jenkinsci/slack-plugin/pull/446)
+- Fix compatibility for getBotUser [PR #449](https://github.com/jenkinsci/slack-plugin/pull/449)
 
 # 2.9 release notes
 
