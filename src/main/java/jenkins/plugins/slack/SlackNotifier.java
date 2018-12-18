@@ -485,6 +485,11 @@ public class SlackNotifier extends Notifier {
             return botUser;
         }
 
+        @Deprecated
+        public boolean getBotUser() {
+            return botUser;
+        }
+
         @DataBoundSetter
         public void setBotUser(boolean botUser) {
             this.botUser = botUser;
