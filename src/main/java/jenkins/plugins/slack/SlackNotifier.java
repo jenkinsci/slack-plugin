@@ -317,6 +317,24 @@ public class SlackNotifier extends Notifier {
     }
 
     @DataBoundConstructor
+    public SlackNotifier(CommitInfoChoice commitInfoChoice) {
+        this.commitInfoChoice = commitInfoChoice;
+    }
+
+    @Deprecated
+    public SlackNotifier(final String baseUrl, final String teamDomain, final String authToken, final boolean botUser, final String room, final String tokenCredentialId,
+                         final String sendAs, final boolean startNotification, final boolean notifyAborted, final boolean notifyFailure,
+                         final boolean notifyNotBuilt, final boolean notifySuccess, final boolean notifyUnstable, final boolean notifyRegression, final boolean notifyBackToNormal,
+                         final boolean notifyRepeatedFailure, final boolean includeTestSummary, final boolean includeFailedTests,
+                         CommitInfoChoice commitInfoChoice, boolean includeCustomMessage, String customMessage) {
+        this(
+                baseUrl, teamDomain, authToken, botUser, room, tokenCredentialId, sendAs, startNotification,
+                notifyAborted, notifyFailure, notifyNotBuilt, notifySuccess, notifyUnstable, notifyRegression,
+                notifyBackToNormal, notifyRepeatedFailure, includeTestSummary, includeFailedTests, commitInfoChoice,
+                includeCustomMessage, customMessage, null, null, null, null, null
+        );
+    }
+
     public SlackNotifier(final String baseUrl, final String teamDomain, final String authToken, final boolean botUser, final String room, final String tokenCredentialId,
                          final String sendAs, final boolean startNotification, final boolean notifyAborted, final boolean notifyFailure,
                          final boolean notifyNotBuilt, final boolean notifySuccess, final boolean notifyUnstable, final boolean notifyRegression, final boolean notifyBackToNormal,
