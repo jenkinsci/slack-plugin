@@ -1,4 +1,4 @@
-# 2.10 (unreleased) release notes
+# 2.10 release notes
 
 ## New features:
 
