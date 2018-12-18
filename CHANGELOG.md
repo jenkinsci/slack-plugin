@@ -1,3 +1,9 @@
+# 2.11 release notes
+
+## Bug fixes:
+
+- Move optional params to setters and fix constructor compatibility [PR #452](https://github.com/jenkinsci/slack-plugin/pull/452)
+
 # 2.10 release notes
 
 ## New features:
