@@ -104,7 +104,7 @@ public class ActiveNotifier implements FineGrainedNotifier {
         AbstractProject<?, ?> project = r.getProject();
         Result result = r.getResult();
         AbstractBuild<?, ?> previousBuild = project.getLastBuild();
-        if (null != previousBuild && !r.isBuilding()) {
+        if (null != previousBuild) {
             do {
                 previousBuild = previousBuild.getPreviousCompletedBuild();
             } while (previousBuild != null && previousBuild.getResult() == Result.ABORTED);
@@ -124,7 +124,7 @@ public class ActiveNotifier implements FineGrainedNotifier {
         AbstractProject<?, ?> project = r.getProject();
         Result result = r.getResult();
         AbstractBuild<?, ?> previousBuild = project.getLastBuild();
-        if (null != previousBuild && !r.isBuilding()) {
+        if (null != previousBuild) {
             do {
                 previousBuild = previousBuild.getPreviousCompletedBuild();
             } while (null != previousBuild && previousBuild.getResult() == Result.ABORTED);
