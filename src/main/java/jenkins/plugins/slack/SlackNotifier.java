@@ -425,7 +425,7 @@ public class SlackNotifier extends Notifier {
 
     @Override
     public boolean needsToRunAfterFinalized() {
-        return notifyRegression;
+        return true;
     }
 
     @Override
