@@ -316,7 +316,6 @@ public class SlackNotifier extends Notifier {
         this.customMessageFailure = customMessageFailure;
     }
 
-    @DataBoundConstructor
     public SlackNotifier(CommitInfoChoice commitInfoChoice) {
         this.commitInfoChoice = commitInfoChoice;
     }
@@ -335,6 +334,7 @@ public class SlackNotifier extends Notifier {
         );
     }
 
+    @DataBoundConstructor
     public SlackNotifier(final String baseUrl, final String teamDomain, final String authToken, final boolean botUser, final String room, final String tokenCredentialId,
                          final String sendAs, final boolean startNotification, final boolean notifyAborted, final boolean notifyFailure,
                          final boolean notifyNotBuilt, final boolean notifySuccess, final boolean notifyUnstable, final boolean notifyRegression, final boolean notifyBackToNormal,
