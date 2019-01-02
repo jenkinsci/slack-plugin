@@ -460,7 +460,7 @@ public class ActiveNotifier implements FineGrainedNotifier {
                     customMessage = notifier.getCustomMessageFailure();
                 }
             }
-            if (customMessage.isEmpty()) {
+            if (customMessage == null || customMessage.isEmpty()) {
                 customMessage = notifier.getCustomMessage();
             }
             try {
