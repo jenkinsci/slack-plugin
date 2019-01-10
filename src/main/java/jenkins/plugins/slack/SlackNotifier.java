@@ -704,10 +704,10 @@ public class SlackNotifier extends Notifier {
             this.includeCustomMessage = includeCustomMessage;
             this.customMessage = customMessage;
             this.customMessageSuccess = customMessageSuccess;
-            this.customMessageFailure = customMessageAborted;
-            this.customMessageSuccess = customMessageNotBuilt;
-            this.customMessageFailure = customMessageUnstable;
-            this.customMessageSuccess = customMessageRegression;
+            this.customMessageAborted = customMessageAborted;
+            this.customMessageNotBuilt = customMessageNotBuilt;
+            this.customMessageUnstable = customMessageUnstable;
+            this.customMessageRegression = customMessageRegression;
             this.customMessageFailure = customMessageFailure;
         }
 
