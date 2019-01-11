@@ -73,8 +73,10 @@ This feature requires botUser mode.
    `https://mydomain.com/hooks/xxxx` where `xxxx` is the integration token and
    `https://mydomain.com/hooks/` is the `Slack compatible app URL`.
 4. Install this plugin on your Jenkins server.
-5. Configure it in your Jenkins job (and optionally as a [global configuration using an additional plugin](https://github.com/jenkinsci/global-slack-notifier-plugin)) and
+5. Configure it in your Jenkins job (and optionally as global configuration) and
    **add it as a Post-build action**.
+
+If you want to configure a notification to be sent to Slack for **all jobs**, you may want to also consider installing an additional plugin called [Global Slack Notifier plugin](https://github.com/jenkinsci/global-slack-notifier-plugin).
 
 ## Security
 
