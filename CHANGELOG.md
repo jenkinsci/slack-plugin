@@ -14,7 +14,7 @@
 
 ## Bug fixes:
 
-- Revert 'Don't publish twice, while the build isn't finished yet'[PR #457](https://github.com/jenkinsci/slack-plugin/pull/457)
+- Revert 'Don't publish twice, while the build isn't finished yet' [PR #457](https://github.com/jenkinsci/slack-plugin/pull/457)
 
 # 2.11 release notes
 
