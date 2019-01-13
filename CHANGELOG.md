@@ -1,3 +1,15 @@
+# 2.13 release notes
+
+## Bug fixes:
+
+- Fixed constructor of SlackJobProperty [PR #468](https://github.com/jenkinsci/slack-plugin/pull/468)
+- Adding null check on custom message [PR #466](https://github.com/jenkinsci/slack-plugin/pull/466)
+- Always runAfterFinalized [PR #462](https://github.com/jenkinsci/slack-plugin/pull/462)
+
+## Docs updates:
+
+- Added note for Global Slack Notifications [PR #470](https://github.com/jenkinsci/slack-plugin/pull/470)
+
 # 2.12 release notes
 
 ## Bug fixes:
