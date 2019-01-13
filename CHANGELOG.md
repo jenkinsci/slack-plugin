@@ -1,3 +1,9 @@
+# 2.14 release notes (unreleased)
+
+## Bug fixes:
+
+- Fix UI fields [PR #471](https://github.com/jenkinsci/slack-plugin/pull/471)
+
 # 2.13 release notes
 
 ## Bug fixes:
