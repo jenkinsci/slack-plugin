@@ -1,6 +1,6 @@
 # Slack plugin for Jenkins
 
-[![Build Status](https://ci.jenkins.io/buildStatus/icon?job=Plugins/slack-plugin/master)](https://ci.jenkins.io/job/Plugins/slack-plugin/master)
+[![Build Status](https://ci.jenkins.io/buildStatus/icon?job=Plugins/slack-plugin/master)](https://ci.jenkins.io/job/Plugins/job/slack-plugin/job/master/)
 [![Slack Signup][slack-badge]][slack-signup] (click to sign up)
 
 Provides Jenkins notification integration with Slack or Slack compatible
