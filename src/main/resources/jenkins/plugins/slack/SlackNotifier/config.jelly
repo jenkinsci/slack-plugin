@@ -44,7 +44,7 @@
         </f:entry>
 
         <f:optionalBlock title="Include Custom Message" name="includeCustomMessage" inline="true"
-            checked="${instance.customMessage != null}">
+            checked="${instance.isAnyCustomMessagePopulated()}">
             <f:entry title="Custom Message" field="customMessage" help="/plugin/slack/help-projectConfig-slackCustomMessage.html">
                 <f:textarea />
             </f:entry>
@@ -84,7 +84,7 @@
         </f:entry>
 
         <f:entry title="Integration Token" help="/plugin/slack/help-projectConfig-slackToken.html">
-            <f:textbox field="token" />
+            <f:textbox field="authToken" />
         </f:entry>
 
         <f:entry title="Integration Token Credential ID" help="/plugin/slack/help-projectConfig-slackTokenCredentialId.html" field="tokenCredentialId">
