@@ -34,6 +34,7 @@ import org.kohsuke.stapler.export.Exported;
 import java.io.IOException;
 import java.util.List;
 import java.util.logging.Logger;
+import java.util.stream.Stream;
 
 import static com.cloudbees.plugins.credentials.CredentialsProvider.lookupCredentials;
 
@@ -222,6 +223,11 @@ public class SlackNotifier extends Notifier {
     }
 
     @DataBoundSetter
+    public void setBaseUrl(String baseUrl) {
+        this.baseUrl = baseUrl;
+    }
+
+    @DataBoundSetter
     public void setStartNotification(boolean startNotification) {
         this.startNotification = startNotification;
     }
@@ -375,6 +381,18 @@ public class SlackNotifier extends Notifier {
         } else {
             this.customMessage = null;
         }
+    }
+
+    public boolean isAnyCustomMessagePopulated() {
+        return Stream.of(
+                customMessage,
+                customMessageSuccess,
+                customMessageAborted,
+                customMessageNotBuilt,
+                customMessageUnstable,
+                customMessageFailure
+        ).anyMatch(StringUtils::isNotEmpty);
+
     }
 
     public BuildStepMonitor getRequiredMonitorService() {
