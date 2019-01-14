@@ -53,9 +53,14 @@ public class StandardSlackService implements SlackService {
     private String authTokenCredentialId;
     private boolean botUser;
     private String[] roomIds;
+    private boolean replyBroadcast;
     private String responseString = null;
 
     public StandardSlackService(String baseUrl, String teamDomain, String token, String authTokenCredentialId, boolean botUser, String roomId) {
+        this(baseUrl, teamDomain, token, authTokenCredentialId, botUser, roomId, false);
+    }
+
+    public StandardSlackService(String baseUrl, String teamDomain, String token, String authTokenCredentialId, boolean botUser, String roomId, boolean replyBroadcast) {
         super();
         this.baseUrl = baseUrl;
         if(this.baseUrl != null && !this.baseUrl.isEmpty() && !this.baseUrl.endsWith("/")) {
@@ -66,6 +71,7 @@ public class StandardSlackService implements SlackService {
         this.authTokenCredentialId = StringUtils.trim(authTokenCredentialId);
         this.botUser = botUser;
         this.roomIds = roomId.split("[,; ]+");
+        this.replyBroadcast = replyBroadcast;
     }
 
     public String getResponseString() {
@@ -140,6 +146,9 @@ public class StandardSlackService implements SlackService {
                         "&as_user=true";
                 if (threadTs.length() > 1) {
                     url += "&thread_ts=" + threadTs;
+                }
+                if (replyBroadcast) {
+                    url += "&reply_broadcast=true";
                 }
                 try {
                     url += "&attachments=" + URLEncoder.encode(attachments.toString(), "utf-8");

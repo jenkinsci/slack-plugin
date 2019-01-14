@@ -233,7 +233,7 @@ public class SlackSendStep extends AbstractStepImpl {
             listener.getLogger().println(Messages
                     .SlackSendStepConfig(step.baseUrl == null, step.teamDomain == null, step.token == null, step.channel == null, step.color == null));
 
-            SlackService slackService = getSlackService(baseUrl, team, token, tokenCredentialId, botUser, channel);
+            SlackService slackService = getSlackService(baseUrl, team, token, tokenCredentialId, botUser, channel, false);
             boolean publishSuccess;
             if (step.attachments != null) {
                 JsonSlurper jsonSlurper = new JsonSlurper();
@@ -291,8 +291,8 @@ public class SlackSendStep extends AbstractStepImpl {
         }
 
         //streamline unit testing
-        SlackService getSlackService(String baseUrl, String team, String token, String tokenCredentialId, boolean botUser, String channel) {
-            return new StandardSlackService(baseUrl, team, token, tokenCredentialId, botUser, channel);
+        SlackService getSlackService(String baseUrl, String team, String token, String tokenCredentialId, boolean botUser, String channel, boolean replyBroadcast) {
+            return new StandardSlackService(baseUrl, team, token, tokenCredentialId, botUser, channel, replyBroadcast);
         }
     }
 }
