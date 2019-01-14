@@ -190,6 +190,35 @@ public class SlackSendStepTest {
     }
 
     @Test
+    public void testReplyBroadcast() throws Exception {
+
+        SlackSendStep.SlackSendStepExecution stepExecution = spy(new SlackSendStep.SlackSendStepExecution());
+        stepExecution.step = new SlackSendStep();
+        stepExecution.step.setMessage("message");
+        stepExecution.step.setReplyBroadcast(true);
+
+        when(Jenkins.getActiveInstance()).thenReturn(jenkins);
+
+        stepExecution.listener = taskListenerMock;
+
+        when(slackDescMock.getBaseUrl()).thenReturn("globalBaseUrl");
+        when(slackDescMock.getTeamDomain()).thenReturn("globalTeamDomain");
+        when(slackDescMock.getToken()).thenReturn("globalToken");
+        when(slackDescMock.getTokenCredentialId()).thenReturn("globalTokenCredentialId");
+        when(slackDescMock.isBotUser()).thenReturn(false);
+        when(slackDescMock.getRoom()).thenReturn("globalChannel");
+
+        when(taskListenerMock.getLogger()).thenReturn(printStreamMock);
+        doNothing().when(printStreamMock).println();
+
+        when(stepExecution.getSlackService(anyString(), anyString(), anyString(), anyString(), anyBoolean(), anyString(), anyBoolean())).thenReturn(slackServiceMock);
+
+        stepExecution.run();
+        verify(stepExecution, times(1)).getSlackService("globalBaseUrl", "globalTeamDomain", "globalToken", "globalTokenCredentialId", false, "globalChannel", true);
+        verify(slackServiceMock, times(1)).publish("message", "");
+    }
+
+    @Test
     public void testNonNullEmptyColor() throws Exception {
 
         SlackSendStep.SlackSendStepExecution stepExecution = spy(new SlackSendStep.SlackSendStepExecution());

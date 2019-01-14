@@ -51,6 +51,7 @@ public class SlackSendStep extends AbstractStepImpl {
     private String teamDomain;
     private boolean failOnError;
     private String attachments;
+    private boolean replyBroadcast;
 
 
     @Nonnull
@@ -147,6 +148,15 @@ public class SlackSendStep extends AbstractStepImpl {
         this.message = message;
     }
 
+    public boolean getReplyBroadcast() {
+        return replyBroadcast;
+    }
+
+    @DataBoundSetter
+    public void setReplyBroadcast(boolean replyBroadcast) {
+        this.replyBroadcast = replyBroadcast;
+    }
+
     @DataBoundConstructor
     public SlackSendStep() {
     }
@@ -233,7 +243,7 @@ public class SlackSendStep extends AbstractStepImpl {
             listener.getLogger().println(Messages
                     .SlackSendStepConfig(step.baseUrl == null, step.teamDomain == null, step.token == null, step.channel == null, step.color == null));
 
-            SlackService slackService = getSlackService(baseUrl, team, token, tokenCredentialId, botUser, channel, false);
+            SlackService slackService = getSlackService(baseUrl, team, token, tokenCredentialId, botUser, channel, step.replyBroadcast);
             boolean publishSuccess;
             if (step.attachments != null) {
                 JsonSlurper jsonSlurper = new JsonSlurper();

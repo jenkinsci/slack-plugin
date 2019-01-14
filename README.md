@@ -61,6 +61,21 @@ node {
 
 This feature requires botUser mode.
 
+Messages that are posted to a thread can also optionally be broadcasted to the
+channel. Set `replyBroadcast: true` to do so. For example:
+
+```
+node {
+    def slackResponse = slackSend(channel: "ci", message: "Started build")
+    slackSend(channel: slackResponse.threadId, message: "Build still in progress")
+    slackSend(
+        channel: slackResponse.threadId,
+        replyBroadcast: true,
+        message: "Build failed. Broadcast to channel for better visibility."
+    )
+}
+```
+
 
 ## Install Instructions for Slack compatible application
 
