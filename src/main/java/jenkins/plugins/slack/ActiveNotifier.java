@@ -438,7 +438,7 @@ public class ActiveNotifier implements FineGrainedNotifier {
                 int failed = action.getFailCount();
                 message.append("\n").append(failed).append(" Failed Tests:\n");
                 for(TestResult result : action.getFailedTests()) {
-                    message.append("\t").append(result.getName()).append(" after ")
+                    message.append("\t").append(getTestClassAndMethod(result)).append(" after ")
                             .append(result.getDurationString()).append("\n");
                 }
             }
@@ -471,6 +471,15 @@ public class ActiveNotifier implements FineGrainedNotifier {
                 logger.log(SEVERE, e.getMessage(), e);
             }
             return this;
+        }
+
+        private String getTestClassAndMethod(TestResult result) {
+            String packageClassAndMethod = result.getFullDisplayName();
+
+            int methodDotIndex = packageClassAndMethod.lastIndexOf('.');
+            int testClassDotIndex = packageClassAndMethod.substring(0, methodDotIndex).lastIndexOf('.');
+
+            return packageClassAndMethod.substring(testClassDotIndex + 1);
         }
 
         private String createBackToNormalDurationString(){
