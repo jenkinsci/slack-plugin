@@ -474,12 +474,17 @@ public class ActiveNotifier implements FineGrainedNotifier {
         }
 
         private String getTestClassAndMethod(TestResult result) {
-            String packageClassAndMethod = result.getFullDisplayName();
+            String fullDisplayName = result.getFullDisplayName();
 
-            int methodDotIndex = packageClassAndMethod.lastIndexOf('.');
-            int testClassDotIndex = packageClassAndMethod.substring(0, methodDotIndex).lastIndexOf('.');
+            if (StringUtils.countMatches(fullDisplayName, ".") > 1) {
+                int methodDotIndex = fullDisplayName.lastIndexOf('.');
+                int testClassDotIndex = fullDisplayName.substring(0, methodDotIndex).lastIndexOf('.');
 
-            return packageClassAndMethod.substring(testClassDotIndex + 1);
+                return fullDisplayName.substring(testClassDotIndex + 1);
+
+            } else {
+                return fullDisplayName;
+            }
         }
 
         private String createBackToNormalDurationString(){
