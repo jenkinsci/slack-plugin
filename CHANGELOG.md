@@ -1,83 +1,89 @@
-# 2.14 release notes (unreleased)
+# Changelog
 
-## Bug fixes:
+## 2.14 release notes
+
+### New features:
+
+- Allow broadcasting thread messages to the channel [PR #473](https://github.com/jenkinsci/slack-plugin/pull/473)
+
+### Bug fixes:
 
 - Fix UI fields [PR #471](https://github.com/jenkinsci/slack-plugin/pull/471)
 
-# 2.13 release notes
+## 2.13 release notes
 
-## Bug fixes:
+### Bug fixes:
 
 - Fixed constructor of SlackJobProperty [PR #468](https://github.com/jenkinsci/slack-plugin/pull/468)
 - Adding null check on custom message [PR #466](https://github.com/jenkinsci/slack-plugin/pull/466)
 - Always runAfterFinalized [PR #462](https://github.com/jenkinsci/slack-plugin/pull/462)
 
-## Docs updates:
+### Docs updates:
 
 - Added note for Global Slack Notifications [PR #470](https://github.com/jenkinsci/slack-plugin/pull/470)
 
-# 2.12 release notes
+## 2.12 release notes
 
-## Bug fixes:
+### Bug fixes:
 
 - Revert 'Don't publish twice, while the build isn't finished yet' [PR #457](https://github.com/jenkinsci/slack-plugin/pull/457)
 
-# 2.11 release notes
+## 2.11 release notes
 
-## Bug fixes:
+### Bug fixes:
 
 - Move optional params to setters and fix constructor compatibility [PR #452](https://github.com/jenkinsci/slack-plugin/pull/452)
 
-# 2.10 release notes
+## 2.10 release notes
 
-## New features:
+### New features:
 
 - Send only one message with commit list [PR #448](https://github.com/jenkinsci/slack-plugin/pull/448)
 - Custom messages per Build result [PR #445](https://github.com/jenkinsci/slack-plugin/pull/445)
 
-## Bug fixes:
+### Bug fixes:
 
 - Don't publish twice, while the build isn't finished yet [PR #446](https://github.com/jenkinsci/slack-plugin/pull/446)
 - Fix compatibility for getBotUser [PR #449](https://github.com/jenkinsci/slack-plugin/pull/449)
 
-# 2.9 release notes
+## 2.9 release notes
 
-## Bug fixes:
+### Bug fixes:
 
 - Don't hide custom message if var unset [PR #442](https://github.com/jenkinsci/slack-plugin/pull/442)
 - Rename base url to slack compatible app url [PR #443](https://github.com/jenkinsci/slack-plugin/pull/443)
 
-# 2.8 release notes
+## 2.8 release notes
 
-## Bug fixes:
+### Bug fixes:
 
 - Make pipeline response object safer [PR #439](https://github.com/jenkinsci/slack-plugin/pull/439)
 
-# 2.7 release notes
+## 2.7 release notes
 
-## New features:
+### New features:
 - Pipeline response object (threading enhancement) [PR #429](https://github.com/jenkinsci/slack-plugin/pull/429)
 - Add message when attachments are present [PR #426](https://github.com/jenkinsci/slack-plugin/pull/426)
 
-# 2.6 release notes
+## 2.6 release notes
 
-## Bug fixes:
+### Bug fixes:
 - slack send should not require message [PR #434](https://github.com/jenkinsci/slack-plugin/pull/434)
 
-# 2.5 release notes
+## 2.5 release notes
 
-## Bug fixes:
+### Bug fixes:
 
 - replace # with nothing in chat.postMessage [PR #433](https://github.com/jenkinsci/slack-plugin/pull/433)
 - Fix serialisation of some fields [PR #430](https://github.com/jenkinsci/slack-plugin/pull/430)
 
-## Internal updates:
+### Internal updates:
 
 - Re-enable windows tests on CI [PR #424](https://github.com/jenkinsci/slack-plugin/pull/424)
 
-# 2.4 release notes
+## 2.4 release notes
 
-## New Features:
+### New Features:
 
 - Support JCasC [PR #404](https://github.com/jenkinsci/slack-plugin/pull/404) [JENKINS-53641](https://issues.jenkins-ci.org/browse/JENKINS-53641)
   - [example](/README.md#configuration-as-code)
@@ -85,7 +91,7 @@
 - Add slash command support [PR #345](https://github.com/jenkinsci/slack-plugin/pull/345)
 - Add thread support [PR #377](https://github.com/jenkinsci/slack-plugin/pull/377)
 
-## Bug Fixes:
+### Bug Fixes:
 
 - [JENKINS-50706] Fix permission check for credentials checkbox [PR #372](https://github.com/jenkinsci/slack-plugin/pull/372)
 - [JENKINS-37339] Prevent NPE after plugin installation [PR #403](https://github.com/jenkinsci/slack-plugin/pull/403)
@@ -96,32 +102,32 @@
 - slack outgoing webhook isn't working [PR #344](https://github.com/jenkinsci/slack-plugin/pull/344)
 - integration credential logging removed [PR #407](https://github.com/jenkinsci/slack-plugin/pull/407)
 
-## Dependency upgrades:
+### Dependency upgrades:
 
 - jackson-databind -> 2.8.11.2, [PR #400](https://github.com/jenkinsci/slack-plugin/pull/400)
 
-## Documentation updates:
+### Documentation updates:
 
 - Added multiple channel comment to slackSend [PR #399](https://github.com/jenkinsci/slack-plugin/pull/399)
 - Send to users wording tweak [PR #408](https://github.com/jenkinsci/slack-plugin/pull/408)
 
-## Internal updates:
+### Internal updates:
 
 - Parent pom update, new jenkins baseline (2.60.3) and java 8 required  [PR #406](https://github.com/jenkinsci/slack-plugin/pull/406)
 
-# 2.3 release notes
+## 2.3 release notes
 
-## New Features:
+### New Features:
 
 - Send more advanced slack messages v2 [PR #324](https://github.com/jenkinsci/slack-plugin/pull/324)
 
-## Bug Fixes:
+### Bug Fixes:
 
 - Stop log spam [PR #316](https://github.com/jenkinsci/slack-plugin/pull/316)
 
-# 2.2 release notes
+## 2.2 release notes
 
-New Features:
+### New Features:
 
 - Implement bot-user support ([#258][#258])
 - Use DataBoundSetter for optional params ([#236][#236], [#232][#232])
@@ -132,7 +138,7 @@ New Features:
   or Rocket Chat ([#293][#293])
 - Regression notification implemented ([#294][#294])
 
-Bug Fixes:
+### Bug Fixes:
 
 - Fix #126 Replace `<a>` tags with Slack `<link|name>` ([#222][#222],
   [#126][#126])
@@ -166,9 +172,9 @@ Bug Fixes:
 [#294]: https://github.com/jenkinsci/slack-plugin/issues/294
 [#62]: https://github.com/jenkinsci/slack-plugin/issues/62
 
-# 2.1 release notes
+## 2.1 release notes
 
-New Features:
+### New Features:
 
 - Added Jenkins Credentials support (#247)
 - Added support for display-url-api; will allow Blue Ocean to change display
@@ -177,39 +183,39 @@ New Features:
 - Reduced log verbosity (#252)
 - Updated `@Extension` ordinal value to force earlier migration process (#261)
 
-UI Improvements:
+### UI Improvements:
 
 -  Added credentials selection widget (#247)
 
-Bug Fixes:
+### Bug Fixes:
 
 - Fixes for Security issue [JENKINS-35503][JENKINS-35503] (#247)
 - Fixed documentation for Pipeline step (#220)
 
 [JENKINS-35503]: https://issues.jenkins-ci.org/browse/JENKINS-35503
 
-# 2.0.1 release notes
+## 2.0.1 release notes
 
 Bug Fixes:
 
 - Set webhook endpoint to random uuid based string if not set (PR # 190)
 - Upgrading to Slack 2.0 outbound webhooks breaks Jenkins  (#191)
 
-# 2.0 release notes
+## 2.0 release notes
 
-New Features:
+### New Features:
 
 - Adding configurable webhook endpoint for exposing jenkins commands with a
   Slack outgoing-webhook (#160)
 - Added Jenkins Pipeline support via custom step `slackSend`. (#167)
 
-UI Improvements:
+### UI Improvements:
 
 - Job level configuration was moved under post-build actions with support for
   migration from previous versions. (#79, #170)
 - Use Subdomain instead of Domain (#168)
 
-Bug Fixes
+### Bug Fixes
 
 - Notify for repeated failures doesn't work (#136)
 - Workflow plugin integration (#50)
@@ -222,7 +228,7 @@ Bug Fixes
 - Doesn't support the Jenkins Inheritance plugin (#6)
 
 
-# 1.8.1 release notes
+## 1.8.1 release notes
 
 This is a backport release which backports features originally intended for
 slack-2.0 release.  This is meant as a nice fix for people missing critical
@@ -231,15 +237,15 @@ backport all of the changes.  Since new features listed here will also be
 included in the slack-2.0 release I'm not going to bother mentioning them in the
 slack-2.0 release at all.
 
-New Features:
+### New Features:
 
 - Allow simple markup formatting in custom messages. (#127)
 
-UI Improvements:
+### UI Improvements:
 
 - Improves custom message help text. (#97)
 
-Bug fixes:
+### Bug fixes:
 
 - Allow parallel builds. (#122)
 - Use textarea for customMessage.  This allows custom messages to have new
@@ -248,15 +254,15 @@ Bug fixes:
 - Fix publish to multiple rooms. Add unit tests. (#98, #100)
 - Include custom message when changes are found. (#95)
 
-# 1.8.0 release notes
+## 1.8.0 release notes
 
-New Features:
+### New Features:
 
 - Option to add a custom message (#49, #78)
 - Build Server URL defaults to Jenkins URL when the slack plugin is first
   configured (#42, #90)
 
-UI Improvements:
+### UI Improvements:
 
 - Move `Test Connection` button in slack job config to the advanced section
   (#64)
@@ -264,7 +270,7 @@ UI Improvements:
   Jenkins UI when it succeeds or fails to connect to the slack instance (#51,
   #81)
 
-Improvements:
+### Improvements:
 
 - Improve 'started' message with proper cause (#37)
 - The separator for specifying posting to multiple slack channels is more
@@ -276,7 +282,7 @@ Improvements:
   easier to understand if it is the first or repeated failure in a build (#77)
 - Add unit tests for `doTestConnection` method (#82, #84)
 
-Bug fixes:
+### Bug fixes:
 
 - Fix `Include Test Summary` and `Notify Repeated Failure` options being
   reversed when saving settings in the UI (#63)
@@ -284,9 +290,9 @@ Bug fixes:
 - Solve `java.lang.NoClassDefFoundError` when running unit tests (#82, #83)
 - Adding ability for environment variables and parameters (#31, #80, #89)
 
-# 1.7.0 release notes
+## 1.7.0 release notes
 
-New features:
+### New features:
 
 - Advanced settings
   - Team domain and token can be specified per project; falls back to global
@@ -300,12 +306,12 @@ New features:
 - Test Connection button (#46, #28)
 - Option to disable subsequent notifications on build failures (#46, #15)
 
-Improvements:
+### Improvements:
 
 - Report 'return to normal' on transition from unstable to success (#21).
 - Improved logging.
 
-Bug fixes:
+### Bug fixes:
 
 - When changing the global slack settings the slack config in jobs are updated
   as well (#26, #12)
