@@ -19,9 +19,6 @@
     <f:entry title="Team Subdomain" help="/plugin/slack/help-globalConfig-slackTeamDomain.html">
         <f:textbox field="teamDomain" />
     </f:entry>
-    <f:entry title="Integration Token" help="/plugin/slack/help-globalConfig-slackToken.html">
-        <f:textbox field="token" />
-    </f:entry>
     <f:entry title="Integration Token Credential ID" field="tokenCredentialId" help="/plugin/slack/help-globalConfig-tokenCredentialId.html">
         <c:select/>
     </f:entry>

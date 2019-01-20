@@ -45,7 +45,7 @@ public class SlackSendStep extends AbstractStepImpl {
     private String color;
     private String token;
     private String tokenCredentialId;
-    private boolean botUser;
+    private Boolean botUser;
     private String channel;
     private String baseUrl;
     private String teamDomain;
@@ -228,12 +228,11 @@ public class SlackSendStep extends AbstractStepImpl {
             String tokenCredentialId = step.tokenCredentialId != null ? step.tokenCredentialId : slackDesc
                     .getTokenCredentialId();
             String token;
-            boolean botUser;
+            Boolean botUser;
             if (step.token != null) {
                 token = step.token;
                 botUser = step.botUser;
             } else {
-                token = slackDesc.getToken();
                 botUser = slackDesc.isBotUser();
             }
             String channel = step.channel != null ? step.channel : slackDesc.getRoom();

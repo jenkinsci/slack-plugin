@@ -1,10 +1,14 @@
 package jenkins.plugins.slack;
 
+import com.cloudbees.plugins.credentials.common.StandardCredentials;
 import com.cloudbees.plugins.credentials.common.StandardListBoxModel;
 import com.cloudbees.plugins.credentials.domains.HostnameRequirement;
+import edu.umd.cs.findbugs.annotations.CheckForNull;
 import hudson.EnvVars;
 import hudson.Extension;
 import hudson.Launcher;
+import hudson.init.InitMilestone;
+import hudson.init.Initializer;
 import hudson.model.AbstractBuild;
 import hudson.model.AbstractProject;
 import hudson.model.BuildListener;
@@ -18,6 +22,7 @@ import hudson.tasks.Publisher;
 import hudson.util.FormValidation;
 import hudson.util.ListBoxModel;
 import jenkins.model.Jenkins;
+import jenkins.plugins.slack.config.GlobalCredentialMigrator;
 import jenkins.plugins.slack.config.ItemConfigMigrator;
 import net.sf.json.JSONObject;
 import org.apache.commons.lang.StringUtils;
@@ -411,12 +416,10 @@ public class SlackNotifier extends Notifier {
         }
 
         String authToken = this.authToken;
-        if (StringUtils.isEmpty(authToken)) {
-            authToken = getDescriptor().getToken();
-            botUser = getDescriptor().isBotUser();
-        }
-        String authTokenCredentialId = this.tokenCredentialId;
 
+        botUser = getDescriptor().isBotUser(); // TODO this check was broken before can anything be done?
+
+        String authTokenCredentialId = this.tokenCredentialId;
         if (StringUtils.isEmpty(authTokenCredentialId)) {
             authTokenCredentialId = getDescriptor().getTokenCredentialId();
         }
@@ -466,12 +469,30 @@ public class SlackNotifier extends Notifier {
         return super.prebuild(build, listener);
     }
 
+    @Initializer(after = InitMilestone.JOB_LOADED, before = InitMilestone.COMPLETED)
+    public static void migrateTokenToCredential() throws IOException {
+        DescriptorImpl descriptor = descriptor();
+
+        if (descriptor != null) {
+            descriptor.migrateTokenToCredential();
+        }
+    }
+
+    @CheckForNull
+    private static DescriptorImpl descriptor() {
+        // TODO rework to lookupSingleton after updating baseline
+        Jenkins instance = Jenkins.getInstanceOrNull();
+        return instance == null ? null : instance.getDescriptorByType(DescriptorImpl.class);
+    }
+
+
+
     @Extension @Symbol("slackNotifier")
     public static class DescriptorImpl extends BuildStepDescriptor<Publisher> {
 
         private String baseUrl;
         private String teamDomain;
-        private String token;
+//        private String token;
         private String tokenCredentialId;
         private boolean botUser;
         private String room;
@@ -499,14 +520,26 @@ public class SlackNotifier extends Notifier {
             this.teamDomain = teamDomain;
         }
 
-        public String getToken() {
-            return token;
-        }
+        /**
+         * Deprecated for removal in 3.0
+         *
+         * Use tokenCredentialId instead
+         */
+//        @Deprecated
+//        public String getToken() {
+//            return token;
+//        }
 
-        @DataBoundSetter
-        public void setToken(String token) {
-            this.token = token;
-        }
+        /**
+         * Deprecated for removal in 3.0
+         *
+         * Use tokenCredentialId instead
+         */
+//        @Deprecated
+//        @DataBoundSetter
+//        public void setToken(String token) {
+//            this.token = token;
+//        }
 
         public String getTokenCredentialId() {
             return tokenCredentialId;
@@ -578,12 +611,6 @@ public class SlackNotifier extends Notifier {
                     );
         }
 
-        //WARN users that they should not use the plain/exposed token, but rather the token credential id
-        public FormValidation doCheckToken(@QueryParameter String value) {
-            //always show the warning - TODO investigate if there is a better way to handle this
-            return FormValidation.warning("Exposing your Integration Token is a security risk. Please use the Integration Token Credential ID");
-        }
-
         public boolean isApplicable(Class<? extends AbstractProject> aClass) {
             return true;
         }
@@ -595,8 +622,8 @@ public class SlackNotifier extends Notifier {
             return true;
         }
 
-        SlackService getSlackService(final String baseUrl, final String teamDomain, final String authToken, final String authTokenCredentialId, final boolean botUser, final String room) {
-            return new StandardSlackService(baseUrl, teamDomain, authToken, authTokenCredentialId, botUser, room);
+        SlackService getSlackService(final String baseUrl, final String teamDomain, final String authTokenCredentialId, final boolean botUser, final String room) {
+            return new StandardSlackService(baseUrl, teamDomain, null, authTokenCredentialId, botUser, room);
         }
 
         @Override
@@ -606,7 +633,6 @@ public class SlackNotifier extends Notifier {
 
         public FormValidation doTestConnection(@QueryParameter("baseUrl") final String baseUrl,
                                                @QueryParameter("teamDomain") final String teamDomain,
-                                               @QueryParameter("token") final String authToken,
                                                @QueryParameter("tokenCredentialId") final String tokenCredentialId,
                                                @QueryParameter("botUser") final boolean botUser,
                                                @QueryParameter("room") final String room) {
@@ -625,10 +651,6 @@ public class SlackNotifier extends Notifier {
                 if (StringUtils.isEmpty(targetDomain)) {
                     targetDomain = this.teamDomain;
                 }
-                String targetToken = authToken;
-                if (StringUtils.isEmpty(targetToken)) {
-                    targetToken = this.token;
-                }
 
                 boolean targetBotUser = botUser;
                 if (!targetBotUser) {
@@ -643,13 +665,22 @@ public class SlackNotifier extends Notifier {
                 if (StringUtils.isEmpty(targetRoom)) {
                     targetRoom = this.room;
                 }
-                SlackService testSlackService = getSlackService(targetUrl, targetDomain, targetToken, targetTokenCredentialId, targetBotUser, targetRoom);
+                SlackService testSlackService = getSlackService(targetUrl, targetDomain, targetTokenCredentialId, targetBotUser, targetRoom);
                 String message = "Slack/Jenkins plugin: you're all set on " + DisplayURLProvider.get().getRoot();
                 boolean success = testSlackService.publish(message, "good");
                 return success ? FormValidation.ok("Success") : FormValidation.error("Failure");
             } catch (Exception e) {
                 return FormValidation.error("Client error : " + e.getMessage());
             }
+        }
+
+        void migrateTokenToCredential() throws IOException {
+            StandardCredentials newCredential = new GlobalCredentialMigrator().migrate(this);
+            if (newCredential != null) {
+                this.tokenCredentialId = newCredential.getId();
+//                this.token = null;
+            }
+            save();
         }
     }
 
