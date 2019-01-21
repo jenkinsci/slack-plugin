@@ -61,35 +61,7 @@ public class BackwordsCompatible_1_8_SlackNotifierTest {
 
         assertNull(project.getProperty(SlackJobProperty.class));
     }
-
-    @Test
-    @LocalData
-    public void testGlobalSettingsOverriden() {
-        FreeStyleProject project = (FreeStyleProject) jenkins.getItem("Test_Slack_Plugin");
-        SlackNotifier notifier = project.getPublishersList().get(SlackNotifier.class);
-
-        assertEquals("jenkins-slack-plugin", notifier.getTeamDomain());
-        assertEquals("auth-token-for-test", notifier.getAuthToken());
-        assertEquals(false, notifier.getBotUser());
-        assertEquals("#slack-plugin-testing", notifier.getRoom());
-
-        assertFalse(notifier.getStartNotification());
-        assertTrue(notifier.getNotifySuccess());
-        assertFalse(notifier.getNotifyAborted());
-        assertFalse(notifier.getNotifyNotBuilt());
-        assertFalse(notifier.getNotifyUnstable());
-        assertFalse(notifier.getNotifyRegression());
-        assertTrue(notifier.getNotifyFailure());
-        assertFalse(notifier.getNotifyBackToNormal());
-        assertFalse(notifier.getNotifyRepeatedFailure());
-        assertFalse(notifier.getIncludeTestSummary());
-        assertEquals(CommitInfoChoice.NONE, notifier.getCommitInfoChoice());
-        assertFalse(notifier.getIncludeCustomMessage());
-        assertEquals("", notifier.getCustomMessage());
-
-        assertNull(project.getProperty(SlackJobProperty.class));
-    }
-
+    
     @Test
     @LocalData
     public void testGlobalSettingsNotOverridden() {
