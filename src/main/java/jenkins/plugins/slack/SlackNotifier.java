@@ -5,6 +5,7 @@ import com.cloudbees.plugins.credentials.domains.HostnameRequirement;
 import hudson.EnvVars;
 import hudson.Extension;
 import hudson.Launcher;
+import hudson.Util;
 import hudson.model.AbstractBuild;
 import hudson.model.AbstractProject;
 import hudson.model.BuildListener;
@@ -33,6 +34,7 @@ import org.kohsuke.stapler.export.Exported;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Stream;
 
@@ -400,30 +402,14 @@ public class SlackNotifier extends Notifier {
     }
 
     public SlackService newSlackService(AbstractBuild r, BuildListener listener) {
-        String teamDomain = this.teamDomain;
-        if (StringUtils.isEmpty(teamDomain)) {
-            teamDomain = getDescriptor().getTeamDomain();
-        }
-
-        String baseUrl = this.baseUrl;
-        if (StringUtils.isEmpty(baseUrl)) {
-            baseUrl = getDescriptor().getBaseUrl();
-        }
-
-        String authToken = this.authToken;
-        if (StringUtils.isEmpty(authToken)) {
-            authToken = getDescriptor().getToken();
-            botUser = getDescriptor().isBotUser();
-        }
-        String authTokenCredentialId = this.tokenCredentialId;
-
-        if (StringUtils.isEmpty(authTokenCredentialId)) {
-            authTokenCredentialId = getDescriptor().getTokenCredentialId();
-        }
-        String room = this.room;
-        if (StringUtils.isEmpty(room)) {
-            room = getDescriptor().getRoom();
-        }
+        DescriptorImpl descriptor = getDescriptor();
+        String teamDomain = Util.fixEmpty(this.teamDomain) != null ? this.teamDomain : descriptor.getTeamDomain();
+        String baseUrl = Util.fixEmpty(this.baseUrl) != null ? this.baseUrl : descriptor.getBaseUrl();
+        String authToken = Util.fixEmpty(this.authToken) != null ? this.authToken : descriptor.getToken();
+        boolean botUser = this.botUser || descriptor.isBotUser();
+        String authTokenCredentialId = Util.fixEmpty(this.tokenCredentialId) != null ? this.tokenCredentialId :
+                descriptor.getTokenCredentialId();
+        String room = Util.fixEmpty(this.room) != null ? this.room : descriptor.getRoom();
 
         EnvVars env;
         try {
@@ -621,33 +607,19 @@ public class SlackNotifier extends Notifier {
                 if (StringUtils.isEmpty(targetUrl)) {
                     targetUrl = this.baseUrl;
                 }
-                String targetDomain = teamDomain;
-                if (StringUtils.isEmpty(targetDomain)) {
-                    targetDomain = this.teamDomain;
-                }
-                String targetToken = authToken;
-                if (StringUtils.isEmpty(targetToken)) {
-                    targetToken = this.token;
-                }
+                String targetDomain = Util.fixEmpty(teamDomain) != null ? teamDomain : this.teamDomain;
+                String targetToken = Util.fixEmpty(authToken) != null ? authToken : this.token;
+                boolean targetBotUser = botUser ? botUser : this.botUser;
+                String targetTokenCredentialId = Util.fixEmpty(tokenCredentialId) != null ? tokenCredentialId :
+                        this.tokenCredentialId;
+                String targetRoom = Util.fixEmpty(room) != null ? room : this.room;
 
-                boolean targetBotUser = botUser;
-                if (!targetBotUser) {
-                    targetBotUser = this.botUser;
-                }
-
-                String targetTokenCredentialId = tokenCredentialId;
-                if (StringUtils.isEmpty(targetTokenCredentialId)) {
-                    targetTokenCredentialId = this.tokenCredentialId;
-                }
-                String targetRoom = room;
-                if (StringUtils.isEmpty(targetRoom)) {
-                    targetRoom = this.room;
-                }
                 SlackService testSlackService = getSlackService(targetUrl, targetDomain, targetToken, targetTokenCredentialId, targetBotUser, targetRoom);
                 String message = "Slack/Jenkins plugin: you're all set on " + DisplayURLProvider.get().getRoot();
                 boolean success = testSlackService.publish(message, "good");
                 return success ? FormValidation.ok("Success") : FormValidation.error("Failure");
             } catch (Exception e) {
+                logger.log(Level.WARNING, "Slack config form validation error", e);
                 return FormValidation.error("Client error : " + e.getMessage());
             }
         }
