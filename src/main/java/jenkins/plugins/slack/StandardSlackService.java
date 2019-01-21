@@ -205,20 +205,22 @@ public class StandardSlackService implements SlackService {
     	final CredentialsProvider credentialsProvider = new BasicCredentialsProvider();
     	clientBuilder.setDefaultCredentialsProvider(credentialsProvider);
 
-        Jenkins jenkins = Jenkins.getActiveInstance();
-        ProxyConfiguration proxy = jenkins.proxy;
-        if (proxy != null) {
-            final HttpHost proxyHost = new HttpHost(proxy.name, proxy.port);
-            final HttpRoutePlanner routePlanner = new DefaultProxyRoutePlanner(proxyHost);
-            clientBuilder.setRoutePlanner(routePlanner);
+        Jenkins jenkins = Jenkins.getInstanceOrNull();
+        if (jenkins != null) {
+            ProxyConfiguration proxy = jenkins.proxy;
+            if (proxy != null) {
+                final HttpHost proxyHost = new HttpHost(proxy.name, proxy.port);
+                final HttpRoutePlanner routePlanner = new DefaultProxyRoutePlanner(proxyHost);
+                clientBuilder.setRoutePlanner(routePlanner);
 
-            String username = proxy.getUserName();
-            String password = proxy.getPassword();
-            // Consider it to be passed if username specified. Sufficient?
-            if (username != null && !"".equals(username.trim())) {
-                logger.info("Using proxy authentication (user=" + username + ")");
-                credentialsProvider.setCredentials(new AuthScope(proxyHost),
-                        new UsernamePasswordCredentials(username, password));
+                String username = proxy.getUserName();
+                String password = proxy.getPassword();
+                // Consider it to be passed if username specified. Sufficient?
+                if (username != null && !"".equals(username.trim())) {
+                    logger.info("Using proxy authentication (user=" + username + ")");
+                    credentialsProvider.setCredentials(new AuthScope(proxyHost),
+                            new UsernamePasswordCredentials(username, password));
+                }
             }
         }
         return clientBuilder.build();
