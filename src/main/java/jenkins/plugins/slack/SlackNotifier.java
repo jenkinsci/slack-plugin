@@ -34,6 +34,7 @@ import org.kohsuke.stapler.export.Exported;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Stream;
 
@@ -594,7 +595,7 @@ public class SlackNotifier extends Notifier {
                                                @QueryParameter("teamDomain") final String teamDomain,
                                                @QueryParameter("token") final String authToken,
                                                @QueryParameter("tokenCredentialId") final String tokenCredentialId,
-                                               @QueryParameter("botUser") final boolean botUser,
+                                               @QueryParameter("botUser") final Boolean botUser,
                                                @QueryParameter("room") final String room) {
 
             try {
@@ -607,33 +608,19 @@ public class SlackNotifier extends Notifier {
                 if (StringUtils.isEmpty(targetUrl)) {
                     targetUrl = this.baseUrl;
                 }
-                String targetDomain = teamDomain;
-                if (StringUtils.isEmpty(targetDomain)) {
-                    targetDomain = this.teamDomain;
-                }
-                String targetToken = authToken;
-                if (StringUtils.isEmpty(targetToken)) {
-                    targetToken = this.token;
-                }
+                String targetDomain = Util.fixEmpty(teamDomain) != null ? teamDomain : this.teamDomain;
+                String targetToken = Util.fixEmpty(authToken) != null ? authToken : this.token;
+                boolean targetBotUser = botUser != null ? botUser : this.botUser != null ? this.botUser : false;
+                String targetTokenCredentialId = Util.fixEmpty(tokenCredentialId) != null ? tokenCredentialId :
+                        this.tokenCredentialId;
+                String targetRoom = Util.fixEmpty(room) != null ? room : this.room;
 
-                boolean targetBotUser = botUser;
-                if (!targetBotUser) {
-                    targetBotUser = this.botUser;
-                }
-
-                String targetTokenCredentialId = tokenCredentialId;
-                if (StringUtils.isEmpty(targetTokenCredentialId)) {
-                    targetTokenCredentialId = this.tokenCredentialId;
-                }
-                String targetRoom = room;
-                if (StringUtils.isEmpty(targetRoom)) {
-                    targetRoom = this.room;
-                }
                 SlackService testSlackService = getSlackService(targetUrl, targetDomain, targetToken, targetTokenCredentialId, targetBotUser, targetRoom);
                 String message = "Slack/Jenkins plugin: you're all set on " + DisplayURLProvider.get().getRoot();
                 boolean success = testSlackService.publish(message, "good");
                 return success ? FormValidation.ok("Success") : FormValidation.error("Failure");
             } catch (Exception e) {
+                logger.log(Level.WARNING, "Slack config form validation error", e);
                 return FormValidation.error("Client error : " + e.getMessage());
             }
         }
