@@ -12,11 +12,6 @@ import org.kohsuke.stapler.StaplerRequest;
 
 import hudson.util.FormValidation;
 
-import hudson.model.Descriptor.FormException;
-
-
-
-
 
 @Extension
 public class GlobalConfig extends GlobalConfiguration {

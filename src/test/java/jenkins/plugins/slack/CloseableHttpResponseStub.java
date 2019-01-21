@@ -4,7 +4,6 @@ import org.apache.http.*;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.params.HttpParams;
 
-import java.io.IOException;
 import java.util.Locale;
 
 public class CloseableHttpResponseStub implements CloseableHttpResponse {

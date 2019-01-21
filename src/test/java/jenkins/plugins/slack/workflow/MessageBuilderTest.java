@@ -11,10 +11,8 @@ import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 import org.mockito.Mockito;
 
-import java.io.IOException;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.concurrent.ExecutionException;
 
 @RunWith(Parameterized.class)
 public class MessageBuilderTest extends TestCase {

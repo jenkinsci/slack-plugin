@@ -8,7 +8,6 @@ import org.springframework.util.ReflectionUtils;
 
 import hudson.model.AbstractProject;
 import hudson.model.Item;
-import hudson.model.Job;
 
 /**
  * Configuration migrator for migrating the Slack plugin configuration for an

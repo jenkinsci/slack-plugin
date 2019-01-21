@@ -6,8 +6,6 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
-import java.io.IOException;
-
 import hudson.matrix.MatrixProject;
 import hudson.model.FreeStyleProject;
 import jenkins.model.Jenkins;
@@ -22,7 +20,7 @@ import org.jvnet.hudson.test.JenkinsRule;
 import org.jvnet.hudson.test.recipes.LocalData;
 
 @SuppressWarnings("deprecation")
-public class BackwordsCompatible_1_8_SlackNotifierTest {
+public class BackwardsCompatible_1_8_SlackNotifierTest {
 
     @Rule
     public JenkinsRule j = new JenkinsRule();
@@ -42,7 +40,7 @@ public class BackwordsCompatible_1_8_SlackNotifierTest {
 
         assertEquals("jenkins-slack-plugin", notifier.getTeamDomain());
         assertEquals("auth-token-for-test", notifier.getAuthToken());
-        assertEquals(false, notifier.getBotUser());
+        assertFalse(notifier.getBotUser());
         assertEquals("#slack-plugin-testing", notifier.getRoom());
 
         assertFalse(notifier.getStartNotification());
@@ -61,7 +59,7 @@ public class BackwordsCompatible_1_8_SlackNotifierTest {
 
         assertNull(project.getProperty(SlackJobProperty.class));
     }
-    
+
     @Test
     @LocalData
     public void testGlobalSettingsNotOverridden() {
@@ -70,7 +68,7 @@ public class BackwordsCompatible_1_8_SlackNotifierTest {
 
         assertEquals("", notifier.getTeamDomain());
         assertEquals("", notifier.getAuthToken());
-        assertEquals(false, notifier.getBotUser());
+        assertFalse(notifier.getBotUser());
         assertEquals("", notifier.getRoom());
 
         assertFalse(notifier.getStartNotification());
@@ -126,7 +124,7 @@ public class BackwordsCompatible_1_8_SlackNotifierTest {
 
         assertEquals("", notifier.getTeamDomain());
         assertEquals("", notifier.getAuthToken());
-        assertEquals(false, notifier.getBotUser());
+        assertFalse(notifier.getBotUser());
         assertEquals("", notifier.getRoom());
 
         assertTrue(notifier.getStartNotification());

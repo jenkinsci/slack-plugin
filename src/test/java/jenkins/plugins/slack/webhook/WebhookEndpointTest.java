@@ -40,9 +40,9 @@ public class WebhookEndpointTest {
 
     private JenkinsRule.WebClient client;
 
-    private final String URL = "webook";
-    private final String ENDPOINT = URL+"/";
-    private final String LONG_PROJECT_NAME = "slack_plugin";
+    private static final String URL = "webook";
+    private static final String ENDPOINT = URL + "/";
+    private static final String LONG_PROJECT_NAME = "slack_plugin";
 
     private List<NameValuePair> data;
 
@@ -53,7 +53,7 @@ public class WebhookEndpointTest {
     @Before
     public void setUp() {
         client = jenkinsRule.createWebClient();
-        data = new ArrayList<NameValuePair>();
+        data = new ArrayList<>();
         data.add(new NameValuePair("token", "GOOD_TOKEN"));
         data.add(new NameValuePair("trigger_word", "jenkins")); 
     }
@@ -87,7 +87,7 @@ public class WebhookEndpointTest {
     @Test
     public void testNoTextPostData() throws Exception {
         setConfigSettings();
-        List<NameValuePair> goodToken = new ArrayList<NameValuePair>();
+        List<NameValuePair> goodToken = new ArrayList<>();
         goodToken.add(new NameValuePair("token", "GOOD_TOKEN"));
 
         WebResponse response = makeRequest(goodToken);
@@ -98,7 +98,7 @@ public class WebhookEndpointTest {
     public void testNoTriggerWordPostData() throws Exception {
         // No trigger word is present, which is the case when Slack "slash commands" are used
         setConfigSettings();
-        List<NameValuePair> goodToken = new ArrayList<NameValuePair>();
+        List<NameValuePair> goodToken = new ArrayList<>();
         goodToken.add(new NameValuePair("token", "GOOD_TOKEN"));
         goodToken.add(new NameValuePair("text", "list projects"));
 
@@ -113,7 +113,7 @@ public class WebhookEndpointTest {
 
         setConfigSettings();
 
-        List<NameValuePair> badData = new ArrayList<NameValuePair>();
+        List<NameValuePair> badData = new ArrayList<>();
         badData.add(new NameValuePair("token", "BAD_TOKEN"));
 
         WebResponse response = makeRequest(badData);

@@ -173,6 +173,7 @@ public class SlackSendStep extends AbstractStepImpl {
             return "slackSend";
         }
 
+        @Nonnull
         @Override
         public String getDisplayName() {
             return Messages.SlackSendStepDisplayName();

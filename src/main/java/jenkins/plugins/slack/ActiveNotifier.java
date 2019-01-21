@@ -109,7 +109,7 @@ public class ActiveNotifier implements FineGrainedNotifier {
                 previousBuild = previousBuild.getPreviousCompletedBuild();
             } while (previousBuild != null && previousBuild.getResult() == Result.ABORTED);
             Result previousResult = (previousBuild != null) ? previousBuild.getResult() : Result.SUCCESS;
-            if(null != previousResult && (result.isWorseThan(previousResult) || moreTestFailuresThanPreviousBuild(r, previousBuild)) && notifier.getNotifyRegression()) {
+            if(null != previousResult && (result != null && result.isWorseThan(previousResult) || moreTestFailuresThanPreviousBuild(r, previousBuild)) && notifier.getNotifyRegression()) {
                 String message = getBuildStatusMessage(r, notifier.getIncludeTestSummary(),
                         notifier.getIncludeFailedTests(), notifier.getIncludeCustomMessage());
                 if (notifier.getCommitInfoChoice().showAnything()) {
@@ -168,7 +168,7 @@ public class ActiveNotifier implements FineGrainedNotifier {
     }
 
     private Set<String> getFailedTestIds(AbstractBuild currentBuild) {
-        Set<String> failedTestIds = new HashSet<String>();
+        Set<String> failedTestIds = new HashSet<>();
         List<? extends TestResult> failedTests = getTestResult(currentBuild).getFailedTests();
         for(TestResult result : failedTests) {
             failedTestIds.add(result.getId());
@@ -183,8 +183,8 @@ public class ActiveNotifier implements FineGrainedNotifier {
             return null;
         }
         ChangeLogSet changeSet = r.getChangeSet();
-        List<Entry> entries = new LinkedList<Entry>();
-        Set<AffectedFile> files = new HashSet<AffectedFile>();
+        List<Entry> entries = new LinkedList<>();
+        Set<AffectedFile> files = new HashSet<>();
         for (Object o : changeSet.getItems()) {
             Entry entry = (Entry) o;
             logger.info("Entry " + o);
@@ -197,7 +197,7 @@ public class ActiveNotifier implements FineGrainedNotifier {
             logger.info("Empty change...");
             return null;
         }
-        Set<String> authors = new HashSet<String>();
+        Set<String> authors = new HashSet<>();
         for (Entry entry : entries) {
             authors.add(entry.getAuthor().getDisplayName());
         }
@@ -216,7 +216,7 @@ public class ActiveNotifier implements FineGrainedNotifier {
 
     String getCommitList(AbstractBuild r) {
         ChangeLogSet changeSet = r.getChangeSet();
-        List<Entry> entries = new LinkedList<Entry>();
+        List<Entry> entries = new LinkedList<>();
         for (Object o : changeSet.getItems()) {
             Entry entry = (Entry) o;
             logger.info("Entry " + o);
@@ -236,7 +236,7 @@ public class ActiveNotifier implements FineGrainedNotifier {
                 return getCommitList(upBuild);
             }
         }
-        Set<String> commits = new HashSet<String>();
+        Set<String> commits = new HashSet<>();
         for (Entry entry : entries) {
             StringBuilder commit = new StringBuilder();
             CommitInfoChoice commitInfoChoice = notifier.getCommitInfoChoice();
@@ -296,13 +296,13 @@ public class ActiveNotifier implements FineGrainedNotifier {
                                     REGRESSION_STATUS_MESSAGE = "Regression",
                                     UNKNOWN_STATUS_MESSAGE = "Unknown";
 
-        private StringBuffer message;
+        private StringBuilder message;
         private SlackNotifier notifier;
         private AbstractBuild build;
 
         public MessageBuilder(SlackNotifier notifier, AbstractBuild build) {
             this.notifier = notifier;
-            this.message = new StringBuffer();
+            this.message = new StringBuilder();
             this.build = build;
             startMessage();
         }
@@ -370,7 +370,7 @@ public class ActiveNotifier implements FineGrainedNotifier {
                     if (result == Result.UNSTABLE) {
                         return UNSTABLE_STATUS_MESSAGE;
                     }
-                    if (lastNonAbortedBuild != null && result.isWorseThan(previousResult)) {
+                    if (lastNonAbortedBuild != null && previousResult != null && result.isWorseThan(previousResult)) {
                         return REGRESSION_STATUS_MESSAGE;
                     }
                 }
@@ -422,9 +422,10 @@ public class ActiveNotifier implements FineGrainedNotifier {
                 int failed = action.getFailCount();
                 int skipped = action.getSkipCount();
                 message.append("\nTest Status:\n");
-                message.append("\tPassed: " + (total - failed - skipped));
-                message.append(", Failed: " + failed);
-                message.append(", Skipped: " + skipped);
+                message.append("\tPassed: ")
+                        .append(total - failed - skipped);
+                message.append(", Failed: ").append(failed);
+                message.append(", Skipped: ").append(skipped);
             } else {
                 message.append("\nNo Tests found.");
             }
@@ -503,7 +504,7 @@ public class ActiveNotifier implements FineGrainedNotifier {
 
         private String[] extractReplaceLinks(Matcher aTag, StringBuffer sb) {
             int size = 0;
-            List<String> links = new ArrayList<String>();
+            List<String> links = new ArrayList<>();
             while (aTag.find()) {
                 Matcher url = href.matcher(aTag.group(1));
                 if (url.find()) {

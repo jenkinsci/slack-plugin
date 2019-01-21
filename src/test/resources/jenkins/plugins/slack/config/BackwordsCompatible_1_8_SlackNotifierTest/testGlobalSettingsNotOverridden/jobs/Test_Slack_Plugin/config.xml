@@ -1,13 +1,13 @@
 <?xml version='1.0' encoding='UTF-8'?>
 <project>
   <actions/>
-  <description></description>
+    <description/>
   <keepDependencies>false</keepDependencies>
   <properties>
     <jenkins.plugins.slack.SlackNotifier_-SlackJobProperty plugin="slack@1.8.1-SNAPSHOT">
-      <teamDomain></teamDomain>
-      <token></token>
-      <room></room>
+        <teamDomain/>
+        <token/>
+        <room/>
       <startNotification>false</startNotification>
       <notifySuccess>true</notifySuccess>
       <notifyAborted>false</notifyAborted>
@@ -20,7 +20,7 @@
       <includeTestSummary>false</includeTestSummary>
       <showCommitList>false</showCommitList>
       <includeCustomMessage>false</includeCustomMessage>
-      <customMessage></customMessage>
+        <customMessage/>
     </jenkins.plugins.slack.SlackNotifier_-SlackJobProperty>
   </properties>
   <scm class="hudson.scm.NullSCM"/>
@@ -37,11 +37,11 @@
   </builders>
   <publishers>
     <jenkins.plugins.slack.SlackNotifier plugin="slack@1.8.1-SNAPSHOT">
-      <teamDomain></teamDomain>
-      <authToken></authToken>
-      <botUser></botUser>
-      <buildServerUrl></buildServerUrl>
-      <room></room>
+        <teamDomain/>
+        <authToken/>
+        <botUser/>
+        <buildServerUrl/>
+        <room/>
     </jenkins.plugins.slack.SlackNotifier>
   </publishers>
   <buildWrappers/>

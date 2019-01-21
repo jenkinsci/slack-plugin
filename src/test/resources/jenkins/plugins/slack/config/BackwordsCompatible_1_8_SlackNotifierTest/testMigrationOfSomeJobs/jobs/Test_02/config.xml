@@ -1,13 +1,13 @@
 <?xml version='1.0' encoding='UTF-8'?>
 <project>
   <actions/>
-  <description></description>
+    <description/>
   <keepDependencies>false</keepDependencies>
   <properties>
     <jenkins.plugins.slack.SlackNotifier_-SlackJobProperty plugin="slack@1.8.2-SNAPSHOT">
-      <teamDomain></teamDomain>
-      <token></token>
-      <room></room>
+        <teamDomain/>
+        <token/>
+        <room/>
       <startNotification>true</startNotification>
       <notifySuccess>true</notifySuccess>
       <notifyAborted>true</notifyAborted>
@@ -30,7 +30,7 @@
   <blockBuildWhenUpstreamBuilding>false</blockBuildWhenUpstreamBuilding>
   <triggers>
     <jenkins.triggers.ReverseBuildTrigger>
-      <spec></spec>
+        <spec/>
       <upstreamProjects>Test_01</upstreamProjects>
       <threshold>
         <name>SUCCESS</name>
@@ -48,8 +48,8 @@
   </builders>
   <publishers>
     <jenkins.plugins.slack.SlackNotifier plugin="slack@1.8.2-SNAPSHOT">
-      <teamDomain></teamDomain>
-      <authToken></authToken>
+        <teamDomain/>
+        <authToken/>
     </jenkins.plugins.slack.SlackNotifier>
   </publishers>
   <buildWrappers/>

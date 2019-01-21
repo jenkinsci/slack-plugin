@@ -10,6 +10,7 @@ import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.params.HttpParams;
 import org.apache.http.protocol.HttpContext;
 
+@SuppressWarnings("deprecation") // lots of deprecated abstract methods
 public class CloseableHttpClientStub extends CloseableHttpClient {
 
     private int numberOfCallsToExecuteMethod;
