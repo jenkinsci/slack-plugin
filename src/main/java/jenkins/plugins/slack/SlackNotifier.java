@@ -48,7 +48,7 @@ public class SlackNotifier extends Notifier {
     private String teamDomain;
     private String authToken;
     private String tokenCredentialId;
-    private Boolean botUser;
+    private boolean botUser;
     private String room;
     private String sendAs;
     private boolean startNotification;
@@ -406,8 +406,7 @@ public class SlackNotifier extends Notifier {
         String teamDomain = Util.fixEmpty(this.teamDomain) != null ? this.teamDomain : descriptor.getTeamDomain();
         String baseUrl = Util.fixEmpty(this.baseUrl) != null ? this.baseUrl : descriptor.getBaseUrl();
         String authToken = Util.fixEmpty(this.authToken) != null ? this.authToken : descriptor.getToken();
-        boolean botUser = this.botUser != null ? this.botUser :
-                descriptor.isBotUser() != null ?  descriptor.isBotUser() : false;
+        boolean botUser = this.botUser || descriptor.isBotUser();
         String authTokenCredentialId = Util.fixEmpty(this.tokenCredentialId) != null ? this.tokenCredentialId :
                 descriptor.getTokenCredentialId();
         String room = Util.fixEmpty(this.room) != null ? this.room : descriptor.getRoom();
@@ -460,7 +459,7 @@ public class SlackNotifier extends Notifier {
         private String teamDomain;
         private String token;
         private String tokenCredentialId;
-        private Boolean botUser;
+        private boolean botUser;
         private String room;
         private String sendAs;
 
@@ -504,7 +503,7 @@ public class SlackNotifier extends Notifier {
             this.tokenCredentialId = tokenCredentialId;
         }
 
-        public Boolean isBotUser() {
+        public boolean isBotUser() {
             return botUser;
         }
 
@@ -595,7 +594,7 @@ public class SlackNotifier extends Notifier {
                                                @QueryParameter("teamDomain") final String teamDomain,
                                                @QueryParameter("token") final String authToken,
                                                @QueryParameter("tokenCredentialId") final String tokenCredentialId,
-                                               @QueryParameter("botUser") final Boolean botUser,
+                                               @QueryParameter("botUser") final boolean botUser,
                                                @QueryParameter("room") final String room) {
 
             try {
@@ -610,7 +609,7 @@ public class SlackNotifier extends Notifier {
                 }
                 String targetDomain = Util.fixEmpty(teamDomain) != null ? teamDomain : this.teamDomain;
                 String targetToken = Util.fixEmpty(authToken) != null ? authToken : this.token;
-                boolean targetBotUser = botUser != null ? botUser : this.botUser != null ? this.botUser : false;
+                boolean targetBotUser = botUser ? botUser : this.botUser;
                 String targetTokenCredentialId = Util.fixEmpty(tokenCredentialId) != null ? tokenCredentialId :
                         this.tokenCredentialId;
                 String targetRoom = Util.fixEmpty(room) != null ? room : this.room;

@@ -45,7 +45,7 @@ public class SlackSendStep extends AbstractStepImpl {
     private String color;
     private String token;
     private String tokenCredentialId;
-    private Boolean botUser;
+    private boolean botUser;
     private String channel;
     private String baseUrl;
     private String teamDomain;
@@ -86,12 +86,12 @@ public class SlackSendStep extends AbstractStepImpl {
         this.tokenCredentialId = Util.fixEmpty(tokenCredentialId);
     }
 
-    public Boolean getBotUser() {
+    public boolean getBotUser() {
         return botUser;
     }
 
     @DataBoundSetter
-    public void setBotUser(Boolean botUser) {
+    public void setBotUser(boolean botUser) {
         this.botUser = botUser;
     }
 
@@ -227,7 +227,7 @@ public class SlackSendStep extends AbstractStepImpl {
             String tokenCredentialId = step.tokenCredentialId != null ? step.tokenCredentialId : slackDesc
                     .getTokenCredentialId();
             String token = step.token != null ? step.token : slackDesc.getToken();
-            boolean botUser = getBotUser(slackDesc);
+            boolean botUser = step.botUser || slackDesc.isBotUser();
             String channel = step.channel != null ? step.channel : slackDesc.getRoom();
             String color = step.color != null ? step.color : "";
 
@@ -293,10 +293,6 @@ public class SlackSendStep extends AbstractStepImpl {
                 listener.error(Messages.NotificationFailed());
             }
             return response;
-        }
-
-        private boolean getBotUser(SlackNotifier.DescriptorImpl slackDesc) {
-            return step.botUser != null ? step.botUser : slackDesc.isBotUser() != null ? slackDesc.isBotUser() : false;
         }
 
         private String defaultIfEmpty(String value) {
