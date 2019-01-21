@@ -25,22 +25,22 @@ public class GetProjectLogCommand extends SlackRouterCommand implements RouterCo
         List<String> log;
 
         try (ACLContext ignored = ACL.as(ACL.SYSTEM)) {
-            Project project =
-                Jenkins.getActiveInstance().getItemByFullName(projectName, Project.class);
+            Project project = Jenkins.getActiveInstance().getItemByFullName(projectName, Project.class);
 
-            if (project == null)
-                return new SlackTextMessage("Could not find project ("+projectName+")\n");
+            if (project == null) {
+                return new SlackTextMessage("Could not find project (" + projectName + ")\n");
+            }
 
-            AbstractBuild build =
-                project.getBuildByNumber(Integer.parseInt(buildNumber));
+            AbstractBuild build = project.getBuildByNumber(Integer.parseInt(buildNumber));
 
-            if (build == null)
-                return new SlackTextMessage("Could not find build #"+buildNumber+" for ("+projectName+")\n");
+            if (build == null) {
+                return new SlackTextMessage("Could not find build #" + buildNumber + " for (" + projectName + ")\n");
+            }
 
             log = build.getLog(25);
 
         } catch (IOException ex) {
-            return new SlackTextMessage("Error occurred returning log: "+ex.getMessage());
+            return new SlackTextMessage("Error occurred returning log: " + ex.getMessage());
         }
 
         StringBuilder builder = new StringBuilder("*" + projectName + "* *#" + buildNumber + "*\n```");

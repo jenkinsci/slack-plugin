@@ -73,8 +73,7 @@ public class WebhookEndpoint implements UnprotectedRootAction {
             commandText = commandText.trim().replaceFirst(triggerWord, "").trim();
         }
 
-        CommandRouter<SlackTextMessage> router =
-                new CommandRouter<>();
+        CommandRouter<SlackTextMessage> router = new CommandRouter<>();
 
         try {
             router.addRoute("^list projects",

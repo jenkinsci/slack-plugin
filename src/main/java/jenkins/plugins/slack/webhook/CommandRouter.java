@@ -15,10 +15,12 @@ public class CommandRouter<T> {
 
     public List<Route<T>> routes = new ArrayList<>();
 
-    public CommandRouter<T> addRoute(String regex,
-                                     String command,
-                                     String commandDescription,
-                                     RouterCommand<T> routerCommand) {
+    public CommandRouter<T> addRoute(
+            String regex,
+            String command,
+            String commandDescription,
+            RouterCommand<T> routerCommand
+    ) {
 
         this.routes.add(new CommandRouter.Route<>(regex,
                 command,
@@ -33,7 +35,6 @@ public class CommandRouter<T> {
     }
 
     public T route(String command) throws CommandRouterException {
-
         T message;
         for (Route<T> pa : routes) {
 
@@ -78,10 +79,12 @@ public class CommandRouter<T> {
         public String commandDescription;
         public RouterCommand<T> routerCommand;
 
-        public Route(String regex,
-                     String command,
-                     String commandDescription,
-                     RouterCommand<T> routerCommand) {
+        public Route(
+                String regex,
+                String command,
+                String commandDescription,
+                RouterCommand<T> routerCommand
+        ) {
 
             this.regex = Pattern.compile(regex);
             this.routerCommand = routerCommand;
