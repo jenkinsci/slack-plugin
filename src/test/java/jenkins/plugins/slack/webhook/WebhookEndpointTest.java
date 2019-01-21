@@ -51,7 +51,7 @@ public class WebhookEndpointTest {
 
     
     @Before
-    public void setUp() throws Exception {
+    public void setUp() {
         client = jenkinsRule.createWebClient();
         data = new ArrayList<NameValuePair>();
         data.add(new NameValuePair("token", "GOOD_TOKEN"));
@@ -59,7 +59,7 @@ public class WebhookEndpointTest {
     }
 
     @Test
-    public void testNotNullOutgoingWebhookUrl() throws Exception {
+    public void testNotNullOutgoingWebhookUrl() {
         WebhookEndpoint endpoint = new WebhookEndpoint();
         String url = endpoint.getUrlName();
         assertThat(url, is(not(nullValue())));

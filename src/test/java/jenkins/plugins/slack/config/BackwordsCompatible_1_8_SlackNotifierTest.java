@@ -92,7 +92,7 @@ public class BackwordsCompatible_1_8_SlackNotifierTest {
 
     @Test
     @LocalData
-    public void testGlobalSettingsNotOverridden() throws IOException {
+    public void testGlobalSettingsNotOverridden() {
         FreeStyleProject project = (FreeStyleProject) jenkins.getItem("Test_Slack_Plugin");
         SlackNotifier notifier = project.getPublishersList().get(SlackNotifier.class);
 
@@ -136,7 +136,7 @@ public class BackwordsCompatible_1_8_SlackNotifierTest {
 
     @Test
     @LocalData
-    public void testMigrationOfSomeJobs() throws IOException {
+    public void testMigrationOfSomeJobs() {
         // Project without Slack notifications
         FreeStyleProject project1 = (FreeStyleProject) jenkins.getItem("Test_01");
         assertNull(project1.getPublishersList().get(SlackNotifier.class));

@@ -47,8 +47,7 @@ public class WebhookEndpoint implements UnprotectedRootAction {
     }
 
     @RequirePOST
-    public HttpResponse doIndex(StaplerRequest req) throws IOException,
-        ServletException {
+    public HttpResponse doIndex(StaplerRequest req) {
 
         if (getGlobalConfig().getSlackOutgoingWebhookToken() == null ||
             getGlobalConfig().getSlackOutgoingWebhookToken().equals("")) {

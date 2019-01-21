@@ -16,7 +16,7 @@ public class CloseableHttpResponseStub implements CloseableHttpResponse {
     }
 
     @Override
-    public void close() throws IOException {
+    public void close() {
 
     }
 

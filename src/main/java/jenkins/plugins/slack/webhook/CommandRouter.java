@@ -36,8 +36,7 @@ public class CommandRouter<T> {
         return this.routes;
     }
 
-    public T route(String command) throws CommandRouterException,
-        RouteNotFoundException {
+    public T route(String command) throws CommandRouterException {
 
         T message = null;
 

@@ -26,7 +26,7 @@ public class MessageBuilderTest extends TestCase {
 
     @Before
     @Override
-    public void setUp() throws IOException, ExecutionException, InterruptedException {
+    public void setUp() {
         messageBuilder = new ActiveNotifier.MessageBuilder(null, build);
     }
 

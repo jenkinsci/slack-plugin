@@ -1,4 +1,4 @@
-package jenkins.plugins.slack.webhook.GlobalConfig;
+package jenkins.plugins.slack.webhook.GlobalConfig
 
 f = namespace('/lib/form')
 

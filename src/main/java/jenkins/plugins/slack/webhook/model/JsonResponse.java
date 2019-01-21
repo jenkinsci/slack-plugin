@@ -36,7 +36,7 @@ public class JsonResponse implements HttpResponse {
     @Override
     public void generateResponse(StaplerRequest req,
         StaplerResponse rsp,
-        Object o) throws IOException, ServletException {
+        Object o) throws IOException {
 
         rsp.setStatus(status);
         rsp.setContentType("application/json;charset=UTF-8");
