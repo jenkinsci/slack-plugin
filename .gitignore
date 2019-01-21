@@ -4,5 +4,4 @@ target
 *.iml
 .project
 .settings
-bin
 work

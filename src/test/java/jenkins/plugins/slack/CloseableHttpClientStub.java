@@ -3,7 +3,6 @@ package jenkins.plugins.slack;
 import org.apache.commons.httpclient.HttpStatus;
 import org.apache.http.HttpHost;
 import org.apache.http.HttpRequest;
-import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpUriRequest;
 import org.apache.http.conn.ClientConnectionManager;
@@ -11,8 +10,7 @@ import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.params.HttpParams;
 import org.apache.http.protocol.HttpContext;
 
-import java.io.IOException;
-
+@SuppressWarnings("deprecation") // lots of deprecated abstract methods
 public class CloseableHttpClientStub extends CloseableHttpClient {
 
     private int numberOfCallsToExecuteMethod;
@@ -34,7 +32,7 @@ public class CloseableHttpClientStub extends CloseableHttpClient {
     }
 
     @Override
-    public void close() throws IOException {
+    public void close() {
 
     }
 
@@ -44,7 +42,7 @@ public class CloseableHttpClientStub extends CloseableHttpClient {
     }
 
     @Override
-    protected CloseableHttpResponse doExecute(HttpHost httpHost, HttpRequest httpRequest, HttpContext httpContext) throws IOException, ClientProtocolException {
+    protected CloseableHttpResponse doExecute(HttpHost httpHost, HttpRequest httpRequest, HttpContext httpContext) {
         return null;
     }
 

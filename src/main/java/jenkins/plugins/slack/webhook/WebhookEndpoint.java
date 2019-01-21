@@ -14,12 +14,8 @@ import org.kohsuke.stapler.StaplerRequest;
 import org.kohsuke.stapler.StaplerResponse;
 import org.kohsuke.stapler.interceptor.RequirePOST;
 
-import java.io.IOException;
 import java.util.UUID;
 import java.util.logging.Logger;
-import javax.servlet.ServletException;
-
-
 
 
 @Extension
@@ -47,8 +43,7 @@ public class WebhookEndpoint implements UnprotectedRootAction {
     }
 
     @RequirePOST
-    public HttpResponse doIndex(StaplerRequest req) throws IOException,
-        ServletException {
+    public HttpResponse doIndex(StaplerRequest req) {
 
         if (getGlobalConfig().getSlackOutgoingWebhookToken() == null ||
             getGlobalConfig().getSlackOutgoingWebhookToken().equals("")) {
@@ -78,8 +73,7 @@ public class WebhookEndpoint implements UnprotectedRootAction {
             commandText = commandText.trim().replaceFirst(triggerWord, "").trim();
         }
 
-        CommandRouter<SlackTextMessage> router =
-            new CommandRouter<SlackTextMessage>();
+        CommandRouter<SlackTextMessage> router = new CommandRouter<>();
 
         try {
             router.addRoute("^list projects",

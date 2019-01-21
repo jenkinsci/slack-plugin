@@ -1,6 +1,5 @@
 package jenkins.plugins.slack.webhook.model;
 
-
 import org.kohsuke.stapler.HttpResponse;
 import org.kohsuke.stapler.StaplerRequest;
 import org.kohsuke.stapler.StaplerResponse;
@@ -9,14 +8,9 @@ import java.io.IOException;
 
 import net.sf.json.JSONObject;
 
-import javax.servlet.ServletException;
-
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-
-
-
 
 public class JsonResponse implements HttpResponse {
     private int status;
@@ -36,7 +30,7 @@ public class JsonResponse implements HttpResponse {
     @Override
     public void generateResponse(StaplerRequest req,
         StaplerResponse rsp,
-        Object o) throws IOException, ServletException {
+        Object o) throws IOException {
 
         rsp.setStatus(status);
         rsp.setContentType("application/json;charset=UTF-8");

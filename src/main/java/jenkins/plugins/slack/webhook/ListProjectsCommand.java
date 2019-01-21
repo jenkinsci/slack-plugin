@@ -1,6 +1,7 @@
 package jenkins.plugins.slack.webhook;
 
 
+import hudson.security.ACLContext;
 import jenkins.model.Jenkins;
 
 import hudson.model.Result;
@@ -14,12 +15,6 @@ import java.util.List;
 import jenkins.plugins.slack.webhook.model.SlackPostData;
 import jenkins.plugins.slack.webhook.model.SlackTextMessage;
 
-import org.acegisecurity.context.SecurityContext;
-import org.acegisecurity.context.SecurityContextHolder;
-
-
-
-
 public class ListProjectsCommand extends SlackRouterCommand implements RouterCommand<SlackTextMessage> {
 
     public ListProjectsCommand(SlackPostData data) { 
@@ -28,15 +23,12 @@ public class ListProjectsCommand extends SlackRouterCommand implements RouterCom
 
     @Override
     public SlackTextMessage execute(String... args) {
+        List<AbstractProject> jobs;
+        try (ACLContext ignored = ACL.as(ACL.SYSTEM)) {
+            Jenkins jenkins = Jenkins.getActiveInstance();
 
-        SecurityContext ctx = ACL.impersonate(ACL.SYSTEM);
-
-        Jenkins jenkins = Jenkins.getActiveInstance();
-
-        List<AbstractProject> jobs =
-            jenkins.getAllItems(AbstractProject.class);
-
-        SecurityContextHolder.setContext(ctx);
+            jobs = jenkins.getAllItems(AbstractProject.class);
+        }
 
         StringBuilder builder = new StringBuilder("*Projects:*\n");
         for (AbstractProject job : jobs) {

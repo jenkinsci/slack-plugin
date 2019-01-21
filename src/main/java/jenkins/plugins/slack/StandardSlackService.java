@@ -1,28 +1,17 @@
 package jenkins.plugins.slack;
 
-import hudson.security.ACL;
-
-import net.sf.json.JSONArray;
-import net.sf.json.JSONObject;
-
-import org.jenkinsci.plugins.plaincredentials.StringCredentials;
-
 import com.cloudbees.plugins.credentials.CredentialsMatcher;
 import com.cloudbees.plugins.credentials.CredentialsMatchers;
-import com.cloudbees.plugins.credentials.domains.DomainRequirement;
-
-import java.io.UnsupportedEncodingException;
-import java.net.URLEncoder;
-import java.util.Collections;
-import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-import java.util.ArrayList;
-
-import jenkins.model.Jenkins;
 import hudson.ProxyConfiguration;
-
+import hudson.security.ACL;
+import jenkins.model.Jenkins;
+import net.sf.json.JSONArray;
+import net.sf.json.JSONObject;
 import org.apache.commons.lang.StringUtils;
+import org.apache.http.HttpEntity;
+import org.apache.http.HttpHost;
+import org.apache.http.HttpStatus;
+import org.apache.http.NameValuePair;
 import org.apache.http.auth.AuthScope;
 import org.apache.http.auth.UsernamePasswordCredentials;
 import org.apache.http.client.CredentialsProvider;
@@ -37,10 +26,15 @@ import org.apache.http.impl.client.HttpClients;
 import org.apache.http.impl.conn.DefaultProxyRoutePlanner;
 import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.util.EntityUtils;
-import org.apache.http.HttpEntity;
-import org.apache.http.HttpHost;
-import org.apache.http.HttpStatus;
-import org.apache.http.NameValuePair;
+import org.jenkinsci.plugins.plaincredentials.StringCredentials;
+
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class StandardSlackService implements SlackService {
 
@@ -113,7 +107,7 @@ public class StandardSlackService implements SlackService {
             HttpPost post;
             String url;
             String threadTs = "";
-            List<NameValuePair> nvps = new ArrayList<NameValuePair>();
+            List<NameValuePair> nvps = new ArrayList<>();
 
             //thread_ts is passed once with roomId: Ex: roomId:threadTs
             String[] splitThread = roomId.split("[:]+");
@@ -201,7 +195,7 @@ public class StandardSlackService implements SlackService {
     }
 
     private StringCredentials lookupCredentials(String credentialId) {
-        List<StringCredentials> credentials = com.cloudbees.plugins.credentials.CredentialsProvider.lookupCredentials(StringCredentials.class, Jenkins.getInstance(), ACL.SYSTEM, Collections.<DomainRequirement>emptyList());
+        List<StringCredentials> credentials = com.cloudbees.plugins.credentials.CredentialsProvider.lookupCredentials(StringCredentials.class, Jenkins.getInstance(), ACL.SYSTEM, Collections.emptyList());
         CredentialsMatcher matcher = CredentialsMatchers.withId(credentialId);
         return CredentialsMatchers.firstOrNull(credentials, matcher);
     }
@@ -211,7 +205,7 @@ public class StandardSlackService implements SlackService {
     	final CredentialsProvider credentialsProvider = new BasicCredentialsProvider();
     	clientBuilder.setDefaultCredentialsProvider(credentialsProvider);
 
-        Jenkins jenkins = Jenkins.getInstance();
+        Jenkins jenkins = Jenkins.getInstanceOrNull();
         if (jenkins != null) {
             ProxyConfiguration proxy = jenkins.proxy;
             if (proxy != null) {
@@ -225,7 +219,7 @@ public class StandardSlackService implements SlackService {
                 if (username != null && !"".equals(username.trim())) {
                     logger.info("Using proxy authentication (user=" + username + ")");
                     credentialsProvider.setCredentials(new AuthScope(proxyHost),
-                    								   new UsernamePasswordCredentials(username, password));
+                            new UsernamePasswordCredentials(username, password));
                 }
             }
         }
