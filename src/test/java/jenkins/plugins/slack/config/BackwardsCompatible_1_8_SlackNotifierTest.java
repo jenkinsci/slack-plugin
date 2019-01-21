@@ -78,7 +78,7 @@ public class BackwardsCompatible_1_8_SlackNotifierTest {
 
         assertEquals("", notifier.getTeamDomain());
         assertEquals("", notifier.getAuthToken());
-        assertFalse(notifier.getBotUser());
+        assertEquals(false, notifier.getBotUser());
         assertEquals("", notifier.getRoom());
 
         assertFalse(notifier.getStartNotification());
@@ -134,7 +134,7 @@ public class BackwardsCompatible_1_8_SlackNotifierTest {
 
         assertEquals("", notifier.getTeamDomain());
         assertEquals("", notifier.getAuthToken());
-        assertFalse(notifier.getBotUser());
+        assertEquals(false, notifier.getBotUser());
         assertEquals("", notifier.getRoom());
 
         assertTrue(notifier.getStartNotification());
