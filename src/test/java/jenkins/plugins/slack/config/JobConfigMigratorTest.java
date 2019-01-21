@@ -1,6 +1,5 @@
 package jenkins.plugins.slack.config;
 
-import static org.mockito.Matchers.*;
 import static org.mockito.Mockito.*;
 import hudson.model.Job;
 

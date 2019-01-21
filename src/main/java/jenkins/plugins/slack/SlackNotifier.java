@@ -32,11 +32,12 @@ import org.kohsuke.stapler.QueryParameter;
 import org.kohsuke.stapler.StaplerRequest;
 import org.kohsuke.stapler.export.Exported;
 
-import java.io.IOException;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Stream;
+
+import javax.annotation.Nonnull;
 
 import static com.cloudbees.plugins.credentials.CredentialsProvider.lookupCredentials;
 
@@ -72,12 +73,14 @@ public class SlackNotifier extends Notifier {
     private String customMessageFailure;
 
     /** @deprecated use {@link #tokenCredentialId} */
+    @SuppressWarnings("DeprecatedIsStillUsed")
     private transient String authTokenCredentialId;
 
     public String getAuthTokenCredentialId() {
         return tokenCredentialId;
     }
 
+    @SuppressWarnings("deprecation")
     private Object readResolve() {
         if (this.authTokenCredentialId != null) {
             this.tokenCredentialId = authTokenCredentialId;
@@ -433,12 +436,12 @@ public class SlackNotifier extends Notifier {
     }
 
     @Override
-    public boolean perform(AbstractBuild<?, ?> build, Launcher launcher, BuildListener listener) throws InterruptedException, IOException {
+    public boolean perform(AbstractBuild<?, ?> build, Launcher launcher, BuildListener listener) {
         logger.info("Performing complete notifications");
-        new ActiveNotifier((SlackNotifier) this, listener).completed(build);
+        new ActiveNotifier(this, listener).completed(build);
         if (notifyRegression) {
             logger.info("Performing finalize notifications");
-            new ActiveNotifier((SlackNotifier) this, listener).finalized(build);
+            new ActiveNotifier(this, listener).finalized(build);
         }
         return true;
     }
@@ -447,7 +450,7 @@ public class SlackNotifier extends Notifier {
     public boolean prebuild(AbstractBuild<?, ?> build, BuildListener listener) {
         if (startNotification) {
             logger.info("Performing start notifications");
-            new ActiveNotifier((SlackNotifier) this, listener).started(build);
+            new ActiveNotifier(this, listener).started(build);
         }
         return super.prebuild(build, listener);
     }
@@ -585,6 +588,7 @@ public class SlackNotifier extends Notifier {
             return new StandardSlackService(baseUrl, teamDomain, authToken, authTokenCredentialId, botUser, room);
         }
 
+        @Nonnull
         @Override
         public String getDisplayName() {
             return "Slack Notifications";
@@ -609,7 +613,7 @@ public class SlackNotifier extends Notifier {
                 }
                 String targetDomain = Util.fixEmpty(teamDomain) != null ? teamDomain : this.teamDomain;
                 String targetToken = Util.fixEmpty(authToken) != null ? authToken : this.token;
-                boolean targetBotUser = botUser ? botUser : this.botUser;
+                boolean targetBotUser = botUser || this.botUser;
                 String targetTokenCredentialId = Util.fixEmpty(tokenCredentialId) != null ? tokenCredentialId :
                         this.tokenCredentialId;
                 String targetRoom = Util.fixEmpty(room) != null ? room : this.room;
@@ -833,7 +837,6 @@ public class SlackNotifier extends Notifier {
                     if (!migrator.migrate(item)) {
                         logger.info(String.format("Skipping job \"%s\" with type %s", item.getName(),
                                 item.getClass().getName()));
-                        continue;
                     }
                 }
             }
