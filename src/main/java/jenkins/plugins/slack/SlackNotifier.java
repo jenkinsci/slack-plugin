@@ -5,6 +5,7 @@ import com.cloudbees.plugins.credentials.domains.HostnameRequirement;
 import hudson.EnvVars;
 import hudson.Extension;
 import hudson.Launcher;
+import hudson.Util;
 import hudson.model.AbstractBuild;
 import hudson.model.AbstractProject;
 import hudson.model.BuildListener;
@@ -46,7 +47,7 @@ public class SlackNotifier extends Notifier {
     private String teamDomain;
     private String authToken;
     private String tokenCredentialId;
-    private boolean botUser;
+    private Boolean botUser;
     private String room;
     private String sendAs;
     private boolean startNotification;
@@ -400,30 +401,13 @@ public class SlackNotifier extends Notifier {
     }
 
     public SlackService newSlackService(AbstractBuild r, BuildListener listener) {
-        String teamDomain = this.teamDomain;
-        if (StringUtils.isEmpty(teamDomain)) {
-            teamDomain = getDescriptor().getTeamDomain();
-        }
-
-        String baseUrl = this.baseUrl;
-        if (StringUtils.isEmpty(baseUrl)) {
-            baseUrl = getDescriptor().getBaseUrl();
-        }
-
-        String authToken = this.authToken;
-        if (StringUtils.isEmpty(authToken)) {
-            authToken = getDescriptor().getToken();
-            botUser = getDescriptor().isBotUser();
-        }
-        String authTokenCredentialId = this.tokenCredentialId;
-
-        if (StringUtils.isEmpty(authTokenCredentialId)) {
-            authTokenCredentialId = getDescriptor().getTokenCredentialId();
-        }
-        String room = this.room;
-        if (StringUtils.isEmpty(room)) {
-            room = getDescriptor().getRoom();
-        }
+        String teamDomain = Util.fixEmpty(this.teamDomain) != null ? this.teamDomain : getDescriptor().getTeamDomain();
+        String baseUrl = Util.fixEmpty(this.baseUrl) != null ? this.baseUrl : getDescriptor().getBaseUrl();
+        String authToken = Util.fixEmpty(this.authToken) != null ? this.authToken : getDescriptor().getToken();
+        boolean botUser = this.botUser != null ? this.botUser : getDescriptor().isBotUser();
+        String authTokenCredentialId = Util.fixEmpty(this.tokenCredentialId) != null ? this.tokenCredentialId :
+                getDescriptor().getTokenCredentialId();
+        String room = Util.fixEmpty(this.room) != null ? this.room : getDescriptor().getRoom();
 
         EnvVars env;
         try {
@@ -473,7 +457,7 @@ public class SlackNotifier extends Notifier {
         private String teamDomain;
         private String token;
         private String tokenCredentialId;
-        private boolean botUser;
+        private Boolean botUser;
         private String room;
         private String sendAs;
 
@@ -517,7 +501,7 @@ public class SlackNotifier extends Notifier {
             this.tokenCredentialId = tokenCredentialId;
         }
 
-        public boolean isBotUser() {
+        public Boolean isBotUser() {
             return botUser;
         }
 
