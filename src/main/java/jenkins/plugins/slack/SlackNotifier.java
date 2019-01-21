@@ -401,13 +401,15 @@ public class SlackNotifier extends Notifier {
     }
 
     public SlackService newSlackService(AbstractBuild r, BuildListener listener) {
-        String teamDomain = Util.fixEmpty(this.teamDomain) != null ? this.teamDomain : getDescriptor().getTeamDomain();
-        String baseUrl = Util.fixEmpty(this.baseUrl) != null ? this.baseUrl : getDescriptor().getBaseUrl();
-        String authToken = Util.fixEmpty(this.authToken) != null ? this.authToken : getDescriptor().getToken();
-        boolean botUser = this.botUser != null ? this.botUser : getDescriptor().isBotUser();
+        DescriptorImpl descriptor = getDescriptor();
+        String teamDomain = Util.fixEmpty(this.teamDomain) != null ? this.teamDomain : descriptor.getTeamDomain();
+        String baseUrl = Util.fixEmpty(this.baseUrl) != null ? this.baseUrl : descriptor.getBaseUrl();
+        String authToken = Util.fixEmpty(this.authToken) != null ? this.authToken : descriptor.getToken();
+        boolean botUser = this.botUser != null ? this.botUser :
+                descriptor.isBotUser() != null ?  descriptor.isBotUser() : false;
         String authTokenCredentialId = Util.fixEmpty(this.tokenCredentialId) != null ? this.tokenCredentialId :
-                getDescriptor().getTokenCredentialId();
-        String room = Util.fixEmpty(this.room) != null ? this.room : getDescriptor().getRoom();
+                descriptor.getTokenCredentialId();
+        String room = Util.fixEmpty(this.room) != null ? this.room : descriptor.getRoom();
 
         EnvVars env;
         try {

@@ -227,7 +227,7 @@ public class SlackSendStep extends AbstractStepImpl {
             String tokenCredentialId = step.tokenCredentialId != null ? step.tokenCredentialId : slackDesc
                     .getTokenCredentialId();
             String token = step.token != null ? step.token : slackDesc.getToken();
-            boolean botUser = step.botUser != null ? step.botUser : slackDesc.isBotUser();
+            boolean botUser = getBotUser(slackDesc);
             String channel = step.channel != null ? step.channel : slackDesc.getRoom();
             String color = step.color != null ? step.color : "";
 
@@ -293,6 +293,10 @@ public class SlackSendStep extends AbstractStepImpl {
                 listener.error(Messages.NotificationFailed());
             }
             return response;
+        }
+
+        private boolean getBotUser(SlackNotifier.DescriptorImpl slackDesc) {
+            return step.botUser != null ? step.botUser : slackDesc.isBotUser() != null ? slackDesc.isBotUser() : false;
         }
 
         private String defaultIfEmpty(String value) {
