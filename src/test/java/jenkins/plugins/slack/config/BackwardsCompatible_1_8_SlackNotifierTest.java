@@ -35,6 +35,16 @@ public class BackwardsCompatible_1_8_SlackNotifierTest {
     @Test
     @LocalData
     public void testBasicMigration() {
+        runBasicTest();
+    }
+
+    @Test
+    @LocalData
+    public void testGlobalSettingsOverriden() {
+        runBasicTest();
+    }
+
+    private void runBasicTest() {
         FreeStyleProject project = (FreeStyleProject) jenkins.getItem("Test_Slack_Plugin");
         SlackNotifier notifier = project.getPublishersList().get(SlackNotifier.class);
 
