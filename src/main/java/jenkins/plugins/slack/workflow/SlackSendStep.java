@@ -280,7 +280,7 @@ public class SlackSendStep extends AbstractStepImpl {
                         org.json.JSONObject result = new org.json.JSONObject(responseString);
                         response = new SlackResponse(result);
                     } catch (org.json.JSONException ex) {
-                        listener.error(Messages.FailedToParseSlackResponse());
+                        listener.error(Messages.FailedToParseSlackResponse(responseString));
                         if (step.failOnError) {
                             throw ex;
                         }
