@@ -9,6 +9,7 @@ import com.cloudbees.plugins.credentials.domains.Domain;
 import hudson.Util;
 import hudson.util.Secret;
 import jenkins.model.Jenkins;
+import jenkins.plugins.slack.Messages;
 import jenkins.plugins.slack.SlackNotifier;
 import org.jenkinsci.plugins.plaincredentials.impl.StringCredentialsImpl;
 
@@ -29,12 +30,12 @@ public class GlobalCredentialMigrator {
     public StandardCredentials migrate(SlackNotifier.DescriptorImpl descriptor) throws IOException {
         String token = descriptor.getToken();
         if (Util.fixEmpty(token) != null) {
-            LOGGER.info("Migrating global config: Moving integration token text into a credential");
+            LOGGER.info("Migrating slack global config: moving integration token text into a credential");
 
             StandardCredentials credentials = new StringCredentialsImpl(
                     CredentialsScope.SYSTEM,
                     UUID.randomUUID().toString(),
-                    "Migrated slack token text",
+                    Messages.MigratedCredentialDescription(),
                     Secret.fromString(token)
             );
 
