@@ -181,7 +181,7 @@ public class SlackSendStep extends AbstractStepImpl {
 
         public ListBoxModel doFillTokenCredentialIdItems(@AncestorInPath Project project) {
 
-            Jenkins jenkins = Jenkins.getActiveInstance();
+            Jenkins jenkins = Jenkins.get();
 
             if (project == null && !jenkins.hasPermission(Jenkins.ADMINISTER) ||
                     project != null && !project.hasPermission(Item.EXTENDED_READ)) {
@@ -219,7 +219,7 @@ public class SlackSendStep extends AbstractStepImpl {
         @Override
         protected SlackResponse run() throws Exception {
 
-            Jenkins jenkins = Jenkins.getActiveInstance();
+            Jenkins jenkins = Jenkins.get();
 
             SlackNotifier.DescriptorImpl slackDesc = jenkins.getDescriptorByType(SlackNotifier.DescriptorImpl.class);
 

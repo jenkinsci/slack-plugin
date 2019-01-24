@@ -32,7 +32,7 @@ import static org.mockito.Mockito.when;
 import static org.powermock.api.mockito.PowerMockito.spy;
 
 /**
- * Traditional Unit tests, allows testing null Jenkins.getActiveInstance()
+ * Traditional Unit tests, allows testing null Jenkins.get()
  */
 @RunWith(PowerMockRunner.class)
 @PrepareForTest({Jenkins.class,SlackSendStep.class})
@@ -73,7 +73,7 @@ public class SlackSendStepTest {
         slackSendStep.setColor("good");
         stepExecution.step = slackSendStep;
 
-        when(Jenkins.getActiveInstance()).thenReturn(jenkins);
+        when(Jenkins.get()).thenReturn(jenkins);
 
         stepExecution.listener = taskListenerMock;
 
@@ -106,7 +106,7 @@ public class SlackSendStepTest {
         stepExecution.step.setAttachments(attachments.toString());
         ((JSONObject) attachments.get(0)).put("fallback", "message");
 
-        when(Jenkins.getActiveInstance()).thenReturn(jenkins);
+        when(Jenkins.get()).thenReturn(jenkins);
 
         stepExecution.listener = taskListenerMock;
 
@@ -129,7 +129,7 @@ public class SlackSendStepTest {
         stepExecution.step = new SlackSendStep();
         stepExecution.step.setMessage("message");
 
-        when(Jenkins.getActiveInstance()).thenReturn(jenkins);
+        when(Jenkins.get()).thenReturn(jenkins);
 
         stepExecution.listener = taskListenerMock;
 
@@ -164,7 +164,7 @@ public class SlackSendStepTest {
         stepExecution.step.setMessage("message");
         stepExecution.step.setReplyBroadcast(true);
 
-        when(Jenkins.getActiveInstance()).thenReturn(jenkins);
+        when(Jenkins.get()).thenReturn(jenkins);
 
         stepExecution.listener = taskListenerMock;
 
@@ -194,7 +194,7 @@ public class SlackSendStepTest {
         slackSendStep.setColor("");
         stepExecution.step = slackSendStep;
 
-        when(Jenkins.getActiveInstance()).thenReturn(jenkins);
+        when(Jenkins.get()).thenReturn(jenkins);
 
         stepExecution.listener = taskListenerMock;
 
@@ -223,7 +223,7 @@ public class SlackSendStepTest {
         slackSendStep.setColor("good");
         stepExecution.step = slackSendStep;
 
-        when(Jenkins.getActiveInstance()).thenReturn(jenkins);
+        when(Jenkins.get()).thenReturn(jenkins);
 
         stepExecution.listener = taskListenerMock;
         when(taskListenerMock.getLogger()).thenReturn(printStreamMock);
@@ -263,7 +263,7 @@ public class SlackSendStepTest {
         slackSendStep.setColor("good");
         stepExecution.step = slackSendStep;
 
-        when(Jenkins.getActiveInstance()).thenReturn(jenkins);
+        when(Jenkins.get()).thenReturn(jenkins);
 
         stepExecution.listener = taskListenerMock;
         when(taskListenerMock.getLogger()).thenReturn(printStreamMock);
