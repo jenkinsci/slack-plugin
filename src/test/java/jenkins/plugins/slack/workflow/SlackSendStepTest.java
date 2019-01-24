@@ -77,7 +77,6 @@ public class SlackSendStepTest {
 
         stepExecution.listener = taskListenerMock;
 
-        when(slackDescMock.getToken()).thenReturn("differentToken");
         when(slackDescMock.isBotUser()).thenReturn(false);
 
         when(taskListenerMock.getLogger()).thenReturn(printStreamMock);
@@ -135,7 +134,6 @@ public class SlackSendStepTest {
 
         when(slackDescMock.getBaseUrl()).thenReturn("globalBaseUrl");
         when(slackDescMock.getTeamDomain()).thenReturn("globalTeamDomain");
-        when(slackDescMock.getToken()).thenReturn("globalToken");
         when(slackDescMock.getTokenCredentialId()).thenReturn("globalTokenCredentialId");
         when(slackDescMock.isBotUser()).thenReturn(false);
         when(slackDescMock.getRoom()).thenReturn("globalChannel");
@@ -170,7 +168,6 @@ public class SlackSendStepTest {
 
         when(slackDescMock.getBaseUrl()).thenReturn("globalBaseUrl");
         when(slackDescMock.getTeamDomain()).thenReturn("globalTeamDomain");
-        when(slackDescMock.getToken()).thenReturn("globalToken");
         when(slackDescMock.getTokenCredentialId()).thenReturn("globalTokenCredentialId");
         when(slackDescMock.isBotUser()).thenReturn(false);
         when(slackDescMock.getRoom()).thenReturn("globalChannel");

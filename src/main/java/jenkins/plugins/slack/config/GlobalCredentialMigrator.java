@@ -27,14 +27,15 @@ public class GlobalCredentialMigrator {
 
     @CheckForNull
     public StandardCredentials migrate(SlackNotifier.DescriptorImpl descriptor) throws IOException {
-        if (Util.fixEmpty(descriptor.getToken()) != null) {
+        String token = descriptor.getToken();
+        if (Util.fixEmpty(token) != null) {
             LOGGER.info("Migrating global config: Moving integration token text into a credential");
 
             StandardCredentials credentials = new StringCredentialsImpl(
                     CredentialsScope.SYSTEM,
                     UUID.randomUUID().toString(),
                     "Migrated slack token text",
-                    Secret.fromString(descriptor.getToken())
+                    Secret.fromString(token)
             );
 
             Domain global = Domain.global();
