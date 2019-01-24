@@ -586,7 +586,7 @@ public class SlackNotifier extends Notifier {
 
         public ListBoxModel doFillTokenCredentialIdItems(@AncestorInPath Item context) {
 
-            Jenkins jenkins = Jenkins.getActiveInstance();
+            Jenkins jenkins = Jenkins.get();
 
             if(context == null && !jenkins.hasPermission(Jenkins.ADMINISTER) ||
                     context != null && !context.hasPermission(Item.EXTENDED_READ)) {
@@ -866,7 +866,7 @@ public class SlackNotifier extends Notifier {
 
             ItemConfigMigrator migrator = new ItemConfigMigrator();
 
-            Jenkins jenkins = Jenkins.getActiveInstance();
+            Jenkins jenkins = Jenkins.get();
 
             List<Item> items = jenkins.getAllItems();
             if (null != items) {

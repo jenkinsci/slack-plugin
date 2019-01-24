@@ -19,7 +19,7 @@ public class ScheduleJobCommand extends SlackRouterCommand implements RouterComm
         String projectName = args[0];
 
         try (ACLContext ignored = ACL.as(ACL.SYSTEM)) {
-            Jenkins jenkins = Jenkins.getActiveInstance();
+            Jenkins jenkins = Jenkins.get();
 
             Project project =
                     jenkins.getItemByFullName(projectName, Project.class);

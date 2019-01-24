@@ -25,7 +25,7 @@ public class GetProjectLogCommand extends SlackRouterCommand implements RouterCo
         List<String> log;
 
         try (ACLContext ignored = ACL.as(ACL.SYSTEM)) {
-            Project project = Jenkins.getActiveInstance().getItemByFullName(projectName, Project.class);
+            Project project = Jenkins.get().getItemByFullName(projectName, Project.class);
 
             if (project == null) {
                 return new SlackTextMessage("Could not find project (" + projectName + ")\n");

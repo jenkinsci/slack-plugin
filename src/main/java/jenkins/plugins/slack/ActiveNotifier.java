@@ -230,7 +230,7 @@ public class ActiveNotifier implements FineGrainedNotifier {
             }
             String upProjectName = c.getUpstreamProject();
             int buildNumber = c.getUpstreamBuild();
-            AbstractProject project = Jenkins.getActiveInstance().getItemByFullName(upProjectName, AbstractProject.class);
+            AbstractProject project = Jenkins.get().getItemByFullName(upProjectName, AbstractProject.class);
             if (project != null) {
                 AbstractBuild upBuild = project.getBuildByNumber(buildNumber);
                 return getCommitList(upBuild);

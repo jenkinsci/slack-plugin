@@ -17,6 +17,8 @@
 
     <properties>
         <jenkins.version>2.138.1</jenkins.version>
+        <hpi.compatibleSinceVersion>2.0</hpi.compatibleSinceVersion>
+
         <revision>2.4</revision>
         <changelist>-SNAPSHOT</changelist>
         <java.level>8</java.level>
@@ -225,9 +227,6 @@
             <plugin>
                 <groupId>org.jenkins-ci.tools</groupId>
                 <artifactId>maven-hpi-plugin</artifactId>
-                <configuration>
-                    <compatibleSinceVersion>2.0</compatibleSinceVersion>
-                </configuration>
             </plugin>
         </plugins>
     </build>
