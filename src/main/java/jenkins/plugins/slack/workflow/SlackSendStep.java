@@ -173,6 +173,7 @@ public class SlackSendStep extends AbstractStepImpl {
             return "slackSend";
         }
 
+        @Nonnull
         @Override
         public String getDisplayName() {
             return Messages.SlackSendStepDisplayName();
@@ -221,28 +222,24 @@ public class SlackSendStep extends AbstractStepImpl {
             Jenkins jenkins = Jenkins.getActiveInstance();
 
             SlackNotifier.DescriptorImpl slackDesc = jenkins.getDescriptorByType(SlackNotifier.DescriptorImpl.class);
-            listener.getLogger().println("run slackstepsend, step " + step.botUser + ", desc " + slackDesc.isBotUser());
 
             String baseUrl = step.baseUrl != null ? step.baseUrl : slackDesc.getBaseUrl();
-            String team = step.teamDomain != null ? step.teamDomain : slackDesc.getTeamDomain();
+            String teamDomain = step.teamDomain != null ? step.teamDomain : slackDesc.getTeamDomain();
             String tokenCredentialId = step.tokenCredentialId != null ? step.tokenCredentialId : slackDesc
                     .getTokenCredentialId();
-            String token;
-            Boolean botUser;
-            if (step.token != null) {
-                token = step.token;
-                botUser = step.botUser;
-            } else {
-                botUser = slackDesc.isBotUser();
-            }
+            String token = step.token;
+            boolean botUser = step.botUser || slackDesc.isBotUser();
             String channel = step.channel != null ? step.channel : slackDesc.getRoom();
             String color = step.color != null ? step.color : "";
 
-            //placing in console log to simplify testing of retrieving values from global config or from step field; also used for tests
-            listener.getLogger().println(Messages
-                    .SlackSendStepConfig(step.baseUrl == null, step.teamDomain == null, step.token == null, step.channel == null, step.color == null));
+            listener.getLogger().println(Messages.SlackSendStepValues(
+                    defaultIfEmpty(baseUrl), defaultIfEmpty(teamDomain), channel, defaultIfEmpty(color), botUser,
+                    defaultIfEmpty(tokenCredentialId))
+            );
 
-            SlackService slackService = getSlackService(baseUrl, team, token, tokenCredentialId, botUser, channel, step.replyBroadcast);
+            SlackService slackService = getSlackService(
+                    baseUrl, teamDomain, token, tokenCredentialId, botUser, channel, step.replyBroadcast
+            );
             boolean publishSuccess;
             if (step.attachments != null) {
                 JsonSlurper jsonSlurper = new JsonSlurper();
@@ -283,7 +280,7 @@ public class SlackSendStep extends AbstractStepImpl {
                         org.json.JSONObject result = new org.json.JSONObject(responseString);
                         response = new SlackResponse(result);
                     } catch (org.json.JSONException ex) {
-                        listener.error(Messages.FailedToParseSlackResponse());
+                        listener.error(Messages.FailedToParseSlackResponse(responseString));
                         if (step.failOnError) {
                             throw ex;
                         }
@@ -297,6 +294,10 @@ public class SlackSendStep extends AbstractStepImpl {
                 listener.error(Messages.NotificationFailed());
             }
             return response;
+        }
+
+        private String defaultIfEmpty(String value) {
+            return Util.fixEmpty(value) != null ? value : Messages.SlackSendStepValuesEmptyMessage();
         }
 
         //streamline unit testing

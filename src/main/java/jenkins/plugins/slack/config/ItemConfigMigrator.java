@@ -103,10 +103,7 @@ public class ItemConfigMigrator {
 
         Method method = ReflectionUtils.findMethod(item.getClass(), "getPublishersList");
 
-        if (method != null && method.getReturnType().equals(DescribableList.class)) {
-            return true;
-        }
+        return method != null && method.getReturnType().equals(DescribableList.class);
 
-        return false;
     }
 }

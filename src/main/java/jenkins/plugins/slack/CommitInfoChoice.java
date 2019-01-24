@@ -9,7 +9,7 @@ public enum CommitInfoChoice {
     private boolean showAuthor;
     private boolean showTitle;
 
-    private CommitInfoChoice(String displayName, boolean showAuthor, boolean showTitle) {
+    CommitInfoChoice(String displayName, boolean showAuthor, boolean showTitle) {
         this.displayName = displayName;
         this.showAuthor = showAuthor;
         this.showTitle = showTitle;
