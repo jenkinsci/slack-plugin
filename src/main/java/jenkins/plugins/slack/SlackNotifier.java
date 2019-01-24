@@ -6,6 +6,7 @@ import com.cloudbees.plugins.credentials.domains.HostnameRequirement;
 import edu.umd.cs.findbugs.annotations.CheckForNull;
 import hudson.EnvVars;
 import hudson.Extension;
+import hudson.ExtensionList;
 import hudson.Launcher;
 import hudson.init.InitMilestone;
 import hudson.init.Initializer;
@@ -463,21 +464,12 @@ public class SlackNotifier extends Notifier {
 
     @Initializer(after = InitMilestone.JOB_LOADED, before = InitMilestone.COMPLETED)
     public static void migrateTokenToCredential() throws IOException {
-        DescriptorImpl descriptor = descriptor();
-
-        if (descriptor != null) {
-            descriptor.migrateTokenToCredential();
-        }
+        descriptor().migrateTokenToCredential();
     }
 
-    @CheckForNull
     private static DescriptorImpl descriptor() {
-        // TODO rework to lookupSingleton after updating baseline
-        Jenkins instance = Jenkins.getInstanceOrNull();
-        return instance == null ? null : instance.getDescriptorByType(DescriptorImpl.class);
+        return ExtensionList.lookupSingleton(SlackNotifier.DescriptorImpl.class);
     }
-
-
 
     @Extension @Symbol("slackNotifier")
     public static class DescriptorImpl extends BuildStepDescriptor<Publisher> {

@@ -49,7 +49,7 @@ public class SlackSendStep extends Step {
     private String color;
     private String token;
     private String tokenCredentialId;
-    private Boolean botUser;
+    private boolean botUser;
     private String channel;
     private String baseUrl;
     private String teamDomain;

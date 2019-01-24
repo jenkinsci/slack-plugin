@@ -25,7 +25,6 @@ public class GlobalCredentialMigrator {
     private static final Logger LOGGER = Logger.getLogger(GlobalCredentialMigrator.class
             .getName());
 
-
     @CheckForNull
     public StandardCredentials migrate(SlackNotifier.DescriptorImpl descriptor) throws IOException {
         String token = descriptor.getToken();
