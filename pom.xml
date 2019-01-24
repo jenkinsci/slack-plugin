@@ -16,12 +16,15 @@
     <url>http://wiki.jenkins-ci.org/display/JENKINS/Slack+Plugin</url>
 
     <properties>
-        <jenkins.version>2.138.1</jenkins.version>
         <revision>2.4</revision>
         <changelist>-SNAPSHOT</changelist>
         <java.level>8</java.level>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+
+        <jenkins.version>2.138.1</jenkins.version>
+        <hpi.compatibleSinceVersion>2.0</hpi.compatibleSinceVersion>
+
         <workflow.version>1.11</workflow.version>
         <workflow-step-api-plugin.version>2.9</workflow-step-api-plugin.version>
         <workflow-job-plugin.version>2.9</workflow-job-plugin.version>
@@ -225,9 +228,6 @@
             <plugin>
                 <groupId>org.jenkins-ci.tools</groupId>
                 <artifactId>maven-hpi-plugin</artifactId>
-                <configuration>
-                    <compatibleSinceVersion>2.0</compatibleSinceVersion>
-                </configuration>
             </plugin>
         </plugins>
     </build>
