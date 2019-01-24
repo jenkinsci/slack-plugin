@@ -484,7 +484,7 @@ public class SlackNotifier extends Notifier {
 
         private String baseUrl;
         private String teamDomain;
-//        private String token;
+        private String token;
         private String tokenCredentialId;
         private boolean botUser;
         private String room;
@@ -517,21 +517,21 @@ public class SlackNotifier extends Notifier {
          *
          * Use tokenCredentialId instead
          */
-//        @Deprecated
-//        public String getToken() {
-//            return token;
-//        }
+        @Deprecated
+        public String getToken() {
+            return token;
+        }
 
         /**
          * Deprecated for removal in 3.0
          *
          * Use tokenCredentialId instead
          */
-//        @Deprecated
-//        @DataBoundSetter
-//        public void setToken(String token) {
-//            this.token = token;
-//        }
+        @Deprecated
+        @DataBoundSetter
+        public void setToken(String token) {
+            this.token = token;
+        }
 
         public String getTokenCredentialId() {
             return tokenCredentialId;
@@ -660,7 +660,7 @@ public class SlackNotifier extends Notifier {
             StandardCredentials newCredential = new GlobalCredentialMigrator().migrate(this);
             if (newCredential != null) {
                 this.tokenCredentialId = newCredential.getId();
-//                this.token = null;
+                this.token = null;
             }
             save();
         }
