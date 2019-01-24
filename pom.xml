@@ -227,6 +227,7 @@
                 <artifactId>maven-hpi-plugin</artifactId>
                 <configuration>
                     <compatibleSinceVersion>2.0</compatibleSinceVersion>
+                    <minimumJavaVersion>1.8</minimumJavaVersion>
                 </configuration>
             </plugin>
         </plugins>
