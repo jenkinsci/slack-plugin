@@ -2,11 +2,13 @@ package jenkins.plugins.slack.workflow;
 
 import com.cloudbees.plugins.credentials.common.StandardListBoxModel;
 import com.cloudbees.plugins.credentials.domains.HostnameRequirement;
+import com.google.common.collect.ImmutableSet;
 import hudson.AbortException;
 import hudson.Extension;
 import hudson.Util;
 import hudson.model.Item;
 import hudson.model.Project;
+import hudson.model.Run;
 import hudson.model.TaskListener;
 import hudson.security.ACL;
 import hudson.util.FormValidation;
@@ -22,24 +24,26 @@ import net.sf.json.JSONException;
 import net.sf.json.JSONObject;
 import net.sf.json.groovy.JsonSlurper;
 import org.jenkinsci.plugins.plaincredentials.StringCredentials;
-import org.jenkinsci.plugins.workflow.steps.AbstractStepDescriptorImpl;
-import org.jenkinsci.plugins.workflow.steps.AbstractStepImpl;
-import org.jenkinsci.plugins.workflow.steps.AbstractSynchronousNonBlockingStepExecution;
-import org.jenkinsci.plugins.workflow.steps.StepContextParameter;
+import org.jenkinsci.plugins.workflow.steps.Step;
+import org.jenkinsci.plugins.workflow.steps.StepContext;
+import org.jenkinsci.plugins.workflow.steps.StepDescriptor;
+import org.jenkinsci.plugins.workflow.steps.StepExecution;
+import org.jenkinsci.plugins.workflow.steps.SynchronousNonBlockingStepExecution;
 import org.kohsuke.stapler.AncestorInPath;
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.DataBoundSetter;
 import org.kohsuke.stapler.QueryParameter;
 
+import java.util.Objects;
+import java.util.Set;
 import javax.annotation.Nonnull;
-import javax.inject.Inject;
 
 import static com.cloudbees.plugins.credentials.CredentialsProvider.lookupCredentials;
 
 /**
  * Workflow step to send a Slack channel notification.
  */
-public class SlackSendStep extends AbstractStepImpl {
+public class SlackSendStep extends Step {
 
     private String message;
     private String color;
@@ -161,11 +165,17 @@ public class SlackSendStep extends AbstractStepImpl {
     public SlackSendStep() {
     }
 
-    @Extension
-    public static class DescriptorImpl extends AbstractStepDescriptorImpl {
+    @Override
+    public StepExecution start(StepContext context) {
+        return new SlackSendStepExecution(this, context);
+    }
 
-        public DescriptorImpl() {
-            super(SlackSendStepExecution.class);
+    @Extension
+    public static class DescriptorImpl extends StepDescriptor {
+
+        @Override
+        public Set<? extends Class<?>> getRequiredContext() {
+            return ImmutableSet.of(Run.class, TaskListener.class);
         }
 
         @Override
@@ -206,15 +216,16 @@ public class SlackSendStep extends AbstractStepImpl {
         }
     }
 
-    public static class SlackSendStepExecution extends AbstractSynchronousNonBlockingStepExecution<SlackResponse> {
+    public static class SlackSendStepExecution extends SynchronousNonBlockingStepExecution<SlackResponse> {
 
         private static final long serialVersionUID = 1L;
 
-        @Inject
-        transient SlackSendStep step;
+        private transient final SlackSendStep step;
 
-        @StepContextParameter
-        transient TaskListener listener;
+        SlackSendStepExecution(SlackSendStep step, StepContext context) {
+            super(context);
+            this.step = step;
+        }
 
         @Override
         protected SlackResponse run() throws Exception {
@@ -231,6 +242,9 @@ public class SlackSendStep extends AbstractStepImpl {
             boolean botUser = step.botUser || slackDesc.isBotUser();
             String channel = step.channel != null ? step.channel : slackDesc.getRoom();
             String color = step.color != null ? step.color : "";
+
+            TaskListener listener = getContext().get(TaskListener.class);
+            Objects.requireNonNull(listener, "Listener is mandatory here");
 
             listener.getLogger().println(Messages.SlackSendStepValues(
                     defaultIfEmpty(baseUrl), defaultIfEmpty(teamDomain), channel, defaultIfEmpty(color), botUser,
