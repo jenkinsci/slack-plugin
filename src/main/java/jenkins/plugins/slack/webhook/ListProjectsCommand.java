@@ -25,7 +25,7 @@ public class ListProjectsCommand extends SlackRouterCommand implements RouterCom
     public SlackTextMessage execute(String... args) {
         List<AbstractProject> jobs;
         try (ACLContext ignored = ACL.as(ACL.SYSTEM)) {
-            Jenkins jenkins = Jenkins.getActiveInstance();
+            Jenkins jenkins = Jenkins.get();
 
             jobs = jenkins.getAllItems(AbstractProject.class);
         }
