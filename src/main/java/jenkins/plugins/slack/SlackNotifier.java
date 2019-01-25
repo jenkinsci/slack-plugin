@@ -638,7 +638,7 @@ public class SlackNotifier extends Notifier {
             }
         }
 
-        private Object readResolve() throws IOException {
+        private Object readResolve() {
             if (Util.fixEmpty(this.token) != null) {
                 this.tokenCredentialId = new GlobalCredentialMigrator().migrate(this.token).getId();
                 this.token = null;
