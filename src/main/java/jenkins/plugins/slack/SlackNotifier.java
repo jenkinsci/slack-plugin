@@ -597,7 +597,7 @@ public class SlackNotifier extends Notifier {
         }
 
         SlackService getSlackService(final String baseUrl, final String teamDomain, final String authTokenCredentialId, final boolean botUser, final String room) {
-            return new StandardSlackService(baseUrl, teamDomain, null, authTokenCredentialId, botUser, room);
+            return new StandardSlackService(baseUrl, teamDomain, authTokenCredentialId, botUser, room);
         }
 
         @Nonnull
