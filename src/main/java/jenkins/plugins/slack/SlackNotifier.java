@@ -461,15 +461,6 @@ public class SlackNotifier extends Notifier {
         return super.prebuild(build, listener);
     }
 
-    @Initializer(after = InitMilestone.JOB_LOADED, before = InitMilestone.COMPLETED)
-    public static void migrateTokenToCredential() throws IOException {
-        descriptor().migrateTokenToCredential();
-    }
-
-    private static DescriptorImpl descriptor() {
-        return ExtensionList.lookupSingleton(SlackNotifier.DescriptorImpl.class);
-    }
-
     @Extension @Symbol("slackNotifier")
     public static class DescriptorImpl extends BuildStepDescriptor<Publisher> {
 
@@ -647,13 +638,15 @@ public class SlackNotifier extends Notifier {
             }
         }
 
-        void migrateTokenToCredential() throws IOException {
-            StandardCredentials newCredential = new GlobalCredentialMigrator().migrate(this);
-            if (newCredential != null) {
-                this.tokenCredentialId = newCredential.getId();
+        private Object readResolve() throws IOException {
+            if (Util.fixEmpty(this.token) != null) {
+                this.tokenCredentialId = new GlobalCredentialMigrator().migrate(this.token).getId();
                 this.token = null;
+
+                save();
             }
-            save();
+
+            return this;
         }
     }
 
