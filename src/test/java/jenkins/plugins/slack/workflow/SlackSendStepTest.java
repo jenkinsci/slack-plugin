@@ -74,7 +74,6 @@ public class SlackSendStepTest {
 
         when(Jenkins.get()).thenReturn(jenkins);
 
-        when(slackDescMock.getToken()).thenReturn("differentToken");
         when(slackDescMock.isBotUser()).thenReturn(false);
 
         when(taskListenerMock.getLogger()).thenReturn(printStreamMock);
@@ -125,7 +124,6 @@ public class SlackSendStepTest {
 
         when(slackDescMock.getBaseUrl()).thenReturn("globalBaseUrl");
         when(slackDescMock.getTeamDomain()).thenReturn("globalTeamDomain");
-        when(slackDescMock.getToken()).thenReturn("globalToken");
         when(slackDescMock.getTokenCredentialId()).thenReturn("globalTokenCredentialId");
         when(slackDescMock.isBotUser()).thenReturn(false);
         when(slackDescMock.getRoom()).thenReturn("globalChannel");
@@ -136,7 +134,7 @@ public class SlackSendStepTest {
         when(stepExecution.getSlackService(anyString(), anyString(), anyString(), anyString(), anyBoolean(), anyString(), anyBoolean())).thenReturn(slackServiceMock);
 
         stepExecution.run();
-        verify(stepExecution, times(1)).getSlackService("globalBaseUrl", "globalTeamDomain", "globalToken", "globalTokenCredentialId", false, "globalChannel", false);
+        verify(stepExecution, times(1)).getSlackService("globalBaseUrl", "globalTeamDomain", null, "globalTokenCredentialId", false, "globalChannel", false);
         verify(slackServiceMock, times(1)).publish("message", "");
     }
 
@@ -152,7 +150,6 @@ public class SlackSendStepTest {
 
         when(slackDescMock.getBaseUrl()).thenReturn("globalBaseUrl");
         when(slackDescMock.getTeamDomain()).thenReturn("globalTeamDomain");
-        when(slackDescMock.getToken()).thenReturn("globalToken");
         when(slackDescMock.getTokenCredentialId()).thenReturn("globalTokenCredentialId");
         when(slackDescMock.isBotUser()).thenReturn(false);
         when(slackDescMock.getRoom()).thenReturn("globalChannel");
@@ -163,7 +160,7 @@ public class SlackSendStepTest {
         when(stepExecution.getSlackService(anyString(), anyString(), anyString(), anyString(), anyBoolean(), anyString(), anyBoolean())).thenReturn(slackServiceMock);
 
         stepExecution.run();
-        verify(stepExecution, times(1)).getSlackService("globalBaseUrl", "globalTeamDomain", "globalToken", "globalTokenCredentialId", false, "globalChannel", true);
+        verify(stepExecution, times(1)).getSlackService("globalBaseUrl", "globalTeamDomain", null, "globalTokenCredentialId", false, "globalChannel", true);
         verify(slackServiceMock, times(1)).publish("message", "");
     }
 

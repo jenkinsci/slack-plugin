@@ -50,6 +50,10 @@ public class StandardSlackService implements SlackService {
     private boolean replyBroadcast;
     private String responseString = null;
 
+    public StandardSlackService(String baseUrl, String teamDomain, String authTokenCredentialId, boolean botUser, String roomId) {
+        this(baseUrl, teamDomain, null, authTokenCredentialId, botUser, roomId, false);
+    }
+
     public StandardSlackService(String baseUrl, String teamDomain, String token, String authTokenCredentialId, boolean botUser, String roomId) {
         this(baseUrl, teamDomain, token, authTokenCredentialId, botUser, roomId, false);
     }

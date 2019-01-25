@@ -1,10 +1,14 @@
 package jenkins.plugins.slack;
 
+import com.cloudbees.plugins.credentials.common.StandardCredentials;
 import com.cloudbees.plugins.credentials.common.StandardListBoxModel;
 import com.cloudbees.plugins.credentials.domains.HostnameRequirement;
 import hudson.EnvVars;
 import hudson.Extension;
+import hudson.ExtensionList;
 import hudson.Launcher;
+import hudson.init.InitMilestone;
+import hudson.init.Initializer;
 import hudson.Util;
 import hudson.model.AbstractBuild;
 import hudson.model.AbstractProject;
@@ -19,6 +23,7 @@ import hudson.tasks.Publisher;
 import hudson.util.FormValidation;
 import hudson.util.ListBoxModel;
 import jenkins.model.Jenkins;
+import jenkins.plugins.slack.config.GlobalCredentialMigrator;
 import jenkins.plugins.slack.config.ItemConfigMigrator;
 import net.sf.json.JSONObject;
 import org.apache.commons.lang.StringUtils;
@@ -32,6 +37,7 @@ import org.kohsuke.stapler.QueryParameter;
 import org.kohsuke.stapler.StaplerRequest;
 import org.kohsuke.stapler.export.Exported;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -408,7 +414,7 @@ public class SlackNotifier extends Notifier {
         DescriptorImpl descriptor = getDescriptor();
         String teamDomain = Util.fixEmpty(this.teamDomain) != null ? this.teamDomain : descriptor.getTeamDomain();
         String baseUrl = Util.fixEmpty(this.baseUrl) != null ? this.baseUrl : descriptor.getBaseUrl();
-        String authToken = Util.fixEmpty(this.authToken) != null ? this.authToken : descriptor.getToken();
+        String authToken = Util.fixEmpty(this.authToken);
         boolean botUser = this.botUser || descriptor.isBotUser();
         String authTokenCredentialId = Util.fixEmpty(this.tokenCredentialId) != null ? this.tokenCredentialId :
                 descriptor.getTokenCredentialId();
@@ -488,10 +494,22 @@ public class SlackNotifier extends Notifier {
             this.teamDomain = teamDomain;
         }
 
+        /**
+         * Deprecated for removal in 3.0
+         *
+         * Use tokenCredentialId instead
+         */
+        @Deprecated
         public String getToken() {
             return token;
         }
 
+        /**
+         * Deprecated for removal in 3.0
+         *
+         * Use tokenCredentialId instead
+         */
+        @Deprecated
         @DataBoundSetter
         public void setToken(String token) {
             this.token = token;
@@ -567,12 +585,6 @@ public class SlackNotifier extends Notifier {
                     );
         }
 
-        //WARN users that they should not use the plain/exposed token, but rather the token credential id
-        public FormValidation doCheckToken(@QueryParameter String value) {
-            //always show the warning - TODO investigate if there is a better way to handle this
-            return FormValidation.warning("Exposing your Integration Token is a security risk. Please use the Integration Token Credential ID");
-        }
-
         public boolean isApplicable(Class<? extends AbstractProject> aClass) {
             return true;
         }
@@ -584,8 +596,8 @@ public class SlackNotifier extends Notifier {
             return true;
         }
 
-        SlackService getSlackService(final String baseUrl, final String teamDomain, final String authToken, final String authTokenCredentialId, final boolean botUser, final String room) {
-            return new StandardSlackService(baseUrl, teamDomain, authToken, authTokenCredentialId, botUser, room);
+        SlackService getSlackService(final String baseUrl, final String teamDomain, final String authTokenCredentialId, final boolean botUser, final String room) {
+            return new StandardSlackService(baseUrl, teamDomain, authTokenCredentialId, botUser, room);
         }
 
         @Nonnull
@@ -596,7 +608,6 @@ public class SlackNotifier extends Notifier {
 
         public FormValidation doTestConnection(@QueryParameter("baseUrl") final String baseUrl,
                                                @QueryParameter("teamDomain") final String teamDomain,
-                                               @QueryParameter("token") final String authToken,
                                                @QueryParameter("tokenCredentialId") final String tokenCredentialId,
                                                @QueryParameter("botUser") final boolean botUser,
                                                @QueryParameter("room") final String room) {
@@ -612,13 +623,12 @@ public class SlackNotifier extends Notifier {
                     targetUrl = this.baseUrl;
                 }
                 String targetDomain = Util.fixEmpty(teamDomain) != null ? teamDomain : this.teamDomain;
-                String targetToken = Util.fixEmpty(authToken) != null ? authToken : this.token;
                 boolean targetBotUser = botUser || this.botUser;
                 String targetTokenCredentialId = Util.fixEmpty(tokenCredentialId) != null ? tokenCredentialId :
                         this.tokenCredentialId;
                 String targetRoom = Util.fixEmpty(room) != null ? room : this.room;
 
-                SlackService testSlackService = getSlackService(targetUrl, targetDomain, targetToken, targetTokenCredentialId, targetBotUser, targetRoom);
+                SlackService testSlackService = getSlackService(targetUrl, targetDomain, targetTokenCredentialId, targetBotUser, targetRoom);
                 String message = "Slack/Jenkins plugin: you're all set on " + DisplayURLProvider.get().getRoot();
                 boolean success = testSlackService.publish(message, "good");
                 return success ? FormValidation.ok("Success") : FormValidation.error("Failure");
@@ -626,6 +636,17 @@ public class SlackNotifier extends Notifier {
                 logger.log(Level.WARNING, "Slack config form validation error", e);
                 return FormValidation.error("Client error : " + e.getMessage());
             }
+        }
+
+        private Object readResolve() {
+            if (Util.fixEmpty(this.token) != null) {
+                this.tokenCredentialId = new GlobalCredentialMigrator().migrate(this.token).getId();
+                this.token = null;
+
+                save();
+            }
+
+            return this;
         }
     }
 

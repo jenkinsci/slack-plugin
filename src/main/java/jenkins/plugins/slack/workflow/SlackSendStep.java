@@ -238,7 +238,7 @@ public class SlackSendStep extends Step {
             String teamDomain = step.teamDomain != null ? step.teamDomain : slackDesc.getTeamDomain();
             String tokenCredentialId = step.tokenCredentialId != null ? step.tokenCredentialId : slackDesc
                     .getTokenCredentialId();
-            String token = step.token != null ? step.token : slackDesc.getToken();
+            String token = step.token;
             boolean botUser = step.botUser || slackDesc.isBotUser();
             String channel = step.channel != null ? step.channel : slackDesc.getRoom();
             String color = step.color != null ? step.color : "";
