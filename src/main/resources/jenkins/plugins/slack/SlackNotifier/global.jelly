@@ -22,8 +22,8 @@
     <f:entry title="Integration Token Credential ID" field="tokenCredentialId" help="/plugin/slack/help-globalConfig-tokenCredentialId.html">
         <c:select/>
     </f:entry>
-    <f:entry title="Is Bot User?" help="/plugin/slack/help-globalConfig-botUser.html">
-        <f:checkbox field="botUser" />
+    <f:entry>
+        <f:checkbox field="botUser" title="Is Bot User" help="/plugin/slack/help-globalConfig-botUser.html" />
     </f:entry>
     <f:entry title="Channel or Slack ID" help="/plugin/slack/help-globalConfig-slackRoom.html">
         <f:textbox field="room" />
