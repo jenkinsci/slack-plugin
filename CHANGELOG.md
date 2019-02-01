@@ -1,9 +1,16 @@
 # Changelog
 
-## 2.15 (unreleased) release notes
+## 2.16 (unreleased) release notes
+
+## 2.15 release notes (2019-01-01)
 
 ### Removed functionality
+
 - Integration token text removed from global configuration, it will be automatically migrated into a credential for you. There's upcoming changes for jobs and pipelines in this area as well [PR #493](https://github.com/jenkinsci/slack-plugin/pull/493)
+
+### Bug fixes
+
+- Add null check to extractReplaceLinks [PR #497](https://github.com/jenkinsci/slack-plugin/pull/497)
 
 ### New features
 
@@ -11,6 +18,7 @@
 - Add class name to failed test notification [PR #474](https://github.com/jenkinsci/slack-plugin/pull/474)
 
 ### Internal
+
 - Remove overriding plugin pom config [PR #492](https://github.com/jenkinsci/slack-plugin/pull/492)
 - Remove deprecated code [PR #491](https://github.com/jenkinsci/slack-plugin/pull/491)
 - Bump baseline and parent pom [PR #485](https://github.com/jenkinsci/slack-plugin/pull/485)
