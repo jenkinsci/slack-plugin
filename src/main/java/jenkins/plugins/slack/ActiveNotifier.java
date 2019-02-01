@@ -520,15 +520,18 @@ public class ActiveNotifier implements FineGrainedNotifier {
             int size = 0;
             List<String> links = new ArrayList<>();
             while (aTag.find()) {
-                Matcher url = href.matcher(aTag.group(1));
-                if (url.find()) {
-                    String escapeThis = aTag.group(3);
-                    if (escapeThis != null) {
-                        aTag.appendReplacement(sb,String.format("{%s}", size++));
-                        links.add("{");
-                    } else {
-                        aTag.appendReplacement(sb,String.format("{%s}", size++));
-                        links.add(String.format("<%s|%s>", url.group(1).replaceAll("\"", ""), aTag.group(2)));
+                String firstGroup = aTag.group(1);
+                if (firstGroup != null) {
+                    Matcher url = href.matcher(firstGroup);
+                    if (url.find()) {
+                        String escapeThis = aTag.group(3);
+                        if (escapeThis != null) {
+                            aTag.appendReplacement(sb, String.format("{%s}", size++));
+                            links.add("{");
+                        } else {
+                            aTag.appendReplacement(sb, String.format("{%s}", size++));
+                            links.add(String.format("<%s|%s>", url.group(1).replaceAll("\"", ""), aTag.group(2)));
+                        }
                     }
                 }
             }
