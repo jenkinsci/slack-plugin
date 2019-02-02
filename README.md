@@ -119,12 +119,12 @@ is not unique and will not work if it is an ambiguous match.
 This plugin supports sending notifications via bot users. You can enable bot
 user support from both global and project configurations. If the notification
 will be sent to a user via direct message, default integration sends it via
-@slackbot, you can use this option if you want to send messages via a bot user.
-You need to provide credentials of the bot user for integration token
-credentials to use this feature.
+@slackbot. You can use this option if you want to send messages via a bot user.
+You need to provide the `Bot User OAuth Access Token` credential as the
+integration token credentials to use this feature.
 
-Bot user option is not supported, if you use Base Url for a Slack compatible
-application.
+The bot user option is not supported if you use the *Slack compatible app URL*
+option.
 
 ## Configuration as code
 
