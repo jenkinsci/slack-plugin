@@ -26,10 +26,12 @@ import org.jenkinsci.plugins.tokenmacro.TokenMacro;
 import java.io.IOException;
 import java.text.MessageFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -542,6 +544,7 @@ public class ActiveNotifier implements FineGrainedNotifier {
         public String escape(String string) {
             StringBuffer pattern = new StringBuffer();
             String[] links = extractReplaceLinks(aTag.matcher(string), pattern);
+            logger.log(Level.FINER, String.format("Pattern is: %s, Links are: %s", pattern, Arrays.toString(links)));
             return MessageFormat.format(escapeCharacters(pattern.toString()), links);
         }
 
