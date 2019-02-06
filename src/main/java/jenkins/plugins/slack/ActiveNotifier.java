@@ -544,7 +544,7 @@ public class ActiveNotifier implements FineGrainedNotifier {
         public String escape(String string) {
             StringBuffer pattern = new StringBuffer();
             String[] links = extractReplaceLinks(aTag.matcher(string), pattern);
-            logger.log(Level.FINER, String.format("Pattern is: %s, Links are: %s", pattern, Arrays.toString(links)));
+            logger.log(Level.INFO, String.format("Pattern is: %s, Links are: %s", pattern, Arrays.toString(links)));
             return MessageFormat.format(escapeCharacters(pattern.toString()), links);
         }
 
