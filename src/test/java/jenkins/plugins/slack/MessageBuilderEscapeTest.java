@@ -54,6 +54,14 @@ public class MessageBuilderEscapeTest {
     }
 
     @Test
+    public void testEscapeBraces() throws IOException {
+        String input = "something { is } odd";
+        String expected = "something { is } odd";
+        String escaped = messageBuilder.escape(input);
+        assertEquals(expected, escaped);
+    }
+
+    @Test
     public void testEscapeBracesInLink() throws IOException {
         String input = "<a href='target'>test { case }</a>";
         String expected = "<'target'|test { case }>";
