@@ -2,6 +2,10 @@
 
 ## 2.16 (unreleased) release notes
 
+### Bug fixes:
+
+- java.lang.NumberFormatException: When using parametrized scheduler [PR #510](https://github.com/jenkinsci/slack-plugin/pull/510)
+
 ## 2.15 release notes (2019-01-01)
 
 ### Removed functionality
