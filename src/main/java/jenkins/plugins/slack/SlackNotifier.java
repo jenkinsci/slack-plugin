@@ -24,7 +24,6 @@ import hudson.util.FormValidation;
 import hudson.util.ListBoxModel;
 import jenkins.model.Jenkins;
 import jenkins.plugins.slack.config.GlobalCredentialMigrator;
-import jenkins.plugins.slack.config.ItemConfigMigrator;
 import net.sf.json.JSONObject;
 import org.apache.commons.lang.StringUtils;
 import org.jenkinsci.Symbol;
@@ -37,8 +36,6 @@ import org.kohsuke.stapler.QueryParameter;
 import org.kohsuke.stapler.StaplerRequest;
 import org.kohsuke.stapler.export.Exported;
 
-import java.io.IOException;
-import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Stream;
@@ -841,28 +838,5 @@ public class SlackNotifier extends Notifier {
             return customMessageFailure;
         }
 
-    }
-
-    @Extension(ordinal = 100) public static final class Migrator extends ItemListener {
-        @Override
-        public void onLoaded() {
-            logger.info("Starting Settings Migration Process");
-
-            ItemConfigMigrator migrator = new ItemConfigMigrator();
-
-            Jenkins jenkins = Jenkins.get();
-
-            List<Item> items = jenkins.getAllItems();
-            if (null != items) {
-                for (Item item : items) {
-                    if (!migrator.migrate(item)) {
-                        logger.info(String.format("Skipping job \"%s\" with type %s", item.getName(),
-                                item.getClass().getName()));
-                    }
-                }
-            }
-
-            logger.info("Completed Settings Migration Process");
-        }
     }
 }
