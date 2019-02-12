@@ -13,6 +13,7 @@ import jenkins.plugins.slack.Messages;
 import org.jenkinsci.plugins.plaincredentials.StringCredentials;
 import org.jenkinsci.plugins.plaincredentials.impl.StringCredentialsImpl;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.UUID;
 import java.util.logging.Logger;
@@ -52,7 +53,14 @@ public class GlobalCredentialMigrator {
                 Secret.fromString(token)
         );
 
-        SystemCredentialsProvider.getInstance().getCredentials().add(credentials);
+        SystemCredentialsProvider instance = SystemCredentialsProvider.getInstance();
+        instance.getCredentials().add(credentials);
+
+        try {
+            instance.save();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
 
         return credentials;
     }
