@@ -1,5 +1,11 @@
 # Changelog
 
+## 2.16 release notes (Unreleased)
+
+### Bug fixes:
+
+- Fix migration - credentials weren't being saved [PR #513](https://github.com/jenkinsci/slack-plugin/pull/513)
+
 ## 2.16 release notes (2019-02-07)
 
 ### Bug fixes:
