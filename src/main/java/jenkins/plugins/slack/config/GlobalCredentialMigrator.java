@@ -47,7 +47,7 @@ public class GlobalCredentialMigrator {
 
     private StringCredentials addCredentialIfNotPresent(@Nonnull String token) {
         StringCredentials credentials = new StringCredentialsImpl(
-                CredentialsScope.SYSTEM,
+                CredentialsScope.GLOBAL,
                 UUID.randomUUID().toString(),
                 Messages.MigratedCredentialDescription(),
                 Secret.fromString(token)
