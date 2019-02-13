@@ -1,6 +1,6 @@
 # Changelog
 
-## 2.16 release notes (Unreleased)
+## 2.16 release notes (2019-02-13)
 
 ### Bug fixes:
 
