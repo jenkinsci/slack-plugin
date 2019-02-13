@@ -5,6 +5,8 @@
 ### Bug fixes:
 
 - Fix migration - credentials weren't being saved [PR #513](https://github.com/jenkinsci/slack-plugin/pull/513)
+- Use correct scope for migrated credential [PR #515](https://github.com/jenkinsci/slack-plugin/pull/515)
+- Remove 1.8 migration code and SlackJobProperty [PR #514](https://github.com/jenkinsci/slack-plugin/pull/514)
 
 ## 2.16 release notes (2019-02-07)
 
