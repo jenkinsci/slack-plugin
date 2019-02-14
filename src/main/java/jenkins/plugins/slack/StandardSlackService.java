@@ -5,6 +5,7 @@ import com.cloudbees.plugins.credentials.CredentialsMatchers;
 import hudson.ProxyConfiguration;
 import hudson.security.ACL;
 import jenkins.model.Jenkins;
+import jenkins.plugins.slack.logging.BuildKey;
 import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
 import org.apache.commons.lang.StringUtils;
@@ -172,7 +173,7 @@ public class StandardSlackService implements SlackService {
             		 logger.log(Level.WARNING, "Response Code: " + responseCode);
             		 result = false;
                 } else {
-                    logger.info("Posting succeeded");
+                    logger.fine("Posting succeeded");
                 }
             } catch (Exception e) {
                 logger.log(Level.WARNING, "Error posting to Slack", e);

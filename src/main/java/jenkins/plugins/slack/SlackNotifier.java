@@ -1,20 +1,15 @@
 package jenkins.plugins.slack;
 
-import com.cloudbees.plugins.credentials.common.StandardCredentials;
 import com.cloudbees.plugins.credentials.common.StandardListBoxModel;
 import com.cloudbees.plugins.credentials.domains.HostnameRequirement;
 import hudson.EnvVars;
 import hudson.Extension;
-import hudson.ExtensionList;
 import hudson.Launcher;
-import hudson.init.InitMilestone;
-import hudson.init.Initializer;
 import hudson.Util;
 import hudson.model.AbstractBuild;
 import hudson.model.AbstractProject;
 import hudson.model.BuildListener;
 import hudson.model.Item;
-import hudson.model.listeners.ItemListener;
 import hudson.security.ACL;
 import hudson.tasks.BuildStepDescriptor;
 import hudson.tasks.BuildStepMonitor;
@@ -24,6 +19,9 @@ import hudson.util.FormValidation;
 import hudson.util.ListBoxModel;
 import jenkins.model.Jenkins;
 import jenkins.plugins.slack.config.GlobalCredentialMigrator;
+import jenkins.plugins.slack.logging.BuildAwareLogger;
+import jenkins.plugins.slack.logging.BuildKey;
+import jenkins.plugins.slack.logging.SlackNotificationsLogger;
 import net.sf.json.JSONObject;
 import org.apache.commons.lang.StringUtils;
 import org.jenkinsci.Symbol;
@@ -34,8 +32,8 @@ import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.DataBoundSetter;
 import org.kohsuke.stapler.QueryParameter;
 import org.kohsuke.stapler.StaplerRequest;
-import org.kohsuke.stapler.export.Exported;
 
+import java.util.function.Function;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Stream;
@@ -440,11 +438,14 @@ public class SlackNotifier extends Notifier {
 
     @Override
     public boolean perform(AbstractBuild<?, ?> build, Launcher launcher, BuildListener listener) {
-        logger.info("Performing complete notifications");
-        new ActiveNotifier(this, listener).completed(build);
+        String buildKey = BuildKey.format(build);
+        BuildAwareLogger log = createLogger(listener);
+        log.debug(buildKey, "Performing complete notifications");
+        JenkinsTokenExpander tokenExpander = new JenkinsTokenExpander(listener);
+        new ActiveNotifier(this, slackFactory(listener), log, tokenExpander).completed(build);
         if (notifyRegression) {
-            logger.info("Performing finalize notifications");
-            new ActiveNotifier(this, listener).finalized(build);
+            log.debug(buildKey, "Performing finalize notifications");
+            new ActiveNotifier(this, slackFactory(listener), log, tokenExpander).finalized(build);
         }
         return true;
     }
@@ -452,15 +453,25 @@ public class SlackNotifier extends Notifier {
     @Override
     public boolean prebuild(AbstractBuild<?, ?> build, BuildListener listener) {
         if (startNotification) {
-            logger.info("Performing start notifications");
-            new ActiveNotifier(this, listener).started(build);
+            BuildAwareLogger log = createLogger(listener);
+            log.debug(BuildKey.format(build), "Performing start notifications");
+            new ActiveNotifier(this, slackFactory(listener), log, new JenkinsTokenExpander(listener)).started(build);
         }
         return super.prebuild(build, listener);
+    }
+
+    private Function<AbstractBuild<?, ?>, SlackService> slackFactory(BuildListener listener) {
+        return b -> newSlackService(b, listener);
+    }
+
+    private static BuildAwareLogger createLogger(BuildListener listener) {
+        return new SlackNotificationsLogger(logger, listener.getLogger());
     }
 
     @Extension @Symbol("slackNotifier")
     public static class DescriptorImpl extends BuildStepDescriptor<Publisher> {
 
+        public static final String PLUGIN_DISPLAY_NAME = "Slack Notifications";
         private String baseUrl;
         private String teamDomain;
         private String token;
@@ -600,7 +611,7 @@ public class SlackNotifier extends Notifier {
         @Nonnull
         @Override
         public String getDisplayName() {
-            return "Slack Notifications";
+            return PLUGIN_DISPLAY_NAME;
         }
 
         public FormValidation doTestConnection(@QueryParameter("baseUrl") final String baseUrl,
