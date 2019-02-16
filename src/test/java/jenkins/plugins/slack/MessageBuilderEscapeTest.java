@@ -3,6 +3,7 @@ package jenkins.plugins.slack;
 import hudson.model.AbstractBuild;
 import hudson.model.AbstractProject;
 import hudson.model.ItemGroup;
+import jenkins.plugins.slack.logging.BuildAwareLogger;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
@@ -23,6 +24,8 @@ public class MessageBuilderEscapeTest {
         AbstractProject job = mock(AbstractProject.class);
         ItemGroup group = mock(ItemGroup.class);
         SlackNotifier notifier = mock(SlackNotifier.class);
+        BuildAwareLogger logger = mock(BuildAwareLogger.class);
+        TokenExpander tokenExpander = mock(TokenExpander.class);
 
         when(build.getDisplayName()).thenReturn("build");
         when(build.getProject()).thenReturn(project);
@@ -34,7 +37,7 @@ public class MessageBuilderEscapeTest {
         when(job.getFullDisplayName()).thenReturn("job");
         when(project.getFullDisplayName()).thenReturn("project");
 
-        messageBuilder = new ActiveNotifier.MessageBuilder(notifier, build);
+        messageBuilder = new ActiveNotifier.MessageBuilder(notifier, build, logger, tokenExpander);
     }
 
     @Test
