@@ -2,6 +2,15 @@
 
 ## 2.18 release notes (Unreleased)
 
+## New features
+
+- Clarify the messaging around the failure notification options [PR #519](https://github.com/jenkinsci/slack-plugin/pull/519)
+- Add additional logging for notification conditions [PR #516](https://github.com/jenkinsci/slack-plugin/pull/516)
+
+## Internal
+
+- Introduce maven-checkstyle-plugin to validate no star imports [PR #521](https://github.com/jenkinsci/slack-plugin/pull/521)
+
 ## 2.17 release notes (2019-02-13)
 
 ### Bug fixes:
