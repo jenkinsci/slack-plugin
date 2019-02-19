@@ -1,6 +1,6 @@
 # Changelog
 
-## 2.18 release notes (Unreleased)
+## 2.18 release notes (2019-02-19)
 
 ## New features
 
