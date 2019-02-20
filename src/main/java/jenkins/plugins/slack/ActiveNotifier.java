@@ -437,10 +437,12 @@ public class ActiveNotifier implements FineGrainedNotifier {
                     .getAction(AbstractTestResultAction.class);
             if (action != null) {
                 int failed = action.getFailCount();
-                message.append("\n").append(failed).append(" Failed Tests:\n");
-                for(TestResult result : action.getFailedTests()) {
-                    message.append("\t").append(getTestClassAndMethod(result)).append(" after ")
-                            .append(result.getDurationString()).append("\n");
+                if (failed > 0) {
+                    message.append("\n").append(failed).append(" Failed Tests:\n");
+                    for(TestResult result : action.getFailedTests()) {
+                        message.append("\t").append(getTestClassAndMethod(result)).append(" after ")
+                                .append(result.getDurationString()).append("\n");
+                    }
                 }
             }
             return this;
