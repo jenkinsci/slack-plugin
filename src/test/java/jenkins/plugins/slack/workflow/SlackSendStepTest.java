@@ -1,11 +1,22 @@
 package jenkins.plugins.slack.workflow;
 
-import hudson.model.TaskListener;
-import jenkins.model.Jenkins;
-import jenkins.plugins.slack.SlackNotifier;
-import jenkins.plugins.slack.SlackService;
-import net.sf.json.JSONArray;
-import net.sf.json.JSONObject;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.mockito.Matchers.anyBoolean;
+import static org.mockito.Matchers.anyString;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+import static org.powermock.api.mockito.PowerMockito.spy;
+
+import java.io.IOException;
+import java.io.PrintStream;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
+
 import org.apache.commons.io.IOUtils;
 import org.jenkinsci.plugins.workflow.steps.StepContext;
 import org.junit.Before;
@@ -16,19 +27,12 @@ import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 
-import java.io.IOException;
-import java.io.PrintStream;
-
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.mockito.Mockito.anyBoolean;
-import static org.mockito.Mockito.anyString;
-import static org.mockito.Mockito.doNothing;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-import static org.powermock.api.mockito.PowerMockito.spy;
+import hudson.model.TaskListener;
+import jenkins.model.Jenkins;
+import jenkins.plugins.slack.SlackNotifier;
+import jenkins.plugins.slack.SlackService;
+import net.sf.json.JSONArray;
+import net.sf.json.JSONObject;
 
 /**
  * Traditional Unit tests, allows testing null Jenkins.get()
@@ -114,6 +118,39 @@ public class SlackSendStepTest {
 
     }
 
+	@Test
+    public void testStepWithAttachmentsAsListOfMap() throws Exception {
+        SlackSendStep step = new SlackSendStep();
+        step.setMessage("message");
+
+        Map<String, String> attachment1 = new HashMap<>();
+        attachment1.put("title", "Title of the message");
+        attachment1.put("author_name", "Name of the author");
+        attachment1.put("author_icon", "Avatar for author");
+
+        step.setAttachments(Arrays.asList(attachment1));
+        SlackSendStep.SlackSendStepExecution stepExecution = spy(new SlackSendStep.SlackSendStepExecution(step, stepContextMock));
+
+        when(Jenkins.get()).thenReturn(jenkins);
+
+        when(taskListenerMock.getLogger()).thenReturn(printStreamMock);
+        doNothing().when(printStreamMock).println();
+
+        when(stepExecution.getSlackService(anyString(), anyString(), anyString(), anyString(), anyBoolean(), anyString(), anyBoolean())).thenReturn(slackServiceMock);
+
+        stepExecution.run();
+        verify(slackServiceMock, times(0)).publish("message", "");
+        
+        JSONArray expectedAttachments = new JSONArray();
+        JSONObject jsonObject = new JSONObject();
+        jsonObject.put("title","Title of the message");
+        jsonObject.put("author_name","Name of the author");
+        jsonObject.put("author_icon","Avatar for author");
+        jsonObject.put("fallback","message");
+        expectedAttachments.add(jsonObject);
+        verify(slackServiceMock, times(1)).publish("message", expectedAttachments, "");
+    }
+    
     @Test
     public void testValuesForGlobalConfig() throws Exception {
         SlackSendStep step = new SlackSendStep();

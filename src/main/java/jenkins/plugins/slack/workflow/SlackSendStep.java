@@ -1,8 +1,28 @@
 package jenkins.plugins.slack.workflow;
 
+import static com.cloudbees.plugins.credentials.CredentialsProvider.lookupCredentials;
+
+import java.util.Objects;
+import java.util.Set;
+
+import javax.annotation.Nonnull;
+
+import org.jenkinsci.plugins.plaincredentials.StringCredentials;
+import org.jenkinsci.plugins.workflow.steps.Step;
+import org.jenkinsci.plugins.workflow.steps.StepContext;
+import org.jenkinsci.plugins.workflow.steps.StepDescriptor;
+import org.jenkinsci.plugins.workflow.steps.StepExecution;
+import org.jenkinsci.plugins.workflow.steps.SynchronousNonBlockingStepExecution;
+import org.kohsuke.stapler.AncestorInPath;
+import org.kohsuke.stapler.DataBoundConstructor;
+import org.kohsuke.stapler.DataBoundSetter;
+import org.kohsuke.stapler.QueryParameter;
+
 import com.cloudbees.plugins.credentials.common.StandardListBoxModel;
 import com.cloudbees.plugins.credentials.domains.HostnameRequirement;
 import com.google.common.collect.ImmutableSet;
+
+import groovy.json.JsonOutput;
 import hudson.AbortException;
 import hudson.Extension;
 import hudson.Util;
@@ -23,22 +43,6 @@ import net.sf.json.JSONArray;
 import net.sf.json.JSONException;
 import net.sf.json.JSONObject;
 import net.sf.json.groovy.JsonSlurper;
-import org.jenkinsci.plugins.plaincredentials.StringCredentials;
-import org.jenkinsci.plugins.workflow.steps.Step;
-import org.jenkinsci.plugins.workflow.steps.StepContext;
-import org.jenkinsci.plugins.workflow.steps.StepDescriptor;
-import org.jenkinsci.plugins.workflow.steps.StepExecution;
-import org.jenkinsci.plugins.workflow.steps.SynchronousNonBlockingStepExecution;
-import org.kohsuke.stapler.AncestorInPath;
-import org.kohsuke.stapler.DataBoundConstructor;
-import org.kohsuke.stapler.DataBoundSetter;
-import org.kohsuke.stapler.QueryParameter;
-
-import java.util.Objects;
-import java.util.Set;
-import javax.annotation.Nonnull;
-
-import static com.cloudbees.plugins.credentials.CredentialsProvider.lookupCredentials;
 
 /**
  * Workflow step to send a Slack channel notification.
@@ -54,7 +58,7 @@ public class SlackSendStep extends Step {
     private String baseUrl;
     private String teamDomain;
     private boolean failOnError;
-    private String attachments;
+    private Object attachments;
     private boolean replyBroadcast;
 
 
@@ -139,11 +143,11 @@ public class SlackSendStep extends Step {
     }
 
     @DataBoundSetter
-    public void setAttachments(String attachments) {
+    public void setAttachments(Object attachments) {
         this.attachments = attachments;
     }
 
-    public String getAttachments() {
+    public Object getAttachments() {
         return attachments;
     }
 
@@ -254,22 +258,9 @@ public class SlackSendStep extends Step {
             SlackService slackService = getSlackService(
                     baseUrl, teamDomain, token, tokenCredentialId, botUser, channel, step.replyBroadcast
             );
-            boolean publishSuccess;
+            final boolean publishSuccess;
             if (step.attachments != null) {
-                JsonSlurper jsonSlurper = new JsonSlurper();
-                JSON json;
-                try {
-                    json = jsonSlurper.parseText(step.attachments);
-                } catch (JSONException e) {
-                    listener.error(Messages.NotificationFailedWithException(e));
-                    return null;
-                }
-                if (!(json instanceof JSONArray)) {
-                    listener.error(Messages
-                            .NotificationFailedWithException(new IllegalArgumentException("Attachments must be JSONArray")));
-                    return null;
-                }
-                JSONArray jsonArray = (JSONArray) json;
+                JSONArray jsonArray = getAttachmentsAsJSONArray();
                 for (Object object : jsonArray) {
                     if (object instanceof JSONObject) {
                         JSONObject jsonNode = ((JSONObject) object);
@@ -308,6 +299,31 @@ public class SlackSendStep extends Step {
                 listener.error(Messages.NotificationFailed());
             }
             return response;
+        }
+
+        JSONArray getAttachmentsAsJSONArray() throws Exception {
+            final TaskListener listener = getContext().get(TaskListener.class);
+        	final String jsonString;
+        	if (step.attachments instanceof String) {
+        		jsonString = (String) step.attachments;
+        	}
+        	else {
+        		jsonString = JsonOutput.toJson(step.attachments);
+        	}
+
+            JsonSlurper jsonSlurper = new JsonSlurper();
+            JSON json = null;
+            try {
+                json = jsonSlurper.parseText(jsonString);
+            } catch (JSONException e) {
+                listener.error(Messages.NotificationFailedWithException(e));
+                return null;
+            }
+            if(!(json instanceof JSONArray)){
+                listener.error(Messages.NotificationFailedWithException(new IllegalArgumentException("Attachments must be JSONArray")));
+                return null;
+            }
+            return (JSONArray) json;
         }
 
         private String defaultIfEmpty(String value) {
