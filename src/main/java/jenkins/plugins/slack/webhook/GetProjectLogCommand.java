@@ -1,36 +1,19 @@
 package jenkins.plugins.slack.webhook;
 
-
-import jenkins.model.Jenkins;
-
-import hudson.model.Build;
-import hudson.model.Result;
-import hudson.model.Project;
 import hudson.model.AbstractBuild;
-import hudson.model.AbstractProject;
-
+import hudson.model.Project;
 import hudson.security.ACL;
-
-import java.io.IOException;
-
-import java.util.List;
-import java.util.ArrayList;
-
-import org.kohsuke.stapler.interceptor.RequirePOST;
-
+import hudson.security.ACLContext;
+import jenkins.model.Jenkins;
 import jenkins.plugins.slack.webhook.model.SlackPostData;
 import jenkins.plugins.slack.webhook.model.SlackTextMessage;
-import jenkins.plugins.slack.webhook.model.SlackWebhookCause;
 
-import org.acegisecurity.context.SecurityContext;
-import org.acegisecurity.context.SecurityContextHolder;
-
-
-
+import java.io.IOException;
+import java.util.List;
 
 public class GetProjectLogCommand extends SlackRouterCommand implements RouterCommand<SlackTextMessage> {
 
-    public GetProjectLogCommand(SlackPostData data) { 
+    public GetProjectLogCommand(SlackPostData data) {
         super(data);
     }
 
@@ -39,38 +22,33 @@ public class GetProjectLogCommand extends SlackRouterCommand implements RouterCo
         String projectName = args[0];
         String buildNumber = args[1];
 
-        SecurityContext ctx = ACL.impersonate(ACL.SYSTEM);
+        List<String> log;
 
-        List<String> log = new ArrayList<String>();
+        try (ACLContext ignored = ACL.as(ACL.SYSTEM)) {
+            Project project = Jenkins.get().getItemByFullName(projectName, Project.class);
 
-        try {
-            Project project =
-                Jenkins.getInstance().getItemByFullName(projectName, Project.class);
+            if (project == null) {
+                return new SlackTextMessage("Could not find project (" + projectName + ")\n");
+            }
 
-            if (project == null)
-                return new SlackTextMessage("Could not find project ("+projectName+")\n");
+            AbstractBuild build = project.getBuildByNumber(Integer.parseInt(buildNumber));
 
-            AbstractBuild build =
-                project.getBuildByNumber(Integer.parseInt(buildNumber));
-
-            if (build == null)
-                return new SlackTextMessage("Could not find build #"+buildNumber+" for ("+projectName+")\n");
+            if (build == null) {
+                return new SlackTextMessage("Could not find build #" + buildNumber + " for (" + projectName + ")\n");
+            }
 
             log = build.getLog(25);
 
         } catch (IOException ex) {
-            return new SlackTextMessage("Error occured returning log: "+ex.getMessage());
-        } finally {
-            SecurityContextHolder.setContext(ctx);
+            return new SlackTextMessage("Error occurred returning log: " + ex.getMessage());
         }
 
-        String response = "*"+projectName+"* *#"+buildNumber+"*\n";
-        response += "```";
+        StringBuilder builder = new StringBuilder("*" + projectName + "* *#" + buildNumber + "*\n```");
         for (String line : log) {
-            response += line + "\n";
+            builder.append(line).append("\n");
         }
-        response += "```";
+        builder.append("```");
 
-        return new SlackTextMessage(response);
+        return new SlackTextMessage(builder.toString());
     }
 }

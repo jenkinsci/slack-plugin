@@ -109,4 +109,13 @@ public class StandardSlackServiceTest {
         service.setHttpClient(httpClientStub);
         assertTrue(service.publish("message"));
     }
+
+    @Test
+    public void sendAsBotUserInThreadReturnsTrue() {
+        StandardSlackServiceStub service = new StandardSlackServiceStub("", "domain", "token", null, true, "#room1:1528317530");
+        CloseableHttpClientStub httpClientStub = new CloseableHttpClientStub();
+        httpClientStub.setHttpStatus(HttpStatus.SC_OK);
+        service.setHttpClient(httpClientStub);
+        assertTrue(service.publish("message"));
+    }
 }

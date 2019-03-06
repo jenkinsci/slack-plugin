@@ -5,8 +5,6 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.Before;
 
-import static org.junit.Assert.assertEquals;
-
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.nullValue;
@@ -15,13 +13,10 @@ import static org.hamcrest.Matchers.containsString;
 import static org.junit.Assert.assertThat;
 
 import com.gargoylesoftware.htmlunit.WebResponse;
-import com.gargoylesoftware.htmlunit.WebRequestSettings;
+import com.gargoylesoftware.htmlunit.WebRequest;
 import static com.gargoylesoftware.htmlunit.HttpMethod.POST;
 
 import com.gargoylesoftware.htmlunit.html.HtmlForm;
-import com.gargoylesoftware.htmlunit.html.HtmlInput;
-
-import hudson.tasks.Shell;
 
 import org.jvnet.hudson.test.JenkinsRule;
 
@@ -30,8 +25,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import static java.net.HttpURLConnection.HTTP_OK;
 import static java.net.HttpURLConnection.HTTP_NOT_FOUND;
 
-import org.apache.commons.httpclient.NameValuePair;
+import com.gargoylesoftware.htmlunit.util.NameValuePair;
 
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.ArrayList;
 
@@ -40,18 +36,13 @@ import jenkins.model.GlobalConfiguration;
 
 import jenkins.plugins.slack.webhook.model.SlackTextMessage;
 
-import jenkins.plugins.slack.webhook.WebhookEndpoint;
-
-
-
-
 public class WebhookEndpointTest {
 
     private JenkinsRule.WebClient client;
 
-    private final String URL = "webook";
-    private final String ENDPOINT = URL+"/";
-    private final String LONG_PROJECT_NAME = "¶12345678  90怒qwertyuioplkjhgfdsazxcvbnm~()-_=+7{},.\"'    5";
+    private static final String URL = "webook";
+    private static final String ENDPOINT = URL + "/";
+    private static final String LONG_PROJECT_NAME = "slack_plugin";
 
     private List<NameValuePair> data;
 
@@ -60,15 +51,15 @@ public class WebhookEndpointTest {
 
     
     @Before
-    public void setUp() throws Exception {
+    public void setUp() {
         client = jenkinsRule.createWebClient();
-        data = new ArrayList<NameValuePair>();
+        data = new ArrayList<>();
         data.add(new NameValuePair("token", "GOOD_TOKEN"));
         data.add(new NameValuePair("trigger_word", "jenkins")); 
     }
 
     @Test
-    public void testNotNullOutgoingWebhookUrl() throws Exception {
+    public void testNotNullOutgoingWebhookUrl() {
         WebhookEndpoint endpoint = new WebhookEndpoint();
         String url = endpoint.getUrlName();
         assertThat(url, is(not(nullValue())));
@@ -96,7 +87,7 @@ public class WebhookEndpointTest {
     @Test
     public void testNoTextPostData() throws Exception {
         setConfigSettings();
-        List<NameValuePair> goodToken = new ArrayList<NameValuePair>();
+        List<NameValuePair> goodToken = new ArrayList<>();
         goodToken.add(new NameValuePair("token", "GOOD_TOKEN"));
 
         WebResponse response = makeRequest(goodToken);
@@ -105,13 +96,14 @@ public class WebhookEndpointTest {
 
     @Test
     public void testNoTriggerWordPostData() throws Exception {
+        // No trigger word is present, which is the case when Slack "slash commands" are used
         setConfigSettings();
-        List<NameValuePair> goodToken = new ArrayList<NameValuePair>();
+        List<NameValuePair> goodToken = new ArrayList<>();
         goodToken.add(new NameValuePair("token", "GOOD_TOKEN"));
-        goodToken.add(new NameValuePair("text", "jenkins"));
+        goodToken.add(new NameValuePair("text", "list projects"));
 
         WebResponse response = makeRequest(goodToken);
-        assertThat(getSlackMessage(response).getText(), is("Invalid command, trigger_word field required"));
+        assertThat(getSlackMessage(response).getText(), is("*Projects:*\n>_No projects found_"));
     }
 
     @Test
@@ -121,7 +113,7 @@ public class WebhookEndpointTest {
 
         setConfigSettings();
 
-        List<NameValuePair> badData = new ArrayList<NameValuePair>();
+        List<NameValuePair> badData = new ArrayList<>();
         badData.add(new NameValuePair("token", "BAD_TOKEN"));
 
         WebResponse response = makeRequest(badData);
@@ -164,7 +156,7 @@ public class WebhookEndpointTest {
     @Test
     public void testRunProject() throws Exception {
         setConfigSettings();
-        FreeStyleProject project = jenkinsRule.createFreeStyleProject(LONG_PROJECT_NAME);
+        jenkinsRule.createFreeStyleProject(LONG_PROJECT_NAME);
         data.add(new NameValuePair("text", "jenkins run "+LONG_PROJECT_NAME));
         WebResponse response = makeRequest(data);
         assertThat(getSlackMessage(response).getText(), is("Build scheduled for project "+LONG_PROJECT_NAME+"\n"));
@@ -201,13 +193,13 @@ public class WebhookEndpointTest {
     }
 
     private WebResponse makeRequest(List<NameValuePair> postData) throws Exception {
-        WebRequestSettings request =
-            new WebRequestSettings(client.createCrumbedUrl(ENDPOINT), POST);
+        WebRequest request =
+            new WebRequest(client.createCrumbedUrl(ENDPOINT), POST);
 
         if (postData != null)
             request.setRequestParameters(postData);
 
-        request.setCharset("utf-8");
+        request.setCharset(StandardCharsets.UTF_8);
 
         return client.loadWebResponse(request);
     } 

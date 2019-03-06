@@ -2,11 +2,13 @@ package jenkins.plugins.slack.workflow;
 
 import com.cloudbees.plugins.credentials.common.StandardListBoxModel;
 import com.cloudbees.plugins.credentials.domains.HostnameRequirement;
+import com.google.common.collect.ImmutableSet;
 import hudson.AbortException;
 import hudson.Extension;
 import hudson.Util;
 import hudson.model.Item;
 import hudson.model.Project;
+import hudson.model.Run;
 import hudson.model.TaskListener;
 import hudson.security.ACL;
 import hudson.util.FormValidation;
@@ -22,28 +24,28 @@ import net.sf.json.JSONException;
 import net.sf.json.JSONObject;
 import net.sf.json.groovy.JsonSlurper;
 import org.jenkinsci.plugins.plaincredentials.StringCredentials;
-import org.jenkinsci.plugins.workflow.steps.AbstractStepDescriptorImpl;
-import org.jenkinsci.plugins.workflow.steps.AbstractStepImpl;
-import org.jenkinsci.plugins.workflow.steps.AbstractSynchronousNonBlockingStepExecution;
-import org.jenkinsci.plugins.workflow.steps.StepContextParameter;
-
+import org.jenkinsci.plugins.workflow.steps.Step;
+import org.jenkinsci.plugins.workflow.steps.StepContext;
+import org.jenkinsci.plugins.workflow.steps.StepDescriptor;
+import org.jenkinsci.plugins.workflow.steps.StepExecution;
+import org.jenkinsci.plugins.workflow.steps.SynchronousNonBlockingStepExecution;
 import org.kohsuke.stapler.AncestorInPath;
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.DataBoundSetter;
 import org.kohsuke.stapler.QueryParameter;
 
+import java.util.Objects;
+import java.util.Set;
 import javax.annotation.Nonnull;
-import javax.inject.Inject;
-
 
 import static com.cloudbees.plugins.credentials.CredentialsProvider.lookupCredentials;
 
 /**
  * Workflow step to send a Slack channel notification.
  */
-public class SlackSendStep extends AbstractStepImpl {
+public class SlackSendStep extends Step {
 
-    private final @Nonnull String message;
+    private String message;
     private String color;
     private String token;
     private String tokenCredentialId;
@@ -53,6 +55,7 @@ public class SlackSendStep extends AbstractStepImpl {
     private String teamDomain;
     private boolean failOnError;
     private String attachments;
+    private boolean replyBroadcast;
 
 
     @Nonnull
@@ -112,7 +115,7 @@ public class SlackSendStep extends AbstractStepImpl {
     @DataBoundSetter
     public void setBaseUrl(String baseUrl) {
         this.baseUrl = Util.fixEmpty(baseUrl);
-        if(this.baseUrl != null && !this.baseUrl.isEmpty() && !this.baseUrl.endsWith("/")) {
+        if (this.baseUrl != null && !this.baseUrl.isEmpty() && !this.baseUrl.endsWith("/")) {
             this.baseUrl += "/";
         }
     }
@@ -136,24 +139,43 @@ public class SlackSendStep extends AbstractStepImpl {
     }
 
     @DataBoundSetter
-    public void setAttachments(String attachments){
+    public void setAttachments(String attachments) {
         this.attachments = attachments;
     }
 
-    public String getAttachments(){
+    public String getAttachments() {
         return attachments;
     }
 
-    @DataBoundConstructor
-    public SlackSendStep(@Nonnull String message) {
+    @DataBoundSetter
+    public void setMessage(String message) {
         this.message = message;
     }
 
-    @Extension
-    public static class DescriptorImpl extends AbstractStepDescriptorImpl {
+    public boolean getReplyBroadcast() {
+        return replyBroadcast;
+    }
 
-        public DescriptorImpl() {
-            super(SlackSendStepExecution.class);
+    @DataBoundSetter
+    public void setReplyBroadcast(boolean replyBroadcast) {
+        this.replyBroadcast = replyBroadcast;
+    }
+
+    @DataBoundConstructor
+    public SlackSendStep() {
+    }
+
+    @Override
+    public StepExecution start(StepContext context) {
+        return new SlackSendStepExecution(this, context);
+    }
+
+    @Extension
+    public static class DescriptorImpl extends StepDescriptor {
+
+        @Override
+        public Set<? extends Class<?>> getRequiredContext() {
+            return ImmutableSet.of(Run.class, TaskListener.class);
         }
 
         @Override
@@ -161,6 +183,7 @@ public class SlackSendStep extends AbstractStepImpl {
             return "slackSend";
         }
 
+        @Nonnull
         @Override
         public String getDisplayName() {
             return Messages.SlackSendStepDisplayName();
@@ -168,7 +191,9 @@ public class SlackSendStep extends AbstractStepImpl {
 
         public ListBoxModel doFillTokenCredentialIdItems(@AncestorInPath Project project) {
 
-            if(project == null && !Jenkins.getInstance().hasPermission(Jenkins.ADMINISTER) ||
+            Jenkins jenkins = Jenkins.get();
+
+            if (project == null && !jenkins.hasPermission(Jenkins.ADMINISTER) ||
                     project != null && !project.hasPermission(Item.EXTENDED_READ)) {
                 return new StandardListBoxModel();
             }
@@ -186,92 +211,112 @@ public class SlackSendStep extends AbstractStepImpl {
         //WARN users that they should not use the plain/exposed token, but rather the token credential id
         public FormValidation doCheckToken(@QueryParameter String value) {
             //always show the warning - TODO investigate if there is a better way to handle this
-            return FormValidation.warning("Exposing your Integration Token is a security risk. Please use the Integration Token Credential ID");
+            return FormValidation
+                    .warning("Exposing your Integration Token is a security risk. Please use the Integration Token Credential ID");
         }
     }
 
-    public static class SlackSendStepExecution extends AbstractSynchronousNonBlockingStepExecution<Void> {
+    public static class SlackSendStepExecution extends SynchronousNonBlockingStepExecution<SlackResponse> {
 
         private static final long serialVersionUID = 1L;
 
-        @Inject
-        transient SlackSendStep step;
+        private transient final SlackSendStep step;
 
-        @StepContextParameter
-        transient TaskListener listener;
+        SlackSendStepExecution(SlackSendStep step, StepContext context) {
+            super(context);
+            this.step = step;
+        }
 
         @Override
-        protected Void run() throws Exception {
+        protected SlackResponse run() throws Exception {
 
-            //default to global config values if not set in step, but allow step to override all global settings
-            Jenkins jenkins;
-            //Jenkins.getInstance() may return null, no message sent in that case
-            try {
-                jenkins = Jenkins.getInstance();
-            } catch (NullPointerException ne) {
-                listener.error(Messages.NotificationFailedWithException(ne));
-                return null;
-            }
+            Jenkins jenkins = Jenkins.get();
+
             SlackNotifier.DescriptorImpl slackDesc = jenkins.getDescriptorByType(SlackNotifier.DescriptorImpl.class);
-            listener.getLogger().println("run slackstepsend, step " + step.token+":" + step.botUser+", desc " + slackDesc.getToken()+":"+slackDesc.getBotUser());
+
             String baseUrl = step.baseUrl != null ? step.baseUrl : slackDesc.getBaseUrl();
-            String team = step.teamDomain != null ? step.teamDomain : slackDesc.getTeamDomain();
-            String tokenCredentialId = step.tokenCredentialId != null ? step.tokenCredentialId : slackDesc.getTokenCredentialId();
-            String token;
-            boolean botUser;
-            if (step.token != null) {
-                token = step.token;
-                botUser = step.botUser;
-            } else {
-                token = slackDesc.getToken();
-                botUser = slackDesc.getBotUser();
-            }
+            String teamDomain = step.teamDomain != null ? step.teamDomain : slackDesc.getTeamDomain();
+            String tokenCredentialId = step.tokenCredentialId != null ? step.tokenCredentialId : slackDesc
+                    .getTokenCredentialId();
+            String token = step.token;
+            boolean botUser = step.botUser || slackDesc.isBotUser();
             String channel = step.channel != null ? step.channel : slackDesc.getRoom();
             String color = step.color != null ? step.color : "";
 
-            //placing in console log to simplify testing of retrieving values from global config or from step field; also used for tests
-            listener.getLogger().println(Messages.SlackSendStepConfig(step.baseUrl == null, step.teamDomain == null, step.token == null, step.channel == null, step.color == null));
+            TaskListener listener = getContext().get(TaskListener.class);
+            Objects.requireNonNull(listener, "Listener is mandatory here");
 
-            SlackService slackService = getSlackService(baseUrl, team, token, tokenCredentialId, botUser, channel);
+            listener.getLogger().println(Messages.SlackSendStepValues(
+                    defaultIfEmpty(baseUrl), defaultIfEmpty(teamDomain), channel, defaultIfEmpty(color), botUser,
+                    defaultIfEmpty(tokenCredentialId))
+            );
+
+            SlackService slackService = getSlackService(
+                    baseUrl, teamDomain, token, tokenCredentialId, botUser, channel, step.replyBroadcast
+            );
             boolean publishSuccess;
-            if(step.attachments != null){
+            if (step.attachments != null) {
                 JsonSlurper jsonSlurper = new JsonSlurper();
-                JSON json = null;
+                JSON json;
                 try {
                     json = jsonSlurper.parseText(step.attachments);
                 } catch (JSONException e) {
                     listener.error(Messages.NotificationFailedWithException(e));
                     return null;
                 }
-                if(!(json instanceof JSONArray)){
-                    listener.error(Messages.NotificationFailedWithException(new IllegalArgumentException("Attachments must be JSONArray")));
+                if (!(json instanceof JSONArray)) {
+                    listener.error(Messages
+                            .NotificationFailedWithException(new IllegalArgumentException("Attachments must be JSONArray")));
                     return null;
                 }
                 JSONArray jsonArray = (JSONArray) json;
-                for (int i = 0; i < jsonArray.size(); i++) {
-                    Object object = jsonArray.get(i);
-                    if(object instanceof JSONObject){
+                for (Object object : jsonArray) {
+                    if (object instanceof JSONObject) {
                         JSONObject jsonNode = ((JSONObject) object);
                         if (!jsonNode.has("fallback")) {
                             jsonNode.put("fallback", step.message);
                         }
                     }
                 }
-                publishSuccess = slackService.publish(jsonArray, color);
-            }else{
+                publishSuccess = slackService.publish(step.message, jsonArray, color);
+            } else if (step.message != null) {
                 publishSuccess = slackService.publish(step.message, color);
+            } else {
+                listener.error(Messages
+                        .NotificationFailedWithException(new IllegalArgumentException("No message or attachments provided")));
+                return null;
             }
-            if (!publishSuccess && step.failOnError) {
+            SlackResponse response = null;
+            if (publishSuccess) {
+                String responseString = slackService.getResponseString();
+                if (responseString != null) {
+                    try {
+                        org.json.JSONObject result = new org.json.JSONObject(responseString);
+                        response = new SlackResponse(result);
+                    } catch (org.json.JSONException ex) {
+                        listener.error(Messages.FailedToParseSlackResponse(responseString));
+                        if (step.failOnError) {
+                            throw ex;
+                        }
+                    }
+                } else {
+                    return new SlackResponse();
+                }
+            } else if (step.failOnError) {
                 throw new AbortException(Messages.NotificationFailed());
-            } else if (!publishSuccess) {
+            } else {
                 listener.error(Messages.NotificationFailed());
             }
-            return null;
+            return response;
+        }
+
+        private String defaultIfEmpty(String value) {
+            return Util.fixEmpty(value) != null ? value : Messages.SlackSendStepValuesEmptyMessage();
         }
 
         //streamline unit testing
-        SlackService getSlackService(String baseUrl, String team, String token, String tokenCredentialId, boolean botUser, String channel) {
-            return new StandardSlackService(baseUrl, team, token, tokenCredentialId, botUser, channel);
+        SlackService getSlackService(String baseUrl, String team, String token, String tokenCredentialId, boolean botUser, String channel, boolean replyBroadcast) {
+            return new StandardSlackService(baseUrl, team, token, tokenCredentialId, botUser, channel, replyBroadcast);
         }
     }
 }
