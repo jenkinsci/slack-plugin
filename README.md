@@ -32,7 +32,6 @@ Additionally you can pass a JSONArray as a String in order to send complex
 messages, as per the example:
 
 ```
-import groovy.json.JsonOutput
 
 node {
     def attachments = [
@@ -43,7 +42,7 @@ node {
         ]
     ]
 
-    slackSend(color: '#00FF00', channel: '@gustavo.maia', attachments: JsonOutput.toJson(attachments))
+    slackSend(color: '#00FF00', channel: '@gustavo.maia', attachments: attachments)
 }
 ```
 For more information about slack messages see [Slack Messages Api](https://api.slack.com/docs/messages)
