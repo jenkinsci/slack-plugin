@@ -3,6 +3,7 @@ package jenkins.plugins.slack;
 import com.cloudbees.plugins.credentials.CredentialsMatcher;
 import com.cloudbees.plugins.credentials.CredentialsMatchers;
 import hudson.ProxyConfiguration;
+import hudson.model.Item;
 import hudson.security.ACL;
 import jenkins.model.Jenkins;
 import jenkins.plugins.slack.logging.BuildKey;
@@ -50,16 +51,17 @@ public class StandardSlackService implements SlackService {
     private String[] roomIds;
     private boolean replyBroadcast;
     private String responseString = null;
+    private Item item;
 
-    public StandardSlackService(String baseUrl, String teamDomain, String authTokenCredentialId, boolean botUser, String roomId) {
-        this(baseUrl, teamDomain, null, authTokenCredentialId, botUser, roomId, false);
+    public StandardSlackService(String baseUrl, String teamDomain, String authTokenCredentialId, boolean botUser, String roomId, Item item) {
+        this(baseUrl, teamDomain, null, authTokenCredentialId, botUser, roomId, false, item);
     }
 
-    public StandardSlackService(String baseUrl, String teamDomain, String token, String authTokenCredentialId, boolean botUser, String roomId) {
-        this(baseUrl, teamDomain, token, authTokenCredentialId, botUser, roomId, false);
+    public StandardSlackService(String baseUrl, String teamDomain, String token, String authTokenCredentialId, boolean botUser, String roomId, Item item) {
+        this(baseUrl, teamDomain, token, authTokenCredentialId, botUser, roomId, false, item);
     }
 
-    public StandardSlackService(String baseUrl, String teamDomain, String token, String authTokenCredentialId, boolean botUser, String roomId, boolean replyBroadcast) {
+    public StandardSlackService(String baseUrl, String teamDomain, String token, String authTokenCredentialId, boolean botUser, String roomId, boolean replyBroadcast, Item item) {
         super();
         this.baseUrl = baseUrl;
         if(this.baseUrl != null && !this.baseUrl.isEmpty() && !this.baseUrl.endsWith("/")) {
@@ -71,6 +73,7 @@ public class StandardSlackService implements SlackService {
         this.botUser = botUser;
         this.roomIds = roomId.split("[,; ]+");
         this.replyBroadcast = replyBroadcast;
+        this.item = item;
     }
 
     public String getResponseString() {
@@ -120,12 +123,12 @@ public class StandardSlackService implements SlackService {
                 roomId = splitThread[0];
                 threadTs = splitThread[1];
             }
-
+            final String token = getTokenToUse();
             //prepare post methods for both requests types
             if (!botUser || !StringUtils.isEmpty(baseUrl)) {
-                url = "https://" + teamDomain + "." + host + "/services/hooks/jenkins-ci?token=" + getTokenToUse();
+                url = "https://" + teamDomain + "." + host + "/services/hooks/jenkins-ci?token=" + token;
                 if (!StringUtils.isEmpty(baseUrl)) {
-                    url = baseUrl + getTokenToUse();
+                    url = baseUrl + token;
                 }
                 post = new HttpPost(url);
                 JSONObject json = new JSONObject();
@@ -139,7 +142,7 @@ public class StandardSlackService implements SlackService {
 
                 nvps.add(new BasicNameValuePair("payload", json.toString()));
             } else {
-                url = "https://slack.com/api/chat.postMessage?token=" + getTokenToUse() +
+                url = "https://slack.com/api/chat.postMessage?token=" + token +
                         "&channel=" + roomId.replace("#", "") +
                         "&link_names=1" +
                         "&as_user=true";
@@ -200,7 +203,7 @@ public class StandardSlackService implements SlackService {
     }
 
     private StringCredentials lookupCredentials(String credentialId) {
-        List<StringCredentials> credentials = com.cloudbees.plugins.credentials.CredentialsProvider.lookupCredentials(StringCredentials.class, Jenkins.get(), ACL.SYSTEM, Collections.emptyList());
+        List<StringCredentials> credentials = com.cloudbees.plugins.credentials.CredentialsProvider.lookupCredentials(StringCredentials.class, item, ACL.SYSTEM, Collections.emptyList());
         CredentialsMatcher matcher = CredentialsMatchers.withId(credentialId);
         return CredentialsMatchers.firstOrNull(credentials, matcher);
     }

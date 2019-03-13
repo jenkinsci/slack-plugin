@@ -1,5 +1,7 @@
 package jenkins.plugins.slack;
 
+import hudson.model.Item;
+
 public class SlackNotifierStub extends SlackNotifier {
 
     public SlackNotifierStub(String baseUrl, String teamDomain, String authToken, boolean botUser, String room, String authTokenCredentialId,
@@ -23,7 +25,7 @@ public class SlackNotifierStub extends SlackNotifier {
         }
 
         @Override
-        SlackService getSlackService(final String baseUrl, final String teamDomain, final String authTokenCredentialId, final boolean botUser, final String room) {
+        SlackService getSlackService(final String baseUrl, final String teamDomain, final String authTokenCredentialId, final boolean botUser, final String room, final Item project) {
             return slackService;
         }
 

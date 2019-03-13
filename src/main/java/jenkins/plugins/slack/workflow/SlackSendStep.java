@@ -232,7 +232,7 @@ public class SlackSendStep extends Step {
         protected SlackResponse run() throws Exception {
 
             Jenkins jenkins = Jenkins.get();
-
+            Project project = getContext().get(Project.class);
             SlackNotifier.DescriptorImpl slackDesc = jenkins.getDescriptorByType(SlackNotifier.DescriptorImpl.class);
 
             String baseUrl = step.baseUrl != null ? step.baseUrl : slackDesc.getBaseUrl();
@@ -253,7 +253,7 @@ public class SlackSendStep extends Step {
             );
 
             SlackService slackService = getSlackService(
-                    baseUrl, teamDomain, token, tokenCredentialId, botUser, channel, step.replyBroadcast
+                    baseUrl, teamDomain, token, tokenCredentialId, botUser, channel, step.replyBroadcast, project
             );
             final boolean publishSuccess;
             if (step.attachments != null) {
@@ -328,8 +328,8 @@ public class SlackSendStep extends Step {
         }
 
         //streamline unit testing
-        SlackService getSlackService(String baseUrl, String team, String token, String tokenCredentialId, boolean botUser, String channel, boolean replyBroadcast) {
-            return new StandardSlackService(baseUrl, team, token, tokenCredentialId, botUser, channel, replyBroadcast);
+        SlackService getSlackService(String baseUrl, String team, String token, String tokenCredentialId, boolean botUser, String channel, boolean replyBroadcast, Item item) {
+            return new StandardSlackService(baseUrl, team, token, tokenCredentialId, botUser, channel, replyBroadcast, item);
         }
     }
 }

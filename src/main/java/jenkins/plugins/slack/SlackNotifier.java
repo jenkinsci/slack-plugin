@@ -10,6 +10,7 @@ import hudson.model.AbstractBuild;
 import hudson.model.AbstractProject;
 import hudson.model.BuildListener;
 import hudson.model.Item;
+import hudson.model.Project;
 import hudson.security.ACL;
 import hudson.tasks.BuildStepDescriptor;
 import hudson.tasks.BuildStepMonitor;
@@ -427,8 +428,7 @@ public class SlackNotifier extends Notifier {
         authToken = env.expand(authToken);
         authTokenCredentialId = env.expand(authTokenCredentialId);
         room = env.expand(room);
-
-        return new StandardSlackService(baseUrl, teamDomain, authToken, authTokenCredentialId, botUser, room);
+        return new StandardSlackService(baseUrl, teamDomain, authToken, authTokenCredentialId, botUser, room, r.getProject());
     }
 
     @Override
@@ -604,8 +604,8 @@ public class SlackNotifier extends Notifier {
             return true;
         }
 
-        SlackService getSlackService(final String baseUrl, final String teamDomain, final String authTokenCredentialId, final boolean botUser, final String room) {
-            return new StandardSlackService(baseUrl, teamDomain, authTokenCredentialId, botUser, room);
+        SlackService getSlackService(final String baseUrl, final String teamDomain, final String authTokenCredentialId, final boolean botUser, final String room, final Item project) {
+            return new StandardSlackService(baseUrl, teamDomain, authTokenCredentialId, botUser, room, project);
         }
 
         @Nonnull
@@ -618,7 +618,8 @@ public class SlackNotifier extends Notifier {
                                                @QueryParameter("teamDomain") final String teamDomain,
                                                @QueryParameter("tokenCredentialId") final String tokenCredentialId,
                                                @QueryParameter("botUser") final boolean botUser,
-                                               @QueryParameter("room") final String room) {
+                                               @QueryParameter("room") final String room,
+                                               @AncestorInPath Project project) {
 
             try {
                 String targetUrl = baseUrl;
@@ -636,7 +637,7 @@ public class SlackNotifier extends Notifier {
                         this.tokenCredentialId;
                 String targetRoom = Util.fixEmpty(room) != null ? room : this.room;
 
-                SlackService testSlackService = getSlackService(targetUrl, targetDomain, targetTokenCredentialId, targetBotUser, targetRoom);
+                SlackService testSlackService = getSlackService(targetUrl, targetDomain, targetTokenCredentialId, targetBotUser, targetRoom, project);
                 String message = "Slack/Jenkins plugin: you're all set on " + DisplayURLProvider.get().getRoot();
                 boolean success = testSlackService.publish(message, "good");
                 return success ? FormValidation.ok("Success") : FormValidation.error("Failure");
