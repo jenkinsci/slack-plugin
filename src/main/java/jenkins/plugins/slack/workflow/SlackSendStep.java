@@ -63,8 +63,6 @@ public class SlackSendStep extends Step {
     private Object attachments;
     private boolean replyBroadcast;
 
-
-
     @Nonnull
     public String getMessage() {
         return message;

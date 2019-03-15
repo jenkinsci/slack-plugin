@@ -5,6 +5,7 @@ import com.cloudbees.plugins.credentials.CredentialsMatchers;
 import com.cloudbees.plugins.credentials.CredentialsProvider;
 import hudson.model.Item;
 import hudson.security.ACL;
+import jenkins.model.Jenkins;
 import org.apache.commons.lang.StringUtils;
 import org.jenkinsci.plugins.plaincredentials.StringCredentials;
 
@@ -12,6 +13,12 @@ import java.util.Collections;
 import java.util.List;
 
 public class CredentialsObtainer {
+
+    public static StringCredentials lookupCredentials(String credentialId) {
+        List<StringCredentials> credentials = CredentialsProvider.lookupCredentials(StringCredentials.class, Jenkins.get(), ACL.SYSTEM, Collections.emptyList());
+        CredentialsMatcher matcher = CredentialsMatchers.withId(credentialId);
+        return CredentialsMatchers.firstOrNull(credentials, matcher);
+    }
 
     public static StringCredentials lookupCredentials(String credentialId, Item item) {
         List<StringCredentials> credentials = CredentialsProvider.lookupCredentials(StringCredentials.class, item, ACL.SYSTEM, Collections.emptyList());
