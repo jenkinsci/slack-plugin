@@ -53,12 +53,16 @@ public class StandardSlackService implements SlackService {
     private String responseString = null;
     private Item item;
 
-    public StandardSlackService(String baseUrl, String teamDomain, String authTokenCredentialId, boolean botUser, String roomId, Item item) {
-        this(baseUrl, teamDomain, null, authTokenCredentialId, botUser, roomId, false, item);
+    public StandardSlackService(String baseUrl, String teamDomain, String authTokenCredentialId, boolean botUser, String roomId) {
+        this(baseUrl, teamDomain, null, authTokenCredentialId, botUser, roomId, false, null);
     }
 
-    public StandardSlackService(String baseUrl, String teamDomain, String token, String authTokenCredentialId, boolean botUser, String roomId, Item item) {
-        this(baseUrl, teamDomain, token, authTokenCredentialId, botUser, roomId, false, item);
+    public StandardSlackService(String baseUrl, String teamDomain, String token, String authTokenCredentialId, boolean botUser, String roomId) {
+        this(baseUrl, teamDomain, token, authTokenCredentialId, botUser, roomId, false, null);
+    }
+
+    public StandardSlackService(String baseUrl, String teamDomain, String token, String authTokenCredentialId, boolean botUser, String roomId, boolean replyBroadcast) {
+        this(baseUrl, teamDomain, token, authTokenCredentialId, botUser, roomId, replyBroadcast, null);
     }
 
     public StandardSlackService(String baseUrl, String teamDomain, String token, String authTokenCredentialId, boolean botUser, String roomId, boolean replyBroadcast, Item item) {
