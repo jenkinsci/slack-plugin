@@ -73,7 +73,10 @@ public class StandardSlackService implements SlackService {
     @Deprecated
     public StandardSlackService(String baseUrl, String teamDomain, String token, String authTokenCredentialId, boolean botUser, String roomId, boolean replyBroadcast) {
         this(baseUrl, teamDomain, botUser, roomId, replyBroadcast);
-        populatedToken = getTokenToUse(authTokenCredentialId, token);
+        this.populatedToken = getTokenToUse(authTokenCredentialId, token);
+        if (this.populatedToken == null) {
+            throw new IllegalArgumentException("No slack token found, setup a secret text credential and configure it to be used");
+        }
     }
 
     /**

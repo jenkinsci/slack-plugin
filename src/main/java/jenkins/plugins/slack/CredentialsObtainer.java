@@ -11,19 +11,18 @@ import org.jenkinsci.plugins.plaincredentials.StringCredentials;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.NoSuchElementException;
 
 public class CredentialsObtainer {
 
     public static StringCredentials lookupCredentials(String credentialId) {
         List<StringCredentials> credentials = CredentialsProvider.lookupCredentials(StringCredentials.class, Jenkins.get(), ACL.SYSTEM, Collections.emptyList());
-        CredentialsMatcher matcher = CredentialsMatchers.withId(credentialId);
-        return CredentialsMatchers.firstOrNull(credentials, matcher);
+        return getCredentialWithId(credentialId, credentials);
     }
 
     public static StringCredentials lookupCredentials(String credentialId, Item item) {
         List<StringCredentials> credentials = CredentialsProvider.lookupCredentials(StringCredentials.class, item, ACL.SYSTEM, Collections.emptyList());
-        CredentialsMatcher matcher = CredentialsMatchers.withId(credentialId);
-        return CredentialsMatchers.firstOrNull(credentials, matcher);
+        return getCredentialWithId(credentialId, credentials);
     }
 
     /**
@@ -49,5 +48,10 @@ public class CredentialsObtainer {
             throw new IllegalArgumentException("the token with the provided ID could not be found and no token was specified");
         }
         return response;
+    }
+
+    private static StringCredentials getCredentialWithId(String credentialId, List<StringCredentials> credentials) {
+        CredentialsMatcher matcher = CredentialsMatchers.withId(credentialId);
+        return CredentialsMatchers.firstOrNull(credentials, matcher);
     }
 }
