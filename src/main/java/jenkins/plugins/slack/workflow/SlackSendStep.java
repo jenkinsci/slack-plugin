@@ -257,12 +257,15 @@ public class SlackSendStep extends Step {
                     defaultIfEmpty(baseUrl), defaultIfEmpty(teamDomain), channel, defaultIfEmpty(color), botUser,
                     defaultIfEmpty(tokenCredentialId))
             );
-            final String populatedToken = CredentialsObtainer.getTokenToUse(tokenCredentialId, item, token);
-            if (populatedToken == null) {
+            final String populatedToken;
+            try {
+                populatedToken = CredentialsObtainer.getTokenToUse(tokenCredentialId, item, token);
+            } catch (IllegalArgumentException e) {
                 listener.error(Messages
-                        .NotificationFailedWithException(new IllegalArgumentException("the token with the provided ID could not be found and no token was specified")));
+                        .NotificationFailedWithException(e));
                 return null;
             }
+
             SlackService slackService = getSlackService(
                     baseUrl, teamDomain, botUser, channel, step.replyBroadcast, populatedToken);
             final boolean publishSuccess;

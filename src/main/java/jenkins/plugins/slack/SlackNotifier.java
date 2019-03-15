@@ -408,7 +408,7 @@ public class SlackNotifier extends Notifier {
         return BuildStepMonitor.NONE;
     }
 
-    public SlackService newSlackService(AbstractBuild r, BuildListener listener) {
+    public SlackService newSlackService(AbstractBuild abstractBuild, BuildListener listener) {
         DescriptorImpl descriptor = getDescriptor();
         String teamDomain = Util.fixEmpty(this.teamDomain) != null ? this.teamDomain : descriptor.getTeamDomain();
         String baseUrl = Util.fixEmpty(this.baseUrl) != null ? this.baseUrl : descriptor.getBaseUrl();
@@ -420,7 +420,7 @@ public class SlackNotifier extends Notifier {
 
         EnvVars env;
         try {
-            env = r.getEnvironment(listener);
+            env = abstractBuild.getEnvironment(listener);
         } catch (Exception e) {
             listener.getLogger().println("Error retrieving environment vars: " + e.getMessage());
             env = new EnvVars();
@@ -430,15 +430,8 @@ public class SlackNotifier extends Notifier {
         authToken = env.expand(authToken);
         authTokenCredentialId = env.expand(authTokenCredentialId);
         room = env.expand(room);
-        final String populatedToken = CredentialsObtainer.getTokenToUse(authTokenCredentialId, r.getProject(), authToken);
-        if (populatedToken != null) {
-            return new StandardSlackService(baseUrl, teamDomain, botUser, room, false, populatedToken);
-        } else {
-            logger.log(Level.INFO, "No explicit token specified and could not obtain credentials for id: " + authTokenCredentialId);
-            return new StandardSlackService(baseUrl, teamDomain, authToken, authTokenCredentialId, botUser, room, false);
-        }
-
-
+        final String populatedToken = CredentialsObtainer.getTokenToUse(authTokenCredentialId, abstractBuild.getParent(), authToken);
+        return new StandardSlackService(baseUrl, teamDomain, botUser, room, false, populatedToken);
     }
 
     @Override
@@ -612,6 +605,14 @@ public class SlackNotifier extends Notifier {
             req.bindJSON(this, formData);
             save();
             return true;
+        }
+
+        /**
+         * @deprecated  use {@link #getSlackService(String, String, String, boolean, String, Item)} instead}
+         */
+        @Deprecated
+        SlackService getSlackService(final String baseUrl, final String teamDomain, final String authTokenCredentialId, final boolean botUser, final String roomId) {
+            return getSlackService(baseUrl, teamDomain, authTokenCredentialId, botUser, roomId, null);
         }
 
         SlackService getSlackService(final String baseUrl, final String teamDomain, final String authTokenCredentialId, final boolean botUser, final String roomId, final Item item) {

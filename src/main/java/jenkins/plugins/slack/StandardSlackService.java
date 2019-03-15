@@ -45,13 +45,11 @@ public class StandardSlackService implements SlackService {
     private String host = "slack.com";
     private String baseUrl;
     private String teamDomain;
-    private String token = null;
-    private String authTokenCredentialId = null;
     private boolean botUser;
     private String[] roomIds;
     private boolean replyBroadcast;
-    private String responseString = null;
-    private String populatedToken = null;
+    private String responseString;
+    private String populatedToken;
 
     /**
      * @deprecated use {@link #StandardSlackService(String, String, boolean, String, boolean, String)} instead}
@@ -75,8 +73,7 @@ public class StandardSlackService implements SlackService {
     @Deprecated
     public StandardSlackService(String baseUrl, String teamDomain, String token, String authTokenCredentialId, boolean botUser, String roomId, boolean replyBroadcast) {
         this(baseUrl, teamDomain, botUser, roomId, replyBroadcast);
-        this.token = token;
-        this.authTokenCredentialId = StringUtils.trim(authTokenCredentialId);
+        populatedToken = getTokenToUse(authTokenCredentialId, token);
     }
 
     /**
@@ -103,11 +100,12 @@ public class StandardSlackService implements SlackService {
         }
         this.teamDomain = teamDomain;
         this.botUser = botUser;
+        if (roomId == null) {
+            throw new IllegalArgumentException("Project Channel or Slack User ID must be specified.");
+        }
         this.roomIds = roomId.split("[,; ]+");
         this.replyBroadcast = replyBroadcast;
     }
-
-
 
     public String getResponseString() {
         return responseString;
@@ -156,12 +154,11 @@ public class StandardSlackService implements SlackService {
                 roomId = splitThread[0];
                 threadTs = splitThread[1];
             }
-            final String token = getTokenToUse();
             //prepare post methods for both requests types
             if (!botUser || !StringUtils.isEmpty(baseUrl)) {
-                url = "https://" + teamDomain + "." + host + "/services/hooks/jenkins-ci?token=" + token;
+                url = "https://" + teamDomain + "." + host + "/services/hooks/jenkins-ci?token=" + populatedToken;
                 if (!StringUtils.isEmpty(baseUrl)) {
-                    url = baseUrl + token;
+                    url = baseUrl + populatedToken;
                 }
                 post = new HttpPost(url);
                 JSONObject json = new JSONObject();
@@ -175,7 +172,7 @@ public class StandardSlackService implements SlackService {
 
                 nvps.add(new BasicNameValuePair("payload", json.toString()));
             } else {
-                url = "https://slack.com/api/chat.postMessage?token=" + token +
+                url = "https://slack.com/api/chat.postMessage?token=" + populatedToken +
                         "&channel=" + roomId.replace("#", "") +
                         "&link_names=1" +
                         "&as_user=true";
@@ -221,20 +218,16 @@ public class StandardSlackService implements SlackService {
         return result;
     }
 
-    private String getTokenToUse() {
-        if (populatedToken != null) {
-            return populatedToken;
-        } else {
-            if (!StringUtils.isEmpty(authTokenCredentialId)) {
-                StringCredentials credentials = CredentialsObtainer.lookupCredentials(authTokenCredentialId, null);
-                if (credentials != null) {
-                    logger.fine("Using Integration Token Credential ID.");
-                    return credentials.getSecret().getPlainText();
-                }
+    private String getTokenToUse(String authTokenCredentialId, String token) {
+        if (!StringUtils.isEmpty(authTokenCredentialId)) {
+            StringCredentials credentials = CredentialsObtainer.lookupCredentials(authTokenCredentialId, null);
+            if (credentials != null) {
+                logger.fine("Using Integration Token Credential ID.");
+                return credentials.getSecret().getPlainText();
             }
-
-            logger.fine("Using Integration Token.");
         }
+
+        logger.fine("Using Integration Token.");
         return token;
     }
 
