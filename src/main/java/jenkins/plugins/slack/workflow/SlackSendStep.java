@@ -15,6 +15,7 @@ import hudson.security.ACL;
 import hudson.util.FormValidation;
 import hudson.util.ListBoxModel;
 import jenkins.model.Jenkins;
+import jenkins.plugins.slack.CredentialsObtainer;
 import jenkins.plugins.slack.Messages;
 import jenkins.plugins.slack.SlackNotifier;
 import jenkins.plugins.slack.SlackService;
@@ -61,6 +62,7 @@ public class SlackSendStep extends Step {
     private boolean failOnError;
     private Object attachments;
     private boolean replyBroadcast;
+
 
 
     @Nonnull
@@ -255,10 +257,14 @@ public class SlackSendStep extends Step {
                     defaultIfEmpty(baseUrl), defaultIfEmpty(teamDomain), channel, defaultIfEmpty(color), botUser,
                     defaultIfEmpty(tokenCredentialId))
             );
-
+            final String populatedToken = CredentialsObtainer.getTokenToUse(tokenCredentialId, item, token);
+            if (populatedToken == null) {
+                listener.error(Messages
+                        .NotificationFailedWithException(new IllegalArgumentException("the token with the provided ID could not be found and no token was specified")));
+                return null;
+            }
             SlackService slackService = getSlackService(
-                    baseUrl, teamDomain, token, tokenCredentialId, botUser, channel, step.replyBroadcast, item
-            );
+                    baseUrl, teamDomain, botUser, channel, step.replyBroadcast, populatedToken);
             final boolean publishSuccess;
             if (step.attachments != null) {
                 JSONArray jsonArray = getAttachmentsAsJSONArray();
@@ -357,8 +363,8 @@ public class SlackSendStep extends Step {
         }
 
         //streamline unit testing
-        SlackService getSlackService(String baseUrl, String team, String token, String tokenCredentialId, boolean botUser, String channel, boolean replyBroadcast, Item item) {
-            return new StandardSlackService(baseUrl, team, token, tokenCredentialId, botUser, channel, replyBroadcast, item);
+        SlackService getSlackService(String baseUrl, String team, boolean botUser, String channel, boolean replyBroadcast, String populatedToken) {
+            return new StandardSlackService(baseUrl, team, botUser, channel, replyBroadcast, populatedToken);
         }
     }
 }

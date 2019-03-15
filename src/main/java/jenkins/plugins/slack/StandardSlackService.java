@@ -45,40 +45,69 @@ public class StandardSlackService implements SlackService {
     private String host = "slack.com";
     private String baseUrl;
     private String teamDomain;
-    private String token;
-    private String authTokenCredentialId;
+    private String token = null;
+    private String authTokenCredentialId = null;
     private boolean botUser;
     private String[] roomIds;
     private boolean replyBroadcast;
     private String responseString = null;
-    private Item item;
+    private String populatedToken = null;
 
+    /**
+     * @deprecated use {@link #StandardSlackService(String, String, boolean, String, boolean, String)} instead}
+     */
+    @Deprecated
     public StandardSlackService(String baseUrl, String teamDomain, String authTokenCredentialId, boolean botUser, String roomId) {
-        this(baseUrl, teamDomain, null, authTokenCredentialId, botUser, roomId, false, null);
+        this(baseUrl, teamDomain, null, authTokenCredentialId, botUser, roomId, false);
     }
 
+    /**
+     * @deprecated use {@link #StandardSlackService(String, String, boolean, String, boolean, String)} instead}
+     */
+    @Deprecated
     public StandardSlackService(String baseUrl, String teamDomain, String token, String authTokenCredentialId, boolean botUser, String roomId) {
-        this(baseUrl, teamDomain, token, authTokenCredentialId, botUser, roomId, false, null);
+        this(baseUrl, teamDomain, token, authTokenCredentialId, botUser, roomId, false);
     }
 
+    /**
+     * @deprecated use {@link #StandardSlackService(String, String, boolean, String, boolean, String)} instead}
+     */
+    @Deprecated
     public StandardSlackService(String baseUrl, String teamDomain, String token, String authTokenCredentialId, boolean botUser, String roomId, boolean replyBroadcast) {
-        this(baseUrl, teamDomain, token, authTokenCredentialId, botUser, roomId, replyBroadcast, null);
+        this(baseUrl, teamDomain, botUser, roomId, replyBroadcast);
+        this.token = token;
+        this.authTokenCredentialId = StringUtils.trim(authTokenCredentialId);
     }
 
-    public StandardSlackService(String baseUrl, String teamDomain, String token, String authTokenCredentialId, boolean botUser, String roomId, boolean replyBroadcast, Item item) {
+    /**
+     * @param baseUrl the full url to use, this is an alternative to specifying teamDomain
+     * @param teamDomain the teamDomain inside slack.com to use
+     * @param botUser
+     * @param roomId a semicolon separated list of rooms to notify
+     * @param replyBroadcast
+     * @param populatedToken a non-null token to use for authentication
+     */
+    public StandardSlackService(String baseUrl, String teamDomain, boolean botUser, String roomId, boolean replyBroadcast, String populatedToken) {
+        this(baseUrl, teamDomain, botUser, roomId, replyBroadcast);
+        if (populatedToken == null) {
+            throw new IllegalArgumentException("populatedToken cannot be null");
+        }
+        this.populatedToken = populatedToken;
+    }
+
+    private StandardSlackService(String baseUrl, String teamDomain, boolean botUser, String roomId, boolean replyBroadcast) {
         super();
         this.baseUrl = baseUrl;
         if(this.baseUrl != null && !this.baseUrl.isEmpty() && !this.baseUrl.endsWith("/")) {
             this.baseUrl += "/";
         }
         this.teamDomain = teamDomain;
-        this.token = token;
-        this.authTokenCredentialId = StringUtils.trim(authTokenCredentialId);
         this.botUser = botUser;
         this.roomIds = roomId.split("[,; ]+");
         this.replyBroadcast = replyBroadcast;
-        this.item = item;
     }
+
+
 
     public String getResponseString() {
         return responseString;
@@ -193,23 +222,20 @@ public class StandardSlackService implements SlackService {
     }
 
     private String getTokenToUse() {
-        if (authTokenCredentialId != null && !authTokenCredentialId.isEmpty()) {
-            StringCredentials credentials = lookupCredentials(authTokenCredentialId);
-            if (credentials != null) {
-                logger.fine("Using Integration Token Credential ID.");
-                return credentials.getSecret().getPlainText();
+        if (populatedToken != null) {
+            return populatedToken;
+        } else {
+            if (!StringUtils.isEmpty(authTokenCredentialId)) {
+                StringCredentials credentials = CredentialsObtainer.lookupCredentials(authTokenCredentialId, null);
+                if (credentials != null) {
+                    logger.fine("Using Integration Token Credential ID.");
+                    return credentials.getSecret().getPlainText();
+                }
             }
+
+            logger.fine("Using Integration Token.");
         }
-
-        logger.fine("Using Integration Token.");
-
         return token;
-    }
-
-    private StringCredentials lookupCredentials(String credentialId) {
-        List<StringCredentials> credentials = com.cloudbees.plugins.credentials.CredentialsProvider.lookupCredentials(StringCredentials.class, item, ACL.SYSTEM, Collections.emptyList());
-        CredentialsMatcher matcher = CredentialsMatchers.withId(credentialId);
-        return CredentialsMatchers.firstOrNull(credentials, matcher);
     }
 
     protected CloseableHttpClient getHttpClient() {

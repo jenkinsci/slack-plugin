@@ -1,5 +1,6 @@
 package jenkins.plugins.slack;
 
+import com.cloudbees.plugins.credentials.Credentials;
 import com.cloudbees.plugins.credentials.common.StandardListBoxModel;
 import com.cloudbees.plugins.credentials.domains.HostnameRequirement;
 import hudson.EnvVars;
@@ -34,6 +35,7 @@ import org.kohsuke.stapler.DataBoundSetter;
 import org.kohsuke.stapler.QueryParameter;
 import org.kohsuke.stapler.StaplerRequest;
 
+import java.util.NoSuchElementException;
 import java.util.function.Function;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -428,7 +430,14 @@ public class SlackNotifier extends Notifier {
         authToken = env.expand(authToken);
         authTokenCredentialId = env.expand(authTokenCredentialId);
         room = env.expand(room);
-        return new StandardSlackService(baseUrl, teamDomain, authToken, authTokenCredentialId, botUser, room, false, r.getProject());
+        final String populatedToken = CredentialsObtainer.getTokenToUse(authTokenCredentialId, r.getProject(), authToken);
+        if (populatedToken != null) {
+            return new StandardSlackService(baseUrl, teamDomain, botUser, room, false, populatedToken);
+        } else {
+            logger.log(Level.INFO, "No explicit token specified and could not obtain credentials for id: " + authTokenCredentialId);
+            return new StandardSlackService(baseUrl, teamDomain, authToken, authTokenCredentialId, botUser, room, false);
+        }
+
 
     }
 
@@ -606,7 +615,12 @@ public class SlackNotifier extends Notifier {
         }
 
         SlackService getSlackService(final String baseUrl, final String teamDomain, final String authTokenCredentialId, final boolean botUser, final String roomId, final Item item) {
-            return new StandardSlackService(baseUrl, teamDomain, null, authTokenCredentialId, botUser, roomId, false, item);
+            final String populatedToken = CredentialsObtainer.getTokenToUse(authTokenCredentialId, item,null );
+            if (populatedToken != null) {
+                return new StandardSlackService(baseUrl, teamDomain, botUser, roomId, false, populatedToken);
+            } else {
+                throw new NoSuchElementException("Could not obtain credentials with credential id: " + authTokenCredentialId);
+            }
         }
 
         @Nonnull

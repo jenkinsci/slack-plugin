@@ -2,7 +2,6 @@ package jenkins.plugins.slack;
 
 import com.cloudbees.plugins.credentials.CredentialsProvider;
 import hudson.ExtensionList;
-import hudson.model.*;
 import hudson.security.ACL;
 import hudson.util.Secret;
 import jenkins.model.Jenkins;
@@ -21,7 +20,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.powermock.api.mockito.PowerMockito.mock;
 import static org.powermock.api.mockito.PowerMockito.when;
@@ -38,24 +36,22 @@ public class StandardSlackServiceCredentialsTest {
     }
 
     @Test
-    public void providedJobCredentialsAreUsed() {
-        final String id = "cred-id";
-        final String secretText = "secret-text";
-        final Job job = createJobWithAvailableCredentialId(id, secretText);
-        final StandardSlackServiceStub service = new StandardSlackServiceStub("", "domain", null, id, true, "#room1:1528317530", job);
+    public void populatedTokenIsUsed() {
+        final String populatedToken = "secret-text";
+        final StandardSlackServiceStub service = new StandardSlackServiceStub("", "domain", true, "#room1:1528317530", populatedToken);
         final CloseableHttpClientStub httpClientStub = new CloseableHttpClientStub();
         httpClientStub.setHttpStatus(HttpStatus.SC_OK);
         service.setHttpClient(httpClientStub);
         service.publish("message");
-        assertTrue(httpClientStub.getLastRequest().getURI().toString().contains(secretText));
+        assertTrue(httpClientStub.getLastRequest().getURI().toString().contains(populatedToken));
     }
 
     @Test
-    public void globalCredentialsCanBeUsed() {
+    public void globalCredentialByIdUsed() {
         final String id = "cred-2id";
         final String secretText = "secret-2text";
         setupGlobalAvailableCredentialId(id, secretText);
-        final StandardSlackServiceStub service = new StandardSlackServiceStub("", "domain", null, id, true, "#room1:1528317530", null);
+        final StandardSlackServiceStub service = new StandardSlackServiceStub("", "domain", null, id, true, "#room1:1528317530");
         final CloseableHttpClientStub httpClientStub = new CloseableHttpClientStub();
         httpClientStub.setHttpStatus(HttpStatus.SC_OK);
         service.setHttpClient(httpClientStub);
@@ -64,22 +60,9 @@ public class StandardSlackServiceCredentialsTest {
     }
 
     @Test
-    public void otherJobCredentialsAreNotObtained() {
-        final String id = "cred-id";
-        final String secretText = "secret-text";
-        final Job job = createJobWithAvailableCredentialId(id, secretText);
-        final StandardSlackServiceStub service = new StandardSlackServiceStub("", "domain", null, "wrongid", true, "#room1:1528317530", job);
-        final CloseableHttpClientStub httpClientStub = new CloseableHttpClientStub();
-        httpClientStub.setHttpStatus(HttpStatus.SC_OK);
-        service.setHttpClient(httpClientStub);
-        service.publish("message");
-        assertFalse(httpClientStub.getLastRequest().getURI().toString().contains(secretText));
-    }
-
-    @Test
-    public void ifNoJobProvidedTokenIsUsed() {
+    public void tokenIsUsed() {
         final String token = "explicittoken";
-        final StandardSlackServiceStub service = new StandardSlackServiceStub("", "domain", token, null, true, "#room1:1528317530", null);
+        final StandardSlackServiceStub service = new StandardSlackServiceStub("", "domain", token, null, true, "#room1:1528317530");
         final CloseableHttpClientStub httpClientStub = new CloseableHttpClientStub();
         httpClientStub.setHttpStatus(HttpStatus.SC_OK);
         service.setHttpClient(httpClientStub);
@@ -87,27 +70,8 @@ public class StandardSlackServiceCredentialsTest {
         assertTrue(httpClientStub.getLastRequest().getURI().toString().contains(token));
     }
 
-    /**
-     * Creates a mocked job and sets up the mocking mechanism so the provided credential is obtainable.
-     * @param id the id of the credential to use.
-     * @param secretText the secret text of the credential.
-     * @return a mocked job set up so it can use the provided credentials
-     */
-    private Job createJobWithAvailableCredentialId(final String id, final String secretText) {
-        final Job job = mock(Job.class);
-        final CredentialsProvider credentialsProvider = mock(CredentialsProvider.class);
-        final List<StringCredentials> credentialList = setupMocks(id, secretText, credentialsProvider);
-        when(credentialsProvider.getCredentials(Matchers.eq(StringCredentials.class), Matchers.eq(job), Matchers.eq(ACL.SYSTEM), Matchers.eq(Collections.emptyList()))).thenReturn(credentialList);
-        return job;
-    }
-
     private void setupGlobalAvailableCredentialId(final String id, final String secretText) {
         final CredentialsProvider credentialsProvider = mock(CredentialsProvider.class);
-        final List<StringCredentials> credentialList = setupMocks(id, secretText, credentialsProvider);
-        when(credentialsProvider.getCredentials(Matchers.eq(StringCredentials.class), Matchers.eq(jenkins), Matchers.eq(ACL.SYSTEM), Matchers.eq(Collections.emptyList()))).thenReturn(credentialList);
-    }
-
-    private List<StringCredentials> setupMocks(String id, String secretText, CredentialsProvider credentialsProvider) {
         final ExtensionList<CredentialsProvider> extensionList = mock(ExtensionList.class);
         final List<CredentialsProvider> listProviders = new ArrayList<>(1);
         final List<StringCredentials> credentialList = new ArrayList<>();
@@ -121,7 +85,7 @@ public class StandardSlackServiceCredentialsTest {
         when(secret.getPlainText()).thenReturn(secretText);
         when(credentials.getSecret()).thenReturn(secret);
         credentialList.add(credentials);
-        return credentialList;
+        when(credentialsProvider.getCredentials(Matchers.eq(StringCredentials.class), Matchers.eq(jenkins), Matchers.eq(ACL.SYSTEM), Matchers.eq(Collections.emptyList()))).thenReturn(credentialList);
     }
 
 }
