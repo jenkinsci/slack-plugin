@@ -1,27 +1,8 @@
 package jenkins.plugins.slack.workflow;
 
-import static com.cloudbees.plugins.credentials.CredentialsProvider.lookupCredentials;
-
-import java.util.Objects;
-import java.util.Set;
-
-import javax.annotation.Nonnull;
-
-import org.jenkinsci.plugins.plaincredentials.StringCredentials;
-import org.jenkinsci.plugins.workflow.steps.Step;
-import org.jenkinsci.plugins.workflow.steps.StepContext;
-import org.jenkinsci.plugins.workflow.steps.StepDescriptor;
-import org.jenkinsci.plugins.workflow.steps.StepExecution;
-import org.jenkinsci.plugins.workflow.steps.SynchronousNonBlockingStepExecution;
-import org.kohsuke.stapler.AncestorInPath;
-import org.kohsuke.stapler.DataBoundConstructor;
-import org.kohsuke.stapler.DataBoundSetter;
-import org.kohsuke.stapler.QueryParameter;
-
 import com.cloudbees.plugins.credentials.common.StandardListBoxModel;
 import com.cloudbees.plugins.credentials.domains.HostnameRequirement;
 import com.google.common.collect.ImmutableSet;
-
 import groovy.json.JsonOutput;
 import hudson.AbortException;
 import hudson.Extension;
@@ -43,6 +24,22 @@ import net.sf.json.JSONArray;
 import net.sf.json.JSONException;
 import net.sf.json.JSONObject;
 import net.sf.json.groovy.JsonSlurper;
+import org.jenkinsci.plugins.plaincredentials.StringCredentials;
+import org.jenkinsci.plugins.workflow.steps.Step;
+import org.jenkinsci.plugins.workflow.steps.StepContext;
+import org.jenkinsci.plugins.workflow.steps.StepDescriptor;
+import org.jenkinsci.plugins.workflow.steps.StepExecution;
+import org.jenkinsci.plugins.workflow.steps.SynchronousNonBlockingStepExecution;
+import org.kohsuke.stapler.AncestorInPath;
+import org.kohsuke.stapler.DataBoundConstructor;
+import org.kohsuke.stapler.DataBoundSetter;
+import org.kohsuke.stapler.QueryParameter;
+
+import java.util.Objects;
+import java.util.Set;
+import javax.annotation.Nonnull;
+
+import static com.cloudbees.plugins.credentials.CredentialsProvider.lookupCredentials;
 
 /**
  * Workflow step to send a Slack channel notification.
