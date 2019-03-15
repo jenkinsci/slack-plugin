@@ -90,7 +90,7 @@ public class StandardSlackService implements SlackService {
     public StandardSlackService(String baseUrl, String teamDomain, boolean botUser, String roomId, boolean replyBroadcast, String populatedToken) {
         this(baseUrl, teamDomain, botUser, roomId, replyBroadcast);
         if (populatedToken == null) {
-            throw new IllegalArgumentException("populatedToken cannot be null");
+            throw new IllegalArgumentException("No slack token found, setup a secret text credential and configure it to be used");
         }
         this.populatedToken = populatedToken;
     }
