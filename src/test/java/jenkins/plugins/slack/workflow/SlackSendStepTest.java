@@ -18,6 +18,9 @@ import org.powermock.modules.junit4.PowerMockRunner;
 
 import java.io.IOException;
 import java.io.PrintStream;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -114,6 +117,39 @@ public class SlackSendStepTest {
 
     }
 
+	@Test
+    public void testStepWithAttachmentsAsListOfMap() throws Exception {
+        SlackSendStep step = new SlackSendStep();
+        step.setMessage("message");
+
+        Map<String, String> attachment1 = new HashMap<>();
+        attachment1.put("title", "Title of the message");
+        attachment1.put("author_name", "Name of the author");
+        attachment1.put("author_icon", "Avatar for author");
+
+        step.setAttachments(Arrays.asList(attachment1));
+        SlackSendStep.SlackSendStepExecution stepExecution = spy(new SlackSendStep.SlackSendStepExecution(step, stepContextMock));
+
+        when(Jenkins.get()).thenReturn(jenkins);
+
+        when(taskListenerMock.getLogger()).thenReturn(printStreamMock);
+        doNothing().when(printStreamMock).println();
+
+        when(stepExecution.getSlackService(anyString(), anyString(), anyString(), anyString(), anyBoolean(), anyString(), anyBoolean())).thenReturn(slackServiceMock);
+
+        stepExecution.run();
+        verify(slackServiceMock, times(0)).publish("message", "");
+        
+        JSONArray expectedAttachments = new JSONArray();
+        JSONObject jsonObject = new JSONObject();
+        jsonObject.put("title","Title of the message");
+        jsonObject.put("author_name","Name of the author");
+        jsonObject.put("author_icon","Avatar for author");
+        jsonObject.put("fallback","message");
+        expectedAttachments.add(jsonObject);
+        verify(slackServiceMock, times(1)).publish("message", expectedAttachments, "");
+    }
+    
     @Test
     public void testValuesForGlobalConfig() throws Exception {
         SlackSendStep step = new SlackSendStep();

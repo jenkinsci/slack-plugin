@@ -3,6 +3,7 @@ package jenkins.plugins.slack.workflow;
 import com.cloudbees.plugins.credentials.common.StandardListBoxModel;
 import com.cloudbees.plugins.credentials.domains.HostnameRequirement;
 import com.google.common.collect.ImmutableSet;
+import groovy.json.JsonOutput;
 import hudson.AbortException;
 import hudson.Extension;
 import hudson.Util;
@@ -54,7 +55,7 @@ public class SlackSendStep extends Step {
     private String baseUrl;
     private String teamDomain;
     private boolean failOnError;
-    private String attachments;
+    private Object attachments;
     private boolean replyBroadcast;
 
 
@@ -139,11 +140,11 @@ public class SlackSendStep extends Step {
     }
 
     @DataBoundSetter
-    public void setAttachments(String attachments) {
+    public void setAttachments(Object attachments) {
         this.attachments = attachments;
     }
 
-    public String getAttachments() {
+    public Object getAttachments() {
         return attachments;
     }
 
@@ -254,22 +255,9 @@ public class SlackSendStep extends Step {
             SlackService slackService = getSlackService(
                     baseUrl, teamDomain, token, tokenCredentialId, botUser, channel, step.replyBroadcast
             );
-            boolean publishSuccess;
+            final boolean publishSuccess;
             if (step.attachments != null) {
-                JsonSlurper jsonSlurper = new JsonSlurper();
-                JSON json;
-                try {
-                    json = jsonSlurper.parseText(step.attachments);
-                } catch (JSONException e) {
-                    listener.error(Messages.NotificationFailedWithException(e));
-                    return null;
-                }
-                if (!(json instanceof JSONArray)) {
-                    listener.error(Messages
-                            .NotificationFailedWithException(new IllegalArgumentException("Attachments must be JSONArray")));
-                    return null;
-                }
-                JSONArray jsonArray = (JSONArray) json;
+                JSONArray jsonArray = getAttachmentsAsJSONArray();
                 for (Object object : jsonArray) {
                     if (object instanceof JSONObject) {
                         JSONObject jsonNode = ((JSONObject) object);
@@ -308,6 +296,31 @@ public class SlackSendStep extends Step {
                 listener.error(Messages.NotificationFailed());
             }
             return response;
+        }
+
+        JSONArray getAttachmentsAsJSONArray() throws Exception {
+            final TaskListener listener = getContext().get(TaskListener.class);
+        	final String jsonString;
+        	if (step.attachments instanceof String) {
+        		jsonString = (String) step.attachments;
+        	}
+        	else {
+        		jsonString = JsonOutput.toJson(step.attachments);
+        	}
+
+            JsonSlurper jsonSlurper = new JsonSlurper();
+            JSON json = null;
+            try {
+                json = jsonSlurper.parseText(jsonString);
+            } catch (JSONException e) {
+                listener.error(Messages.NotificationFailedWithException(e));
+                return null;
+            }
+            if(!(json instanceof JSONArray)){
+                listener.error(Messages.NotificationFailedWithException(new IllegalArgumentException("Attachments must be JSONArray")));
+                return null;
+            }
+            return (JSONArray) json;
         }
 
         private String defaultIfEmpty(String value) {
