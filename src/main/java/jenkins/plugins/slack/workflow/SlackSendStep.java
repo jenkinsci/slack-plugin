@@ -194,12 +194,12 @@ public class SlackSendStep extends Step {
             return Messages.SlackSendStepDisplayName();
         }
 
-        public ListBoxModel doFillTokenCredentialIdItems(@AncestorInPath Project project) {
+        public ListBoxModel doFillTokenCredentialIdItems(@AncestorInPath Item item) {
 
             Jenkins jenkins = Jenkins.get();
 
-            if (project == null && !jenkins.hasPermission(Jenkins.ADMINISTER) ||
-                    project != null && !project.hasPermission(Item.EXTENDED_READ)) {
+            if (item == null && !jenkins.hasPermission(Jenkins.ADMINISTER) ||
+                    item != null && !item.hasPermission(Item.EXTENDED_READ)) {
                 return new StandardListBoxModel();
             }
 
@@ -207,7 +207,7 @@ public class SlackSendStep extends Step {
                     .withEmptySelection()
                     .withAll(lookupCredentials(
                             StringCredentials.class,
-                            project,
+                            item,
                             ACL.SYSTEM,
                             new HostnameRequirement("*.slack.com"))
                     );
