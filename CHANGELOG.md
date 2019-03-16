@@ -1,13 +1,20 @@
 # Changelog
 
+## 2.19 release notes (2019-03-16)
+
+### New features
+
+- Folder credential support [PR #541](https://github.com/jenkinsci/slack-plugin/pull/541)
+- Simplify and Groovyfy attachment handling [PR #536](https://github.com/jenkinsci/slack-plugin/pull/536)
+
 ## 2.18 release notes (2019-02-19)
 
-## New features
+### New features
 
 - Clarify the messaging around the failure notification options [PR #519](https://github.com/jenkinsci/slack-plugin/pull/519)
 - Add additional logging for notification conditions [PR #516](https://github.com/jenkinsci/slack-plugin/pull/516)
 
-## Internal
+### Internal
 
 - Introduce maven-checkstyle-plugin to validate no star imports [PR #521](https://github.com/jenkinsci/slack-plugin/pull/521)
 
