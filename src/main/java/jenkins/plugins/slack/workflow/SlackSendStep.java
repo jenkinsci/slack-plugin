@@ -15,6 +15,7 @@ import hudson.security.ACL;
 import hudson.util.FormValidation;
 import hudson.util.ListBoxModel;
 import jenkins.model.Jenkins;
+import jenkins.plugins.slack.CredentialsObtainer;
 import jenkins.plugins.slack.Messages;
 import jenkins.plugins.slack.SlackNotifier;
 import jenkins.plugins.slack.SlackService;
@@ -34,9 +35,11 @@ import org.kohsuke.stapler.AncestorInPath;
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.DataBoundSetter;
 import org.kohsuke.stapler.QueryParameter;
+import java.util.logging.Level;
 
 import java.util.Objects;
 import java.util.Set;
+import java.util.logging.Logger;
 import javax.annotation.Nonnull;
 
 import static com.cloudbees.plugins.credentials.CredentialsProvider.lookupCredentials;
@@ -45,6 +48,8 @@ import static com.cloudbees.plugins.credentials.CredentialsProvider.lookupCreden
  * Workflow step to send a Slack channel notification.
  */
 public class SlackSendStep extends Step {
+
+    private static final Logger logger = Logger.getLogger(SlackSendStep.class.getName());
 
     private String message;
     private String color;
@@ -57,7 +62,6 @@ public class SlackSendStep extends Step {
     private boolean failOnError;
     private Object attachments;
     private boolean replyBroadcast;
-
 
     @Nonnull
     public String getMessage() {
@@ -190,12 +194,12 @@ public class SlackSendStep extends Step {
             return Messages.SlackSendStepDisplayName();
         }
 
-        public ListBoxModel doFillTokenCredentialIdItems(@AncestorInPath Project project) {
+        public ListBoxModel doFillTokenCredentialIdItems(@AncestorInPath Item item) {
 
             Jenkins jenkins = Jenkins.get();
 
-            if (project == null && !jenkins.hasPermission(Jenkins.ADMINISTER) ||
-                    project != null && !project.hasPermission(Item.EXTENDED_READ)) {
+            if (item == null && !jenkins.hasPermission(Jenkins.ADMINISTER) ||
+                    item != null && !item.hasPermission(Item.EXTENDED_READ)) {
                 return new StandardListBoxModel();
             }
 
@@ -203,7 +207,7 @@ public class SlackSendStep extends Step {
                     .withEmptySelection()
                     .withAll(lookupCredentials(
                             StringCredentials.class,
-                            project,
+                            item,
                             ACL.SYSTEM,
                             new HostnameRequirement("*.slack.com"))
                     );
@@ -232,7 +236,7 @@ public class SlackSendStep extends Step {
         protected SlackResponse run() throws Exception {
 
             Jenkins jenkins = Jenkins.get();
-
+            Item item = getItemForCredentials();
             SlackNotifier.DescriptorImpl slackDesc = jenkins.getDescriptorByType(SlackNotifier.DescriptorImpl.class);
 
             String baseUrl = step.baseUrl != null ? step.baseUrl : slackDesc.getBaseUrl();
@@ -251,10 +255,17 @@ public class SlackSendStep extends Step {
                     defaultIfEmpty(baseUrl), defaultIfEmpty(teamDomain), channel, defaultIfEmpty(color), botUser,
                     defaultIfEmpty(tokenCredentialId))
             );
+            final String populatedToken;
+            try {
+                populatedToken = CredentialsObtainer.getTokenToUse(tokenCredentialId, item, token);
+            } catch (IllegalArgumentException e) {
+                listener.error(Messages
+                        .NotificationFailedWithException(e));
+                return null;
+            }
 
             SlackService slackService = getSlackService(
-                    baseUrl, teamDomain, token, tokenCredentialId, botUser, channel, step.replyBroadcast
-            );
+                    baseUrl, teamDomain, botUser, channel, step.replyBroadcast, populatedToken);
             final boolean publishSuccess;
             if (step.attachments != null) {
                 JSONArray jsonArray = getAttachmentsAsJSONArray();
@@ -300,13 +311,12 @@ public class SlackSendStep extends Step {
 
         JSONArray getAttachmentsAsJSONArray() throws Exception {
             final TaskListener listener = getContext().get(TaskListener.class);
-        	final String jsonString;
-        	if (step.attachments instanceof String) {
-        		jsonString = (String) step.attachments;
-        	}
-        	else {
-        		jsonString = JsonOutput.toJson(step.attachments);
-        	}
+            final String jsonString;
+            if (step.attachments instanceof String) {
+                jsonString = (String) step.attachments;
+            } else {
+                jsonString = JsonOutput.toJson(step.attachments);
+            }
 
             JsonSlurper jsonSlurper = new JsonSlurper();
             JSON json = null;
@@ -316,11 +326,37 @@ public class SlackSendStep extends Step {
                 listener.error(Messages.NotificationFailedWithException(e));
                 return null;
             }
-            if(!(json instanceof JSONArray)){
+            if (!(json instanceof JSONArray)) {
                 listener.error(Messages.NotificationFailedWithException(new IllegalArgumentException("Attachments must be JSONArray")));
                 return null;
             }
             return (JSONArray) json;
+        }
+
+        /**
+         * Tries to obtain the proper Item object to provide to CredentialsProvider.
+         * Project works for freestyle jobs, the parent of the Run works for pipelines.
+         * In case the proper item cannot be found, null is returned, since when null is provided to CredentialsProvider,
+         * it will internally use Jenkins.getInstance() which effectively only allows global credentials.
+         *
+         * @return the item to use for CredentialsProvider credential lookup
+         */
+        private Item getItemForCredentials() {
+            Item item = null;
+            try {
+                item = getContext().get(Project.class);
+                if (item == null) {
+                    Run run = getContext().get(Run.class);
+                    if (run != null) {
+                        item = run.getParent();
+                    } else {
+                        item = null;
+                    }
+                }
+            } catch (Exception e) {
+                logger.log(Level.INFO, "Exception obtaining item for credentials lookup. Only global credentials will be available", e);
+            }
+            return item;
         }
 
         private String defaultIfEmpty(String value) {
@@ -328,8 +364,8 @@ public class SlackSendStep extends Step {
         }
 
         //streamline unit testing
-        SlackService getSlackService(String baseUrl, String team, String token, String tokenCredentialId, boolean botUser, String channel, boolean replyBroadcast) {
-            return new StandardSlackService(baseUrl, team, token, tokenCredentialId, botUser, channel, replyBroadcast);
+        SlackService getSlackService(String baseUrl, String team, boolean botUser, String channel, boolean replyBroadcast, String populatedToken) {
+            return new StandardSlackService(baseUrl, team, botUser, channel, replyBroadcast, populatedToken);
         }
     }
 }

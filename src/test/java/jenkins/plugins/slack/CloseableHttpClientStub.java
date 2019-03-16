@@ -16,8 +16,10 @@ public class CloseableHttpClientStub extends CloseableHttpClient {
     private int numberOfCallsToExecuteMethod;
     private int httpStatus;
     private boolean failAlternateResponses = false;
+    private HttpUriRequest lastRequest = null;
 
     public CloseableHttpResponse execute(HttpUriRequest post) {
+        lastRequest = post;
         numberOfCallsToExecuteMethod++;
         if (failAlternateResponses && (numberOfCallsToExecuteMethod % 2 == 0)) {
             return new CloseableHttpResponseStub(HttpStatus.SC_NOT_FOUND);
@@ -56,5 +58,9 @@ public class CloseableHttpClientStub extends CloseableHttpClient {
 
     public void setFailAlternateResponses(boolean failAlternateResponses) {
         this.failAlternateResponses = failAlternateResponses;
+    }
+
+    public HttpUriRequest getLastRequest() {
+        return lastRequest;
     }
 }

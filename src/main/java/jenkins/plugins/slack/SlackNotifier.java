@@ -1,5 +1,6 @@
 package jenkins.plugins.slack;
 
+import com.cloudbees.plugins.credentials.Credentials;
 import com.cloudbees.plugins.credentials.common.StandardListBoxModel;
 import com.cloudbees.plugins.credentials.domains.HostnameRequirement;
 import hudson.EnvVars;
@@ -10,6 +11,7 @@ import hudson.model.AbstractBuild;
 import hudson.model.AbstractProject;
 import hudson.model.BuildListener;
 import hudson.model.Item;
+import hudson.model.Project;
 import hudson.security.ACL;
 import hudson.tasks.BuildStepDescriptor;
 import hudson.tasks.BuildStepMonitor;
@@ -33,6 +35,7 @@ import org.kohsuke.stapler.DataBoundSetter;
 import org.kohsuke.stapler.QueryParameter;
 import org.kohsuke.stapler.StaplerRequest;
 
+import java.util.NoSuchElementException;
 import java.util.function.Function;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -405,7 +408,7 @@ public class SlackNotifier extends Notifier {
         return BuildStepMonitor.NONE;
     }
 
-    public SlackService newSlackService(AbstractBuild r, BuildListener listener) {
+    public SlackService newSlackService(AbstractBuild abstractBuild, BuildListener listener) {
         DescriptorImpl descriptor = getDescriptor();
         String teamDomain = Util.fixEmpty(this.teamDomain) != null ? this.teamDomain : descriptor.getTeamDomain();
         String baseUrl = Util.fixEmpty(this.baseUrl) != null ? this.baseUrl : descriptor.getBaseUrl();
@@ -417,7 +420,7 @@ public class SlackNotifier extends Notifier {
 
         EnvVars env;
         try {
-            env = r.getEnvironment(listener);
+            env = abstractBuild.getEnvironment(listener);
         } catch (Exception e) {
             listener.getLogger().println("Error retrieving environment vars: " + e.getMessage());
             env = new EnvVars();
@@ -427,8 +430,8 @@ public class SlackNotifier extends Notifier {
         authToken = env.expand(authToken);
         authTokenCredentialId = env.expand(authTokenCredentialId);
         room = env.expand(room);
-
-        return new StandardSlackService(baseUrl, teamDomain, authToken, authTokenCredentialId, botUser, room);
+        final String populatedToken = CredentialsObtainer.getTokenToUse(authTokenCredentialId, abstractBuild.getParent(), authToken);
+        return new StandardSlackService(baseUrl, teamDomain, botUser, room, false, populatedToken);
     }
 
     @Override
@@ -442,20 +445,29 @@ public class SlackNotifier extends Notifier {
         BuildAwareLogger log = createLogger(listener);
         log.debug(buildKey, "Performing complete notifications");
         JenkinsTokenExpander tokenExpander = new JenkinsTokenExpander(listener);
-        new ActiveNotifier(this, slackFactory(listener), log, tokenExpander).completed(build);
-        if (notifyRegression) {
-            log.debug(buildKey, "Performing finalize notifications");
-            new ActiveNotifier(this, slackFactory(listener), log, tokenExpander).finalized(build);
+        try {
+            new ActiveNotifier(this, slackFactory(listener), log, tokenExpander).completed(build);
+            if (notifyRegression) {
+                log.debug(buildKey, "Performing finalize notifications");
+                new ActiveNotifier(this, slackFactory(listener), log, tokenExpander).finalized(build);
+            }
+        } catch (Exception e) {
+            log.info(buildKey,"Exception attempting Slack notification: " + e.getMessage());
         }
         return true;
     }
 
     @Override
     public boolean prebuild(AbstractBuild<?, ?> build, BuildListener listener) {
-        if (startNotification) {
-            BuildAwareLogger log = createLogger(listener);
-            log.debug(BuildKey.format(build), "Performing start notifications");
-            new ActiveNotifier(this, slackFactory(listener), log, new JenkinsTokenExpander(listener)).started(build);
+        String buildKey = BuildKey.format(build);
+        BuildAwareLogger log = createLogger(listener);
+        try {
+            if (startNotification) {
+                log.debug(buildKey, "Performing start notifications");
+                new ActiveNotifier(this, slackFactory(listener), log, new JenkinsTokenExpander(listener)).started(build);
+            }
+        } catch (Exception e) {
+            log.info(buildKey,"Exception attempting Slack notification: " + e.getMessage());
         }
         return super.prebuild(build, listener);
     }
@@ -604,8 +616,21 @@ public class SlackNotifier extends Notifier {
             return true;
         }
 
-        SlackService getSlackService(final String baseUrl, final String teamDomain, final String authTokenCredentialId, final boolean botUser, final String room) {
-            return new StandardSlackService(baseUrl, teamDomain, authTokenCredentialId, botUser, room);
+        /**
+         * @deprecated  use {@link #getSlackService(String, String, String, boolean, String, Item)} instead}
+         */
+        @Deprecated
+        SlackService getSlackService(final String baseUrl, final String teamDomain, final String authTokenCredentialId, final boolean botUser, final String roomId) {
+            return getSlackService(baseUrl, teamDomain, authTokenCredentialId, botUser, roomId, null);
+        }
+
+        SlackService getSlackService(final String baseUrl, final String teamDomain, final String authTokenCredentialId, final boolean botUser, final String roomId, final Item item) {
+            final String populatedToken = CredentialsObtainer.getTokenToUse(authTokenCredentialId, item,null );
+            if (populatedToken != null) {
+                return new StandardSlackService(baseUrl, teamDomain, botUser, roomId, false, populatedToken);
+            } else {
+                throw new NoSuchElementException("Could not obtain credentials with credential id: " + authTokenCredentialId);
+            }
         }
 
         @Nonnull
@@ -618,7 +643,8 @@ public class SlackNotifier extends Notifier {
                                                @QueryParameter("teamDomain") final String teamDomain,
                                                @QueryParameter("tokenCredentialId") final String tokenCredentialId,
                                                @QueryParameter("botUser") final boolean botUser,
-                                               @QueryParameter("room") final String room) {
+                                               @QueryParameter("room") final String room,
+                                               @AncestorInPath Project project) {
 
             try {
                 String targetUrl = baseUrl;
@@ -636,7 +662,7 @@ public class SlackNotifier extends Notifier {
                         this.tokenCredentialId;
                 String targetRoom = Util.fixEmpty(room) != null ? room : this.room;
 
-                SlackService testSlackService = getSlackService(targetUrl, targetDomain, targetTokenCredentialId, targetBotUser, targetRoom);
+                SlackService testSlackService = getSlackService(targetUrl, targetDomain, targetTokenCredentialId, targetBotUser, targetRoom, project);
                 String message = "Slack/Jenkins plugin: you're all set on " + DisplayURLProvider.get().getRoot();
                 boolean success = testSlackService.publish(message, "good");
                 return success ? FormValidation.ok("Success") : FormValidation.error("Failure");

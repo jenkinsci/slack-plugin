@@ -52,7 +52,7 @@ public class SlackNotifierTest extends TestCase {
         }
         descriptor.setSlackService(slackServiceStub);
         FormValidation result = descriptor
-                .doTestConnection("baseUrl", "teamDomain", "authTokenCredentialId", false, "room");
+                .doTestConnection("baseUrl", "teamDomain", "authTokenCredentialId", false, "room", null);
         assertEquals(result.kind, expectedResult);
     }
 
