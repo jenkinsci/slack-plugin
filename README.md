@@ -42,7 +42,7 @@ node {
         ]
     ]
 
-    slackSend(color: '#00FF00', channel: '@gustavo.maia', attachments: attachments)
+    slackSend(channel: '#general', attachments: attachments)
 }
 ```
 For more information about slack messages see [Slack Messages Api](https://api.slack.com/docs/messages)
