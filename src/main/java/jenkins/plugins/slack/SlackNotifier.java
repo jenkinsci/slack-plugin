@@ -34,6 +34,7 @@ import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.DataBoundSetter;
 import org.kohsuke.stapler.QueryParameter;
 import org.kohsuke.stapler.StaplerRequest;
+import org.kohsuke.stapler.verb.POST;
 
 import java.util.NoSuchElementException;
 import java.util.function.Function;
@@ -639,12 +640,18 @@ public class SlackNotifier extends Notifier {
             return PLUGIN_DISPLAY_NAME;
         }
 
+        @POST
         public FormValidation doTestConnection(@QueryParameter("baseUrl") final String baseUrl,
                                                @QueryParameter("teamDomain") final String teamDomain,
                                                @QueryParameter("tokenCredentialId") final String tokenCredentialId,
                                                @QueryParameter("botUser") final boolean botUser,
                                                @QueryParameter("room") final String room,
                                                @AncestorInPath Project project) {
+            if (project == null) {
+                Jenkins.get().checkPermission(Jenkins.ADMINISTER);
+            } else {
+                project.checkPermission(Item.CONFIGURE);
+            }
 
             try {
                 String targetUrl = baseUrl;
