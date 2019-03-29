@@ -273,26 +273,6 @@
     -->
     <developers>
         <developer>
-            <id>kmadel</id>
-            <name>Kurt Madel</name>
-            <email>kmadel@cloudbees.com</email>
-            <url>https://github.com/kmadel</url>
-            <roles>
-                <role>maintainer</role>
-            </roles>
-            <timezone>America/New_York</timezone>
-        </developer>
-        <developer>
-            <id>gurumaia</id>
-            <name>Gustavo Maia</name>
-            <email>gurumaia@gmail.com</email>
-            <url>https://github.com/gurumaia</url>
-            <roles>
-                <role>maintainer</role>
-            </roles>
-            <timezone>America/Sao_Paulo</timezone>
-        </developer>
-        <developer>
             <id>timja</id>
             <name>Tim Jacomb</name>
             <url>https://github.com/timja</url>
