@@ -1,6 +1,7 @@
 package jenkins.plugins.slack;
 
 import hudson.Util;
+import hudson.matrix.MatrixRun;
 import hudson.model.AbstractBuild;
 import hudson.model.AbstractProject;
 import hudson.model.Cause;
@@ -52,6 +53,9 @@ public class ActiveNotifier implements FineGrainedNotifier {
     }
 
     public void started(AbstractBuild build) {
+        if (skipOnMatrixChildren(build)) {
+            return;
+        }
         String key = BuildKey.format(build);
 
         CauseAction causeAction = build.getAction(CauseAction.class);
@@ -83,6 +87,9 @@ public class ActiveNotifier implements FineGrainedNotifier {
     }
 
     private void notifyStart(AbstractBuild build, String message) {
+        if (skipOnMatrixChildren(build)) {
+            return;
+        }
         AbstractProject<?, ?> project = build.getProject();
         AbstractBuild<?, ?> lastBuild = project.getLastBuild();
         SlackService slack = slackFactory.apply(build);
@@ -99,6 +106,9 @@ public class ActiveNotifier implements FineGrainedNotifier {
     }
 
     public void finalized(AbstractBuild r) {
+        if (skipOnMatrixChildren(r)) {
+            return;
+        }
         AbstractProject<?, ?> project = r.getProject();
         Result result = r.getResult();
         AbstractBuild<?, ?> previousBuild = project.getLastBuild();
@@ -119,6 +129,9 @@ public class ActiveNotifier implements FineGrainedNotifier {
     }
 
     public void completed(AbstractBuild r) {
+        if (skipOnMatrixChildren(r)) {
+            return;
+        }
         String key = BuildKey.format(r);
         AbstractProject<?, ?> project = r.getProject();
         AbstractBuild<?, ?> previousBuild = project.getLastBuild();
@@ -142,6 +155,10 @@ public class ActiveNotifier implements FineGrainedNotifier {
                 slackFactory.apply(r).publish(message, getBuildColor(r));
             }
         }
+    }
+
+    private boolean skipOnMatrixChildren(AbstractBuild build) {
+        return build instanceof MatrixRun && !notifier.getMatrixTriggerMode().forChild;
     }
 
     private boolean moreTestFailuresThanPreviousBuild(AbstractBuild currentBuild, AbstractBuild<?, ?> previousBuild) {

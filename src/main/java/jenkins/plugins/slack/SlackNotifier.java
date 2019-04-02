@@ -6,6 +6,11 @@ import com.cloudbees.plugins.credentials.domains.HostnameRequirement;
 import hudson.EnvVars;
 import hudson.Extension;
 import hudson.Launcher;
+import hudson.matrix.MatrixAggregatable;
+import hudson.matrix.MatrixAggregator;
+import hudson.matrix.MatrixBuild;
+import hudson.matrix.MatrixProject;
+import hudson.matrix.MatrixRun;
 import hudson.Util;
 import hudson.model.AbstractBuild;
 import hudson.model.AbstractProject;
@@ -24,6 +29,7 @@ import jenkins.plugins.slack.config.GlobalCredentialMigrator;
 import jenkins.plugins.slack.logging.BuildAwareLogger;
 import jenkins.plugins.slack.logging.BuildKey;
 import jenkins.plugins.slack.logging.SlackNotificationsLogger;
+import jenkins.plugins.slack.matrix.MatrixTriggerMode;
 import net.sf.json.JSONObject;
 import org.apache.commons.lang.StringUtils;
 import org.jenkinsci.Symbol;
@@ -36,6 +42,7 @@ import org.kohsuke.stapler.QueryParameter;
 import org.kohsuke.stapler.StaplerRequest;
 import org.kohsuke.stapler.verb.POST;
 
+import java.io.IOException;
 import java.util.NoSuchElementException;
 import java.util.function.Function;
 import java.util.logging.Level;
@@ -46,7 +53,7 @@ import javax.annotation.Nonnull;
 
 import static com.cloudbees.plugins.credentials.CredentialsProvider.lookupCredentials;
 
-public class SlackNotifier extends Notifier {
+public class SlackNotifier extends Notifier implements MatrixAggregatable {
 
     private static final Logger logger = Logger.getLogger(SlackNotifier.class.getName());
 
@@ -68,6 +75,7 @@ public class SlackNotifier extends Notifier {
     private boolean notifyRepeatedFailure;
     private boolean includeTestSummary;
     private boolean includeFailedTests;
+    private MatrixTriggerMode matrixTriggerMode;
     private CommitInfoChoice commitInfoChoice;
     private boolean includeCustomMessage;
     private String customMessage;
@@ -168,6 +176,14 @@ public class SlackNotifier extends Notifier {
         return commitInfoChoice;
     }
 
+    public MatrixTriggerMode getMatrixTriggerMode() {
+        if (matrixTriggerMode == null) {
+            return MatrixTriggerMode.ONLY_CONFIGURATIONS;
+        } else {
+            return matrixTriggerMode;
+        }
+    }
+
     public boolean getNotifyAborted() {
         return notifyAborted;
     }
@@ -250,6 +266,11 @@ public class SlackNotifier extends Notifier {
     @DataBoundSetter
     public void setCommitInfoChoice(CommitInfoChoice commitInfoChoice) {
         this.commitInfoChoice = commitInfoChoice;
+    }
+
+    @DataBoundSetter
+    public void setMatrixTriggerMode(MatrixTriggerMode matrixTriggerMode) {
+        this.matrixTriggerMode = matrixTriggerMode;
     }
 
     @DataBoundSetter
@@ -341,20 +362,20 @@ public class SlackNotifier extends Notifier {
     public SlackNotifier(final String baseUrl, final String teamDomain, final String authToken, final boolean botUser, final String room, final String tokenCredentialId,
                          final String sendAs, final boolean startNotification, final boolean notifyAborted, final boolean notifyFailure,
                          final boolean notifyNotBuilt, final boolean notifySuccess, final boolean notifyUnstable, final boolean notifyRegression, final boolean notifyBackToNormal,
-                         final boolean notifyRepeatedFailure, final boolean includeTestSummary, final boolean includeFailedTests,
+                         final boolean notifyRepeatedFailure, final boolean includeTestSummary, final boolean includeFailedTests, MatrixTriggerMode matrixTriggerMode,
                          CommitInfoChoice commitInfoChoice, boolean includeCustomMessage, String customMessage) {
         this(
                 baseUrl, teamDomain, authToken, botUser, room, tokenCredentialId, sendAs, startNotification,
                 notifyAborted, notifyFailure, notifyNotBuilt, notifySuccess, notifyUnstable, notifyRegression,
-                notifyBackToNormal, notifyRepeatedFailure, includeTestSummary, includeFailedTests, commitInfoChoice,
-                includeCustomMessage, customMessage, null, null, null, null, null
+                notifyBackToNormal, notifyRepeatedFailure, includeTestSummary, includeFailedTests, matrixTriggerMode,
+                commitInfoChoice, includeCustomMessage, customMessage, null, null, null, null, null
         );
     }
 
     public SlackNotifier(final String baseUrl, final String teamDomain, final String authToken, final boolean botUser, final String room, final String tokenCredentialId,
                          final String sendAs, final boolean startNotification, final boolean notifyAborted, final boolean notifyFailure,
                          final boolean notifyNotBuilt, final boolean notifySuccess, final boolean notifyUnstable, final boolean notifyRegression, final boolean notifyBackToNormal,
-                         final boolean notifyRepeatedFailure, final boolean includeTestSummary, final boolean includeFailedTests,
+                         final boolean notifyRepeatedFailure, final boolean includeTestSummary, final boolean includeFailedTests, MatrixTriggerMode matrixTriggerMode,
                          CommitInfoChoice commitInfoChoice, boolean includeCustomMessage, String customMessage, String customMessageSuccess,
                          String customMessageAborted, String customMessageNotBuilt, String customMessageUnstable, String customMessageFailure) {
         super();
@@ -379,6 +400,7 @@ public class SlackNotifier extends Notifier {
         this.notifyRepeatedFailure = notifyRepeatedFailure;
         this.includeTestSummary = includeTestSummary;
         this.includeFailedTests = includeFailedTests;
+        this.matrixTriggerMode = matrixTriggerMode;
         this.commitInfoChoice = commitInfoChoice;
         this.includeCustomMessage = includeCustomMessage;
         if (includeCustomMessage) {
@@ -471,6 +493,26 @@ public class SlackNotifier extends Notifier {
             log.info(buildKey,"Exception attempting Slack notification: " + e.getMessage());
         }
         return super.prebuild(build, listener);
+    }
+
+    public MatrixAggregator createAggregator(MatrixBuild matrixBuild, Launcher launcher, BuildListener buildListener) {
+        return new MatrixAggregator(matrixBuild, launcher, buildListener) {
+            @Override
+            public boolean startBuild() throws InterruptedException, IOException {
+                if (getMatrixTriggerMode().forParent) {
+                    return SlackNotifier.this.perform(this.build, this.launcher, this.listener);
+                }
+                return true;
+            }
+
+            @Override
+            public boolean endBuild() throws InterruptedException, IOException {
+                if (getMatrixTriggerMode().forParent) {
+                    return SlackNotifier.this.perform(this.build, this.launcher, this.listener);
+                }
+                return true;
+            }
+        };
     }
 
     private Function<AbstractBuild<?, ?>, SlackService> slackFactory(BuildListener listener) {
@@ -632,6 +674,10 @@ public class SlackNotifier extends Notifier {
             } else {
                 throw new NoSuchElementException("Could not obtain credentials with credential id: " + authTokenCredentialId);
             }
+        }
+
+        public boolean isMatrixProject(AbstractProject<?, ?> project) {
+            return project instanceof MatrixProject;
         }
 
         @Nonnull

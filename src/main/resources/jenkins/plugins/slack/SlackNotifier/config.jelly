@@ -36,6 +36,12 @@
         <f:checkbox field="notifyBackToNormal" />
     </f:entry>
 
+	<j:if test="${descriptor.isMatrixProject(it)}">
+	    <f:entry title="${%Trigger for matrix projects}" field="matrixTriggerMode">
+		    <f:enum>${it.description}</f:enum>
+        </f:entry>
+	</j:if>
+
     <f:advanced>
         <f:entry title="Include Test Summary">
             <f:checkbox field="includeTestSummary" />
