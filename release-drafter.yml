@@ -1,5 +1,5 @@
 name-template: v$NEXT_MINOR_VERSION 🌈
-tag-template: configuration-as-code-$NEXT_MINOR_VERSION
+tag-template: slack-$NEXT_MINOR_VERSION
 categories:
   - title: 🚀 Features
     label: feature
@@ -14,4 +14,5 @@ categories:
 
 template: |
   ## Changes
+
   $CHANGES
