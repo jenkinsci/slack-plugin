@@ -1,12 +1,13 @@
 package jenkins.plugins.slack;
 
-import com.cloudbees.plugins.credentials.CredentialsMatcher;
-import com.cloudbees.plugins.credentials.CredentialsMatchers;
 import hudson.ProxyConfiguration;
-import hudson.model.Item;
-import hudson.security.ACL;
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import jenkins.model.Jenkins;
-import jenkins.plugins.slack.logging.BuildKey;
 import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
 import org.apache.commons.lang.StringUtils;
@@ -29,14 +30,6 @@ import org.apache.http.impl.conn.DefaultProxyRoutePlanner;
 import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.util.EntityUtils;
 import org.jenkinsci.plugins.plaincredentials.StringCredentials;
-
-import java.io.UnsupportedEncodingException;
-import java.net.URLEncoder;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 public class StandardSlackService implements SlackService {
 
@@ -80,10 +73,10 @@ public class StandardSlackService implements SlackService {
     }
 
     /**
-     * @param baseUrl the full url to use, this is an alternative to specifying teamDomain
-     * @param teamDomain the teamDomain inside slack.com to use
+     * @param baseUrl        the full url to use, this is an alternative to specifying teamDomain
+     * @param teamDomain     the teamDomain inside slack.com to use
      * @param botUser
-     * @param roomId a semicolon separated list of rooms to notify
+     * @param roomId         a semicolon separated list of rooms to notify
      * @param replyBroadcast
      * @param populatedToken a non-null token to use for authentication
      */
@@ -98,7 +91,7 @@ public class StandardSlackService implements SlackService {
     private StandardSlackService(String baseUrl, String teamDomain, boolean botUser, String roomId, boolean replyBroadcast) {
         super();
         this.baseUrl = baseUrl;
-        if(this.baseUrl != null && !this.baseUrl.isEmpty() && !this.baseUrl.endsWith("/")) {
+        if (this.baseUrl != null && !this.baseUrl.isEmpty() && !this.baseUrl.endsWith("/")) {
             this.baseUrl += "/";
         }
         this.teamDomain = teamDomain;
@@ -196,18 +189,18 @@ public class StandardSlackService implements SlackService {
             CloseableHttpClient client = getHttpClient();
 
             try {
-            	post.setEntity(new UrlEncodedFormEntity(nvps, "UTF-8"));
-            	CloseableHttpResponse response = client.execute(post);
+                post.setEntity(new UrlEncodedFormEntity(nvps, "UTF-8"));
+                CloseableHttpResponse response = client.execute(post);
 
-            	int responseCode = response.getStatusLine().getStatusCode();
-            	HttpEntity entity = response.getEntity();
-            	if (botUser && entity != null) {
+                int responseCode = response.getStatusLine().getStatusCode();
+                HttpEntity entity = response.getEntity();
+                if (botUser && entity != null) {
                     responseString = EntityUtils.toString(entity);
                 }
-            	if(responseCode != HttpStatus.SC_OK) {
-            		 logger.log(Level.WARNING, "Slack post may have failed. Response: " + responseString);
-            		 logger.log(Level.WARNING, "Response Code: " + responseCode);
-            		 result = false;
+                if (responseCode != HttpStatus.SC_OK) {
+                    logger.log(Level.WARNING, "Slack post may have failed. Response: " + responseString);
+                    logger.log(Level.WARNING, "Response Code: " + responseCode);
+                    result = false;
                 } else {
                     logger.fine("Posting succeeded");
                 }
@@ -235,9 +228,9 @@ public class StandardSlackService implements SlackService {
     }
 
     protected CloseableHttpClient getHttpClient() {
-    	final HttpClientBuilder clientBuilder = HttpClients.custom();
-    	final CredentialsProvider credentialsProvider = new BasicCredentialsProvider();
-    	clientBuilder.setDefaultCredentialsProvider(credentialsProvider);
+        final HttpClientBuilder clientBuilder = HttpClients.custom();
+        final CredentialsProvider credentialsProvider = new BasicCredentialsProvider();
+        clientBuilder.setDefaultCredentialsProvider(credentialsProvider);
 
         Jenkins jenkins = Jenkins.getInstanceOrNull();
         if (jenkins != null) {

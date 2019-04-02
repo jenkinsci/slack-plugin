@@ -2,9 +2,8 @@ package jenkins.plugins.slack.decisions;
 
 import hudson.model.AbstractBuild;
 import hudson.model.Result;
-import jenkins.plugins.slack.logging.BuildKey;
-
 import javax.annotation.Nullable;
+import jenkins.plugins.slack.logging.BuildKey;
 
 public class Context {
     private final AbstractBuild<?, ?> current;

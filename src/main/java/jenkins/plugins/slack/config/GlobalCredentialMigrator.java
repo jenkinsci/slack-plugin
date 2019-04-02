@@ -8,16 +8,15 @@ import com.cloudbees.plugins.credentials.common.StandardCredentials;
 import com.cloudbees.plugins.credentials.domains.DomainRequirement;
 import hudson.security.ACL;
 import hudson.util.Secret;
-import jenkins.model.Jenkins;
-import jenkins.plugins.slack.Messages;
-import org.jenkinsci.plugins.plaincredentials.StringCredentials;
-import org.jenkinsci.plugins.plaincredentials.impl.StringCredentialsImpl;
-
 import java.io.IOException;
 import java.util.List;
 import java.util.UUID;
 import java.util.logging.Logger;
 import javax.annotation.Nonnull;
+import jenkins.model.Jenkins;
+import jenkins.plugins.slack.Messages;
+import org.jenkinsci.plugins.plaincredentials.StringCredentials;
+import org.jenkinsci.plugins.plaincredentials.impl.StringCredentialsImpl;
 
 @SuppressWarnings("deprecation")
 public class GlobalCredentialMigrator {

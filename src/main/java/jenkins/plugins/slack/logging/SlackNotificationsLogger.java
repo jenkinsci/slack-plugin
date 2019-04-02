@@ -1,10 +1,9 @@
 package jenkins.plugins.slack.logging;
 
 import hudson.model.AbstractBuild;
-import jenkins.plugins.slack.SlackNotifier;
-
 import java.io.PrintStream;
 import java.util.logging.Logger;
+import jenkins.plugins.slack.SlackNotifier;
 
 public class SlackNotificationsLogger implements BuildAwareLogger {
     private static final String PLUGIN_KEY = String.format("[%s]", SlackNotifier.DescriptorImpl.PLUGIN_DISPLAY_NAME);

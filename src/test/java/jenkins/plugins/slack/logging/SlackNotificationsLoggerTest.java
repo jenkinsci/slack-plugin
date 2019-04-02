@@ -1,15 +1,14 @@
 package jenkins.plugins.slack.logging;
 
+import java.io.PrintStream;
+import java.util.function.Supplier;
+import java.util.logging.Logger;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-
-import java.io.PrintStream;
-import java.util.function.Supplier;
-import java.util.logging.Logger;
 
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.verify;

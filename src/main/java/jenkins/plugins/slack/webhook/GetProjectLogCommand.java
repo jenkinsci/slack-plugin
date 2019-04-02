@@ -4,12 +4,11 @@ import hudson.model.AbstractBuild;
 import hudson.model.Project;
 import hudson.security.ACL;
 import hudson.security.ACLContext;
+import java.io.IOException;
+import java.util.List;
 import jenkins.model.Jenkins;
 import jenkins.plugins.slack.webhook.model.SlackPostData;
 import jenkins.plugins.slack.webhook.model.SlackTextMessage;
-
-import java.io.IOException;
-import java.util.List;
 
 public class GetProjectLogCommand extends SlackRouterCommand implements RouterCommand<SlackTextMessage> {
 

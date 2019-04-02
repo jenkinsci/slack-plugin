@@ -1,6 +1,8 @@
 package jenkins.plugins.slack;
 
 import hudson.util.FormValidation;
+import java.util.Arrays;
+import java.util.Collection;
 import junit.framework.TestCase;
 import net.sf.json.JSONArray;
 import org.junit.Before;
@@ -9,9 +11,6 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 import org.jvnet.hudson.test.JenkinsRule;
-
-import java.util.Arrays;
-import java.util.Collection;
 
 @RunWith(Parameterized.class)
 public class SlackNotifierTest extends TestCase {

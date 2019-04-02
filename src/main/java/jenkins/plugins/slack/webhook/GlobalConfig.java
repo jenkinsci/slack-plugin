@@ -2,15 +2,11 @@ package jenkins.plugins.slack.webhook;
 
 
 import hudson.Extension;
-
-import net.sf.json.JSONObject;
-
+import hudson.util.FormValidation;
 import jenkins.model.GlobalConfiguration;
-
+import net.sf.json.JSONObject;
 import org.kohsuke.stapler.QueryParameter;
 import org.kohsuke.stapler.StaplerRequest;
-
-import hudson.util.FormValidation;
 
 
 @Extension
@@ -19,8 +15,8 @@ public class GlobalConfig extends GlobalConfiguration {
     private String slackOutgoingWebhookToken;
     private String slackOutgoingWebhookURL;
 
-    public GlobalConfig() { 
-        load(); 
+    public GlobalConfig() {
+        load();
     }
 
     public String getSlackOutgoingWebhookToken() {
