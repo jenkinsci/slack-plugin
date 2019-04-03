@@ -5,7 +5,7 @@ package jenkins.plugins.slack.webhook.model;
 
 public class SlackTextMessage {
     private String text;
-        
+
     public SlackTextMessage() { }
 
     public SlackTextMessage(String text) {

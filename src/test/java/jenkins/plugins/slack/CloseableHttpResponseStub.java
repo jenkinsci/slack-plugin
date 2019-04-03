@@ -1,10 +1,13 @@
 package jenkins.plugins.slack;
 
-import org.apache.http.*;
+import java.util.Locale;
+import org.apache.http.Header;
+import org.apache.http.HeaderIterator;
+import org.apache.http.HttpEntity;
+import org.apache.http.ProtocolVersion;
+import org.apache.http.StatusLine;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.params.HttpParams;
-
-import java.util.Locale;
 
 public class CloseableHttpResponseStub implements CloseableHttpResponse {
 

@@ -1,8 +1,7 @@
 package jenkins.plugins.slack.decisions;
 
-import org.junit.Test;
-
 import java.util.Arrays;
+import org.junit.Test;
 
 import static org.junit.Assert.assertTrue;
 
