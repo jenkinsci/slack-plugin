@@ -86,9 +86,6 @@ public class ActiveNotifier implements FineGrainedNotifier {
     }
 
     private void notifyStart(AbstractBuild build, String message) {
-        if (skipOnMatrixChildren(build)) {
-            return;
-        }
         AbstractProject<?, ?> project = build.getProject();
         AbstractBuild<?, ?> lastBuild = project.getLastBuild();
         SlackService slack = slackFactory.apply(build);

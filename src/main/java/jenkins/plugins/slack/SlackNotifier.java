@@ -5,12 +5,11 @@ import com.cloudbees.plugins.credentials.domains.HostnameRequirement;
 import hudson.EnvVars;
 import hudson.Extension;
 import hudson.Launcher;
+import hudson.Util;
 import hudson.matrix.MatrixAggregatable;
 import hudson.matrix.MatrixAggregator;
 import hudson.matrix.MatrixBuild;
 import hudson.matrix.MatrixProject;
-import hudson.matrix.MatrixRun;
-import hudson.Util;
 import hudson.model.AbstractBuild;
 import hudson.model.AbstractProject;
 import hudson.model.BuildListener;
@@ -71,7 +70,7 @@ public class SlackNotifier extends Notifier implements MatrixAggregatable {
     private boolean notifyRepeatedFailure;
     private boolean includeTestSummary;
     private boolean includeFailedTests;
-    private MatrixTriggerMode matrixTriggerMode;
+    private MatrixTriggerMode matrixTriggerMode = MatrixTriggerMode.ONLY_CONFIGURATIONS;
     private CommitInfoChoice commitInfoChoice;
     private boolean includeCustomMessage;
     private String customMessage;
@@ -173,11 +172,7 @@ public class SlackNotifier extends Notifier implements MatrixAggregatable {
     }
 
     public MatrixTriggerMode getMatrixTriggerMode() {
-        if (matrixTriggerMode == null) {
-            return MatrixTriggerMode.ONLY_CONFIGURATIONS;
-        } else {
-            return matrixTriggerMode;
-        }
+        return matrixTriggerMode;
     }
 
     public boolean getNotifyAborted() {
@@ -358,13 +353,29 @@ public class SlackNotifier extends Notifier implements MatrixAggregatable {
     public SlackNotifier(final String baseUrl, final String teamDomain, final String authToken, final boolean botUser, final String room, final String tokenCredentialId,
                          final String sendAs, final boolean startNotification, final boolean notifyAborted, final boolean notifyFailure,
                          final boolean notifyNotBuilt, final boolean notifySuccess, final boolean notifyUnstable, final boolean notifyRegression, final boolean notifyBackToNormal,
-                         final boolean notifyRepeatedFailure, final boolean includeTestSummary, final boolean includeFailedTests, MatrixTriggerMode matrixTriggerMode,
+                         final boolean notifyRepeatedFailure, final boolean includeTestSummary, final boolean includeFailedTests,
                          CommitInfoChoice commitInfoChoice, boolean includeCustomMessage, String customMessage) {
         this(
                 baseUrl, teamDomain, authToken, botUser, room, tokenCredentialId, sendAs, startNotification,
                 notifyAborted, notifyFailure, notifyNotBuilt, notifySuccess, notifyUnstable, notifyRegression,
-                notifyBackToNormal, notifyRepeatedFailure, includeTestSummary, includeFailedTests, matrixTriggerMode,
+                notifyBackToNormal, notifyRepeatedFailure, includeTestSummary, includeFailedTests,
                 commitInfoChoice, includeCustomMessage, customMessage, null, null, null, null, null
+        );
+    }
+
+    @Deprecated
+    public SlackNotifier(final String baseUrl, final String teamDomain, final String authToken, final boolean botUser, final String room, final String tokenCredentialId,
+                         final String sendAs, final boolean startNotification, final boolean notifyAborted, final boolean notifyFailure,
+                         final boolean notifyNotBuilt, final boolean notifySuccess, final boolean notifyUnstable, final boolean notifyRegression, final boolean notifyBackToNormal,
+                         final boolean notifyRepeatedFailure, final boolean includeTestSummary, final boolean includeFailedTests,
+                         CommitInfoChoice commitInfoChoice, boolean includeCustomMessage, String customMessage, String customMessageSuccess,
+                         String customMessageAborted, String customMessageNotBuilt, String customMessageUnstable, String customMessageFailure) {
+        this(
+                baseUrl, teamDomain, authToken, botUser, room, tokenCredentialId, sendAs, startNotification,
+                notifyAborted, notifyFailure, notifyNotBuilt, notifySuccess, notifyUnstable, notifyRegression,
+                notifyBackToNormal, notifyRepeatedFailure, includeTestSummary, includeFailedTests, MatrixTriggerMode.ONLY_CONFIGURATIONS,
+                commitInfoChoice, includeCustomMessage, customMessage, customMessageSuccess, customMessageAborted, customMessageNotBuilt,
+                customMessageUnstable, customMessageFailure
         );
     }
 
@@ -494,7 +505,7 @@ public class SlackNotifier extends Notifier implements MatrixAggregatable {
     public MatrixAggregator createAggregator(MatrixBuild matrixBuild, Launcher launcher, BuildListener buildListener) {
         return new MatrixAggregator(matrixBuild, launcher, buildListener) {
             @Override
-            public boolean startBuild() throws InterruptedException, IOException {
+            public boolean startBuild() {
                 if (getMatrixTriggerMode().forParent) {
                     return SlackNotifier.this.perform(this.build, this.launcher, this.listener);
                 }
@@ -502,7 +513,7 @@ public class SlackNotifier extends Notifier implements MatrixAggregatable {
             }
 
             @Override
-            public boolean endBuild() throws InterruptedException, IOException {
+            public boolean endBuild() {
                 if (getMatrixTriggerMode().forParent) {
                     return SlackNotifier.this.perform(this.build, this.launcher, this.listener);
                 }
