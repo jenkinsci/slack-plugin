@@ -179,6 +179,13 @@ public class StandardSlackService implements SlackService {
                     url += "&reply_broadcast=true";
                 }
                 try {
+                    if (StringUtils.isNotEmpty(message)) {
+                        url += "&text=" + URLEncoder.encode(message.toString(), "utf-8");
+                    }
+                } catch (UnsupportedEncodingException e) {
+                    logger.log(Level.ALL, "Error while encoding text: " + e.getMessage());
+                }
+                try {
                     url += "&attachments=" + URLEncoder.encode(attachments.toString(), "utf-8");
                 } catch (UnsupportedEncodingException e) {
                     logger.log(Level.ALL, "Error while encoding attachments: " + e.getMessage());
