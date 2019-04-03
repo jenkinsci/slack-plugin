@@ -1,23 +1,19 @@
 package jenkins.plugins.slack.webhook;
 
 
-import hudson.security.ACLContext;
-import jenkins.model.Jenkins;
-
-import hudson.model.Result;
 import hudson.model.AbstractBuild;
 import hudson.model.AbstractProject;
-
+import hudson.model.Result;
 import hudson.security.ACL;
-
+import hudson.security.ACLContext;
 import java.util.List;
-
+import jenkins.model.Jenkins;
 import jenkins.plugins.slack.webhook.model.SlackPostData;
 import jenkins.plugins.slack.webhook.model.SlackTextMessage;
 
 public class ListProjectsCommand extends SlackRouterCommand implements RouterCommand<SlackTextMessage> {
 
-    public ListProjectsCommand(SlackPostData data) { 
+    public ListProjectsCommand(SlackPostData data) {
         super(data);
     }
 

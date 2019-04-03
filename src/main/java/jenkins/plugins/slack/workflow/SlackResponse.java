@@ -1,10 +1,9 @@
 package jenkins.plugins.slack.workflow;
 
+import java.io.Serializable;
 import org.apache.commons.lang.StringUtils;
 import org.jenkinsci.plugins.scriptsecurity.sandbox.whitelists.Whitelisted;
 import org.json.JSONObject;
-
-import java.io.Serializable;
 
 public class SlackResponse implements Serializable {
     private static final String THREAD_ID = "ts";

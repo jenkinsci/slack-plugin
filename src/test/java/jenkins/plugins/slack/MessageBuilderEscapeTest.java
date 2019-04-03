@@ -3,11 +3,10 @@ package jenkins.plugins.slack;
 import hudson.model.AbstractBuild;
 import hudson.model.AbstractProject;
 import hudson.model.ItemGroup;
+import java.io.IOException;
 import jenkins.plugins.slack.logging.BuildAwareLogger;
 import org.junit.BeforeClass;
 import org.junit.Test;
-
-import java.io.IOException;
 
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.mock;

@@ -5,13 +5,11 @@ import com.cloudbees.plugins.credentials.CredentialsMatchers;
 import com.cloudbees.plugins.credentials.CredentialsProvider;
 import hudson.model.Item;
 import hudson.security.ACL;
+import java.util.Collections;
+import java.util.List;
 import jenkins.model.Jenkins;
 import org.apache.commons.lang.StringUtils;
 import org.jenkinsci.plugins.plaincredentials.StringCredentials;
-
-import java.util.Collections;
-import java.util.List;
-import java.util.NoSuchElementException;
 
 public class CredentialsObtainer {
 

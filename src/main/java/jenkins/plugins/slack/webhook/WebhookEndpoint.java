@@ -3,6 +3,8 @@ package jenkins.plugins.slack.webhook;
 
 import hudson.Extension;
 import hudson.model.UnprotectedRootAction;
+import java.util.UUID;
+import java.util.logging.Logger;
 import jenkins.model.GlobalConfiguration;
 import jenkins.plugins.slack.webhook.exception.CommandRouterException;
 import jenkins.plugins.slack.webhook.exception.RouteNotFoundException;
@@ -13,9 +15,6 @@ import org.kohsuke.stapler.HttpResponse;
 import org.kohsuke.stapler.StaplerRequest;
 import org.kohsuke.stapler.StaplerResponse;
 import org.kohsuke.stapler.interceptor.RequirePOST;
-
-import java.util.UUID;
-import java.util.logging.Logger;
 
 
 @Extension
@@ -47,17 +46,15 @@ public class WebhookEndpoint implements UnprotectedRootAction {
 
         if (getGlobalConfig().getSlackOutgoingWebhookToken() == null ||
             getGlobalConfig().getSlackOutgoingWebhookToken().equals("")) {
-            return new JsonResponse(new SlackTextMessage("Slack token not set"),
-                StaplerResponse.SC_OK); 
+            return new JsonResponse(new SlackTextMessage("Slack token not set"), StaplerResponse.SC_OK);
         }
 
         SlackPostData data = new SlackPostData();
         req.bindParameters(data);
 
         if (!getGlobalConfig().getSlackOutgoingWebhookToken().equals(data.getToken()))
-            return new JsonResponse(new SlackTextMessage("Invalid Slack token"),
-                StaplerResponse.SC_OK); 
-    
+            return new JsonResponse(new SlackTextMessage("Invalid Slack token"), StaplerResponse.SC_OK);
+
         String commandText = data.getText();
         if (commandText == null || commandText.isEmpty())
             return new JsonResponse(new SlackTextMessage("Invalid command, text field required"),
@@ -92,7 +89,7 @@ public class WebhookEndpoint implements UnprotectedRootAction {
             SlackTextMessage msg = router.route(commandText);
 
             return new JsonResponse(msg, StaplerResponse.SC_OK);
-            
+
         } catch (RouteNotFoundException ex) {
 
             LOGGER.warning(ex.getMessage());

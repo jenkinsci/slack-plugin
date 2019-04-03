@@ -1,40 +1,30 @@
 package jenkins.plugins.slack.webhook;
 
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.gargoylesoftware.htmlunit.WebRequest;
+import com.gargoylesoftware.htmlunit.WebResponse;
+import com.gargoylesoftware.htmlunit.html.HtmlForm;
+import com.gargoylesoftware.htmlunit.util.NameValuePair;
+import hudson.model.FreeStyleProject;
+import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.List;
+import jenkins.model.GlobalConfiguration;
+import jenkins.plugins.slack.webhook.model.SlackTextMessage;
+import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
-import org.junit.Before;
+import org.jvnet.hudson.test.JenkinsRule;
 
+import static com.gargoylesoftware.htmlunit.HttpMethod.POST;
+import static java.net.HttpURLConnection.HTTP_NOT_FOUND;
+import static java.net.HttpURLConnection.HTTP_OK;
+import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.nullValue;
-import static org.hamcrest.Matchers.containsString;
-
 import static org.junit.Assert.assertThat;
-
-import com.gargoylesoftware.htmlunit.WebResponse;
-import com.gargoylesoftware.htmlunit.WebRequest;
-import static com.gargoylesoftware.htmlunit.HttpMethod.POST;
-
-import com.gargoylesoftware.htmlunit.html.HtmlForm;
-
-import org.jvnet.hudson.test.JenkinsRule;
-
-import com.fasterxml.jackson.databind.ObjectMapper;
-
-import static java.net.HttpURLConnection.HTTP_OK;
-import static java.net.HttpURLConnection.HTTP_NOT_FOUND;
-
-import com.gargoylesoftware.htmlunit.util.NameValuePair;
-
-import java.nio.charset.StandardCharsets;
-import java.util.List;
-import java.util.ArrayList;
-
-import hudson.model.FreeStyleProject;
-import jenkins.model.GlobalConfiguration;
-
-import jenkins.plugins.slack.webhook.model.SlackTextMessage;
 
 public class WebhookEndpointTest {
 

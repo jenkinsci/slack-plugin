@@ -1,8 +1,7 @@
 package jenkins.plugins.slack.decisions;
 
-import jenkins.plugins.slack.logging.BuildAwareLogger;
-
 import java.util.function.Predicate;
+import jenkins.plugins.slack.logging.BuildAwareLogger;
 
 interface Condition extends Predicate<Context> {
     boolean isMetBy(Context context);

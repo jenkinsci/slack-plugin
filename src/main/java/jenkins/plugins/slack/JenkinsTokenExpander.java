@@ -2,12 +2,11 @@ package jenkins.plugins.slack;
 
 import hudson.model.AbstractBuild;
 import hudson.model.TaskListener;
-import org.jenkinsci.plugins.tokenmacro.MacroEvaluationException;
-import org.jenkinsci.plugins.tokenmacro.TokenMacro;
-
 import java.io.IOException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import org.jenkinsci.plugins.tokenmacro.MacroEvaluationException;
+import org.jenkinsci.plugins.tokenmacro.TokenMacro;
 
 public class JenkinsTokenExpander implements TokenExpander {
     private static final Logger logger = Logger.getLogger(JenkinsTokenExpander.class.getName());

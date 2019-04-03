@@ -1,11 +1,10 @@
 package jenkins.plugins.slack.decisions;
 
-import jenkins.plugins.slack.SlackNotifier;
-import jenkins.plugins.slack.logging.BuildAwareLogger;
-
 import java.util.Arrays;
 import java.util.List;
 import java.util.function.Predicate;
+import jenkins.plugins.slack.SlackNotifier;
+import jenkins.plugins.slack.logging.BuildAwareLogger;
 
 public class NotificationConditions implements Predicate<Context> {
     private final List<Predicate<Context>> conditions;

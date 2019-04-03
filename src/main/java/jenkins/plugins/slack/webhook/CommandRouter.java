@@ -1,12 +1,11 @@
 package jenkins.plugins.slack.webhook;
 
-import jenkins.plugins.slack.webhook.exception.CommandRouterException;
-import jenkins.plugins.slack.webhook.exception.RouteNotFoundException;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import jenkins.plugins.slack.webhook.exception.CommandRouterException;
+import jenkins.plugins.slack.webhook.exception.RouteNotFoundException;
 
 public class CommandRouter<T> {
 
