@@ -3,6 +3,7 @@ package jenkins.plugins.slack;
 import hudson.ProxyConfiguration;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
@@ -180,15 +181,11 @@ public class StandardSlackService implements SlackService {
                 }
                 try {
                     if (StringUtils.isNotEmpty(message)) {
-                        url += "&text=" + URLEncoder.encode(message.toString(), "utf-8");
+                        url += "&text=" + URLEncoder.encode(message, StandardCharsets.UTF_8.name());
                     }
+                    url += "&attachments=" + URLEncoder.encode(attachments.toString(), StandardCharsets.UTF_8.name());
                 } catch (UnsupportedEncodingException e) {
-                    logger.log(Level.ALL, "Error while encoding text: " + e.getMessage());
-                }
-                try {
-                    url += "&attachments=" + URLEncoder.encode(attachments.toString(), "utf-8");
-                } catch (UnsupportedEncodingException e) {
-                    logger.log(Level.ALL, "Error while encoding attachments: " + e.getMessage());
+                    logger.log(Level.ALL, "Error while encoding payload: " + e.getMessage());
                 }
                 post = new HttpPost(url);
             }
