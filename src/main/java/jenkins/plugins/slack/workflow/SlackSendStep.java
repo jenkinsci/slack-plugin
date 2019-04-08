@@ -190,7 +190,7 @@ public class SlackSendStep extends Step {
         @Nonnull
         @Override
         public String getDisplayName() {
-            return Messages.SlackSendStepDisplayName();
+            return Messages.slackSendStepDisplayName();
         }
 
         public ListBoxModel doFillTokenCredentialIdItems(@AncestorInPath Item item) {
@@ -250,7 +250,7 @@ public class SlackSendStep extends Step {
             TaskListener listener = getContext().get(TaskListener.class);
             Objects.requireNonNull(listener, "Listener is mandatory here");
 
-            listener.getLogger().println(Messages.SlackSendStepValues(
+            listener.getLogger().println(Messages.slackSendStepValues(
                     defaultIfEmpty(baseUrl), defaultIfEmpty(teamDomain), channel, defaultIfEmpty(color), botUser,
                     defaultIfEmpty(tokenCredentialId))
             );
@@ -259,7 +259,7 @@ public class SlackSendStep extends Step {
                 populatedToken = CredentialsObtainer.getTokenToUse(tokenCredentialId, item, token);
             } catch (IllegalArgumentException e) {
                 listener.error(Messages
-                        .NotificationFailedWithException(e));
+                        .notificationFailedWithException(e));
                 return null;
             }
 
@@ -281,7 +281,7 @@ public class SlackSendStep extends Step {
                 publishSuccess = slackService.publish(step.message, color);
             } else {
                 listener.error(Messages
-                        .NotificationFailedWithException(new IllegalArgumentException("No message or attachments provided")));
+                        .notificationFailedWithException(new IllegalArgumentException("No message or attachments provided")));
                 return null;
             }
             SlackResponse response = null;
@@ -292,7 +292,7 @@ public class SlackSendStep extends Step {
                         org.json.JSONObject result = new org.json.JSONObject(responseString);
                         response = new SlackResponse(result);
                     } catch (org.json.JSONException ex) {
-                        listener.error(Messages.FailedToParseSlackResponse(responseString));
+                        listener.error(Messages.failedToParseSlackResponse(responseString));
                         if (step.failOnError) {
                             throw ex;
                         }
@@ -301,9 +301,9 @@ public class SlackSendStep extends Step {
                     return new SlackResponse();
                 }
             } else if (step.failOnError) {
-                throw new AbortException(Messages.NotificationFailed());
+                throw new AbortException(Messages.notificationFailed());
             } else {
-                listener.error(Messages.NotificationFailed());
+                listener.error(Messages.notificationFailed());
             }
             return response;
         }
@@ -322,11 +322,11 @@ public class SlackSendStep extends Step {
             try {
                 json = jsonSlurper.parseText(jsonString);
             } catch (JSONException e) {
-                listener.error(Messages.NotificationFailedWithException(e));
+                listener.error(Messages.notificationFailedWithException(e));
                 return null;
             }
             if (!(json instanceof JSONArray)) {
-                listener.error(Messages.NotificationFailedWithException(new IllegalArgumentException("Attachments must be JSONArray")));
+                listener.error(Messages.notificationFailedWithException(new IllegalArgumentException("Attachments must be JSONArray")));
                 return null;
             }
             return (JSONArray) json;
@@ -359,7 +359,7 @@ public class SlackSendStep extends Step {
         }
 
         private String defaultIfEmpty(String value) {
-            return Util.fixEmpty(value) != null ? value : Messages.SlackSendStepValuesEmptyMessage();
+            return Util.fixEmpty(value) != null ? value : Messages.slackSendStepValuesEmptyMessage();
         }
 
         //streamline unit testing

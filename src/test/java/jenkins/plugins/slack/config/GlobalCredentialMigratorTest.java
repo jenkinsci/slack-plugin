@@ -47,7 +47,7 @@ public class GlobalCredentialMigratorTest {
         String tokenCredentialId = descriptor.getTokenCredentialId();
 
         StringCredentials stringCredentials = lookupCredentials(tokenCredentialId);
-        assertEquals(stringCredentials.getDescription(), Messages.MigratedCredentialDescription());
+        assertEquals(stringCredentials.getDescription(), Messages.migratedCredentialDescription());
     }
 
     private StringCredentials lookupCredentials(String credentialId) {
