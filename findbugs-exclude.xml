@@ -1,0 +1,6 @@
+<FindBugsFilter>
+	<Match>
+    <Class name="~.*\.Messages" />
+    <Bug pattern="NM_METHOD_NAMING_CONVENTION" />
+	</Match>
+</FindBugsFilter>
