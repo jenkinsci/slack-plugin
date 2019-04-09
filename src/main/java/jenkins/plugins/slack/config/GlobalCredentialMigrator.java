@@ -48,7 +48,7 @@ public class GlobalCredentialMigrator {
         StringCredentials credentials = new StringCredentialsImpl(
                 CredentialsScope.GLOBAL,
                 UUID.randomUUID().toString(),
-                Messages.MigratedCredentialDescription(),
+                Messages.migratedCredentialDescription(),
                 Secret.fromString(token)
         );
 
