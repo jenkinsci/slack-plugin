@@ -47,7 +47,7 @@ import static com.cloudbees.plugins.credentials.CredentialsProvider.lookupCreden
 public class SlackNotifier extends Notifier {
 
     private static final Logger logger = Logger.getLogger(SlackNotifier.class.getName());
-    public static final String MATRIX_PROJECT_CLASS_NAME = "hudson.matrix.MatrixProject";
+    private static final String MATRIX_PROJECT_CLASS_NAME = "hudson.matrix.MatrixProject";
 
     private String baseUrl;
     private String teamDomain;
