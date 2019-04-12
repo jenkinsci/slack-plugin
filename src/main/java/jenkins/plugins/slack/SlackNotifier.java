@@ -6,10 +6,6 @@ import hudson.EnvVars;
 import hudson.Extension;
 import hudson.Launcher;
 import hudson.Util;
-import hudson.matrix.MatrixAggregatable;
-import hudson.matrix.MatrixAggregator;
-import hudson.matrix.MatrixBuild;
-import hudson.matrix.MatrixProject;
 import hudson.model.AbstractBuild;
 import hudson.model.AbstractProject;
 import hudson.model.BuildListener;
@@ -48,9 +44,10 @@ import org.kohsuke.stapler.verb.POST;
 
 import static com.cloudbees.plugins.credentials.CredentialsProvider.lookupCredentials;
 
-public class SlackNotifier extends Notifier implements MatrixAggregatable {
+public class SlackNotifier extends Notifier {
 
     private static final Logger logger = Logger.getLogger(SlackNotifier.class.getName());
+    private static final String MATRIX_PROJECT_CLASS_NAME = "hudson.matrix.MatrixProject";
 
     private String baseUrl;
     private String teamDomain;
@@ -502,26 +499,6 @@ public class SlackNotifier extends Notifier implements MatrixAggregatable {
         return super.prebuild(build, listener);
     }
 
-    public MatrixAggregator createAggregator(MatrixBuild matrixBuild, Launcher launcher, BuildListener buildListener) {
-        return new MatrixAggregator(matrixBuild, launcher, buildListener) {
-            @Override
-            public boolean startBuild() {
-                if (getMatrixTriggerMode().forParent) {
-                    return SlackNotifier.this.perform(this.build, this.launcher, this.listener);
-                }
-                return true;
-            }
-
-            @Override
-            public boolean endBuild() {
-                if (getMatrixTriggerMode().forParent) {
-                    return SlackNotifier.this.perform(this.build, this.launcher, this.listener);
-                }
-                return true;
-            }
-        };
-    }
-
     private Function<AbstractBuild<?, ?>, SlackService> slackFactory(BuildListener listener) {
         return b -> newSlackService(b, listener);
     }
@@ -683,8 +660,9 @@ public class SlackNotifier extends Notifier implements MatrixAggregatable {
             }
         }
 
+        @SuppressWarnings("unused") // called by jelly
         public boolean isMatrixProject(AbstractProject<?, ?> project) {
-            return project instanceof MatrixProject;
+            return project.getClass().getName().equals(MATRIX_PROJECT_CLASS_NAME);
         }
 
         @Nonnull
