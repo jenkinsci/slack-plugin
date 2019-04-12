@@ -52,5 +52,4 @@ public class OnSingleFailureTest {
 
         assertFalse(actual);
     }
-
 }

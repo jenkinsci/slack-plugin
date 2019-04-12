@@ -42,7 +42,7 @@ import static org.powermock.api.mockito.PowerMockito.spy;
  * Traditional Unit tests, allows testing null Jenkins.get()
  */
 @RunWith(PowerMockRunner.class)
-@PrepareForTest({Jenkins.class,SlackSendStep.class, CredentialsObtainer.class})
+@PrepareForTest({Jenkins.class, SlackSendStep.class, CredentialsObtainer.class})
 public class SlackSendStepTest {
 
     @Mock
@@ -101,7 +101,7 @@ public class SlackSendStepTest {
         when(slackServiceMock.publish(anyString(), anyString())).thenReturn(true);
 
         stepExecution.run();
-        verify(stepExecution, times(1)).getSlackService("baseUrl/", "teamDomain",  true, "channel", false, token);
+        verify(stepExecution, times(1)).getSlackService("baseUrl/", "teamDomain", true, "channel", false, token);
         verify(slackServiceMock, times(1)).publish("message", "good");
     }
 
@@ -111,9 +111,9 @@ public class SlackSendStepTest {
         step.setMessage("message");
         JSONArray attachments = new JSONArray();
         JSONObject jsonObject = new JSONObject();
-        jsonObject.put("title","Title of the message");
-        jsonObject.put("author_name","Name of the author");
-        jsonObject.put("author_icon","Avatar for author");
+        jsonObject.put("title", "Title of the message");
+        jsonObject.put("author_name", "Name of the author");
+        jsonObject.put("author_icon", "Avatar for author");
         attachments.add(jsonObject);
         step.setAttachments(attachments.toString());
         SlackSendStep.SlackSendStepExecution stepExecution = spy(new SlackSendStep.SlackSendStepExecution(step, stepContextMock));
@@ -126,7 +126,7 @@ public class SlackSendStepTest {
         when(taskListenerMock.getLogger()).thenReturn(printStreamMock);
         doNothing().when(printStreamMock).println();
 
-        when(stepExecution.getSlackService(anyString(), anyString(),  anyBoolean(), anyString(), anyBoolean(), anyString() )).thenReturn(slackServiceMock);
+        when(stepExecution.getSlackService(anyString(), anyString(), anyBoolean(), anyString(), anyBoolean(), anyString())).thenReturn(slackServiceMock);
 
         stepExecution.run();
         verify(slackServiceMock, times(0)).publish("message", "");
@@ -134,7 +134,7 @@ public class SlackSendStepTest {
 
     }
 
-	@Test
+    @Test
     public void testStepWithAttachmentsAsListOfMap() throws Exception {
         SlackSendStep step = new SlackSendStep();
         step.setMessage("message");
@@ -154,21 +154,21 @@ public class SlackSendStepTest {
         when(taskListenerMock.getLogger()).thenReturn(printStreamMock);
         doNothing().when(printStreamMock).println();
 
-        when(stepExecution.getSlackService(anyString(), anyString(),  anyBoolean(), anyString(), anyBoolean(), anyString())).thenReturn(slackServiceMock);
+        when(stepExecution.getSlackService(anyString(), anyString(), anyBoolean(), anyString(), anyBoolean(), anyString())).thenReturn(slackServiceMock);
 
         stepExecution.run();
         verify(slackServiceMock, times(0)).publish("message", "");
-        
+
         JSONArray expectedAttachments = new JSONArray();
         JSONObject jsonObject = new JSONObject();
-        jsonObject.put("title","Title of the message");
-        jsonObject.put("author_name","Name of the author");
-        jsonObject.put("author_icon","Avatar for author");
-        jsonObject.put("fallback","message");
+        jsonObject.put("title", "Title of the message");
+        jsonObject.put("author_name", "Name of the author");
+        jsonObject.put("author_icon", "Avatar for author");
+        jsonObject.put("fallback", "message");
         expectedAttachments.add(jsonObject);
         verify(slackServiceMock, times(1)).publish("message", expectedAttachments, "");
     }
-    
+
     @Test
     public void testValuesForGlobalConfig() throws Exception {
         SlackSendStep step = new SlackSendStep();
@@ -194,7 +194,7 @@ public class SlackSendStepTest {
         when(stepExecution.getSlackService(anyString(), anyString(), anyBoolean(), anyString(), anyBoolean(), anyString())).thenReturn(slackServiceMock);
 
         stepExecution.run();
-        verify(stepExecution, times(1)).getSlackService("globalBaseUrl", "globalTeamDomain",false, "globalChannel", false, "token2");
+        verify(stepExecution, times(1)).getSlackService("globalBaseUrl", "globalTeamDomain", false, "globalChannel", false, "token2");
         verify(slackServiceMock, times(1)).publish("message", "");
     }
 
