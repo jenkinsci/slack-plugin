@@ -1,5 +1,8 @@
 # Changelog
 
+The CHANGELOG is now maintained on the GitHub releases page:
+https://github.com/jenkinsci/slack-plugin/releases
+
 ## 2.19 release notes (2019-03-16)
 
 ### New features
