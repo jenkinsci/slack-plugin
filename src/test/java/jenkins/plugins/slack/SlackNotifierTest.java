@@ -1,11 +1,8 @@
 package jenkins.plugins.slack;
 
-import hudson.matrix.MatrixAggregator;
 import hudson.util.FormValidation;
-import java.io.IOException;
 import java.util.Arrays;
 import java.util.Collection;
-import jenkins.plugins.slack.matrix.MatrixTriggerMode;
 import junit.framework.TestCase;
 import net.sf.json.JSONArray;
 import org.junit.Before;
@@ -14,11 +11,6 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 import org.jvnet.hudson.test.JenkinsRule;
-
-import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.spy;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
 
 @RunWith(Parameterized.class)
 public class SlackNotifierTest extends TestCase {
@@ -84,6 +76,8 @@ public class SlackNotifierTest extends TestCase {
             this.response = response;
         }
 
-        public String getResponseString() { return null; }
+        public String getResponseString() {
+            return null;
+        }
     }
 }
