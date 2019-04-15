@@ -2,6 +2,7 @@ package jenkins.plugins.slack;
 
 import com.cloudbees.plugins.credentials.common.StandardListBoxModel;
 import com.cloudbees.plugins.credentials.domains.HostnameRequirement;
+import edu.umd.cs.findbugs.annotations.CheckForNull;
 import hudson.EnvVars;
 import hudson.Extension;
 import hudson.Launcher;
@@ -46,8 +47,9 @@ import static com.cloudbees.plugins.credentials.CredentialsProvider.lookupCreden
 
 public class SlackNotifier extends Notifier {
 
+    public static final String MATRIX_PROJECT_CLASS_NAME = "hudson.matrix.MatrixProject";
+    public static final String MATRIX_RUN_CLASS_NAME = "hudson.matrix.MatrixRun";
     private static final Logger logger = Logger.getLogger(SlackNotifier.class.getName());
-    private static final String MATRIX_PROJECT_CLASS_NAME = "hudson.matrix.MatrixProject";
 
     private String baseUrl;
     private String teamDomain;
@@ -67,7 +69,7 @@ public class SlackNotifier extends Notifier {
     private boolean notifyRepeatedFailure;
     private boolean includeTestSummary;
     private boolean includeFailedTests;
-    private MatrixTriggerMode matrixTriggerMode = MatrixTriggerMode.ONLY_CONFIGURATIONS;
+    private MatrixTriggerMode matrixTriggerMode;
     private CommitInfoChoice commitInfoChoice;
     private boolean includeCustomMessage;
     private String customMessage;
@@ -168,6 +170,7 @@ public class SlackNotifier extends Notifier {
         return commitInfoChoice;
     }
 
+    @CheckForNull
     public MatrixTriggerMode getMatrixTriggerMode() {
         return matrixTriggerMode;
     }
@@ -507,6 +510,10 @@ public class SlackNotifier extends Notifier {
         return new SlackNotificationsLogger(logger, listener.getLogger());
     }
 
+    public boolean isMatrixRun(AbstractBuild<?, ?> build) {
+        return build.getClass().getName().equals(MATRIX_RUN_CLASS_NAME);
+    }
+
     @Extension @Symbol("slackNotifier")
     public static class DescriptorImpl extends BuildStepDescriptor<Publisher> {
 
@@ -721,4 +728,5 @@ public class SlackNotifier extends Notifier {
             return this;
         }
     }
+
 }
