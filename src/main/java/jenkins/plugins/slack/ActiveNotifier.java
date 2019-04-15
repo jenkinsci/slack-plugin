@@ -1,7 +1,6 @@
 package jenkins.plugins.slack;
 
 import hudson.Util;
-import hudson.matrix.MatrixRun;
 import hudson.model.AbstractBuild;
 import hudson.model.AbstractProject;
 import hudson.model.Cause;
@@ -154,7 +153,7 @@ public class ActiveNotifier implements FineGrainedNotifier {
     }
 
     private boolean skipOnMatrixChildren(AbstractBuild build) {
-        return build instanceof MatrixRun && !notifier.getMatrixTriggerMode().forChild;
+        return notifier.isMatrixProject(build) && !notifier.getMatrixTriggerMode().forChild;
     }
 
     private boolean moreTestFailuresThanPreviousBuild(AbstractBuild currentBuild, AbstractBuild<?, ?> previousBuild) {
