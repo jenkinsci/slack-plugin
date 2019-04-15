@@ -2,6 +2,7 @@ package jenkins.plugins.slack;
 
 import com.cloudbees.plugins.credentials.common.StandardListBoxModel;
 import com.cloudbees.plugins.credentials.domains.HostnameRequirement;
+import edu.umd.cs.findbugs.annotations.CheckForNull;
 import hudson.EnvVars;
 import hudson.Extension;
 import hudson.Launcher;
@@ -67,7 +68,7 @@ public class SlackNotifier extends Notifier {
     private boolean notifyRepeatedFailure;
     private boolean includeTestSummary;
     private boolean includeFailedTests;
-    private MatrixTriggerMode matrixTriggerMode = MatrixTriggerMode.ONLY_CONFIGURATIONS;
+    private MatrixTriggerMode matrixTriggerMode;
     private CommitInfoChoice commitInfoChoice;
     private boolean includeCustomMessage;
     private String customMessage;
@@ -168,6 +169,7 @@ public class SlackNotifier extends Notifier {
         return commitInfoChoice;
     }
 
+    @CheckForNull
     public MatrixTriggerMode getMatrixTriggerMode() {
         return matrixTriggerMode;
     }

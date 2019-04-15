@@ -153,7 +153,8 @@ public class ActiveNotifier implements FineGrainedNotifier {
     }
 
     private boolean skipOnMatrixChildren(AbstractBuild build) {
-        return notifier.isMatrixProject(build) && !notifier.getMatrixTriggerMode().forChild;
+        return notifier.isMatrixProject(build) && !(notifier.getMatrixTriggerMode() != null
+            && notifier.getMatrixTriggerMode().forChild);
     }
 
     private boolean moreTestFailuresThanPreviousBuild(AbstractBuild currentBuild, AbstractBuild<?, ?> previousBuild) {

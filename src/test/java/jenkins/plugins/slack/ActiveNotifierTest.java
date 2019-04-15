@@ -5,9 +5,12 @@ import hudson.matrix.MatrixProject;
 import hudson.matrix.MatrixRun;
 import hudson.model.AbstractBuild;
 import hudson.model.CauseAction;
+import hudson.model.FreeStyleBuild;
+import hudson.model.FreeStyleProject;
 import hudson.model.ItemGroup;
 import hudson.model.Result;
 import java.util.function.Function;
+import jenkins.plugins.slack.ActiveNotifier.MessageBuilder;
 import jenkins.plugins.slack.logging.BuildAwareLogger;
 import jenkins.plugins.slack.matrix.MatrixTriggerMode;
 import junit.framework.TestCase;
@@ -28,45 +31,57 @@ import static org.mockito.Mockito.when;
 @PrepareForTest(ActiveNotifier.class)
 public class ActiveNotifierTest extends TestCase {
     MatrixRun matrixRun = mock(MatrixRun.class);
+    FreeStyleBuild freeStyleBuild = mock(FreeStyleBuild.class);
     SlackNotifier slackNotifier = mock(SlackNotifier.class);
     SlackService slack = mock(SlackService.class);
 
     ActiveNotifier activeNotifier;
+    ActiveNotifier freeStyleActiveNotifer;
 
     @Before
     public void setupActiveNotifier() throws Exception {
         BuildAwareLogger buildAwareLogger = mock(BuildAwareLogger.class);
         TokenExpander tokenExpander = mock(TokenExpander.class);
-        MatrixProject project = mock(MatrixProject.class);
+        MatrixProject matrixProject = mock(MatrixProject.class);
+        FreeStyleProject freeStyleProject = mock(FreeStyleProject.class);
         MatrixConfiguration configuration = mock(MatrixConfiguration.class);
         ItemGroup group = mock(ItemGroup.class);
         MatrixRun previousBuild = mock(MatrixRun.class);
-        ActiveNotifier.MessageBuilder messageBuilder = mock(ActiveNotifier.MessageBuilder.class);
+        MessageBuilder messageBuilder = mock(MessageBuilder.class);
         Function<AbstractBuild<?, ?>, SlackService> slackFactory = (Function<AbstractBuild<?, ?>, SlackService>) mock(Function.class);
 
         when(slackNotifier.getNotifyRegression()).thenReturn(true);
         when(slackNotifier.getNotifyFailure()).thenReturn(true);
         when(slackNotifier.getCommitInfoChoice()).thenReturn(CommitInfoChoice.NONE);
         when(group.getFullDisplayName()).thenReturn("group");
-        when(project.getParent()).thenReturn(group);
-        when(project.getLastBuild()).thenReturn(null);
-        when(project.getFullDisplayName()).thenReturn("project");
+        when(matrixProject.getParent()).thenReturn(group);
+        when(matrixProject.getLastBuild()).thenReturn(null);
+        when(matrixProject.getFullDisplayName()).thenReturn("matrixProject");
         when(previousBuild.getPreviousCompletedBuild()).thenReturn(null);
         when(previousBuild.getResult()).thenReturn(Result.SUCCESS);
-        when(configuration.getParent()).thenReturn(project);
+        when(configuration.getParent()).thenReturn(matrixProject);
         when(configuration.getLastBuild()).thenReturn(previousBuild);
-        when(configuration.getFullDisplayName()).thenReturn("project");
+        when(configuration.getFullDisplayName()).thenReturn("matrixProject");
         when(matrixRun.getAction(CauseAction.class)).thenReturn(null);
         when(matrixRun.getProject()).thenReturn(configuration);
         when(matrixRun.hasChangeSetComputed()).thenReturn(false);
         when(matrixRun.getNumber()).thenReturn(1);
         when(matrixRun.getResult()).thenReturn(Result.FAILURE);
+        when(freeStyleBuild.getParent()).thenReturn(freeStyleProject);
+        when(freeStyleProject.getParent()).thenReturn(group);
+        when(freeStyleProject.getLastBuild()).thenReturn(null);
+        when(freeStyleProject.getFullDisplayName()).thenReturn("freeStyleProject");
         when(slackFactory.apply(matrixRun)).thenReturn(slack);
+        when(slackFactory.apply(freeStyleBuild)).thenReturn(slack);
         when(messageBuilder.toString()).thenReturn("build status message");
-        PowerMockito.whenNew(ActiveNotifier.MessageBuilder.class)
+        PowerMockito.whenNew(MessageBuilder.class)
                 .withArguments(slackNotifier, matrixRun, buildAwareLogger, tokenExpander)
                 .thenReturn(messageBuilder);
         activeNotifier = new ActiveNotifier(slackNotifier, slackFactory, buildAwareLogger, tokenExpander);
+        PowerMockito.whenNew(MessageBuilder.class)
+            .withArguments(slackNotifier, freeStyleBuild, buildAwareLogger, tokenExpander)
+            .thenReturn(messageBuilder);
+        freeStyleActiveNotifer = activeNotifier;
     }
 
     @Test
@@ -148,5 +163,32 @@ public class ActiveNotifierTest extends TestCase {
         activeNotifier.completed(matrixRun);
 
         verify(slack).publish("build status message", "danger");
+    }
+
+    @Test
+    public void startedNotifiesMatrixTriggerModeNull() {
+        when(slackNotifier.getMatrixTriggerMode()).thenReturn(null);
+
+        activeNotifier.started(matrixRun);
+
+        verify(slack, never()).publish(any(), any());
+    }
+
+    @Test
+    public void startedNotifiesFreeStayle() {
+        when(slackNotifier.getMatrixTriggerMode()).thenReturn(null);
+
+        freeStyleActiveNotifer.started(freeStyleBuild);
+
+        verify(slack).publish("build status message", "good");
+    }
+
+    @Test
+    public void startedNotifiesFreeStayleWithMatrixTriggerMode() {
+        when(slackNotifier.getMatrixTriggerMode()).thenReturn(MatrixTriggerMode.BOTH);
+
+        freeStyleActiveNotifer.started(freeStyleBuild);
+
+        verify(slack).publish("build status message", "good");
     }
 }
