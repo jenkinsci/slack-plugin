@@ -4,18 +4,19 @@ package jenkins.plugins.slack.webhook;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.gargoylesoftware.htmlunit.WebRequest;
 import com.gargoylesoftware.htmlunit.WebResponse;
-import com.gargoylesoftware.htmlunit.html.HtmlForm;
-import com.gargoylesoftware.htmlunit.util.NameValuePair;
 import hudson.model.FreeStyleProject;
-import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.List;
 import jenkins.model.GlobalConfiguration;
+import jenkins.plugins.slack.webhook.model.JsonResponse;
+import jenkins.plugins.slack.webhook.model.SlackPostData;
 import jenkins.plugins.slack.webhook.model.SlackTextMessage;
+import net.sf.json.JSONObject;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.jvnet.hudson.test.JenkinsRule;
+import org.jvnet.hudson.test.JenkinsRule.WebClient;
+import org.kohsuke.stapler.RequestImpl;
+import org.mockito.Mockito;
 
 import static com.gargoylesoftware.htmlunit.HttpMethod.POST;
 import static java.net.HttpURLConnection.HTTP_NOT_FOUND;
@@ -25,27 +26,31 @@ import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.nullValue;
 import static org.junit.Assert.assertThat;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 public class WebhookEndpointTest {
 
-    private JenkinsRule.WebClient client;
+    private RequestImpl req;
 
     private static final String URL = "webook";
     private static final String ENDPOINT = URL + "/";
     private static final String LONG_PROJECT_NAME = "slack_plugin";
 
-    private List<NameValuePair> data;
+    private WebhookEndpoint endpoint;
+    private SlackPostData data;
 
     @Rule
     public final JenkinsRule jenkinsRule = new JenkinsRule();
 
-
     @Before
     public void setUp() {
-        client = jenkinsRule.createWebClient();
-        data = new ArrayList<>();
-        data.add(new NameValuePair("token", "GOOD_TOKEN"));
-        data.add(new NameValuePair("trigger_word", "jenkins"));
+        endpoint = new WebhookEndpoint();
+        req = mock(RequestImpl.class);
+        data = new SlackPostData();
+        data.setToken("GOOD_TOKEN");
+        data.setTrigger_word("jenkins");
+        when(req.bindJSON(Mockito.eq(SlackPostData.class), Mockito.any(JSONObject.class))).thenReturn(data);
     }
 
     @Test
@@ -58,29 +63,25 @@ public class WebhookEndpointTest {
 
     @Test
     public void testUnconfiguredSlackURL() throws Exception {
-        WebResponse response = makeRequest(null);
+        WebClient client = jenkinsRule.createWebClient();
+        WebRequest request =
+            new WebRequest(client.createCrumbedUrl(ENDPOINT), POST);
+        WebResponse response = client.loadWebResponse(request);
         assertThat(response.getStatusCode(), is(HTTP_NOT_FOUND));
     }
 
     @Test
     public void testUnconfiguredSlackToken() throws Exception {
-        HtmlForm form = jenkinsRule.createWebClient().goTo("configure").getFormByName("config");
-        form.getInputByName("_.slackOutgoingWebhookURL").setValueAttribute(URL);
-        jenkinsRule.submit(form);
-
-        WebResponse response = makeRequest(null);
-
-        assertThat(response.getStatusCode(), is(HTTP_OK));
+        JsonResponse response = (JsonResponse) endpoint.doIndex(req);
+        assertThat(response.getStatus(), is(HTTP_OK));
         assertThat(getSlackMessage(response).getText(), is("Slack token not set"));
     }
 
     @Test
     public void testNoTextPostData() throws Exception {
         setConfigSettings();
-        List<NameValuePair> goodToken = new ArrayList<>();
-        goodToken.add(new NameValuePair("token", "GOOD_TOKEN"));
-
-        WebResponse response = makeRequest(goodToken);
+        JsonResponse response = (JsonResponse) endpoint.doIndex(req);
+        assertThat(response.getStatus(), is(HTTP_OK));
         assertThat(getSlackMessage(response).getText(), is("Invalid command, text field required"));
     }
 
@@ -88,58 +89,57 @@ public class WebhookEndpointTest {
     public void testNoTriggerWordPostData() throws Exception {
         // No trigger word is present, which is the case when Slack "slash commands" are used
         setConfigSettings();
-        List<NameValuePair> goodToken = new ArrayList<>();
-        goodToken.add(new NameValuePair("token", "GOOD_TOKEN"));
-        goodToken.add(new NameValuePair("text", "list projects"));
-
-        WebResponse response = makeRequest(goodToken);
+        data.setTrigger_word(null);
+        data.setText("list projects");
+        JsonResponse response = (JsonResponse) endpoint.doIndex(req);
+        assertThat(response.getStatus(), is(HTTP_OK));
         assertThat(getSlackMessage(response).getText(), is("*Projects:*\n>_No projects found_"));
     }
 
     @Test
     public void testInvalidConfiguredSlackToken() throws Exception {
-        GlobalConfig config = GlobalConfiguration.all().get(GlobalConfig.class);
-        assertThat(config.getSlackOutgoingWebhookToken(), is(nullValue()));
-
         setConfigSettings();
-
-        List<NameValuePair> badData = new ArrayList<>();
-        badData.add(new NameValuePair("token", "BAD_TOKEN"));
-
-        WebResponse response = makeRequest(badData);
-
+        data.setToken("BAD_TOKEN");
+        JsonResponse response = (JsonResponse) endpoint.doIndex(req);
+        assertThat(response.getStatus(), is(HTTP_OK));
         assertThat(getSlackMessage(response).getText(), is("Invalid Slack token"));
     }
 
     @Test
     public void testInvalidTriggerWord() throws Exception {
         setConfigSettings();
-        data.add(new NameValuePair("text", "jenkinns list projects"));
-        WebResponse response = makeRequest(data);
+        data.setTrigger_word("notJenkins");
+        data.setText("jenkins list projects");
+        JsonResponse response = (JsonResponse) endpoint.doIndex(req);
+        assertThat(response.getStatus(), is(HTTP_OK));
         assertThat(getSlackMessage(response).getText(), is("Invalid command, invalid trigger_word"));
     }
 
     @Test
     public void testListProjects() throws Exception {
         setConfigSettings();
-        data.add(new NameValuePair("text", "jenkins list projects"));
-        WebResponse response = makeRequest(data);
+        data.setText("jenkins list projects");
+        JsonResponse response = (JsonResponse) endpoint.doIndex(req);
+        assertThat(response.getStatus(), is(HTTP_OK));
         assertThat(getSlackMessage(response).getText(), is("*Projects:*\n>_No projects found_"));
 
         FreeStyleProject project = jenkinsRule.createFreeStyleProject(LONG_PROJECT_NAME);
-        response = makeRequest(data);
+        response = (JsonResponse) endpoint.doIndex(req);
+        assertThat(response.getStatus(), is(HTTP_OK));
         assertThat(getSlackMessage(response).getText(), is("*Projects:*\n>*" + LONG_PROJECT_NAME + "*\n>*Last Build:* #TBD\n>*Status:* TBD\n\n\n"));
 
         project.scheduleBuild2(0).get();
-        response = makeRequest(data);
+        response = (JsonResponse) endpoint.doIndex(req);
+        assertThat(response.getStatus(), is(HTTP_OK));
         assertThat(getSlackMessage(response).getText(), is("*Projects:*\n>*" + LONG_PROJECT_NAME + "*\n>*Last Build:* #1\n>*Status:* SUCCESS\n\n\n"));
     }
 
     @Test
     public void testRunNonExistantProject() throws Exception {
         setConfigSettings();
-        data.add(new NameValuePair("text", "jenkins run project-1"));
-        WebResponse response = makeRequest(data);
+        data.setText("jenkins run project-1");
+        JsonResponse response = (JsonResponse) endpoint.doIndex(req);
+        assertThat(response.getStatus(), is(HTTP_OK));
         assertThat(getSlackMessage(response).getText(), is("Could not find project (project-1)\n"));
     }
 
@@ -147,16 +147,18 @@ public class WebhookEndpointTest {
     public void testRunProject() throws Exception {
         setConfigSettings();
         jenkinsRule.createFreeStyleProject(LONG_PROJECT_NAME);
-        data.add(new NameValuePair("text", "jenkins run " + LONG_PROJECT_NAME));
-        WebResponse response = makeRequest(data);
+        data.setText("jenkins run " + LONG_PROJECT_NAME);
+        JsonResponse response = (JsonResponse) endpoint.doIndex(req);
+        assertThat(response.getStatus(), is(HTTP_OK));
         assertThat(getSlackMessage(response).getText(), is("Build scheduled for project " + LONG_PROJECT_NAME + "\n"));
     }
 
     @Test
     public void testGetProjectBuildLogWithNonExistantProject() throws Exception {
         setConfigSettings();
-        data.add(new NameValuePair("text", "jenkins get project_1 #1 log"));
-        WebResponse response = makeRequest(data);
+        data.setText("jenkins get project_1 #1 log");
+        JsonResponse response = (JsonResponse) endpoint.doIndex(req);
+        assertThat(response.getStatus(), is(HTTP_OK));
         assertThat(getSlackMessage(response).getText(), is("Could not find project (project_1)\n"));
     }
 
@@ -165,32 +167,21 @@ public class WebhookEndpointTest {
         setConfigSettings();
         FreeStyleProject project = jenkinsRule.createFreeStyleProject(LONG_PROJECT_NAME);
         project.scheduleBuild2(0).get();
-        data.add(new NameValuePair("text", "jenkins get " + LONG_PROJECT_NAME + " #1 log"));
-        WebResponse response = makeRequest(data);
+        data.setText("jenkins get " + LONG_PROJECT_NAME + " #1 log");
+        JsonResponse response = (JsonResponse) endpoint.doIndex(req);
+        assertThat(response.getStatus(), is(HTTP_OK));
         assertThat(getSlackMessage(response).getText(), containsString("Building in workspace"));
     }
 
-    private void setConfigSettings() throws Exception {
-        HtmlForm form = jenkinsRule.createWebClient().goTo("configure").getFormByName("config");
-        form.getInputByName("_.slackOutgoingWebhookURL").setValueAttribute(URL);
-        form.getInputByName("_.slackOutgoingWebhookToken").setValueAttribute("GOOD_TOKEN");
-        jenkinsRule.submit(form);
+    private void setConfigSettings() {
+        GlobalConfig config = GlobalConfiguration.all().get(GlobalConfig.class);
+        assert config != null;
+        config.setSlackOutgoingWebhookToken("GOOD_TOKEN");
+        config.setSlackOutgoingWebhookURL(URL);
     }
 
-    private SlackTextMessage getSlackMessage(WebResponse response) throws Exception {
-        return new ObjectMapper().readValue(response.getContentAsString(),
+    private SlackTextMessage getSlackMessage(JsonResponse response) throws Exception {
+        return new ObjectMapper().readValue(response.getJson(),
                 SlackTextMessage.class);
-    }
-
-    private WebResponse makeRequest(List<NameValuePair> postData) throws Exception {
-        WebRequest request =
-                new WebRequest(client.createCrumbedUrl(ENDPOINT), POST);
-
-        if (postData != null)
-            request.setRequestParameters(postData);
-
-        request.setCharset(StandardCharsets.UTF_8);
-
-        return client.loadWebResponse(request);
     }
 }
