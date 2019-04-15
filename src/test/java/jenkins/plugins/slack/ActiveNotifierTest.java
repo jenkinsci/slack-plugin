@@ -177,7 +177,7 @@ public class ActiveNotifierTest extends TestCase {
     }
 
     @Test
-    public void startedNotifiesFreeStayle() {
+    public void startedNotifiesFreeStyle() {
         when(slackNotifier.getMatrixTriggerMode()).thenReturn(null);
 
         freeStyleActiveNotifer.started(freeStyleBuild);
@@ -186,7 +186,7 @@ public class ActiveNotifierTest extends TestCase {
     }
 
     @Test
-    public void startedNotifiesFreeStayleWithMatrixTriggerMode() {
+    public void startedNotifiesFreeStyleWithMatrixTriggerMode() {
         when(slackNotifier.getMatrixTriggerMode()).thenReturn(MatrixTriggerMode.BOTH);
 
         freeStyleActiveNotifer.started(freeStyleBuild);
