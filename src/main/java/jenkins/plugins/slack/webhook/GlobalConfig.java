@@ -39,7 +39,7 @@ public class GlobalConfig extends GlobalConfiguration {
     }
 
     public void setSlackOutgoingWebhookURL(String slackOutgoingWebhookURL) {
-        this.slackOutgoingWebhookURL = slackOutgoingWebhookURL;
+        this.slackOutgoingWebhookURL = slackOutgoingWebhookURL.replaceFirst("^/", "");
     }
 
     public FormValidation doCheckSlackOutgoingWebhookURL(@QueryParameter String value) {
