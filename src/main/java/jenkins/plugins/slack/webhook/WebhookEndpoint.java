@@ -5,6 +5,7 @@ import hudson.Extension;
 import hudson.model.UnprotectedRootAction;
 import java.util.UUID;
 import java.util.logging.Logger;
+import javax.servlet.ServletException;
 import jenkins.model.GlobalConfiguration;
 import jenkins.plugins.slack.webhook.exception.CommandRouterException;
 import jenkins.plugins.slack.webhook.exception.RouteNotFoundException;
@@ -42,15 +43,14 @@ public class WebhookEndpoint implements UnprotectedRootAction {
     }
 
     @RequirePOST
-    public HttpResponse doIndex(StaplerRequest req) {
+    public HttpResponse doIndex(StaplerRequest req) throws ServletException {
 
         if (getGlobalConfig().getSlackOutgoingWebhookToken() == null ||
             getGlobalConfig().getSlackOutgoingWebhookToken().equals("")) {
             return new JsonResponse(new SlackTextMessage("Slack token not set"), StaplerResponse.SC_OK);
         }
 
-        SlackPostData data = new SlackPostData();
-        req.bindParameters(data);
+        SlackPostData data = req.bindJSON(SlackPostData.class, req.getSubmittedForm());
 
         if (!getGlobalConfig().getSlackOutgoingWebhookToken().equals(data.getToken()))
             return new JsonResponse(new SlackTextMessage("Invalid Slack token"), StaplerResponse.SC_OK);

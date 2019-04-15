@@ -23,6 +23,14 @@ public class JsonResponse implements HttpResponse {
         this.status = status;
     }
 
+    public int getStatus() {
+        return status;
+    }
+
+    public String getJson() {
+        return json;
+    }
+
     @Override
     public void generateResponse(StaplerRequest req,
         StaplerResponse rsp,
