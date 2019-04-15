@@ -48,6 +48,7 @@ import static com.cloudbees.plugins.credentials.CredentialsProvider.lookupCreden
 public class SlackNotifier extends Notifier {
 
     public static final String MATRIX_PROJECT_CLASS_NAME = "hudson.matrix.MatrixProject";
+    public static final String MATRIX_RUN_CLASS_NAME = "hudson.matrix.MatrixRun";
     private static final Logger logger = Logger.getLogger(SlackNotifier.class.getName());
 
     private String baseUrl;
@@ -509,8 +510,8 @@ public class SlackNotifier extends Notifier {
         return new SlackNotificationsLogger(logger, listener.getLogger());
     }
 
-    boolean isMatrixProject(AbstractBuild<?, ?> project) {
-        return project.getClass().getName().equals(MATRIX_PROJECT_CLASS_NAME);
+    public boolean isMatrixRun(AbstractBuild<?, ?> build) {
+        return build.getClass().getName().equals(MATRIX_RUN_CLASS_NAME);
     }
 
     @Extension @Symbol("slackNotifier")

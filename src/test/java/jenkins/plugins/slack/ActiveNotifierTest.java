@@ -53,6 +53,8 @@ public class ActiveNotifierTest extends TestCase {
         when(slackNotifier.getNotifyRegression()).thenReturn(true);
         when(slackNotifier.getNotifyFailure()).thenReturn(true);
         when(slackNotifier.getCommitInfoChoice()).thenReturn(CommitInfoChoice.NONE);
+        when(slackNotifier.isMatrixRun(freeStyleBuild)).thenReturn(false);
+        when(slackNotifier.isMatrixRun(matrixRun)).thenReturn(true);
         when(group.getFullDisplayName()).thenReturn("group");
         when(matrixProject.getParent()).thenReturn(group);
         when(matrixProject.getLastBuild()).thenReturn(null);
