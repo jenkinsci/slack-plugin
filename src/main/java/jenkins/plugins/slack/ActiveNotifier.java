@@ -28,6 +28,7 @@ import jenkins.plugins.slack.decisions.Context;
 import jenkins.plugins.slack.decisions.NotificationConditions;
 import jenkins.plugins.slack.logging.BuildAwareLogger;
 import jenkins.plugins.slack.logging.BuildKey;
+import jenkins.plugins.slack.matrix.MatrixTriggerMode;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
 import org.jenkinsci.plugins.displayurlapi.DisplayURLProvider;
@@ -153,8 +154,11 @@ public class ActiveNotifier implements FineGrainedNotifier {
     }
 
     private boolean skipOnMatrixChildren(AbstractBuild build) {
-        return notifier.isMatrixRun(build) && !(notifier.getMatrixTriggerMode() != null
-            && notifier.getMatrixTriggerMode().forChild);
+        if (notifier.isMatrixRun(build)) {
+            MatrixTriggerMode matrixTriggerMode = notifier.getMatrixTriggerMode();
+            return !(matrixTriggerMode != null && matrixTriggerMode.forChild);
+        }
+        return false;
     }
 
     private boolean moreTestFailuresThanPreviousBuild(AbstractBuild currentBuild, AbstractBuild<?, ?> previousBuild) {
