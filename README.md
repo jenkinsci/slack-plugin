@@ -1,6 +1,9 @@
 # Slack plugin for Jenkins
 
-[![Build Status](https://ci.jenkins.io/buildStatus/icon?job=Plugins/slack-plugin/master)](https://ci.jenkins.io/job/Plugins/job/slack-plugin/job/master/)
+[![Build Status][jenkins-status]][jenkins-builds]
+[![Jenkins Plugin][plugin-version-badge]][plugin]
+[![GitHub release][github-release-badge]][github-release]
+[![Jenkins Plugin Installs][plugin-install-badge]][plugin]
 [![Slack Signup][slack-badge]][slack-signup] (click to sign up)
 
 Provides Jenkins notification integration with Slack or Slack compatible
@@ -173,10 +176,15 @@ Create an HPI file to install in Jenkins (HPI file will be in
 
     mvn clean package
 
-[jenkins-builds]: https://jenkins.ci.cloudbees.com/job/plugins/job/slack-plugin/
-[jenkins-status]: https://jenkins.ci.cloudbees.com/buildStatus/icon?job=plugins/slack-plugin
+[jenkins-builds]: https://ci.jenkins.io/job/Plugins/job/slack-plugin/job/master/
+[jenkins-status]: https://ci.jenkins.io/buildStatus/icon?job=Plugins/slack-plugin/master
 [slack-badge]: https://jenkins-slack-testing-signup.herokuapp.com/badge.svg
 [slack-signup]: https://jenkins-slack-testing-signup.herokuapp.com/
+[plugin-version-badge]: https://img.shields.io/jenkins/plugin/v/slack.svg
+[plugin-install-badge]: https://img.shields.io/jenkins/plugin/i/configuration-as-code.svg?color=blue
+[plugin]: https://plugins.jenkins.io/slack
+[github-release-badge]: https://img.shields.io/github/release/jenkinsci/slack-plugin.svg?label=release
+[github-release]: https://github.com/jenkinsci/slack-plugin/releases/latest
 [rocketchat]: https://rocket.chat/
 [mattermost]: https://about.mattermost.com/
 [img-secret-text]: https://cloud.githubusercontent.com/assets/983526/17971588/6c26dfa0-6aa9-11e6-808c-3e139446e013.png
