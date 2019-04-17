@@ -181,7 +181,7 @@ Create an HPI file to install in Jenkins (HPI file will be in
 [slack-badge]: https://jenkins-slack-testing-signup.herokuapp.com/badge.svg
 [slack-signup]: https://jenkins-slack-testing-signup.herokuapp.com/
 [plugin-version-badge]: https://img.shields.io/jenkins/plugin/v/slack.svg
-[plugin-install-badge]: https://img.shields.io/jenkins/plugin/i/configuration-as-code.svg?color=blue
+[plugin-install-badge]: https://img.shields.io/jenkins/plugin/i/slack.svg?color=blue
 [plugin]: https://plugins.jenkins.io/slack
 [github-release-badge]: https://img.shields.io/github/release/jenkinsci/slack-plugin.svg?label=release
 [github-release]: https://github.com/jenkinsci/slack-plugin/releases/latest
