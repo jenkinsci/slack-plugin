@@ -16,6 +16,7 @@ public class NotificationConditions implements Predicate<Context> {
     public static NotificationConditions create(SlackNotifier preferences, BuildAwareLogger log) {
         return new NotificationConditions(Arrays.asList(
                 new OnAborted(preferences, log),
+                new OnEveryFailure(preferences, log),
                 new OnSingleFailure(preferences, log),
                 new OnRepeatedFailure(preferences, log),
                 new OnNotBuilt(preferences, log),
