@@ -65,6 +65,7 @@ public class SlackNotifier extends Notifier {
     private boolean notifyUnstable;
     private boolean notifyRegression;
     private boolean notifyFailure;
+    private boolean notifyEveryFailure;
     private boolean notifyBackToNormal;
     private boolean notifyRepeatedFailure;
     private boolean includeTestSummary;
@@ -183,6 +184,10 @@ public class SlackNotifier extends Notifier {
         return notifyFailure;
     }
 
+    public boolean getNotifyEveryFailure() {
+        return notifyEveryFailure;
+    }
+
     public boolean getNotifyNotBuilt() {
         return notifyNotBuilt;
     }
@@ -272,6 +277,11 @@ public class SlackNotifier extends Notifier {
     @DataBoundSetter
     public void setNotifyFailure(boolean notifyFailure) {
         this.notifyFailure = notifyFailure;
+    }
+
+    @DataBoundSetter
+    public void setNotifyEveryFailure(boolean notifyEveryFailure) {
+        this.notifyEveryFailure = notifyEveryFailure;
     }
 
     @DataBoundSetter

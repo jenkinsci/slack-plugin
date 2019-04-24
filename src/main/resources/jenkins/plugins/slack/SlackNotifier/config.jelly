@@ -24,12 +24,8 @@
         <f:checkbox field="notifyRegression" />
     </f:entry>
 
-    <f:entry title="Notify First Failure Only">
-        <f:checkbox field="notifyFailure" />
-    </f:entry>
-
-    <f:entry title="Notify Repeated Failure Only">
-        <f:checkbox field="notifyRepeatedFailure" />
+    <f:entry title="Notify Every Failure">
+        <f:checkbox field="notifyEveryFailure" />
     </f:entry>
 
     <f:entry title="Notify Back To Normal">
@@ -43,6 +39,12 @@
 	</j:if>
 
     <f:advanced>
+        <f:entry title="Notify First Failure Only">
+            <f:checkbox field="notifyFailure" />
+        </f:entry>
+        <f:entry title="Notify Repeated Failure Only">
+            <f:checkbox field="notifyRepeatedFailure" />
+        </f:entry>
         <f:entry title="Include Test Summary">
             <f:checkbox field="includeTestSummary" />
         </f:entry>
