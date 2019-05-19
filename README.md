@@ -31,22 +31,19 @@ applications like [RocketChat][rocketchat] and [Mattermost][mattermost].
 slackSend color: 'good', message: 'Message from Jenkins Pipeline'
 ```
 
-Additionally you can pass a JSONArray as a String in order to send complex
-messages, as per the example:
+Additionally you can pass a JSONArray in order to send complex
+messages, for example:
 
 ```
+def attachments = [
+  [
+    text: 'I find your lack of faith disturbing!',
+    fallback: 'Hey, Vader seems to be mad at you.',
+    color: '#ff0000'
+  ]
+]
 
-node {
-    def attachments = [
-        [
-            text: 'I find your lack of faith disturbing!',
-            fallback: 'Hey, Vader seems to be mad at you.',
-            color: '#ff0000'
-        ]
-    ]
-
-    slackSend(channel: '#general', attachments: attachments)
-}
+slackSend(channel: '#general', attachments: attachments)
 ```
 For more information about slack messages see [Slack Messages Api](https://api.slack.com/docs/messages)
 and [Slack attachments Api](https://api.slack.com/docs/message-attachments)
