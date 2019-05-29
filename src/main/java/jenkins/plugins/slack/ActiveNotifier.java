@@ -134,7 +134,7 @@ public class ActiveNotifier implements FineGrainedNotifier {
         if (null != previousBuild) {
             do {
                 previousBuild = previousBuild.getPreviousCompletedBuild();
-            } while ((null != previousBuild && previousBuild.getResult() == Result.ABORTED) || previousBuild.getNumber() == r.getNumber());
+            } while ((null != previousBuild && previousBuild.getResult() == Result.ABORTED) || (null != previousBuild && previousBuild.getNumber() == r.getNumber()));
             if (null != previousBuild) {
                 log.info(key, "found #%d as previous completed, non-aborted build", previousBuild.getNumber());
             } else {
