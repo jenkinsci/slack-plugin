@@ -42,31 +42,32 @@ public class StandardSlackService implements SlackService {
     private boolean botUser;
     private String[] roomIds;
     private boolean replyBroadcast;
+    private String iconEmoji;
     private String responseString;
     private String populatedToken;
 
     /**
-     * @deprecated use {@link #StandardSlackService(String, String, boolean, String, boolean, String)} instead}
+     * @deprecated use {@link #StandardSlackService(String, String, boolean, String, boolean, String, String)} instead}
      */
     @Deprecated
     public StandardSlackService(String baseUrl, String teamDomain, String authTokenCredentialId, boolean botUser, String roomId) {
-        this(baseUrl, teamDomain, null, authTokenCredentialId, botUser, roomId, false);
+        this(baseUrl, teamDomain, null, authTokenCredentialId, botUser, roomId, false, null);
     }
 
     /**
-     * @deprecated use {@link #StandardSlackService(String, String, boolean, String, boolean, String)} instead}
+     * @deprecated use {@link #StandardSlackService(String, String, boolean, String, boolean, String, String)} instead}
      */
     @Deprecated
     public StandardSlackService(String baseUrl, String teamDomain, String token, String authTokenCredentialId, boolean botUser, String roomId) {
-        this(baseUrl, teamDomain, token, authTokenCredentialId, botUser, roomId, false);
+        this(baseUrl, teamDomain, token, authTokenCredentialId, botUser, roomId, false, null);
     }
 
     /**
-     * @deprecated use {@link #StandardSlackService(String, String, boolean, String, boolean, String)} instead}
+     * @deprecated use {@link #StandardSlackService(String, String, boolean, String, boolean, String, String)} instead}
      */
     @Deprecated
-    public StandardSlackService(String baseUrl, String teamDomain, String token, String authTokenCredentialId, boolean botUser, String roomId, boolean replyBroadcast) {
-        this(baseUrl, teamDomain, botUser, roomId, replyBroadcast);
+    public StandardSlackService(String baseUrl, String teamDomain, String token, String authTokenCredentialId, boolean botUser, String roomId, boolean replyBroadcast, String iconEmoji) {
+        this(baseUrl, teamDomain, botUser, roomId, replyBroadcast, iconEmoji);
         this.populatedToken = getTokenToUse(authTokenCredentialId, token);
         if (this.populatedToken == null) {
             throw new IllegalArgumentException("No slack token found, setup a secret text credential and configure it to be used");
@@ -79,17 +80,18 @@ public class StandardSlackService implements SlackService {
      * @param botUser
      * @param roomId         a semicolon separated list of rooms to notify
      * @param replyBroadcast
+     * @param iconEmoji
      * @param populatedToken a non-null token to use for authentication
      */
-    public StandardSlackService(String baseUrl, String teamDomain, boolean botUser, String roomId, boolean replyBroadcast, String populatedToken) {
-        this(baseUrl, teamDomain, botUser, roomId, replyBroadcast);
+    public StandardSlackService(String baseUrl, String teamDomain, boolean botUser, String roomId, boolean replyBroadcast, String iconEmoji, String populatedToken) {
+        this(baseUrl, teamDomain, botUser, roomId, replyBroadcast, iconEmoji);
         if (populatedToken == null) {
             throw new IllegalArgumentException("No slack token found, setup a secret text credential and configure it to be used");
         }
         this.populatedToken = populatedToken;
     }
 
-    private StandardSlackService(String baseUrl, String teamDomain, boolean botUser, String roomId, boolean replyBroadcast) {
+    private StandardSlackService(String baseUrl, String teamDomain, boolean botUser, String roomId, boolean replyBroadcast, String iconEmoji) {
         super();
         this.baseUrl = baseUrl;
         if (this.baseUrl != null && !this.baseUrl.isEmpty() && !this.baseUrl.endsWith("/")) {
@@ -102,6 +104,7 @@ public class StandardSlackService implements SlackService {
         }
         this.roomIds = roomId.split("[,; ]+");
         this.replyBroadcast = replyBroadcast;
+        this.iconEmoji = iconEmoji;
     }
 
     public String getResponseString() {
@@ -166,6 +169,7 @@ public class StandardSlackService implements SlackService {
                 }
                 json.put("attachments", attachments);
                 json.put("link_names", "1");
+                json.put("icon_emoji", iconEmoji);
 
                 nvps.add(new BasicNameValuePair("payload", json.toString()));
             } else {

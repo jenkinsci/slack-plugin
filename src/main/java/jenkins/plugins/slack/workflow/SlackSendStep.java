@@ -61,6 +61,7 @@ public class SlackSendStep extends Step {
     private boolean failOnError;
     private Object attachments;
     private boolean replyBroadcast;
+    private String iconEmoji;
 
     @Nonnull
     public String getMessage() {
@@ -169,6 +170,15 @@ public class SlackSendStep extends Step {
     public SlackSendStep() {
     }
 
+    public Object getIconEmoji() {
+        return iconEmoji;
+    }
+
+    @DataBoundSetter
+    public void setIconEmoji(String iconEmoji) {
+        this.iconEmoji = iconEmoji;
+    }
+
     @Override
     public StepExecution start(StepContext context) {
         return new SlackSendStepExecution(this, context);
@@ -264,7 +274,7 @@ public class SlackSendStep extends Step {
             }
 
             SlackService slackService = getSlackService(
-                    baseUrl, teamDomain, botUser, channel, step.replyBroadcast, populatedToken);
+                    baseUrl, teamDomain, botUser, channel, step.replyBroadcast, step.iconEmoji, populatedToken);
             final boolean publishSuccess;
             if (step.attachments != null) {
                 JSONArray jsonArray = getAttachmentsAsJSONArray();
@@ -363,8 +373,8 @@ public class SlackSendStep extends Step {
         }
 
         //streamline unit testing
-        SlackService getSlackService(String baseUrl, String team, boolean botUser, String channel, boolean replyBroadcast, String populatedToken) {
-            return new StandardSlackService(baseUrl, team, botUser, channel, replyBroadcast, populatedToken);
+        SlackService getSlackService(String baseUrl, String team, boolean botUser, String channel, boolean replyBroadcast, String iconEmoji, String populatedToken) {
+            return new StandardSlackService(baseUrl, team, botUser, channel, replyBroadcast, iconEmoji, populatedToken);
         }
     }
 }
