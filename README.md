@@ -80,6 +80,16 @@ node {
 }
 ```
 
+#### Unfurling Links
+
+You can allow link unfurling if you send the message as text. This only works in a text message, as attachments cannot be unfurled.
+
+Example:
+
+```
+node {
+    slackSend(channel: "news-update", message: "https://www.nytimes.com", sendAsText: true)
+```
 
 ## Install Instructions for Slack compatible application
 
