@@ -89,7 +89,7 @@ Example:
 ```
 node {
     slackSend(channel: "news-update", message: "https://www.nytimes.com", sendAsText: true)
-    }
+}
 ```
 
 ## Install Instructions for Slack compatible application
