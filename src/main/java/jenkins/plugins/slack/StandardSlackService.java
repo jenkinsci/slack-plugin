@@ -42,11 +42,12 @@ public class StandardSlackService implements SlackService {
     private boolean botUser;
     private String[] roomIds;
     private boolean replyBroadcast;
+    private boolean sendAsText;
     private String responseString;
     private String populatedToken;
 
     /**
-     * @deprecated use {@link #StandardSlackService(String, String, boolean, String, boolean, String)} instead}
+     * @deprecated use {@link #StandardSlackService(String, String, boolean, String, boolean, boolean, String)} instead}
      */
     @Deprecated
     public StandardSlackService(String baseUrl, String teamDomain, String authTokenCredentialId, boolean botUser, String roomId) {
@@ -54,7 +55,7 @@ public class StandardSlackService implements SlackService {
     }
 
     /**
-     * @deprecated use {@link #StandardSlackService(String, String, boolean, String, boolean, String)} instead}
+     * @deprecated use {@link #StandardSlackService(String, String, boolean, String, boolean, boolean, String)} instead}
      */
     @Deprecated
     public StandardSlackService(String baseUrl, String teamDomain, String token, String authTokenCredentialId, boolean botUser, String roomId) {
@@ -62,11 +63,11 @@ public class StandardSlackService implements SlackService {
     }
 
     /**
-     * @deprecated use {@link #StandardSlackService(String, String, boolean, String, boolean, String)} instead}
+     * @deprecated use {@link #StandardSlackService(String, String, boolean, String, boolean, boolean, String)} instead}
      */
     @Deprecated
     public StandardSlackService(String baseUrl, String teamDomain, String token, String authTokenCredentialId, boolean botUser, String roomId, boolean replyBroadcast) {
-        this(baseUrl, teamDomain, botUser, roomId, replyBroadcast);
+        this(baseUrl, teamDomain, botUser, roomId, replyBroadcast, false);
         this.populatedToken = getTokenToUse(authTokenCredentialId, token);
         if (this.populatedToken == null) {
             throw new IllegalArgumentException("No slack token found, setup a secret text credential and configure it to be used");
@@ -79,17 +80,18 @@ public class StandardSlackService implements SlackService {
      * @param botUser
      * @param roomId         a semicolon separated list of rooms to notify
      * @param replyBroadcast
+     * @param sendAsText
      * @param populatedToken a non-null token to use for authentication
      */
-    public StandardSlackService(String baseUrl, String teamDomain, boolean botUser, String roomId, boolean replyBroadcast, String populatedToken) {
-        this(baseUrl, teamDomain, botUser, roomId, replyBroadcast);
+    public StandardSlackService(String baseUrl, String teamDomain, boolean botUser, String roomId, boolean replyBroadcast, boolean sendAsText, String populatedToken) {
+        this(baseUrl, teamDomain, botUser, roomId, replyBroadcast, sendAsText);
         if (populatedToken == null) {
             throw new IllegalArgumentException("No slack token found, setup a secret text credential and configure it to be used");
         }
         this.populatedToken = populatedToken;
     }
 
-    private StandardSlackService(String baseUrl, String teamDomain, boolean botUser, String roomId, boolean replyBroadcast) {
+    private StandardSlackService(String baseUrl, String teamDomain, boolean botUser, String roomId, boolean replyBroadcast, boolean sendAsText) {
         super();
         this.baseUrl = baseUrl;
         if (this.baseUrl != null && !this.baseUrl.isEmpty() && !this.baseUrl.endsWith("/")) {
@@ -102,6 +104,7 @@ public class StandardSlackService implements SlackService {
         }
         this.roomIds = roomId.split("[,; ]+");
         this.replyBroadcast = replyBroadcast;
+        this.sendAsText = sendAsText;
     }
 
     public String getResponseString() {
@@ -164,15 +167,21 @@ public class StandardSlackService implements SlackService {
                 if (StringUtils.isNotEmpty(message)) {
                     json.put("text", message);
                 }
-                json.put("attachments", attachments);
+                if (attachments.size() > 0) {
+                    json.put("attachments", attachments);
+                }
                 json.put("link_names", "1");
+                json.put("unfurl_links", "true");
+                json.put("unfurl_media", "true");
 
                 nvps.add(new BasicNameValuePair("payload", json.toString()));
             } else {
                 url = "https://slack.com/api/chat.postMessage?token=" + populatedToken +
                         "&channel=" + roomId.replace("#", "") +
                         "&link_names=1" +
-                        "&as_user=true";
+                        "&as_user=true" +
+                        "&unfurl_links=true" +
+                        "&unfurl_media=true";
                 if (threadTs.length() > 1) {
                     url += "&thread_ts=" + threadTs;
                 }
@@ -183,7 +192,9 @@ public class StandardSlackService implements SlackService {
                     if (StringUtils.isNotEmpty(message)) {
                         url += "&text=" + URLEncoder.encode(message, StandardCharsets.UTF_8.name());
                     }
-                    url += "&attachments=" + URLEncoder.encode(attachments.toString(), StandardCharsets.UTF_8.name());
+                    if (attachments.size() > 0) {
+                        url += "&attachments=" + URLEncoder.encode(attachments.toString(), StandardCharsets.UTF_8.name());
+                    }
                 } catch (UnsupportedEncodingException e) {
                     logger.log(Level.ALL, "Error while encoding payload: " + e.getMessage());
                 }

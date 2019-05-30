@@ -61,6 +61,7 @@ public class SlackSendStep extends Step {
     private boolean failOnError;
     private Object attachments;
     private boolean replyBroadcast;
+    private boolean sendAsText;
 
     @Nonnull
     public String getMessage() {
@@ -165,6 +166,16 @@ public class SlackSendStep extends Step {
         this.replyBroadcast = replyBroadcast;
     }
 
+    public boolean getSendAsText() {
+        return sendAsText;
+    }
+
+    @DataBoundSetter
+    public void setSendAsText(boolean sendAsText) {
+        this.sendAsText = sendAsText;
+    }
+
+
     @DataBoundConstructor
     public SlackSendStep() {
     }
@@ -264,9 +275,11 @@ public class SlackSendStep extends Step {
             }
 
             SlackService slackService = getSlackService(
-                    baseUrl, teamDomain, botUser, channel, step.replyBroadcast, populatedToken);
+                    baseUrl, teamDomain, botUser, channel, step.replyBroadcast, step.sendAsText, populatedToken);
             final boolean publishSuccess;
-            if (step.attachments != null) {
+            if (step.sendAsText) {
+                publishSuccess = slackService.publish(step.message, new JSONArray(), color);
+            } else if (step.attachments != null) {
                 JSONArray jsonArray = getAttachmentsAsJSONArray();
                 for (Object object : jsonArray) {
                     if (object instanceof JSONObject) {
@@ -363,8 +376,8 @@ public class SlackSendStep extends Step {
         }
 
         //streamline unit testing
-        SlackService getSlackService(String baseUrl, String team, boolean botUser, String channel, boolean replyBroadcast, String populatedToken) {
-            return new StandardSlackService(baseUrl, team, botUser, channel, replyBroadcast, populatedToken);
+        SlackService getSlackService(String baseUrl, String team, boolean botUser, String channel, boolean replyBroadcast, boolean sendAsText, String populatedToken) {
+            return new StandardSlackService(baseUrl, team, botUser, channel, replyBroadcast, sendAsText, populatedToken);
         }
     }
 }
