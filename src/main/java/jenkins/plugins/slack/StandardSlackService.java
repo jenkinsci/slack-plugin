@@ -169,7 +169,9 @@ public class StandardSlackService implements SlackService {
                 }
                 json.put("attachments", attachments);
                 json.put("link_names", "1");
-                json.put("icon_emoji", iconEmoji);
+                if (!StringUtils.isEmpty(iconEmoji)) {
+                    json.put("icon_emoji", iconEmoji);
+                }
 
                 nvps.add(new BasicNameValuePair("payload", json.toString()));
             } else {
