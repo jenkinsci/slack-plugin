@@ -43,6 +43,7 @@ public class StandardSlackService implements SlackService {
     private String[] roomIds;
     private boolean replyBroadcast;
     private String iconEmoji;
+    private String username;
     private String responseString;
     private String populatedToken;
 
@@ -51,7 +52,7 @@ public class StandardSlackService implements SlackService {
      */
     @Deprecated
     public StandardSlackService(String baseUrl, String teamDomain, String authTokenCredentialId, boolean botUser, String roomId) {
-        this(baseUrl, teamDomain, null, authTokenCredentialId, botUser, roomId, false, null);
+        this(baseUrl, teamDomain, null, authTokenCredentialId, botUser, roomId, false, null, null);
     }
 
     /**
@@ -59,15 +60,15 @@ public class StandardSlackService implements SlackService {
      */
     @Deprecated
     public StandardSlackService(String baseUrl, String teamDomain, String token, String authTokenCredentialId, boolean botUser, String roomId) {
-        this(baseUrl, teamDomain, token, authTokenCredentialId, botUser, roomId, false, null);
+        this(baseUrl, teamDomain, token, authTokenCredentialId, botUser, roomId, false, null, null);
     }
 
     /**
      * @deprecated use {@link #StandardSlackService(String, String, boolean, String, boolean, String, String)} instead}
      */
     @Deprecated
-    public StandardSlackService(String baseUrl, String teamDomain, String token, String authTokenCredentialId, boolean botUser, String roomId, boolean replyBroadcast, String iconEmoji) {
-        this(baseUrl, teamDomain, botUser, roomId, replyBroadcast, iconEmoji);
+    public StandardSlackService(String baseUrl, String teamDomain, String token, String authTokenCredentialId, boolean botUser, String roomId, boolean replyBroadcast, String iconEmoji, String username) {
+        this(baseUrl, teamDomain, botUser, roomId, replyBroadcast, iconEmoji, username);
         this.populatedToken = getTokenToUse(authTokenCredentialId, token);
         if (this.populatedToken == null) {
             throw new IllegalArgumentException("No slack token found, setup a secret text credential and configure it to be used");
@@ -81,17 +82,18 @@ public class StandardSlackService implements SlackService {
      * @param roomId         a semicolon separated list of rooms to notify
      * @param replyBroadcast
      * @param iconEmoji
+     * @param username
      * @param populatedToken a non-null token to use for authentication
      */
-    public StandardSlackService(String baseUrl, String teamDomain, boolean botUser, String roomId, boolean replyBroadcast, String iconEmoji, String populatedToken) {
-        this(baseUrl, teamDomain, botUser, roomId, replyBroadcast, iconEmoji);
+    public StandardSlackService(String baseUrl, String teamDomain, boolean botUser, String roomId, boolean replyBroadcast, String iconEmoji, String username, String populatedToken) {
+        this(baseUrl, teamDomain, botUser, roomId, replyBroadcast, iconEmoji, username);
         if (populatedToken == null) {
             throw new IllegalArgumentException("No slack token found, setup a secret text credential and configure it to be used");
         }
         this.populatedToken = populatedToken;
     }
 
-    private StandardSlackService(String baseUrl, String teamDomain, boolean botUser, String roomId, boolean replyBroadcast, String iconEmoji) {
+    private StandardSlackService(String baseUrl, String teamDomain, boolean botUser, String roomId, boolean replyBroadcast, String iconEmoji, String username) {
         super();
         this.baseUrl = baseUrl;
         if (this.baseUrl != null && !this.baseUrl.isEmpty() && !this.baseUrl.endsWith("/")) {
@@ -105,6 +107,7 @@ public class StandardSlackService implements SlackService {
         this.roomIds = roomId.split("[,; ]+");
         this.replyBroadcast = replyBroadcast;
         this.iconEmoji = correctEmojiFormat(iconEmoji);
+        this.username = username;
     }
 
     public String getResponseString() {
@@ -185,7 +188,10 @@ public class StandardSlackService implements SlackService {
                     if (StringUtils.isNotEmpty(iconEmoji)) {
                         url += "&icon_emoji=" + URLEncoder.encode(iconEmoji, StandardCharsets.UTF_8.name());
                     }
-                    else {
+                    if (StringUtils.isNotEmpty(username)) {
+                        url += "&username=" + URLEncoder.encode(username, StandardCharsets.UTF_8.name());
+                    }
+                    if (StringUtils.isEmpty(iconEmoji) && StringUtils.isEmpty(username)) {
                         url += "&as_user=true";
                     }
                     if (StringUtils.isNotEmpty(message)) {
