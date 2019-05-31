@@ -104,7 +104,7 @@ public class StandardSlackService implements SlackService {
         }
         this.roomIds = roomId.split("[,; ]+");
         this.replyBroadcast = replyBroadcast;
-        this.iconEmoji = iconEmoji;
+        this.iconEmoji = correctEmojiFormat(iconEmoji);
     }
 
     public String getResponseString() {
@@ -237,6 +237,19 @@ public class StandardSlackService implements SlackService {
 
         logger.fine("Using Integration Token.");
         return token;
+    }
+
+    private String correctEmojiFormat(String iconEmoji) {
+        if(StringUtils.isEmpty(iconEmoji)) {
+            return iconEmoji;
+        }
+        else if (!iconEmoji.startsWith(":")) {
+            iconEmoji = ":" + iconEmoji;
+        }
+        if (!iconEmoji.endsWith(":")) {
+            iconEmoji = iconEmoji + ":";
+        }
+        return iconEmoji;
     }
 
     protected CloseableHttpClient getHttpClient() {
