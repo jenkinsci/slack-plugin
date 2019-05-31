@@ -48,7 +48,7 @@ public class StandardSlackService implements SlackService {
     private String populatedToken;
 
     /**
-     * @deprecated use {@link #StandardSlackService(String, String, boolean, String, boolean, String, String)} instead}
+     * @deprecated use {@link #StandardSlackService(String, String, boolean, String, boolean, String, String, String)} instead}
      */
     @Deprecated
     public StandardSlackService(String baseUrl, String teamDomain, String authTokenCredentialId, boolean botUser, String roomId) {
@@ -56,7 +56,7 @@ public class StandardSlackService implements SlackService {
     }
 
     /**
-     * @deprecated use {@link #StandardSlackService(String, String, boolean, String, boolean, String, String)} instead}
+     * @deprecated use {@link #StandardSlackService(String, String, boolean, String, boolean, String, String, String)} instead}
      */
     @Deprecated
     public StandardSlackService(String baseUrl, String teamDomain, String token, String authTokenCredentialId, boolean botUser, String roomId) {
@@ -64,7 +64,7 @@ public class StandardSlackService implements SlackService {
     }
 
     /**
-     * @deprecated use {@link #StandardSlackService(String, String, boolean, String, boolean, String, String)} instead}
+     * @deprecated use {@link #StandardSlackService(String, String, boolean, String, boolean, String, String, String)} instead}
      */
     @Deprecated
     public StandardSlackService(String baseUrl, String teamDomain, String token, String authTokenCredentialId, boolean botUser, String roomId, boolean replyBroadcast, String iconEmoji, String username) {

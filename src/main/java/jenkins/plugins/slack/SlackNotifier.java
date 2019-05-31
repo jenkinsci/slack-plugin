@@ -472,15 +472,15 @@ public class SlackNotifier extends Notifier {
 
     public SlackService newSlackService(AbstractBuild abstractBuild, BuildListener listener) {
         DescriptorImpl descriptor = getDescriptor();
-            String teamDomain = Util.fixEmpty(this.teamDomain) != null ? this.teamDomain : descriptor.getTeamDomain();
-            String baseUrl = Util.fixEmpty(this.baseUrl) != null ? this.baseUrl : descriptor.getBaseUrl();
-            String authToken = Util.fixEmpty(this.authToken);
-            boolean botUser = this.botUser || descriptor.isBotUser();
-            String authTokenCredentialId = Util.fixEmpty(this.tokenCredentialId) != null ? this.tokenCredentialId :
-                    descriptor.getTokenCredentialId();
-            String room = Util.fixEmpty(this.room) != null ? this.room : descriptor.getRoom();
-            String iconEmoji = Util.fixEmpty(this.iconEmoji) != null ? this.iconEmoji : descriptor.getIconEmoji();
-            String username = Util.fixEmpty(this.username) != null ? this.username : descriptor.getUsername();
+        String teamDomain = Util.fixEmpty(this.teamDomain) != null ? this.teamDomain : descriptor.getTeamDomain();
+        String baseUrl = Util.fixEmpty(this.baseUrl) != null ? this.baseUrl : descriptor.getBaseUrl();
+        String authToken = Util.fixEmpty(this.authToken);
+        boolean botUser = this.botUser || descriptor.isBotUser();
+        String authTokenCredentialId = Util.fixEmpty(this.tokenCredentialId) != null ? this.tokenCredentialId :
+                descriptor.getTokenCredentialId();
+        String room = Util.fixEmpty(this.room) != null ? this.room : descriptor.getRoom();
+        String iconEmoji = Util.fixEmpty(this.iconEmoji) != null ? this.iconEmoji : descriptor.getIconEmoji();
+        String username = Util.fixEmpty(this.username) != null ? this.username : descriptor.getUsername();
 
         EnvVars env;
             try {
@@ -495,7 +495,7 @@ public class SlackNotifier extends Notifier {
         authTokenCredentialId = env.expand(authTokenCredentialId);
         room = env.expand(room);
         final String populatedToken = CredentialsObtainer.getTokenToUse(authTokenCredentialId, abstractBuild.getParent(), authToken);
-        return new StandardSlackService(baseUrl, teamDomain, botUser, room, false, iconEmoji,  username, populatedToken);
+        return new StandardSlackService(baseUrl, teamDomain, botUser, room, false, iconEmoji, username, populatedToken);
     }
 
     @Override
