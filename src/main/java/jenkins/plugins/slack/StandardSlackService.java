@@ -169,16 +169,12 @@ public class StandardSlackService implements SlackService {
                 }
                 json.put("attachments", attachments);
                 json.put("link_names", "1");
-                if (!StringUtils.isEmpty(iconEmoji)) {
-                    json.put("icon_emoji", iconEmoji);
-                }
 
                 nvps.add(new BasicNameValuePair("payload", json.toString()));
             } else {
                 url = "https://slack.com/api/chat.postMessage?token=" + populatedToken +
                         "&channel=" + roomId.replace("#", "") +
-                        "&link_names=1" +
-                        "&as_user=true";
+                        "&link_names=1";
                 if (threadTs.length() > 1) {
                     url += "&thread_ts=" + threadTs;
                 }
@@ -186,6 +182,12 @@ public class StandardSlackService implements SlackService {
                     url += "&reply_broadcast=true";
                 }
                 try {
+                    if (StringUtils.isNotEmpty(iconEmoji)) {
+                        url += "&icon_emoji=" + URLEncoder.encode(iconEmoji, StandardCharsets.UTF_8.name());
+                    }
+                    else {
+                        url += "&as_user=true";
+                    }
                     if (StringUtils.isNotEmpty(message)) {
                         url += "&text=" + URLEncoder.encode(message, StandardCharsets.UTF_8.name());
                     }
