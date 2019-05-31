@@ -479,8 +479,10 @@ public class SlackNotifier extends Notifier {
             String authTokenCredentialId = Util.fixEmpty(this.tokenCredentialId) != null ? this.tokenCredentialId :
                     descriptor.getTokenCredentialId();
             String room = Util.fixEmpty(this.room) != null ? this.room : descriptor.getRoom();
+            String iconEmoji = Util.fixEmpty(this.iconEmoji) != null ? this.iconEmoji : descriptor.getIconEmoji();
+            String username = Util.fixEmpty(this.username) != null ? this.username : descriptor.getUsername();
 
-            EnvVars env;
+        EnvVars env;
             try {
                 env = abstractBuild.getEnvironment(listener);
             } catch (Exception e) {
@@ -493,7 +495,7 @@ public class SlackNotifier extends Notifier {
         authTokenCredentialId = env.expand(authTokenCredentialId);
         room = env.expand(room);
         final String populatedToken = CredentialsObtainer.getTokenToUse(authTokenCredentialId, abstractBuild.getParent(), authToken);
-        return new StandardSlackService(baseUrl, teamDomain, botUser, room, false, this.iconEmoji,  this.username, populatedToken);
+        return new StandardSlackService(baseUrl, teamDomain, botUser, room, false, iconEmoji,  username, populatedToken);
     }
 
     @Override
@@ -555,6 +557,8 @@ public class SlackNotifier extends Notifier {
         private String token;
         private String tokenCredentialId;
         private boolean botUser;
+        private String iconEmoji;
+        private String username;
         private String room;
         private String sendAs;
 
@@ -622,6 +626,20 @@ public class SlackNotifier extends Notifier {
         @DataBoundSetter
         public void setBotUser(boolean botUser) {
             this.botUser = botUser;
+        }
+
+        public String getIconEmoji() { return iconEmoji; }
+
+        @DataBoundSetter
+        public void setIconEmoji(String iconEmoji) {
+            this.iconEmoji = iconEmoji;
+        }
+
+        public String getUsername() { return username; }
+
+        @DataBoundSetter
+        public void setUsername(String username) {
+            this.username = username;
         }
 
         public String getRoom() {

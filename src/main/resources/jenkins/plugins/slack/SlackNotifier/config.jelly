@@ -104,11 +104,11 @@
             <f:checkbox field="botUser"/>
         </f:entry>
 
-        <f:entry title="Icon Emoji" help="/plugin/slack/help-projectConfig-slackToken.html">
+        <f:entry title="Icon Emoji" help="/plugin/slack/help-projectConfig-iconEmoji.html">
             <f:textbox field="iconEmoji" />
         </f:entry>
 
-        <f:entry title="Username" help="/plugin/slack/help-projectConfig-slackToken.html">
+        <f:entry title="Username" help="/plugin/slack/help-projectConfig-username.html">
             <f:textbox field="username" />
         </f:entry>
 
