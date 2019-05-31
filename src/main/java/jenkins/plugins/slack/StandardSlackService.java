@@ -185,15 +185,18 @@ public class StandardSlackService implements SlackService {
                     url += "&reply_broadcast=true";
                 }
                 try {
-                    if (StringUtils.isNotEmpty(iconEmoji)) {
-                        url += "&icon_emoji=" + URLEncoder.encode(iconEmoji, StandardCharsets.UTF_8.name());
-                    }
-                    if (StringUtils.isNotEmpty(username)) {
-                        url += "&username=" + URLEncoder.encode(username, StandardCharsets.UTF_8.name());
-                    }
                     if (StringUtils.isEmpty(iconEmoji) && StringUtils.isEmpty(username)) {
                         url += "&as_user=true";
                     }
+                    else {
+                        if (StringUtils.isNotEmpty(iconEmoji)) {
+                            url += "&icon_emoji=" + URLEncoder.encode(iconEmoji, StandardCharsets.UTF_8.name());
+                        }
+                        if (StringUtils.isNotEmpty(username)) {
+                            url += "&username=" + URLEncoder.encode(username, StandardCharsets.UTF_8.name());
+                        }
+                    }
+
                     if (StringUtils.isNotEmpty(message)) {
                         url += "&text=" + URLEncoder.encode(message, StandardCharsets.UTF_8.name());
                     }
