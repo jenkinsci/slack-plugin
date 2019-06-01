@@ -266,6 +266,8 @@ public class SlackSendStep extends Step {
             boolean botUser = step.botUser || slackDesc.isBotUser();
             String channel = step.channel != null ? step.channel : slackDesc.getRoom();
             String color = step.color != null ? step.color : "";
+            String iconEmoji = step.iconEmoji != null ? step.iconEmoji : "";
+            String username = step.username != null ? step.username : "";
 
             TaskListener listener = getContext().get(TaskListener.class);
             Objects.requireNonNull(listener, "Listener is mandatory here");
@@ -284,7 +286,7 @@ public class SlackSendStep extends Step {
             }
 
             SlackService slackService = getSlackService(
-                    baseUrl, teamDomain, botUser, channel, step.replyBroadcast, step.iconEmoji, step.username, populatedToken);
+                    baseUrl, teamDomain, botUser, channel, step.replyBroadcast, iconEmoji, username, populatedToken);
             final boolean publishSuccess;
             if (step.attachments != null) {
                 JSONArray jsonArray = getAttachmentsAsJSONArray();

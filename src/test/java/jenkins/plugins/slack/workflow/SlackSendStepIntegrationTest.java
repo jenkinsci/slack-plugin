@@ -25,6 +25,8 @@ public class SlackSendStepIntegrationTest {
         step1.setTeamDomain("teamDomain");
         step1.setBaseUrl("baseUrl");
         step1.setFailOnError(true);
+        step1.setIconEmoji("");
+        step1.setUsername("");
 
         SlackSendStep step2 = new StepConfigTester(jenkinsRule).configRoundTrip(step1);
         jenkinsRule.assertEqualDataBoundBeans(step1, step2);

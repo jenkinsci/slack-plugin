@@ -101,7 +101,7 @@ public class SlackSendStepTest {
         when(slackServiceMock.publish(anyString(), anyString())).thenReturn(true);
 
         stepExecution.run();
-        verify(stepExecution, times(1)).getSlackService("baseUrl/", "teamDomain", true, "channel", false, null, null, token);
+        verify(stepExecution, times(1)).getSlackService("baseUrl/", "teamDomain", true, "channel", false, "", "", token);
         verify(slackServiceMock, times(1)).publish("message", "good");
     }
 
@@ -194,7 +194,7 @@ public class SlackSendStepTest {
         when(stepExecution.getSlackService(anyString(), anyString(), anyBoolean(), anyString(), anyBoolean(), anyString(), anyString(), anyString())).thenReturn(slackServiceMock);
 
         stepExecution.run();
-        verify(stepExecution, times(1)).getSlackService("globalBaseUrl", "globalTeamDomain", false, "globalChannel", false, null, null, "token2");
+        verify(stepExecution, times(1)).getSlackService("globalBaseUrl", "globalTeamDomain", false, "globalChannel", false, "", "", "token2");
         verify(slackServiceMock, times(1)).publish("message", "");
     }
 
@@ -224,7 +224,7 @@ public class SlackSendStepTest {
         stepExecution.run();
 
         verify(stepExecution, times(1)).getSlackService("globalBaseUrl", "globalTeamDomain",
-                false, "globalChannel", false, null, null,"runcredentials");
+                false, "globalChannel", false, "", "","runcredentials");
         verify(slackServiceMock, times(1)).publish("message", "");
     }
 
@@ -254,7 +254,7 @@ public class SlackSendStepTest {
         when(stepExecution.getSlackService(anyString(), anyString(), anyBoolean(), anyString(), anyBoolean(), anyString(), anyString(), anyString())).thenReturn(slackServiceMock);
 
         stepExecution.run();
-        verify(stepExecution, times(1)).getSlackService("globalBaseUrl", "globalTeamDomain", false, "globalChannel", true, null, null, "token");
+        verify(stepExecution, times(1)).getSlackService("globalBaseUrl", "globalTeamDomain", false, "globalChannel", true, "", "", "token");
         verify(slackServiceMock, times(1)).publish("message", "");
     }
 
@@ -284,7 +284,7 @@ public class SlackSendStepTest {
         when(stepExecution.getSlackService(anyString(), anyString(), anyBoolean(), anyString(), anyBoolean(), anyString(), anyString(), anyString())).thenReturn(slackServiceMock);
 
         stepExecution.run();
-        verify(stepExecution, times(1)).getSlackService("globalBaseUrl", "globalTeamDomain", false, "globalChannel", false, ":+1:", null,"token");
+        verify(stepExecution, times(1)).getSlackService("globalBaseUrl", "globalTeamDomain", false, "globalChannel", false, ":+1:", "","token");
         verify(slackServiceMock, times(1)).publish("message", "");
     }
 
@@ -314,7 +314,7 @@ public class SlackSendStepTest {
         when(stepExecution.getSlackService(anyString(), anyString(), anyBoolean(), anyString(), anyBoolean(), anyString(), anyString(), anyString())).thenReturn(slackServiceMock);
 
         stepExecution.run();
-        verify(stepExecution, times(1)).getSlackService("globalBaseUrl", "globalTeamDomain", false, "globalChannel", false, null, "username","token");
+        verify(stepExecution, times(1)).getSlackService("globalBaseUrl", "globalTeamDomain", false, "globalChannel", false, "", "username","token");
         verify(slackServiceMock, times(1)).publish("message", "");
     }
 
