@@ -11,10 +11,36 @@ public class SlackNotifierStub extends SlackNotifier {
                              boolean notifyRepeatedFailure, boolean includeTestSummary, boolean includeFailedTests, MatrixTriggerMode matrixTriggerMode,
                              CommitInfoChoice commitInfoChoice, boolean includeCustomMessage, String customMessage, String customMessageSuccess,
                              String customMessageAborted, String customMessageNotBuilt, String customMessageUnstable, String customMessageFailure) {
-        super(baseUrl, teamDomain, authToken, botUser, room, authTokenCredentialId, sendAs, iconEmoji, username, startNotification, notifyAborted, notifyFailure,
-                notifyNotBuilt, notifySuccess, notifyUnstable, notifyRegression, notifyBackToNormal, notifyRepeatedFailure,
-                includeTestSummary, includeFailedTests, matrixTriggerMode, commitInfoChoice, includeCustomMessage, customMessage,
-                customMessageSuccess, customMessageAborted, customMessageNotBuilt, customMessageUnstable, customMessageFailure);
+        super(new SlackNotifier.SlackNotifierBuilder()
+                .withBaseUrl(baseUrl)
+                .withTeamDomain(teamDomain)
+                .withAuthToken(authToken)
+                .withBotUser(botUser)
+                .withRoom(room)
+                .withTokenCredentialId(authTokenCredentialId)
+                .withSendAs(sendAs)
+                .withIconEmoji(iconEmoji)
+                .withUsername(username)
+                .withStartNotification(startNotification)
+                .withNotifyAborted(notifyAborted)
+                .withNotifyFailure(notifyFailure)
+                .withNotifyNotBuilt(notifyNotBuilt)
+                .withNotifySuccess(notifySuccess)
+                .withNotifyUnstable(notifyUnstable)
+                .withNotifyRegression(notifyRegression)
+                .withNotifyBackToNormal(notifyBackToNormal)
+                .withNotifyRepeatedFailure(notifyRepeatedFailure)
+                .withIncludeTestSummary(includeTestSummary)
+                .withIncludeFailedTests(includeFailedTests)
+                .withMatrixTriggerMode(matrixTriggerMode)
+                .withCommitInfoChoice(commitInfoChoice)
+                .withIncludeCustomMessage(includeCustomMessage)
+                .withCustomMessage(customMessage)
+                .withCustomMessageSuccess(customMessageSuccess)
+                .withCustomMessageAborted(customMessageAborted)
+                .withCustomMessageNotBuilt(customMessageNotBuilt)
+                .withCustomMessageUnstable(customMessageUnstable)
+                .withCustomMessageFailure(customMessageFailure));
     }
 
     public static class DescriptorImplStub extends SlackNotifier.DescriptorImpl {

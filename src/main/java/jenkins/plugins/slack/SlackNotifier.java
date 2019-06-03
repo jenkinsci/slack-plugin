@@ -492,7 +492,7 @@ public class SlackNotifier extends Notifier {
         }
     }
 
-    private static class SlackNotifierBuilder {
+    public static class SlackNotifierBuilder {
         private String baseUrl;
         private String teamDomain;
         private String authToken;
