@@ -11,7 +11,7 @@ import java.util.logging.Logger;
 import jenkins.model.Jenkins;
 import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpHost;
 import org.apache.http.HttpStatus;
@@ -252,12 +252,9 @@ public class StandardSlackService implements SlackService {
         if(StringUtils.isEmpty(iconEmoji)) {
             return iconEmoji;
         }
-        else if (!iconEmoji.startsWith(":")) {
-            iconEmoji = ":" + iconEmoji;
-        }
-        if (!iconEmoji.endsWith(":")) {
-            iconEmoji = iconEmoji + ":";
-        }
+        iconEmoji = StringUtils.appendIfMissing(iconEmoji, ":");
+        iconEmoji = StringUtils.prependIfMissing(iconEmoji, ":");
+
         return iconEmoji;
     }
 
