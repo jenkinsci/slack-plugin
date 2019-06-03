@@ -1,9 +1,6 @@
 package jenkins.plugins.slack;
 
 import hudson.ProxyConfiguration;
-import java.io.UnsupportedEncodingException;
-import java.net.URLEncoder;
-import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
@@ -19,10 +16,10 @@ import org.apache.http.NameValuePair;
 import org.apache.http.auth.AuthScope;
 import org.apache.http.auth.UsernamePasswordCredentials;
 import org.apache.http.client.CredentialsProvider;
-import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.conn.routing.HttpRoutePlanner;
+import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.BasicCredentialsProvider;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
@@ -157,6 +154,14 @@ public class StandardSlackService implements SlackService {
                 roomId = splitThread[0];
                 threadTs = splitThread[1];
             }
+            JSONObject json = new JSONObject();
+            json.put("channel", roomId);
+            if (StringUtils.isNotEmpty(message)) {
+                json.put("text", message);
+            }
+            json.put("attachments", attachments);
+            json.put("link_names", "1");
+
             //prepare post methods for both requests types
             if (!botUser || !StringUtils.isEmpty(baseUrl)) {
                 url = "https://" + teamDomain + "." + host + "/services/hooks/jenkins-ci?token=" + populatedToken;
@@ -164,53 +169,38 @@ public class StandardSlackService implements SlackService {
                     url = baseUrl + populatedToken;
                 }
                 post = new HttpPost(url);
-                JSONObject json = new JSONObject();
-
-                json.put("channel", roomId);
-                if (StringUtils.isNotEmpty(message)) {
-                    json.put("text", message);
-                }
-                json.put("attachments", attachments);
-                json.put("link_names", "1");
-
-                nvps.add(new BasicNameValuePair("payload", json.toString()));
             } else {
-                url = "https://slack.com/api/chat.postMessage?token=" + populatedToken +
-                        "&channel=" + roomId.replace("#", "") +
-                        "&link_names=1";
+                url = "https://slack.com/api/chat.postMessage";
+
+                post = new HttpPost(url);
+                post.setHeader("Authorization", "Bearer " + populatedToken);
+                post.setHeader("Content-type", "application/json");
                 if (threadTs.length() > 1) {
-                    url += "&thread_ts=" + threadTs;
+                    json.put("thread_ts", "threadTs");
                 }
                 if (replyBroadcast) {
-                    url += "&reply_broadcast=true";
+                    json.put("reply_broadcast", "true");
                 }
-                try {
-                    if (StringUtils.isEmpty(iconEmoji) && StringUtils.isEmpty(username)) {
-                        url += "&as_user=true";
-                    }
-                    else {
-                        if (StringUtils.isNotEmpty(iconEmoji)) {
-                            url += "&icon_emoji=" + URLEncoder.encode(iconEmoji, StandardCharsets.UTF_8.name());
-                        }
-                        if (StringUtils.isNotEmpty(username)) {
-                            url += "&username=" + URLEncoder.encode(username, StandardCharsets.UTF_8.name());
-                        }
-                    }
-
-                    if (StringUtils.isNotEmpty(message)) {
-                        url += "&text=" + URLEncoder.encode(message, StandardCharsets.UTF_8.name());
-                    }
-                    url += "&attachments=" + URLEncoder.encode(attachments.toString(), StandardCharsets.UTF_8.name());
-                } catch (UnsupportedEncodingException e) {
-                    logger.log(Level.ALL, "Error while encoding payload: " + e.getMessage());
+                if (StringUtils.isEmpty(iconEmoji) && StringUtils.isEmpty(username)) {
+                    json.put("as_user", "true");
                 }
-                post = new HttpPost(url);
+                else {
+                    if (StringUtils.isNotEmpty(iconEmoji)) {
+                        json.put("icon_emoji", iconEmoji);
+                    }
+                    if (StringUtils.isNotEmpty(username)) {
+                        json.put("username", username);
+                    }
+                }
             }
+
+            nvps.add(new BasicNameValuePair("payload", json.toString()));
+
             logger.fine("Posting: to " + roomId + " on " + teamDomain + " using " + url + ": " + attachments.toString() + " " + color);
             CloseableHttpClient client = getHttpClient();
 
             try {
-                post.setEntity(new UrlEncodedFormEntity(nvps, "UTF-8"));
+                post.setEntity(new StringEntity(json.toString()));
                 CloseableHttpResponse response = client.execute(post);
 
                 int responseCode = response.getStatusLine().getStatusCode();
