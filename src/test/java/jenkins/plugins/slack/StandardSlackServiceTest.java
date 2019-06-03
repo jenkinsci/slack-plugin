@@ -137,7 +137,7 @@ public class StandardSlackServiceTest {
         httpClientStub.setHttpStatus(HttpStatus.SC_OK);
         service.setHttpClient(httpClientStub);
         service.publish("message");
-        assertTrue(httpClientStub.getLastRequest().getURI().toString().contains(populatedToken));
+        assertTrue(httpClientStub.getLastRequest().getHeaders("Authorization")[0].getValue().contains(populatedToken));
     }
 
 }
