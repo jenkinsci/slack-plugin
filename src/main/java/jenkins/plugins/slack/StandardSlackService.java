@@ -72,6 +72,16 @@ public class StandardSlackService implements SlackService {
         }
     }
 
+
+    @Deprecated
+    public StandardSlackService(String baseUrl, String teamDomain, boolean botUser, String roomId, boolean replyBroadcast, String populatedToken) {
+        this(baseUrl, teamDomain, botUser, roomId, replyBroadcast, null, null);
+        if (populatedToken == null) {
+            throw new IllegalArgumentException("No slack token found, setup a secret text credential and configure it to be used");
+        }
+        this.populatedToken = populatedToken;
+    }
+
     /**
      * @param baseUrl        the full url to use, this is an alternative to specifying teamDomain
      * @param teamDomain     the teamDomain inside slack.com to use
