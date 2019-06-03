@@ -401,7 +401,7 @@ public class SlackNotifier extends Notifier {
                          CommitInfoChoice commitInfoChoice, boolean includeCustomMessage, String customMessage, String customMessageSuccess,
                          String customMessageAborted, String customMessageNotBuilt, String customMessageUnstable, String customMessageFailure) {
         this(
-                baseUrl, teamDomain, authToken, botUser, room, tokenCredentialId, sendAs, null, null, startNotification,
+                baseUrl, teamDomain, authToken, botUser, room, tokenCredentialId, sendAs, startNotification,
                 notifyAborted, notifyFailure, notifyNotBuilt, notifySuccess, notifyUnstable, notifyRegression,
                 notifyBackToNormal, notifyRepeatedFailure, includeTestSummary, includeFailedTests, MatrixTriggerMode.ONLY_CONFIGURATIONS,
                 commitInfoChoice, includeCustomMessage, customMessage, customMessageSuccess, customMessageAborted, customMessageNotBuilt,
@@ -409,52 +409,48 @@ public class SlackNotifier extends Notifier {
         );
     }
 
+    @Deprecated
     public SlackNotifier(final String baseUrl, final String teamDomain, final String authToken, final boolean botUser, final String room, final String tokenCredentialId,
-                         final String sendAs, final String iconEmoji, final String username, final boolean startNotification, final boolean notifyAborted, final boolean notifyFailure,
+                         final String sendAs, final boolean startNotification, final boolean notifyAborted, final boolean notifyFailure,
                          final boolean notifyNotBuilt, final boolean notifySuccess, final boolean notifyUnstable, final boolean notifyRegression, final boolean notifyBackToNormal,
                          final boolean notifyRepeatedFailure, final boolean includeTestSummary, final boolean includeFailedTests, MatrixTriggerMode matrixTriggerMode,
                          CommitInfoChoice commitInfoChoice, boolean includeCustomMessage, String customMessage, String customMessageSuccess,
                          String customMessageAborted, String customMessageNotBuilt, String customMessageUnstable, String customMessageFailure) {
-        super();
-        this.baseUrl = baseUrl;
-        if(this.baseUrl != null && !this.baseUrl.isEmpty() && !this.baseUrl.endsWith("/")) {
-            this.baseUrl += "/";
-        }
-        this.teamDomain = teamDomain;
-        this.authToken = authToken;
-        this.tokenCredentialId = StringUtils.trim(tokenCredentialId);
-        this.botUser = botUser;
-        this.room = room;
-        this.sendAs = sendAs;
-        this.iconEmoji = iconEmoji;
-        this.username = username;
-        this.startNotification = startNotification;
-        this.notifyAborted = notifyAborted;
-        this.notifyFailure = notifyFailure;
-        this.notifyNotBuilt = notifyNotBuilt;
-        this.notifySuccess = notifySuccess;
-        this.notifyUnstable = notifyUnstable;
-        this.notifyRegression = notifyRegression;
-        this.notifyBackToNormal = notifyBackToNormal;
-        this.notifyRepeatedFailure = notifyRepeatedFailure;
-        this.includeTestSummary = includeTestSummary;
-        this.includeFailedTests = includeFailedTests;
-        this.matrixTriggerMode = matrixTriggerMode;
-        this.commitInfoChoice = commitInfoChoice;
-        this.includeCustomMessage = includeCustomMessage;
-        if (includeCustomMessage) {
-            this.customMessage = customMessage;
-            this.customMessageSuccess = customMessageSuccess;
-            this.customMessageAborted = customMessageAborted;
-            this.customMessageNotBuilt = customMessageNotBuilt;
-            this.customMessageUnstable = customMessageUnstable;
-            this.customMessageFailure = customMessageFailure;
-        } else {
-            this.customMessage = null;
-        }
+
+        new SlackNotifier.SlackNotifierBuilder()
+                .withBaseUrl(baseUrl)
+                .withTeamDomain(teamDomain)
+                .withAuthToken(authToken)
+                .withBotUser(botUser)
+                .withRoom(room)
+                .withTokenCredentialId(tokenCredentialId)
+                .withSendAs(sendAs)
+                .withIconEmoji("")
+                .withUsername("")
+                .withStartNotification(startNotification)
+                .withNotifyAborted(notifyAborted)
+                .withNotifyFailure(notifyFailure)
+                .withNotifyNotBuilt(notifyNotBuilt)
+                .withNotifySuccess(notifySuccess)
+                .withNotifyUnstable(notifyUnstable)
+                .withNotifyRegression(notifyRegression)
+                .withNotifyBackToNormal(notifyBackToNormal)
+                .withNotifyRepeatedFailure(notifyRepeatedFailure)
+                .withIncludeTestSummary(includeTestSummary)
+                .withIncludeFailedTests(includeFailedTests)
+                .withMatrixTriggerMode(matrixTriggerMode)
+                .withCommitInfoChoice(commitInfoChoice)
+                .withIncludeCustomMessage(includeCustomMessage)
+                .withCustomMessage(customMessage)
+                .withCustomMessageSuccess(customMessageSuccess)
+                .withCustomMessageAborted(customMessageAborted)
+                .withCustomMessageNotBuilt(customMessageNotBuilt)
+                .withCustomMessageUnstable(customMessageUnstable)
+                .withCustomMessageFailure(customMessageFailure)
+                .build();
     }
 
-    private SlackNotifier(SlackNotifierBuilder slackNotifierBuilder) {
+    public SlackNotifier(SlackNotifierBuilder slackNotifierBuilder) {
         this.baseUrl = slackNotifierBuilder.baseUrl;
         if(this.baseUrl != null && !this.baseUrl.isEmpty() && !this.baseUrl.endsWith("/")) {
             this.baseUrl += "/";
@@ -615,7 +611,7 @@ public class SlackNotifier extends Notifier {
             return this;
         }
 
-        public SlackNotifierBuilder withBackToNormal(boolean notifyBackToNormal) {
+        public SlackNotifierBuilder withNotifyBackToNormal(boolean notifyBackToNormal) {
             this.notifyBackToNormal = notifyBackToNormal;
             return this;
         }
@@ -714,9 +710,9 @@ public class SlackNotifier extends Notifier {
         String username = Util.fixEmpty(this.username) != null ? this.username : descriptor.getUsername();
 
         EnvVars env;
-            try {
-                env = abstractBuild.getEnvironment(listener);
-            } catch (Exception e) {
+        try {
+            env = abstractBuild.getEnvironment(listener);
+        } catch (Exception e) {
             listener.getLogger().println("Error retrieving environment vars: " + e.getMessage());
             env = new EnvVars();
         }
