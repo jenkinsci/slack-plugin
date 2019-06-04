@@ -3,7 +3,6 @@ package jenkins.plugins.slack;
 import com.cloudbees.plugins.credentials.common.StandardListBoxModel;
 import com.cloudbees.plugins.credentials.domains.HostnameRequirement;
 import edu.umd.cs.findbugs.annotations.CheckForNull;
-import edu.umd.cs.findbugs.annotations.CheckReturnValue;
 import hudson.EnvVars;
 import hudson.Extension;
 import hudson.Launcher;
@@ -411,15 +410,13 @@ public class SlackNotifier extends Notifier {
     }
 
     @Deprecated
-    @CheckReturnValue
     public SlackNotifier(final String baseUrl, final String teamDomain, final String authToken, final boolean botUser, final String room, final String tokenCredentialId,
                          final String sendAs, final boolean startNotification, final boolean notifyAborted, final boolean notifyFailure,
                          final boolean notifyNotBuilt, final boolean notifySuccess, final boolean notifyUnstable, final boolean notifyRegression, final boolean notifyBackToNormal,
                          final boolean notifyRepeatedFailure, final boolean includeTestSummary, final boolean includeFailedTests, MatrixTriggerMode matrixTriggerMode,
                          CommitInfoChoice commitInfoChoice, boolean includeCustomMessage, String customMessage, String customMessageSuccess,
                          String customMessageAborted, String customMessageNotBuilt, String customMessageUnstable, String customMessageFailure) {
-
-        new SlackNotifier.SlackNotifierBuilder()
+        new SlackNotifier(new SlackNotifierBuilder()
                 .withBaseUrl(baseUrl)
                 .withTeamDomain(teamDomain)
                 .withAuthToken(authToken)
@@ -449,7 +446,7 @@ public class SlackNotifier extends Notifier {
                 .withCustomMessageNotBuilt(customMessageNotBuilt)
                 .withCustomMessageUnstable(customMessageUnstable)
                 .withCustomMessageFailure(customMessageFailure)
-                .build();
+            );
     }
 
     private SlackNotifier(SlackNotifierBuilder slackNotifierBuilder) {
