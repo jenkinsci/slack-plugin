@@ -450,7 +450,7 @@ public class SlackNotifier extends Notifier {
                 .build();
     }
 
-    public SlackNotifier(SlackNotifierBuilder slackNotifierBuilder) {
+    private SlackNotifier(SlackNotifierBuilder slackNotifierBuilder) {
         this.baseUrl = slackNotifierBuilder.baseUrl;
         if(this.baseUrl != null && !this.baseUrl.isEmpty() && !this.baseUrl.endsWith("/")) {
             this.baseUrl += "/";
