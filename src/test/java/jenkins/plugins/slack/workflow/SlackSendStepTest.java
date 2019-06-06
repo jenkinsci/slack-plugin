@@ -67,7 +67,7 @@ public class SlackSendStepTest {
         PowerMockito.mockStatic(Jenkins.class);
         PowerMockito.mockStatic(CredentialsObtainer.class);
         when(jenkins.getDescriptorByType(SlackNotifier.DescriptorImpl.class)).thenReturn(slackDescMock);
-        PowerMockito.when(Jenkins.getInstance()).thenReturn(jenkins);
+        PowerMockito.when(Jenkins.get()).thenReturn(jenkins);
         when(taskListenerMock.getLogger()).thenReturn(printStreamMock);
         when(stepContextMock.get(TaskListener.class)).thenReturn(taskListenerMock);
     }
