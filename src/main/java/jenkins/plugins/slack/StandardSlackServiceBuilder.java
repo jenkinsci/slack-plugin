@@ -1,7 +1,5 @@
 package jenkins.plugins.slack;
 
-import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
-
 public class StandardSlackServiceBuilder {
 
     String baseUrl;
@@ -51,7 +49,6 @@ public class StandardSlackServiceBuilder {
         return this;
     }
 
-    @SuppressFBWarnings("URF_UNREAD_FIELD")
     public StandardSlackServiceBuilder withPopulatedToken(String populatedToken) {
         this.populatedToken = populatedToken;
         return this;

@@ -102,6 +102,7 @@ public class StandardSlackService implements SlackService {
         this.replyBroadcast = standardSlackServiceBuilder.replyBroadcast;
         this.iconEmoji = correctEmojiFormat(standardSlackServiceBuilder.iconEmoji);
         this.username = standardSlackServiceBuilder.username;
+        this.populatedToken = standardSlackServiceBuilder.populatedToken;
     }
 
     public static StandardSlackServiceBuilder builder() {
