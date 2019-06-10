@@ -45,76 +45,67 @@ public class StandardSlackService implements SlackService {
     private String populatedToken;
 
     /**
-     * @deprecated use {@link #StandardSlackService(String, String, boolean, String, boolean, String, String, String)} instead}
+     * @deprecated use {@link #StandardSlackService(String, String, boolean, String, boolean, String)} instead}
      */
     @Deprecated
     public StandardSlackService(String baseUrl, String teamDomain, String authTokenCredentialId, boolean botUser, String roomId) {
-        this(baseUrl, teamDomain, null, authTokenCredentialId, botUser, roomId, false, null, null);
+        this(baseUrl, teamDomain, null, authTokenCredentialId, botUser, roomId, false);
     }
 
     /**
-     * @deprecated use {@link #StandardSlackService(String, String, boolean, String, boolean, String, String, String)} instead}
+     * @deprecated use {@link #StandardSlackService(String, String, boolean, String, boolean, String)} instead}
      */
     @Deprecated
     public StandardSlackService(String baseUrl, String teamDomain, String token, String authTokenCredentialId, boolean botUser, String roomId) {
-        this(baseUrl, teamDomain, token, authTokenCredentialId, botUser, roomId, false, null, null);
+        this(baseUrl, teamDomain, token, authTokenCredentialId, botUser, roomId, false);
     }
 
     /**
-     * @deprecated use {@link #StandardSlackService(String, String, boolean, String, boolean, String, String, String)} instead}
+     * @deprecated use {@link #StandardSlackService(String, String, boolean, String, boolean, String)} instead}
      */
     @Deprecated
-    public StandardSlackService(String baseUrl, String teamDomain, String token, String authTokenCredentialId, boolean botUser, String roomId, boolean replyBroadcast, String iconEmoji, String username) {
-        this(baseUrl, teamDomain, botUser, roomId, replyBroadcast, iconEmoji, username);
+    public StandardSlackService(String baseUrl, String teamDomain, String token, String authTokenCredentialId, boolean botUser, String roomId, boolean replyBroadcast) {
+        this(baseUrl, teamDomain, botUser, roomId, replyBroadcast, authTokenCredentialId);
         this.populatedToken = getTokenToUse(authTokenCredentialId, token);
         if (this.populatedToken == null) {
             throw new IllegalArgumentException("No slack token found, setup a secret text credential and configure it to be used");
         }
     }
 
-
     @Deprecated
     public StandardSlackService(String baseUrl, String teamDomain, boolean botUser, String roomId, boolean replyBroadcast, String populatedToken) {
-        this(baseUrl, teamDomain, botUser, roomId, replyBroadcast, null, null);
+        this(new StandardSlackServiceBuilder()
+            .withBaseUrl(baseUrl)
+            .withTeamDomain(teamDomain)
+            .withBotUser(botUser)
+            .withRoomId(roomId)
+            .withReplyBroadcast(replyBroadcast)
+            .withPopulatedToken(populatedToken)
+        );
         if (populatedToken == null) {
             throw new IllegalArgumentException("No slack token found, setup a secret text credential and configure it to be used");
         }
         this.populatedToken = populatedToken;
     }
 
-    /**
-     * @param baseUrl        the full url to use, this is an alternative to specifying teamDomain
-     * @param teamDomain     the teamDomain inside slack.com to use
-     * @param botUser
-     * @param roomId         a semicolon separated list of rooms to notify
-     * @param replyBroadcast
-     * @param iconEmoji
-     * @param username
-     * @param populatedToken a non-null token to use for authentication
-     */
-    public StandardSlackService(String baseUrl, String teamDomain, boolean botUser, String roomId, boolean replyBroadcast, String iconEmoji, String username, String populatedToken) {
-        this(baseUrl, teamDomain, botUser, roomId, replyBroadcast, iconEmoji, username);
-        if (populatedToken == null) {
-            throw new IllegalArgumentException("No slack token found, setup a secret text credential and configure it to be used");
-        }
-        this.populatedToken = populatedToken;
-    }
-
-    private StandardSlackService(String baseUrl, String teamDomain, boolean botUser, String roomId, boolean replyBroadcast, String iconEmoji, String username) {
-        super();
-        this.baseUrl = baseUrl;
+    public StandardSlackService(StandardSlackServiceBuilder standardSlackServiceBuilder) {
+        this.baseUrl = standardSlackServiceBuilder.baseUrl;
         if (this.baseUrl != null && !this.baseUrl.isEmpty() && !this.baseUrl.endsWith("/")) {
             this.baseUrl += "/";
         }
-        this.teamDomain = teamDomain;
-        this.botUser = botUser;
-        if (roomId == null) {
+        this.teamDomain = standardSlackServiceBuilder.teamDomain;
+        this.botUser = standardSlackServiceBuilder.botUser;
+        if (standardSlackServiceBuilder.roomId == null) {
             throw new IllegalArgumentException("Project Channel or Slack User ID must be specified.");
         }
-        this.roomIds = roomId.split("[,; ]+");
-        this.replyBroadcast = replyBroadcast;
-        this.iconEmoji = correctEmojiFormat(iconEmoji);
-        this.username = username;
+        this.roomIds = standardSlackServiceBuilder.roomId.split("[,; ]+");
+        this.replyBroadcast = standardSlackServiceBuilder.replyBroadcast;
+        this.iconEmoji = correctEmojiFormat(standardSlackServiceBuilder.iconEmoji);
+        this.username = standardSlackServiceBuilder.username;
+    }
+
+    public static StandardSlackServiceBuilder builder() {
+        return new StandardSlackServiceBuilder();
     }
 
     public String getResponseString() {

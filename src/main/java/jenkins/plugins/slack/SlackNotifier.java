@@ -532,7 +532,16 @@ public class SlackNotifier extends Notifier {
         authTokenCredentialId = env.expand(authTokenCredentialId);
         room = env.expand(room);
         final String populatedToken = CredentialsObtainer.getTokenToUse(authTokenCredentialId, abstractBuild.getParent(), authToken);
-        return new StandardSlackService(baseUrl, teamDomain, botUser, room, false, iconEmoji, username, populatedToken);
+        return new StandardSlackService(
+                new StandardSlackServiceBuilder()
+                        .withBaseUrl(baseUrl)
+                        .withTeamDomain(teamDomain)
+                        .withBotUser(botUser)
+                        .withRoomId(room)
+                        .withIconEmoji(iconEmoji)
+                        .withUsername(username)
+                        .withPopulatedToken(populatedToken)
+        );
     }
 
     @Override
@@ -748,7 +757,14 @@ public class SlackNotifier extends Notifier {
         SlackService getSlackService(final String baseUrl, final String teamDomain, final String authTokenCredentialId, final boolean botUser, final String roomId, final Item item) {
             final String populatedToken = CredentialsObtainer.getTokenToUse(authTokenCredentialId, item,null );
             if (populatedToken != null) {
-                return new StandardSlackService(baseUrl, teamDomain, botUser, roomId, false, null, null, populatedToken);
+                return new StandardSlackService(
+                        new StandardSlackServiceBuilder()
+                                .withBaseUrl(baseUrl)
+                                .withTeamDomain(teamDomain)
+                                .withBotUser(botUser)
+                                .withRoomId(roomId)
+                                .withPopulatedToken(populatedToken)
+                        );
             } else {
                 throw new NoSuchElementException("Could not obtain credentials with credential id: " + authTokenCredentialId);
             }

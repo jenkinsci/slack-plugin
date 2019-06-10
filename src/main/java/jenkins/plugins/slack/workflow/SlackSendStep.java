@@ -25,6 +25,7 @@ import jenkins.plugins.slack.Messages;
 import jenkins.plugins.slack.SlackNotifier;
 import jenkins.plugins.slack.SlackService;
 import jenkins.plugins.slack.StandardSlackService;
+import jenkins.plugins.slack.StandardSlackServiceBuilder;
 import net.sf.json.JSON;
 import net.sf.json.JSONArray;
 import net.sf.json.JSONException;
@@ -386,7 +387,17 @@ public class SlackSendStep extends Step {
 
         //streamline unit testing
         SlackService getSlackService(String baseUrl, String team, boolean botUser, String channel, boolean replyBroadcast, String iconEmoji, String username, String populatedToken) {
-            return new StandardSlackService(baseUrl, team, botUser, channel, replyBroadcast, iconEmoji, username, populatedToken);
+            return new StandardSlackService(
+                    new StandardSlackServiceBuilder()
+                        .withBaseUrl(baseUrl)
+                        .withTeamDomain(team)
+                        .withBotUser(botUser)
+                        .withRoomId(channel)
+                        .withReplyBroadcast(replyBroadcast)
+                        .withIconEmoji(iconEmoji)
+                        .withUsername(username)
+                        .withPopulatedToken(populatedToken)
+                    );
         }
     }
 }
