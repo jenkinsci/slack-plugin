@@ -249,7 +249,7 @@ public class StandardSlackService implements SlackService {
     }
 
     private String correctEmojiFormat(String iconEmoji) {
-        if(StringUtils.isEmpty(iconEmoji)) {
+        if (StringUtils.isEmpty(iconEmoji)) {
             return iconEmoji;
         }
         iconEmoji = StringUtils.appendIfMissing(iconEmoji, ":");
