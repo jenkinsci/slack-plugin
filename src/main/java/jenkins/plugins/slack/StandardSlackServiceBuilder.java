@@ -2,7 +2,6 @@ package jenkins.plugins.slack;
 
 public class StandardSlackServiceBuilder {
 
-    String host = "slack.com";
     String baseUrl;
     String teamDomain;
     boolean botUser;
@@ -14,11 +13,6 @@ public class StandardSlackServiceBuilder {
     String populatedToken;
 
     public StandardSlackServiceBuilder() {
-    }
-
-    public StandardSlackServiceBuilder withHost(String host) {
-        this.host = host;
-        return this;
     }
 
     public StandardSlackServiceBuilder withBaseUrl(String baseUrl) {
