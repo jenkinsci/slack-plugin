@@ -148,7 +148,6 @@ public class StandardSlackService implements SlackService {
             HttpPost post;
             String url;
             String threadTs = "";
-            List<NameValuePair> nvps = new ArrayList<>();
 
             //thread_ts is passed once with roomId: Ex: roomId:threadTs
             String[] splitThread = roomId.split("[:]+");
@@ -195,9 +194,7 @@ public class StandardSlackService implements SlackService {
                     }
                 }
             }
-
-            nvps.add(new BasicNameValuePair("payload", json.toString()));
-
+            
             logger.fine("Posting: to " + roomId + " on " + teamDomain + " using " + url + ": " + attachments.toString() + " " + color);
             CloseableHttpClient client = getHttpClient();
 
