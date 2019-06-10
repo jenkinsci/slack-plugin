@@ -20,12 +20,12 @@
         <f:entry field="botUser" title="Is Bot User?">
             <f:checkbox />
         </f:entry>
-            <f:entry field="iconEmoji" title="Icon Emoji">
-                <f:textbox />
-            </f:entry>
-            <f:entry field="username" title="Username">
-                <f:textbox />
-            </f:entry>
+        <f:entry field="iconEmoji" title="Icon Emoji">
+            <f:textbox />
+        </f:entry>
+        <f:entry field="username" title="Username">
+            <f:textbox />
+        </f:entry>
         <f:entry field="teamDomain" title="Team Domain">
             <f:textbox />
         </f:entry>

@@ -42,7 +42,6 @@ public class SlackNotifierStub extends SlackNotifier {
         );
     }
 
-
     public static class DescriptorImplStub extends SlackNotifier.DescriptorImpl {
 
         private SlackService slackService;

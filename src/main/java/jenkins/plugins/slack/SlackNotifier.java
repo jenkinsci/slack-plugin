@@ -758,12 +758,12 @@ public class SlackNotifier extends Notifier {
             final String populatedToken = CredentialsObtainer.getTokenToUse(authTokenCredentialId, item,null );
             if (populatedToken != null) {
                 return new StandardSlackService(
-                        new StandardSlackServiceBuilder()
-                                .withBaseUrl(baseUrl)
-                                .withTeamDomain(teamDomain)
-                                .withBotUser(botUser)
-                                .withRoomId(roomId)
-                                .withPopulatedToken(populatedToken)
+                        StandardSlackService.builder()
+                            .withBaseUrl(baseUrl)
+                            .withTeamDomain(teamDomain)
+                            .withBotUser(botUser)
+                            .withRoomId(roomId)
+                            .withPopulatedToken(populatedToken)
                         );
             } else {
                 throw new NoSuchElementException("Could not obtain credentials with credential id: " + authTokenCredentialId);
