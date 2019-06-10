@@ -74,7 +74,7 @@ public class StandardSlackService implements SlackService {
 
     @Deprecated
     public StandardSlackService(String baseUrl, String teamDomain, boolean botUser, String roomId, boolean replyBroadcast, String populatedToken) {
-        this(new StandardSlackServiceBuilder()
+        this(builder()
             .withBaseUrl(baseUrl)
             .withTeamDomain(teamDomain)
             .withBotUser(botUser)
