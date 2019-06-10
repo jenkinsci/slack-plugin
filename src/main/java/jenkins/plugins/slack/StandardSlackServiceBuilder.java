@@ -50,11 +50,6 @@ public class StandardSlackServiceBuilder {
         return this;
     }
 
-    public StandardSlackServiceBuilder withResponseString(String responseString) {
-        this.responseString = responseString;
-        return this;
-    }
-
     public StandardSlackServiceBuilder withPopulatedToken(String populatedToken) {
         this.populatedToken = populatedToken;
         return this;
