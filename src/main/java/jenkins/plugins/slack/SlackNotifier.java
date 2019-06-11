@@ -817,14 +817,14 @@ public class SlackNotifier extends Notifier {
                 String targetDomain = Util.fixEmpty(teamDomain) != null ? teamDomain : this.teamDomain;
                 String targetRoom = Util.fixEmpty(room) != null ? room : this.room;
 
-                SlackService testSlackService = getSlackService(new StandardSlackServiceBuilder()
+                SlackService testSlackService = getSlackService(StandardSlackService.builder()
                         .withBaseUrl(targetUrl)
                         .withTeamDomain(targetDomain)
                         .withBotUser(botUser)
                         .withRoomId(targetRoom)
                         .withIconEmoji(iconEmoji)
-                        .withUsername(username)
-                        ,tokenCredentialId, project
+                        .withUsername(username),
+                        tokenCredentialId, project
                 );
 
                 String message = "Slack/Jenkins plugin: you're all set on " + DisplayURLProvider.get().getRoot();
