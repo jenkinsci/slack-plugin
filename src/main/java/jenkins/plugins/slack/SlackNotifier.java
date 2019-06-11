@@ -768,9 +768,10 @@ public class SlackNotifier extends Notifier {
             }
         }
 
-        SlackService getSlackService(StandardSlackServiceBuilder slackServiceBuilder, final Item item) {
-            final String populatedToken = CredentialsObtainer.getTokenToUse(slackServiceBuilder.populatedToken, item,null );
+        SlackService getSlackService(StandardSlackServiceBuilder slackServiceBuilder, String authTokenCredentialsID, final Item item) {
+            final String populatedToken = CredentialsObtainer.getTokenToUse(authTokenCredentialsID, item,null );
             if (populatedToken != null) {
+                slackServiceBuilder.withPopulatedToken(populatedToken);
                 return slackServiceBuilder.build();
             } else {
                 throw new NoSuchElementException("Could not obtain credentials with credential id: " + slackServiceBuilder.populatedToken);
@@ -814,8 +815,6 @@ public class SlackNotifier extends Notifier {
                     targetUrl = this.baseUrl;
                 }
                 String targetDomain = Util.fixEmpty(teamDomain) != null ? teamDomain : this.teamDomain;
-                String targetTokenCredentialId = Util.fixEmpty(tokenCredentialId) != null ? tokenCredentialId :
-                        this.tokenCredentialId;
                 String targetRoom = Util.fixEmpty(room) != null ? room : this.room;
 
                 SlackService testSlackService = getSlackService(new StandardSlackServiceBuilder()
@@ -825,7 +824,7 @@ public class SlackNotifier extends Notifier {
                         .withRoomId(targetRoom)
                         .withIconEmoji(iconEmoji)
                         .withUsername(username)
-                        , project
+                        ,tokenCredentialId, project
                 );
 
                 String message = "Slack/Jenkins plugin: you're all set on " + DisplayURLProvider.get().getRoot();

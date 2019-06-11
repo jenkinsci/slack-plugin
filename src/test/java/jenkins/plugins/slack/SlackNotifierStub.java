@@ -56,7 +56,7 @@ public class SlackNotifierStub extends SlackNotifier {
         }
 
         @Override
-        SlackService getSlackService(final StandardSlackServiceBuilder standardSlackServiceBuilder, final Item item) {
+        SlackService getSlackService(final StandardSlackServiceBuilder standardSlackServiceBuilder, final String authTokenCredentialsId, final Item item) {
             return slackService;
         }
 
