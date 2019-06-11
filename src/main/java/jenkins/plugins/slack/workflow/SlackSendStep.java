@@ -267,8 +267,8 @@ public class SlackSendStep extends Step {
             boolean botUser = step.botUser || slackDesc.isBotUser();
             String channel = step.channel != null ? step.channel : slackDesc.getRoom();
             String color = step.color != null ? step.color : "";
-            String iconEmoji = step.iconEmoji != null ? step.iconEmoji : "";
-            String username = step.username != null ? step.username : "";
+            String iconEmoji = step.iconEmoji != null ? step.iconEmoji : slackDesc.getIconEmoji();
+            String username = step.username != null ? step.username : slackDesc.getUsername();
 
             TaskListener listener = getContext().get(TaskListener.class);
             Objects.requireNonNull(listener, "Listener is mandatory here");
