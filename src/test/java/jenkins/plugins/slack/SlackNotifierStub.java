@@ -55,6 +55,11 @@ public class SlackNotifierStub extends SlackNotifier {
             return slackService;
         }
 
+        @Override
+        SlackService getSlackService(final StandardSlackServiceBuilder standardSlackServiceBuilder, final Item item) {
+            return slackService;
+        }
+
         public void setSlackService(SlackService slackService) {
             this.slackService = slackService;
         }

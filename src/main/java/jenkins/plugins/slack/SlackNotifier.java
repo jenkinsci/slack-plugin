@@ -768,6 +768,15 @@ public class SlackNotifier extends Notifier {
             }
         }
 
+        SlackService getSlackService(StandardSlackServiceBuilder slackServiceBuilder, final Item item) {
+            final String populatedToken = CredentialsObtainer.getTokenToUse(slackServiceBuilder.populatedToken, item,null );
+            if (populatedToken != null) {
+                return slackServiceBuilder.build();
+            } else {
+                throw new NoSuchElementException("Could not obtain credentials with credential id: " + slackServiceBuilder.populatedToken);
+            }
+        }
+
         @SuppressWarnings("unused") // called by jelly
         public boolean isMatrixProject(AbstractProject<?, ?> project) {
             return project.getClass().getName().equals(MATRIX_PROJECT_CLASS_NAME);
@@ -808,17 +817,16 @@ public class SlackNotifier extends Notifier {
                 String targetTokenCredentialId = Util.fixEmpty(tokenCredentialId) != null ? tokenCredentialId :
                         this.tokenCredentialId;
                 String targetRoom = Util.fixEmpty(room) != null ? room : this.room;
-                final String populatedToken = CredentialsObtainer.getTokenToUse(targetTokenCredentialId, project,null );
 
-                SlackService testSlackService = StandardSlackService.builder()
+                SlackService testSlackService = getSlackService(new StandardSlackServiceBuilder()
                         .withBaseUrl(targetUrl)
                         .withTeamDomain(targetDomain)
-                        .withPopulatedToken(populatedToken)
                         .withBotUser(botUser)
                         .withRoomId(targetRoom)
                         .withIconEmoji(iconEmoji)
                         .withUsername(username)
-                        .build();
+                        , project
+                );
 
                 String message = "Slack/Jenkins plugin: you're all set on " + DisplayURLProvider.get().getRoot();
                 boolean success = testSlackService.publish(message, "good");
