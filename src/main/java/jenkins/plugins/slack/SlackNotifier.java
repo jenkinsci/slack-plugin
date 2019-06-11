@@ -746,14 +746,12 @@ public class SlackNotifier extends Notifier {
             return true;
         }
 
-        /**
-         * @deprecated  use {@link #getSlackService(String, String, String, boolean, String, Item)} instead}
-         */
         @Deprecated
         SlackService getSlackService(final String baseUrl, final String teamDomain, final String authTokenCredentialId, final boolean botUser, final String roomId) {
             return getSlackService(baseUrl, teamDomain, authTokenCredentialId, botUser, roomId, null);
         }
 
+        @Deprecated
         SlackService getSlackService(final String baseUrl, final String teamDomain, final String authTokenCredentialId, final boolean botUser, final String roomId, final Item item) {
             final String populatedToken = CredentialsObtainer.getTokenToUse(authTokenCredentialId, item,null );
             if (populatedToken != null) {
@@ -787,6 +785,8 @@ public class SlackNotifier extends Notifier {
                                                @QueryParameter("tokenCredentialId") final String tokenCredentialId,
                                                @QueryParameter("botUser") final boolean botUser,
                                                @QueryParameter("room") final String room,
+                                               @QueryParameter("iconEmoji") final String iconEmoji,
+                                               @QueryParameter("username") final String username,
                                                @AncestorInPath Project project) {
             if (project == null) {
                 Jenkins.get().checkPermission(Jenkins.ADMINISTER);
@@ -805,12 +805,21 @@ public class SlackNotifier extends Notifier {
                     targetUrl = this.baseUrl;
                 }
                 String targetDomain = Util.fixEmpty(teamDomain) != null ? teamDomain : this.teamDomain;
-                boolean targetBotUser = botUser || this.botUser;
                 String targetTokenCredentialId = Util.fixEmpty(tokenCredentialId) != null ? tokenCredentialId :
                         this.tokenCredentialId;
                 String targetRoom = Util.fixEmpty(room) != null ? room : this.room;
+                final String populatedToken = CredentialsObtainer.getTokenToUse(targetTokenCredentialId, project,null );
 
-                SlackService testSlackService = getSlackService(targetUrl, targetDomain, targetTokenCredentialId, targetBotUser, targetRoom, project);
+                SlackService testSlackService = StandardSlackService.builder()
+                        .withBaseUrl(targetUrl)
+                        .withTeamDomain(targetDomain)
+                        .withPopulatedToken(populatedToken)
+                        .withBotUser(botUser)
+                        .withRoomId(targetRoom)
+                        .withIconEmoji(iconEmoji)
+                        .withUsername(username)
+                        .build();
+
                 String message = "Slack/Jenkins plugin: you're all set on " + DisplayURLProvider.get().getRoot();
                 boolean success = testSlackService.publish(message, "good");
                 return success ? FormValidation.ok("Success") : FormValidation.error("Failure");
