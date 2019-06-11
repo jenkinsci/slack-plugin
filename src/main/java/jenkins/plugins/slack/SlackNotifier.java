@@ -816,15 +816,17 @@ public class SlackNotifier extends Notifier {
                 }
                 String targetDomain = Util.fixEmpty(teamDomain) != null ? teamDomain : this.teamDomain;
                 String targetRoom = Util.fixEmpty(room) != null ? room : this.room;
-
+                boolean targetBotUser = botUser || this.botUser;
+                String targetTokenCredentialId = Util.fixEmpty(tokenCredentialId) != null ? tokenCredentialId :
+                        this.tokenCredentialId;
                 SlackService testSlackService = getSlackService(StandardSlackService.builder()
                         .withBaseUrl(targetUrl)
                         .withTeamDomain(targetDomain)
-                        .withBotUser(botUser)
+                        .withBotUser(targetBotUser)
                         .withRoomId(targetRoom)
                         .withIconEmoji(iconEmoji)
                         .withUsername(username),
-                        tokenCredentialId, project
+                        targetTokenCredentialId, project
                 );
 
                 String message = "Slack/Jenkins plugin: you're all set on " + DisplayURLProvider.get().getRoot();
