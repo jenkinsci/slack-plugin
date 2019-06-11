@@ -117,6 +117,6 @@
         </f:entry>
         <f:validateButton
                 title="${%Test Connection}" progress="${%Testing...}"
-                method="testConnection" with="baseUrl,teamDomain,token,tokenCredentialId,botUser,room"/>
+                method="testConnection" with="baseUrl,teamDomain,token,tokenCredentialId,botUser,iconEmoji,username,room"/>
     </f:advanced>
 </j:jelly>

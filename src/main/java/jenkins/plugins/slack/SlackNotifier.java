@@ -819,13 +819,15 @@ public class SlackNotifier extends Notifier {
                 boolean targetBotUser = botUser || this.botUser;
                 String targetTokenCredentialId = Util.fixEmpty(tokenCredentialId) != null ? tokenCredentialId :
                         this.tokenCredentialId;
+                String targetIconEmoji = Util.fixEmpty(iconEmoji) != null ? iconEmoji : this.iconEmoji;
+                String targetUsername = Util.fixEmpty(username) != null ? username : this.username;
                 SlackService testSlackService = getSlackService(StandardSlackService.builder()
                         .withBaseUrl(targetUrl)
                         .withTeamDomain(targetDomain)
                         .withBotUser(targetBotUser)
                         .withRoomId(targetRoom)
-                        .withIconEmoji(iconEmoji)
-                        .withUsername(username),
+                        .withIconEmoji(targetIconEmoji)
+                        .withUsername(targetUsername),
                         targetTokenCredentialId, project
                 );
 
