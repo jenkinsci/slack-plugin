@@ -278,6 +278,7 @@ public class SlackSendStep extends Step {
             boolean botUser = step.botUser || slackDesc.isBotUser();
             String channel = step.channel != null ? step.channel : slackDesc.getRoom();
             String color = step.color != null ? step.color : "";
+            boolean sendAsText = step.sendAsText || slackDesc.isSendAsText();
             String iconEmoji = step.iconEmoji != null ? step.iconEmoji : slackDesc.getIconEmoji();
             String username = step.username != null ? step.username : slackDesc.getUsername();
 
@@ -297,9 +298,9 @@ public class SlackSendStep extends Step {
                 return null;
             }
 
-            SlackService slackService = getSlackService(baseUrl, teamDomain, botUser, channel, step.replyBroadcast, iconEmoji, username, populatedToken);
+            SlackService slackService = getSlackService(baseUrl, teamDomain, botUser, channel, step.replyBroadcast, sendAsText, iconEmoji, username, populatedToken);
             final boolean publishSuccess;
-            if (step.sendAsText) {
+            if (sendAsText) {
                 publishSuccess = slackService.publish(step.message, new JSONArray(), color);
             } else if (step.attachments != null) {
                 JSONArray jsonArray = getAttachmentsAsJSONArray();
@@ -404,7 +405,7 @@ public class SlackSendStep extends Step {
         }
 
         //streamline unit testing
-        SlackService getSlackService(String baseUrl, String team, boolean botUser, String channel, boolean replyBroadcast, String iconEmoji, String username, String populatedToken) {
+        SlackService getSlackService(String baseUrl, String team, boolean botUser, String channel, boolean replyBroadcast, boolean sendAsText, String iconEmoji, String username, String populatedToken) {
             return new StandardSlackService(
                     new StandardSlackServiceBuilder()
                         .withBaseUrl(baseUrl)
@@ -412,6 +413,7 @@ public class SlackSendStep extends Step {
                         .withBotUser(botUser)
                         .withRoomId(channel)
                         .withReplyBroadcast(replyBroadcast)
+                        .withSendAsText(sendAsText)
                         .withIconEmoji(iconEmoji)
                         .withUsername(username)
                         .withPopulatedToken(populatedToken)

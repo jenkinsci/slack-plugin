@@ -25,6 +25,9 @@
     <f:entry title="Is Bot User?" help="/plugin/slack/help-globalConfig-botUser.html">
         <f:checkbox field="botUser" />
     </f:entry>
+    <f:entry title="Send as Text?" help="/plugin/slack/help-globalConfig-sendAsText.html">
+        <f:checkbox field="sendAsText" />
+    </f:entry>
     <f:entry title="Icon Emoji" help="/plugin/slack/help-globalConfig-iconEmoji.html">
         <f:textbox field="iconEmoji" />
     </f:entry>
@@ -36,6 +39,6 @@
     </f:entry>
     <f:validateButton
         title="${%Test Connection}" progress="${%Testing...}"
-        method="testConnection" with="baseUrl,teamDomain,token,tokenCredentialId,botUser,iconEmoji,username,room" />
+        method="testConnection" with="baseUrl,teamDomain,token,tokenCredentialId,botUser,sendAsText,iconEmoji,username,room" />
   </f:section>
 </j:jelly>

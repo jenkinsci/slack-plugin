@@ -158,8 +158,12 @@ public class StandardSlackService implements SlackService {
             if (StringUtils.isNotEmpty(message)) {
                 json.put("text", message);
             }
-            json.put("attachments", attachments);
+            if (attachments.size() > 0) {
+                json.put("attachments", attachments);
+            }
             json.put("link_names", "1");
+            json.put("unfurl_links", "true");
+            json.put("unfurl_media", "true");
 
             //prepare post methods for both requests types
             if (!botUser || !StringUtils.isEmpty(baseUrl)) {
