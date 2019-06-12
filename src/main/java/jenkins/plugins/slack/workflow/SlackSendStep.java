@@ -308,8 +308,8 @@ public class SlackSendStep extends Step {
                 return null;
             }
             SlackResponse response = null;
+            String responseString = slackService.getResponseString();
             if (publishSuccess) {
-                String responseString = slackService.getResponseString();
                 if (responseString != null) {
                     try {
                         org.json.JSONObject result = new org.json.JSONObject(responseString);
@@ -324,8 +324,14 @@ public class SlackSendStep extends Step {
                     return new SlackResponse();
                 }
             } else if (step.failOnError) {
+                if (responseString != null) {
+                    throw new AbortException(Messages.notificationFailedWithException(responseString));
+                }
                 throw new AbortException(Messages.notificationFailed());
             } else {
+                if (responseString != null) {
+                    listener.error(Messages.notificationFailedWithException(responseString));
+                }
                 listener.error(Messages.notificationFailed());
             }
             return response;
