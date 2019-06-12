@@ -720,11 +720,21 @@ public class SlackNotifier extends Notifier {
                 SlackService testSlackService = getSlackService(targetUrl, targetDomain, targetTokenCredentialId, targetBotUser, targetRoom, project);
                 String message = "Slack/Jenkins plugin: you're all set on " + DisplayURLProvider.get().getRoot();
                 boolean success = testSlackService.publish(message, "good");
-                return success ? FormValidation.ok("Success") : FormValidation.error("Failure");
+                return success ? FormValidation.ok("Success") : FormValidation.error(
+                        getErrorMessage(testSlackService.getResponseString())
+                );
             } catch (Exception e) {
                 logger.log(Level.WARNING, "Slack config form validation error", e);
                 return FormValidation.error("Client error : " + e.getMessage());
             }
+        }
+
+        private String getErrorMessage(String responseString) {
+            String error = "Failure";
+            if (responseString != null) {
+                return String.format("%s: %s", error, responseString);
+            }
+            return error;
         }
 
         private Object readResolve() {
