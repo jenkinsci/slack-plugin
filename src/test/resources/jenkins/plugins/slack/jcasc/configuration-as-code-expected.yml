@@ -1,3 +1,4 @@
 botUser: false
+sendAsText: false
 teamDomain: "jenkins-slack-plugin"
 tokenCredentialId: "slack-token"
