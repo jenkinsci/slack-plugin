@@ -25,6 +25,7 @@ import jenkins.plugins.slack.Messages;
 import jenkins.plugins.slack.SlackNotifier;
 import jenkins.plugins.slack.SlackService;
 import jenkins.plugins.slack.StandardSlackService;
+import jenkins.plugins.slack.StandardSlackServiceBuilder;
 import net.sf.json.JSON;
 import net.sf.json.JSONArray;
 import net.sf.json.JSONException;
@@ -61,6 +62,8 @@ public class SlackSendStep extends Step {
     private boolean failOnError;
     private Object attachments;
     private boolean replyBroadcast;
+    private String iconEmoji;
+    private String username;
 
     @Nonnull
     public String getMessage() {
@@ -169,6 +172,24 @@ public class SlackSendStep extends Step {
     public SlackSendStep() {
     }
 
+    public String getIconEmoji() {
+        return iconEmoji;
+    }
+
+    @DataBoundSetter
+    public void setIconEmoji(String iconEmoji) {
+        this.iconEmoji = iconEmoji;
+    }
+
+    public String getUsername() {
+        return username;
+    }
+
+    @DataBoundSetter
+    public void setUsername(String username) {
+        this.username = username;
+    }
+
     @Override
     public StepExecution start(StepContext context) {
         return new SlackSendStepExecution(this, context);
@@ -246,13 +267,15 @@ public class SlackSendStep extends Step {
             boolean botUser = step.botUser || slackDesc.isBotUser();
             String channel = step.channel != null ? step.channel : slackDesc.getRoom();
             String color = step.color != null ? step.color : "";
+            String iconEmoji = step.iconEmoji != null ? step.iconEmoji : slackDesc.getIconEmoji();
+            String username = step.username != null ? step.username : slackDesc.getUsername();
 
             TaskListener listener = getContext().get(TaskListener.class);
             Objects.requireNonNull(listener, "Listener is mandatory here");
 
             listener.getLogger().println(Messages.slackSendStepValues(
                     defaultIfEmpty(baseUrl), defaultIfEmpty(teamDomain), channel, defaultIfEmpty(color), botUser,
-                    defaultIfEmpty(tokenCredentialId))
+                    defaultIfEmpty(tokenCredentialId), defaultIfEmpty(iconEmoji), defaultIfEmpty(username))
             );
             final String populatedToken;
             try {
@@ -264,7 +287,7 @@ public class SlackSendStep extends Step {
             }
 
             SlackService slackService = getSlackService(
-                    baseUrl, teamDomain, botUser, channel, step.replyBroadcast, populatedToken);
+                    baseUrl, teamDomain, botUser, channel, step.replyBroadcast, iconEmoji, username, populatedToken);
             final boolean publishSuccess;
             if (step.attachments != null) {
                 JSONArray jsonArray = getAttachmentsAsJSONArray();
@@ -369,8 +392,18 @@ public class SlackSendStep extends Step {
         }
 
         //streamline unit testing
-        SlackService getSlackService(String baseUrl, String team, boolean botUser, String channel, boolean replyBroadcast, String populatedToken) {
-            return new StandardSlackService(baseUrl, team, botUser, channel, replyBroadcast, populatedToken);
+        SlackService getSlackService(String baseUrl, String team, boolean botUser, String channel, boolean replyBroadcast, String iconEmoji, String username, String populatedToken) {
+            return new StandardSlackService(
+                    new StandardSlackServiceBuilder()
+                        .withBaseUrl(baseUrl)
+                        .withTeamDomain(team)
+                        .withBotUser(botUser)
+                        .withRoomId(channel)
+                        .withReplyBroadcast(replyBroadcast)
+                        .withIconEmoji(iconEmoji)
+                        .withUsername(username)
+                        .withPopulatedToken(populatedToken)
+                    );
         }
     }
 }

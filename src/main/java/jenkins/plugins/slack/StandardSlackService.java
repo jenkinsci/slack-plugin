@@ -1,34 +1,27 @@
 package jenkins.plugins.slack;
 
 import hudson.ProxyConfiguration;
-import java.io.UnsupportedEncodingException;
-import java.net.URLEncoder;
-import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import jenkins.model.Jenkins;
 import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpHost;
 import org.apache.http.HttpStatus;
-import org.apache.http.NameValuePair;
 import org.apache.http.auth.AuthScope;
 import org.apache.http.auth.UsernamePasswordCredentials;
 import org.apache.http.client.CredentialsProvider;
-import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.conn.routing.HttpRoutePlanner;
+import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.BasicCredentialsProvider;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.impl.conn.DefaultProxyRoutePlanner;
-import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.util.EntityUtils;
 import org.jenkinsci.plugins.plaincredentials.StringCredentials;
 
@@ -42,6 +35,8 @@ public class StandardSlackService implements SlackService {
     private boolean botUser;
     private String[] roomIds;
     private boolean replyBroadcast;
+    private String iconEmoji;
+    private String username;
     private String responseString;
     private String populatedToken;
 
@@ -66,42 +61,48 @@ public class StandardSlackService implements SlackService {
      */
     @Deprecated
     public StandardSlackService(String baseUrl, String teamDomain, String token, String authTokenCredentialId, boolean botUser, String roomId, boolean replyBroadcast) {
-        this(baseUrl, teamDomain, botUser, roomId, replyBroadcast);
+        this(baseUrl, teamDomain, botUser, roomId, replyBroadcast, authTokenCredentialId);
         this.populatedToken = getTokenToUse(authTokenCredentialId, token);
         if (this.populatedToken == null) {
             throw new IllegalArgumentException("No slack token found, setup a secret text credential and configure it to be used");
         }
     }
 
-    /**
-     * @param baseUrl        the full url to use, this is an alternative to specifying teamDomain
-     * @param teamDomain     the teamDomain inside slack.com to use
-     * @param botUser
-     * @param roomId         a semicolon separated list of rooms to notify
-     * @param replyBroadcast
-     * @param populatedToken a non-null token to use for authentication
-     */
+    @Deprecated
     public StandardSlackService(String baseUrl, String teamDomain, boolean botUser, String roomId, boolean replyBroadcast, String populatedToken) {
-        this(baseUrl, teamDomain, botUser, roomId, replyBroadcast);
+        this(builder()
+            .withBaseUrl(baseUrl)
+            .withTeamDomain(teamDomain)
+            .withBotUser(botUser)
+            .withRoomId(roomId)
+            .withReplyBroadcast(replyBroadcast)
+            .withPopulatedToken(populatedToken)
+        );
         if (populatedToken == null) {
             throw new IllegalArgumentException("No slack token found, setup a secret text credential and configure it to be used");
         }
         this.populatedToken = populatedToken;
     }
 
-    private StandardSlackService(String baseUrl, String teamDomain, boolean botUser, String roomId, boolean replyBroadcast) {
-        super();
-        this.baseUrl = baseUrl;
+    public StandardSlackService(StandardSlackServiceBuilder standardSlackServiceBuilder) {
+        this.baseUrl = standardSlackServiceBuilder.baseUrl;
         if (this.baseUrl != null && !this.baseUrl.isEmpty() && !this.baseUrl.endsWith("/")) {
             this.baseUrl += "/";
         }
-        this.teamDomain = teamDomain;
-        this.botUser = botUser;
-        if (roomId == null) {
+        this.teamDomain = standardSlackServiceBuilder.teamDomain;
+        this.botUser = standardSlackServiceBuilder.botUser;
+        if (standardSlackServiceBuilder.roomId == null) {
             throw new IllegalArgumentException("Project Channel or Slack User ID must be specified.");
         }
-        this.roomIds = roomId.split("[,; ]+");
-        this.replyBroadcast = replyBroadcast;
+        this.roomIds = standardSlackServiceBuilder.roomId.split("[,; ]+");
+        this.replyBroadcast = standardSlackServiceBuilder.replyBroadcast;
+        this.iconEmoji = correctEmojiFormat(standardSlackServiceBuilder.iconEmoji);
+        this.username = standardSlackServiceBuilder.username;
+        this.populatedToken = standardSlackServiceBuilder.populatedToken;
+    }
+
+    public static StandardSlackServiceBuilder builder() {
+        return new StandardSlackServiceBuilder();
     }
 
     public String getResponseString() {
@@ -143,7 +144,6 @@ public class StandardSlackService implements SlackService {
             HttpPost post;
             String url;
             String threadTs = "";
-            List<NameValuePair> nvps = new ArrayList<>();
 
             //thread_ts is passed once with roomId: Ex: roomId:threadTs
             String[] splitThread = roomId.split("[:]+");
@@ -151,6 +151,14 @@ public class StandardSlackService implements SlackService {
                 roomId = splitThread[0];
                 threadTs = splitThread[1];
             }
+            JSONObject json = new JSONObject();
+            json.put("channel", roomId);
+            if (StringUtils.isNotEmpty(message)) {
+                json.put("text", message);
+            }
+            json.put("attachments", attachments);
+            json.put("link_names", "1");
+
             //prepare post methods for both requests types
             if (!botUser || !StringUtils.isEmpty(baseUrl)) {
                 url = "https://" + teamDomain + "." + host + "/services/hooks/jenkins-ci?token=" + populatedToken;
@@ -158,42 +166,36 @@ public class StandardSlackService implements SlackService {
                     url = baseUrl + populatedToken;
                 }
                 post = new HttpPost(url);
-                JSONObject json = new JSONObject();
-
-                json.put("channel", roomId);
-                if (StringUtils.isNotEmpty(message)) {
-                    json.put("text", message);
-                }
-                json.put("attachments", attachments);
-                json.put("link_names", "1");
-
-                nvps.add(new BasicNameValuePair("payload", json.toString()));
             } else {
-                url = "https://slack.com/api/chat.postMessage?token=" + populatedToken +
-                        "&channel=" + roomId.replace("#", "") +
-                        "&link_names=1" +
-                        "&as_user=true";
+                url = "https://slack.com/api/chat.postMessage";
+
+                post = new HttpPost(url);
+                post.setHeader("Authorization", "Bearer " + populatedToken);
+                post.setHeader("Content-type", "application/json");
                 if (threadTs.length() > 1) {
-                    url += "&thread_ts=" + threadTs;
+                    json.put("thread_ts", "threadTs");
                 }
                 if (replyBroadcast) {
-                    url += "&reply_broadcast=true";
+                    json.put("reply_broadcast", "true");
                 }
-                try {
-                    if (StringUtils.isNotEmpty(message)) {
-                        url += "&text=" + URLEncoder.encode(message, StandardCharsets.UTF_8.name());
+                if (StringUtils.isEmpty(iconEmoji) && StringUtils.isEmpty(username)) {
+                    json.put("as_user", "true");
+                }
+                else {
+                    if (StringUtils.isNotEmpty(iconEmoji)) {
+                        json.put("icon_emoji", iconEmoji);
                     }
-                    url += "&attachments=" + URLEncoder.encode(attachments.toString(), StandardCharsets.UTF_8.name());
-                } catch (UnsupportedEncodingException e) {
-                    logger.log(Level.ALL, "Error while encoding payload: " + e.getMessage());
+                    if (StringUtils.isNotEmpty(username)) {
+                        json.put("username", username);
+                    }
                 }
-                post = new HttpPost(url);
             }
+
             logger.fine("Posting: to " + roomId + " on " + teamDomain + " using " + url + ": " + attachments.toString() + " " + color);
             CloseableHttpClient client = getHttpClient();
 
             try {
-                post.setEntity(new UrlEncodedFormEntity(nvps, "UTF-8"));
+                post.setEntity(new StringEntity(json.toString()));
                 CloseableHttpResponse response = client.execute(post);
 
                 int responseCode = response.getStatusLine().getStatusCode();
@@ -232,6 +234,16 @@ public class StandardSlackService implements SlackService {
 
         logger.fine("Using Integration Token.");
         return token;
+    }
+
+    private String correctEmojiFormat(String iconEmoji) {
+        if (StringUtils.isEmpty(iconEmoji)) {
+            return iconEmoji;
+        }
+        iconEmoji = StringUtils.appendIfMissing(iconEmoji, ":");
+        iconEmoji = StringUtils.prependIfMissing(iconEmoji, ":");
+
+        return iconEmoji;
     }
 
     protected CloseableHttpClient getHttpClient() {
