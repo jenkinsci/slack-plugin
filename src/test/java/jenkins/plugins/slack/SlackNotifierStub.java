@@ -5,6 +5,7 @@ import jenkins.plugins.slack.matrix.MatrixTriggerMode;
 
 public class SlackNotifierStub extends SlackNotifier {
 
+    @Deprecated
     public SlackNotifierStub(String baseUrl, String teamDomain, String authToken, boolean botUser, String room, String authTokenCredentialId,
                              String sendAs, boolean startNotification, boolean notifyAborted, boolean notifyFailure,
                              boolean notifyNotBuilt, boolean notifySuccess, boolean notifyUnstable, boolean notifyRegression, boolean notifyBackToNormal,
@@ -40,6 +41,10 @@ public class SlackNotifierStub extends SlackNotifier {
                 .withCustomMessageUnstable(customMessageUnstable)
                 .withCustomMessageFailure(customMessageFailure)
         );
+    }
+
+    public SlackNotifierStub(SlackNotifierBuilder slackNotifierBuilder) {
+        super(slackNotifierBuilder);
     }
 
     public static class DescriptorImplStub extends SlackNotifier.DescriptorImpl {
