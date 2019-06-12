@@ -1,0 +1,13 @@
+credentials:
+  system:
+    domainCredentials:
+      - credentials:
+          - string:
+              scope: GLOBAL
+              id: slack-token
+              secret: 'abcdef'
+
+unclassified:
+  slackNotifier:
+    teamDomain: 'jenkins-slack-plugin' # i.e. your-company (just the workspace name not the full url)
+    tokenCredentialId: slack-token
