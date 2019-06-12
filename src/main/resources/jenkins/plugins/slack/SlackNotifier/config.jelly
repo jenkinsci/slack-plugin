@@ -104,11 +104,19 @@
             <f:checkbox field="botUser"/>
         </f:entry>
 
+        <f:entry title="Icon Emoji" help="/plugin/slack/help-projectConfig-iconEmoji.html">
+            <f:textbox field="iconEmoji" />
+        </f:entry>
+
+        <f:entry title="Username" help="/plugin/slack/help-projectConfig-username.html">
+            <f:textbox field="username" />
+        </f:entry>
+
         <f:entry title="Project Channel or Slack User ID" help="/plugin/slack/help-projectConfig-slackRoom.html">
             <f:textbox field="room" />
         </f:entry>
         <f:validateButton
                 title="${%Test Connection}" progress="${%Testing...}"
-                method="testConnection" with="baseUrl,teamDomain,token,tokenCredentialId,botUser,room"/>
+                method="testConnection" with="baseUrl,teamDomain,token,tokenCredentialId,botUser,iconEmoji,username,room"/>
     </f:advanced>
 </j:jelly>
