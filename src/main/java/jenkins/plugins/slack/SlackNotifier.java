@@ -31,6 +31,7 @@ import jenkins.plugins.slack.logging.BuildAwareLogger;
 import jenkins.plugins.slack.logging.BuildKey;
 import jenkins.plugins.slack.logging.SlackNotificationsLogger;
 import jenkins.plugins.slack.matrix.MatrixTriggerMode;
+import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
 import org.apache.commons.lang.StringUtils;
 import org.jenkinsci.Symbol;
@@ -58,6 +59,9 @@ public class SlackNotifier extends Notifier {
     private boolean botUser;
     private String room;
     private String sendAs;
+    private boolean sendAsText;
+    private String iconEmoji;
+    private String username;
     private boolean startNotification;
     private boolean notifySuccess;
     private boolean notifyAborted;
@@ -157,6 +161,33 @@ public class SlackNotifier extends Notifier {
     @DataBoundSetter
     public void setSendAs(String sendAs) {
         this.sendAs = sendAs;
+    }
+
+    public boolean getSendAsText() {
+        return sendAsText;
+    }
+
+    @DataBoundSetter
+    public void setSendAsText(boolean sendAsText) {
+        this.sendAsText = sendAsText;
+    }
+
+    public String getIconEmoji() {
+        return iconEmoji;
+    }
+
+    @DataBoundSetter
+    public void setIconEmoji(String iconEmoji) {
+        this.iconEmoji = iconEmoji;
+    }
+
+    public String getUsername() {
+        return username;
+    }
+
+    @DataBoundSetter
+    public void setUsername(String username) {
+        this.username = username;
     }
 
     public boolean getStartNotification() {
@@ -389,47 +420,87 @@ public class SlackNotifier extends Notifier {
         );
     }
 
+    @Deprecated
     public SlackNotifier(final String baseUrl, final String teamDomain, final String authToken, final boolean botUser, final String room, final String tokenCredentialId,
                          final String sendAs, final boolean startNotification, final boolean notifyAborted, final boolean notifyFailure,
                          final boolean notifyNotBuilt, final boolean notifySuccess, final boolean notifyUnstable, final boolean notifyRegression, final boolean notifyBackToNormal,
                          final boolean notifyRepeatedFailure, final boolean includeTestSummary, final boolean includeFailedTests, MatrixTriggerMode matrixTriggerMode,
                          CommitInfoChoice commitInfoChoice, boolean includeCustomMessage, String customMessage, String customMessageSuccess,
                          String customMessageAborted, String customMessageNotBuilt, String customMessageUnstable, String customMessageFailure) {
-        super();
-        this.baseUrl = baseUrl;
+        this(new SlackNotifierBuilder()
+                .withBaseUrl(baseUrl)
+                .withTeamDomain(teamDomain)
+                .withAuthToken(authToken)
+                .withBotUser(botUser)
+                .withRoom(room)
+                .withTokenCredentialId(tokenCredentialId)
+                .withSendAs(sendAs)
+                .withStartNotification(startNotification)
+                .withNotifyAborted(notifyAborted)
+                .withNotifyFailure(notifyFailure)
+                .withNotifyNotBuilt(notifyNotBuilt)
+                .withNotifySuccess(notifySuccess)
+                .withNotifyUnstable(notifyUnstable)
+                .withNotifyRegression(notifyRegression)
+                .withNotifyBackToNormal(notifyBackToNormal)
+                .withNotifyRepeatedFailure(notifyRepeatedFailure)
+                .withIncludeTestSummary(includeTestSummary)
+                .withIncludeFailedTests(includeFailedTests)
+                .withMatrixTriggerMode(matrixTriggerMode)
+                .withCommitInfoChoice(commitInfoChoice)
+                .withIncludeCustomMessage(includeCustomMessage)
+                .withCustomMessage(customMessage)
+                .withCustomMessageSuccess(customMessageSuccess)
+                .withCustomMessageAborted(customMessageAborted)
+                .withCustomMessageNotBuilt(customMessageNotBuilt)
+                .withCustomMessageUnstable(customMessageUnstable)
+                .withCustomMessageFailure(customMessageFailure)
+            );
+    }
+
+    SlackNotifier(SlackNotifierBuilder slackNotifierBuilder) {
+        this.baseUrl = slackNotifierBuilder.baseUrl;
         if(this.baseUrl != null && !this.baseUrl.isEmpty() && !this.baseUrl.endsWith("/")) {
             this.baseUrl += "/";
         }
-        this.teamDomain = teamDomain;
-        this.authToken = authToken;
-        this.tokenCredentialId = StringUtils.trim(tokenCredentialId);
-        this.botUser = botUser;
-        this.room = room;
-        this.sendAs = sendAs;
-        this.startNotification = startNotification;
-        this.notifyAborted = notifyAborted;
-        this.notifyFailure = notifyFailure;
-        this.notifyNotBuilt = notifyNotBuilt;
-        this.notifySuccess = notifySuccess;
-        this.notifyUnstable = notifyUnstable;
-        this.notifyRegression = notifyRegression;
-        this.notifyBackToNormal = notifyBackToNormal;
-        this.notifyRepeatedFailure = notifyRepeatedFailure;
-        this.includeTestSummary = includeTestSummary;
-        this.includeFailedTests = includeFailedTests;
-        this.matrixTriggerMode = matrixTriggerMode;
-        this.commitInfoChoice = commitInfoChoice;
-        this.includeCustomMessage = includeCustomMessage;
+        this.teamDomain = slackNotifierBuilder.teamDomain;
+        this.authToken = slackNotifierBuilder.authToken;
+        this.tokenCredentialId = slackNotifierBuilder.tokenCredentialId;
+        this.botUser = slackNotifierBuilder.botUser;
+        this.room = slackNotifierBuilder.room;
+        this.sendAs = slackNotifierBuilder.sendAs;
+        this.sendAsText = slackNotifierBuilder.sendAsText;
+        this.iconEmoji = slackNotifierBuilder.iconEmoji;
+        this.username = slackNotifierBuilder.username;
+        this.startNotification = slackNotifierBuilder.startNotification;
+        this.notifySuccess = slackNotifierBuilder.notifySuccess;
+        this.notifyAborted = slackNotifierBuilder.notifyAborted;
+        this.notifyNotBuilt = slackNotifierBuilder.notifyNotBuilt;
+        this.notifyUnstable = slackNotifierBuilder.notifyUnstable;
+        this.notifyRegression = slackNotifierBuilder.notifyRegression;
+        this.notifyFailure = slackNotifierBuilder.notifyFailure;
+        this.notifyEveryFailure = slackNotifierBuilder.notifyEveryFailure;
+        this.notifyBackToNormal = slackNotifierBuilder.notifyBackToNormal;
+        this.notifyRepeatedFailure = slackNotifierBuilder.notifyRepeatedFailure;
+        this.includeTestSummary = slackNotifierBuilder.includeTestSummary;
+        this.includeFailedTests = slackNotifierBuilder.includeFailedTests;
+        this.matrixTriggerMode = slackNotifierBuilder.matrixTriggerMode;
+        this.commitInfoChoice = slackNotifierBuilder.commitInfoChoice;
+        this.includeCustomMessage = slackNotifierBuilder.includeCustomMessage;
         if (includeCustomMessage) {
-            this.customMessage = customMessage;
-            this.customMessageSuccess = customMessageSuccess;
-            this.customMessageAborted = customMessageAborted;
-            this.customMessageNotBuilt = customMessageNotBuilt;
-            this.customMessageUnstable = customMessageUnstable;
-            this.customMessageFailure = customMessageFailure;
+            this.customMessage = slackNotifierBuilder.customMessage;
+            this.customMessageSuccess = slackNotifierBuilder.customMessageSuccess;
+            this.customMessageAborted = slackNotifierBuilder.customMessageAborted;
+            this.customMessageNotBuilt = slackNotifierBuilder.customMessageNotBuilt;
+            this.customMessageUnstable = slackNotifierBuilder.customMessageUnstable;
+            this.customMessageFailure = slackNotifierBuilder.customMessageFailure;
         } else {
             this.customMessage = null;
         }
+    }
+
+    public static SlackNotifierBuilder builder() {
+        return new SlackNotifierBuilder();
     }
 
     public boolean isAnyCustomMessagePopulated() {
@@ -457,6 +528,9 @@ public class SlackNotifier extends Notifier {
         String authTokenCredentialId = Util.fixEmpty(this.tokenCredentialId) != null ? this.tokenCredentialId :
                 descriptor.getTokenCredentialId();
         String room = Util.fixEmpty(this.room) != null ? this.room : descriptor.getRoom();
+        boolean sendAsText = this.sendAsText || descriptor.isSendAsText();
+        String iconEmoji = Util.fixEmpty(this.iconEmoji) != null ? this.iconEmoji : descriptor.getIconEmoji();
+        String username = Util.fixEmpty(this.username) != null ? this.username : descriptor.getUsername();
 
         EnvVars env;
         try {
@@ -471,7 +545,17 @@ public class SlackNotifier extends Notifier {
         authTokenCredentialId = env.expand(authTokenCredentialId);
         room = env.expand(room);
         final String populatedToken = CredentialsObtainer.getTokenToUse(authTokenCredentialId, abstractBuild.getParent(), authToken);
-        return new StandardSlackService(baseUrl, teamDomain, botUser, room, false, false, populatedToken);
+        return new StandardSlackService(
+                new StandardSlackServiceBuilder()
+                        .withBaseUrl(baseUrl)
+                        .withTeamDomain(teamDomain)
+                        .withBotUser(botUser)
+                        .withRoomId(room)
+                        .withSendAsText(sendAsText)
+                        .withIconEmoji(iconEmoji)
+                        .withUsername(username)
+                        .withPopulatedToken(populatedToken)
+        );
     }
 
     @Override
@@ -533,6 +617,9 @@ public class SlackNotifier extends Notifier {
         private String token;
         private String tokenCredentialId;
         private boolean botUser;
+        private boolean sendAsText;
+        private String iconEmoji;
+        private String username;
         private String room;
         private String sendAs;
 
@@ -602,6 +689,29 @@ public class SlackNotifier extends Notifier {
             this.botUser = botUser;
         }
 
+        public boolean isSendAsText() {
+            return sendAsText;
+        }
+
+        @DataBoundSetter
+        public void setSendAsText(boolean sendAsText) {
+            this.sendAsText = sendAsText;
+        }
+
+        public String getIconEmoji() { return iconEmoji; }
+
+        @DataBoundSetter
+        public void setIconEmoji(String iconEmoji) {
+            this.iconEmoji = iconEmoji;
+        }
+
+        public String getUsername() { return username; }
+
+        @DataBoundSetter
+        public void setUsername(String username) {
+            this.username = username;
+        }
+
         public String getRoom() {
             return room;
         }
@@ -660,20 +770,35 @@ public class SlackNotifier extends Notifier {
             return true;
         }
 
-        /**
-         * @deprecated  use {@link #getSlackService(String, String, String, boolean, String, Item)} instead}
-         */
         @Deprecated
         SlackService getSlackService(final String baseUrl, final String teamDomain, final String authTokenCredentialId, final boolean botUser, final String roomId) {
             return getSlackService(baseUrl, teamDomain, authTokenCredentialId, botUser, roomId, null);
         }
 
+        @Deprecated
         SlackService getSlackService(final String baseUrl, final String teamDomain, final String authTokenCredentialId, final boolean botUser, final String roomId, final Item item) {
             final String populatedToken = CredentialsObtainer.getTokenToUse(authTokenCredentialId, item,null );
             if (populatedToken != null) {
-                return new StandardSlackService(baseUrl, teamDomain, botUser, roomId, false, false, populatedToken);
+                return new StandardSlackService(
+                        StandardSlackService.builder()
+                            .withBaseUrl(baseUrl)
+                            .withTeamDomain(teamDomain)
+                            .withBotUser(botUser)
+                            .withRoomId(roomId)
+                            .withPopulatedToken(populatedToken)
+                        );
             } else {
                 throw new NoSuchElementException("Could not obtain credentials with credential id: " + authTokenCredentialId);
+            }
+        }
+
+        SlackService getSlackService(StandardSlackServiceBuilder slackServiceBuilder, String authTokenCredentialsID, final Item item) {
+            final String populatedToken = CredentialsObtainer.getTokenToUse(authTokenCredentialsID, item,null );
+            if (populatedToken != null) {
+                slackServiceBuilder.withPopulatedToken(populatedToken);
+                return slackServiceBuilder.build();
+            } else {
+                throw new NoSuchElementException("Could not obtain credentials with credential id: " + slackServiceBuilder.populatedToken);
             }
         }
 
@@ -694,6 +819,9 @@ public class SlackNotifier extends Notifier {
                                                @QueryParameter("tokenCredentialId") final String tokenCredentialId,
                                                @QueryParameter("botUser") final boolean botUser,
                                                @QueryParameter("room") final String room,
+                                               @QueryParameter("sendAsText") final boolean sendAsText,
+                                               @QueryParameter("iconEmoji") final String iconEmoji,
+                                               @QueryParameter("username") final String username,
                                                @AncestorInPath Project project) {
             if (project == null) {
                 Jenkins.get().checkPermission(Jenkins.ADMINISTER);
@@ -712,19 +840,46 @@ public class SlackNotifier extends Notifier {
                     targetUrl = this.baseUrl;
                 }
                 String targetDomain = Util.fixEmpty(teamDomain) != null ? teamDomain : this.teamDomain;
+                String targetRoom = Util.fixEmpty(room) != null ? room : this.room;
                 boolean targetBotUser = botUser || this.botUser;
                 String targetTokenCredentialId = Util.fixEmpty(tokenCredentialId) != null ? tokenCredentialId :
                         this.tokenCredentialId;
-                String targetRoom = Util.fixEmpty(room) != null ? room : this.room;
+                boolean targetSendAsText = sendAsText || this.sendAsText;
+                String targetIconEmoji = Util.fixEmpty(iconEmoji) != null ? iconEmoji : this.iconEmoji;
+                String targetUsername = Util.fixEmpty(username) != null ? username : this.username;
+                SlackService testSlackService = getSlackService(StandardSlackService.builder()
+                        .withBaseUrl(targetUrl)
+                        .withTeamDomain(targetDomain)
+                        .withBotUser(targetBotUser)
+                        .withRoomId(targetRoom)
+                        .withSendAsText(targetSendAsText)
+                        .withIconEmoji(targetIconEmoji)
+                        .withUsername(targetUsername),
+                        targetTokenCredentialId, project
+                );
 
-                SlackService testSlackService = getSlackService(targetUrl, targetDomain, targetTokenCredentialId, targetBotUser, targetRoom, project);
                 String message = "Slack/Jenkins plugin: you're all set on " + DisplayURLProvider.get().getRoot();
-                boolean success = testSlackService.publish(message, "good");
-                return success ? FormValidation.ok("Success") : FormValidation.error("Failure");
+                boolean success;
+                if (targetSendAsText) {
+                    success = testSlackService.publish(message, new JSONArray(), "");
+                } else {
+                    success = testSlackService.publish(message, "good");
+                }
+                return success ? FormValidation.ok("Success") : FormValidation.error(
+                        getErrorMessage(testSlackService.getResponseString())
+                );
             } catch (Exception e) {
                 logger.log(Level.WARNING, "Slack config form validation error", e);
                 return FormValidation.error("Client error : " + e.getMessage());
             }
+        }
+
+        private String getErrorMessage(String responseString) {
+            String error = "Failure";
+            if (responseString != null) {
+                return String.format("%s: %s", error, responseString);
+            }
+            return error;
         }
 
         private Object readResolve() {
