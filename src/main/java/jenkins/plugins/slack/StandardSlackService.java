@@ -98,7 +98,6 @@ public class StandardSlackService implements SlackService {
         }
         this.roomIds = standardSlackServiceBuilder.roomId.split("[,; ]+");
         this.replyBroadcast = standardSlackServiceBuilder.replyBroadcast;
-        this.sendAsText = standardSlackServiceBuilder.sendAsText;
         this.iconEmoji = correctEmojiFormat(standardSlackServiceBuilder.iconEmoji);
         this.username = standardSlackServiceBuilder.username;
         this.populatedToken = standardSlackServiceBuilder.populatedToken;
