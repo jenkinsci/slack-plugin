@@ -7,7 +7,6 @@ public class StandardSlackServiceBuilder {
     boolean botUser;
     String roomId;
     boolean replyBroadcast;
-    boolean sendAsText;
     String iconEmoji;
     String username;
     String populatedToken;
@@ -37,11 +36,6 @@ public class StandardSlackServiceBuilder {
 
     public StandardSlackServiceBuilder withReplyBroadcast(boolean replyBroadcast) {
         this.replyBroadcast = replyBroadcast;
-        return this;
-    }
-
-    public StandardSlackServiceBuilder withSendAsText(boolean sendAsText) {
-        this.sendAsText = sendAsText;
         return this;
     }
 

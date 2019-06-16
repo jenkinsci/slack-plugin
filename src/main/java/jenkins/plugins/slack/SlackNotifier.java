@@ -469,7 +469,6 @@ public class SlackNotifier extends Notifier {
         this.botUser = slackNotifierBuilder.botUser;
         this.room = slackNotifierBuilder.room;
         this.sendAs = slackNotifierBuilder.sendAs;
-        this.sendAsText = slackNotifierBuilder.sendAsText;
         this.iconEmoji = slackNotifierBuilder.iconEmoji;
         this.username = slackNotifierBuilder.username;
         this.startNotification = slackNotifierBuilder.startNotification;
@@ -551,7 +550,6 @@ public class SlackNotifier extends Notifier {
                         .withTeamDomain(teamDomain)
                         .withBotUser(botUser)
                         .withRoomId(room)
-                        .withSendAsText(sendAsText)
                         .withIconEmoji(iconEmoji)
                         .withUsername(username)
                         .withPopulatedToken(populatedToken)
@@ -852,7 +850,6 @@ public class SlackNotifier extends Notifier {
                         .withTeamDomain(targetDomain)
                         .withBotUser(targetBotUser)
                         .withRoomId(targetRoom)
-                        .withSendAsText(targetSendAsText)
                         .withIconEmoji(targetIconEmoji)
                         .withUsername(targetUsername),
                         targetTokenCredentialId, project

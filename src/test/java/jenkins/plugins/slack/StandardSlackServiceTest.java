@@ -228,38 +228,6 @@ public class StandardSlackServiceTest {
     }
 
     @Test
-    public void sendAsTextAndBotUserReturnsTrue() {
-        StandardSlackServiceStub service = new StandardSlackServiceStub(
-                StandardSlackService.builder()
-                        .withBaseUrl("")
-                        .withTeamDomain("domain")
-                        .withBotUser(true)
-                        .withRoomId("#room1:1528317530")
-                        .withPopulatedToken("token")
-                        .withSendAsText(true));
-        CloseableHttpClientStub httpClientStub = new CloseableHttpClientStub();
-        httpClientStub.setHttpStatus(HttpStatus.SC_OK);
-        service.setHttpClient(httpClientStub);
-        assertTrue(service.publish("message"));
-    }
-
-    @Test
-    public void sendAsTextAndNotBotUserReturnsTrue() {
-        StandardSlackServiceStub service = new StandardSlackServiceStub(
-                StandardSlackService.builder()
-                        .withBaseUrl("")
-                        .withTeamDomain("domain")
-                        .withBotUser(false)
-                        .withRoomId("#room1:1528317530")
-                        .withPopulatedToken("token")
-                        .withSendAsText(true));
-        CloseableHttpClientStub httpClientStub = new CloseableHttpClientStub();
-        httpClientStub.setHttpStatus(HttpStatus.SC_OK);
-        service.setHttpClient(httpClientStub);
-        assertTrue(service.publish("message"));
-    }
-
-    @Test
     public void iconEmojiAndBotUserReturnsTrue() {
         StandardSlackServiceStub service = new StandardSlackServiceStub(
                 StandardSlackService.builder()

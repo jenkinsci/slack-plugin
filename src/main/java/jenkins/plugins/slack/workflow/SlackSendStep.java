@@ -413,7 +413,6 @@ public class SlackSendStep extends Step {
                         .withBotUser(botUser)
                         .withRoomId(channel)
                         .withReplyBroadcast(replyBroadcast)
-                        .withSendAsText(sendAsText)
                         .withIconEmoji(iconEmoji)
                         .withUsername(username)
                         .withPopulatedToken(populatedToken)

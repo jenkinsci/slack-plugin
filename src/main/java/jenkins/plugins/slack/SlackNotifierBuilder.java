@@ -10,7 +10,6 @@ public class SlackNotifierBuilder {
     boolean botUser;
     String room;
     String sendAs;
-    boolean sendAsText;
     String iconEmoji;
     String username;
     boolean startNotification;
@@ -65,11 +64,6 @@ public class SlackNotifierBuilder {
 
     public SlackNotifierBuilder withSendAs(String sendAs) {
         this.sendAs = sendAs;
-        return this;
-    }
-
-    public SlackNotifierBuilder withSendAsText(boolean sendAsText) {
-        this.sendAsText = sendAsText;
         return this;
     }
 
