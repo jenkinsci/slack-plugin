@@ -31,6 +31,7 @@ import jenkins.plugins.slack.logging.BuildAwareLogger;
 import jenkins.plugins.slack.logging.BuildKey;
 import jenkins.plugins.slack.logging.SlackNotificationsLogger;
 import jenkins.plugins.slack.matrix.MatrixTriggerMode;
+import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
 import org.apache.commons.lang.StringUtils;
 import org.jenkinsci.Symbol;
@@ -58,6 +59,7 @@ public class SlackNotifier extends Notifier {
     private boolean botUser;
     private String room;
     private String sendAs;
+    private boolean sendAsText;
     private String iconEmoji;
     private String username;
     private boolean startNotification;
@@ -159,6 +161,15 @@ public class SlackNotifier extends Notifier {
     @DataBoundSetter
     public void setSendAs(String sendAs) {
         this.sendAs = sendAs;
+    }
+
+    public boolean getSendAsText() {
+        return sendAsText;
+    }
+
+    @DataBoundSetter
+    public void setSendAsText(boolean sendAsText) {
+        this.sendAsText = sendAsText;
     }
 
     public String getIconEmoji() {
@@ -516,6 +527,7 @@ public class SlackNotifier extends Notifier {
         String authTokenCredentialId = Util.fixEmpty(this.tokenCredentialId) != null ? this.tokenCredentialId :
                 descriptor.getTokenCredentialId();
         String room = Util.fixEmpty(this.room) != null ? this.room : descriptor.getRoom();
+        boolean sendAsText = this.sendAsText || descriptor.isSendAsText();
         String iconEmoji = Util.fixEmpty(this.iconEmoji) != null ? this.iconEmoji : descriptor.getIconEmoji();
         String username = Util.fixEmpty(this.username) != null ? this.username : descriptor.getUsername();
 
@@ -603,6 +615,7 @@ public class SlackNotifier extends Notifier {
         private String token;
         private String tokenCredentialId;
         private boolean botUser;
+        private boolean sendAsText;
         private String iconEmoji;
         private String username;
         private String room;
@@ -672,6 +685,15 @@ public class SlackNotifier extends Notifier {
         @DataBoundSetter
         public void setBotUser(boolean botUser) {
             this.botUser = botUser;
+        }
+
+        public boolean isSendAsText() {
+            return sendAsText;
+        }
+
+        @DataBoundSetter
+        public void setSendAsText(boolean sendAsText) {
+            this.sendAsText = sendAsText;
         }
 
         public String getIconEmoji() { return iconEmoji; }
@@ -795,6 +817,7 @@ public class SlackNotifier extends Notifier {
                                                @QueryParameter("tokenCredentialId") final String tokenCredentialId,
                                                @QueryParameter("botUser") final boolean botUser,
                                                @QueryParameter("room") final String room,
+                                               @QueryParameter("sendAsText") final boolean sendAsText,
                                                @QueryParameter("iconEmoji") final String iconEmoji,
                                                @QueryParameter("username") final String username,
                                                @AncestorInPath Project project) {
@@ -819,6 +842,7 @@ public class SlackNotifier extends Notifier {
                 boolean targetBotUser = botUser || this.botUser;
                 String targetTokenCredentialId = Util.fixEmpty(tokenCredentialId) != null ? tokenCredentialId :
                         this.tokenCredentialId;
+                boolean targetSendAsText = sendAsText || this.sendAsText;
                 String targetIconEmoji = Util.fixEmpty(iconEmoji) != null ? iconEmoji : this.iconEmoji;
                 String targetUsername = Util.fixEmpty(username) != null ? username : this.username;
                 SlackService testSlackService = getSlackService(StandardSlackService.builder()
@@ -832,7 +856,12 @@ public class SlackNotifier extends Notifier {
                 );
 
                 String message = "Slack/Jenkins plugin: you're all set on " + DisplayURLProvider.get().getRoot();
-                boolean success = testSlackService.publish(message, "good");
+                boolean success;
+                if (targetSendAsText) {
+                    success = testSlackService.publish(message, new JSONArray(), "");
+                } else {
+                    success = testSlackService.publish(message, "good");
+                }
                 return success ? FormValidation.ok("Success") : FormValidation.error(
                         getErrorMessage(testSlackService.getResponseString())
                 );

@@ -35,6 +35,7 @@ public class StandardSlackService implements SlackService {
     private boolean botUser;
     private String[] roomIds;
     private boolean replyBroadcast;
+    private boolean sendAsText;
     private String iconEmoji;
     private String username;
     private String responseString;
@@ -61,6 +62,7 @@ public class StandardSlackService implements SlackService {
      */
     @Deprecated
     public StandardSlackService(String baseUrl, String teamDomain, String token, String authTokenCredentialId, boolean botUser, String roomId, boolean replyBroadcast) {
+
         this(baseUrl, teamDomain, botUser, roomId, replyBroadcast, authTokenCredentialId);
         this.populatedToken = getTokenToUse(authTokenCredentialId, token);
         if (this.populatedToken == null) {
@@ -156,8 +158,12 @@ public class StandardSlackService implements SlackService {
             if (StringUtils.isNotEmpty(message)) {
                 json.put("text", message);
             }
-            json.put("attachments", attachments);
+            if (attachments.size() > 0) {
+                json.put("attachments", attachments);
+            }
             json.put("link_names", "1");
+            json.put("unfurl_links", "true");
+            json.put("unfurl_media", "true");
 
             //prepare post methods for both requests types
             if (!botUser || !StringUtils.isEmpty(baseUrl)) {
@@ -166,6 +172,7 @@ public class StandardSlackService implements SlackService {
                     url = baseUrl + populatedToken;
                 }
                 post = new HttpPost(url);
+
             } else {
                 url = "https://slack.com/api/chat.postMessage";
 

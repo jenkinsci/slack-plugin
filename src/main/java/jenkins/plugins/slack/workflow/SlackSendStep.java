@@ -62,6 +62,7 @@ public class SlackSendStep extends Step {
     private boolean failOnError;
     private Object attachments;
     private boolean replyBroadcast;
+    private boolean sendAsText;
     private String iconEmoji;
     private String username;
 
@@ -168,6 +169,16 @@ public class SlackSendStep extends Step {
         this.replyBroadcast = replyBroadcast;
     }
 
+    public boolean getSendAsText() {
+        return sendAsText;
+    }
+
+    @DataBoundSetter
+    public void setSendAsText(boolean sendAsText) {
+        this.sendAsText = sendAsText;
+    }
+
+
     @DataBoundConstructor
     public SlackSendStep() {
     }
@@ -267,6 +278,7 @@ public class SlackSendStep extends Step {
             boolean botUser = step.botUser || slackDesc.isBotUser();
             String channel = step.channel != null ? step.channel : slackDesc.getRoom();
             String color = step.color != null ? step.color : "";
+            boolean sendAsText = step.sendAsText || slackDesc.isSendAsText();
             String iconEmoji = step.iconEmoji != null ? step.iconEmoji : slackDesc.getIconEmoji();
             String username = step.username != null ? step.username : slackDesc.getUsername();
 
@@ -286,10 +298,11 @@ public class SlackSendStep extends Step {
                 return null;
             }
 
-            SlackService slackService = getSlackService(
-                    baseUrl, teamDomain, botUser, channel, step.replyBroadcast, iconEmoji, username, populatedToken);
+            SlackService slackService = getSlackService(baseUrl, teamDomain, botUser, channel, step.replyBroadcast, sendAsText, iconEmoji, username, populatedToken);
             final boolean publishSuccess;
-            if (step.attachments != null) {
+            if (sendAsText) {
+                publishSuccess = slackService.publish(step.message, new JSONArray(), color);
+            } else if (step.attachments != null) {
                 JSONArray jsonArray = getAttachmentsAsJSONArray();
                 for (Object object : jsonArray) {
                     if (object instanceof JSONObject) {
@@ -392,7 +405,7 @@ public class SlackSendStep extends Step {
         }
 
         //streamline unit testing
-        SlackService getSlackService(String baseUrl, String team, boolean botUser, String channel, boolean replyBroadcast, String iconEmoji, String username, String populatedToken) {
+        SlackService getSlackService(String baseUrl, String team, boolean botUser, String channel, boolean replyBroadcast, boolean sendAsText, String iconEmoji, String username, String populatedToken) {
             return new StandardSlackService(
                     new StandardSlackServiceBuilder()
                         .withBaseUrl(baseUrl)
