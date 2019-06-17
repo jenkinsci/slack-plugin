@@ -180,7 +180,7 @@ public class StandardSlackService implements SlackService {
                 post.setHeader("Authorization", "Bearer " + populatedToken);
                 post.setHeader("Content-type", "application/json");
                 if (threadTs.length() > 1) {
-                    json.put("thread_ts", "threadTs");
+                    json.put("thread_ts", threadTs);
                 }
                 if (replyBroadcast) {
                     json.put("reply_broadcast", "true");
