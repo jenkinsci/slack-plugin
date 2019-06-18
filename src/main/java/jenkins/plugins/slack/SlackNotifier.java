@@ -527,7 +527,6 @@ public class SlackNotifier extends Notifier {
         String authTokenCredentialId = Util.fixEmpty(this.tokenCredentialId) != null ? this.tokenCredentialId :
                 descriptor.getTokenCredentialId();
         String room = Util.fixEmpty(this.room) != null ? this.room : descriptor.getRoom();
-        boolean sendAsText = this.sendAsText || descriptor.isSendAsText();
         String iconEmoji = Util.fixEmpty(this.iconEmoji) != null ? this.iconEmoji : descriptor.getIconEmoji();
         String username = Util.fixEmpty(this.username) != null ? this.username : descriptor.getUsername();
 
