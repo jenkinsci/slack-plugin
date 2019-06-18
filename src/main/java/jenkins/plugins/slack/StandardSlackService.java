@@ -1,6 +1,7 @@
 package jenkins.plugins.slack;
 
 import hudson.ProxyConfiguration;
+import java.nio.charset.StandardCharsets;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import jenkins.model.Jenkins;
@@ -202,7 +203,7 @@ public class StandardSlackService implements SlackService {
             CloseableHttpClient client = getHttpClient();
 
             try {
-                post.setEntity(new StringEntity(json.toString()));
+                post.setEntity(new StringEntity(json.toString(), StandardCharsets.UTF_8));
                 CloseableHttpResponse response = client.execute(post);
 
                 int responseCode = response.getStatusLine().getStatusCode();
