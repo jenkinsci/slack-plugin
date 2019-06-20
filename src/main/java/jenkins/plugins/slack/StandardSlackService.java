@@ -179,7 +179,6 @@ public class StandardSlackService implements SlackService {
 
                 post = new HttpPost(url);
                 post.setHeader("Authorization", "Bearer " + populatedToken);
-                post.setHeader("Content-type", "application/json");
                 if (threadTs.length() > 1) {
                     json.put("thread_ts", threadTs);
                 }
@@ -203,6 +202,7 @@ public class StandardSlackService implements SlackService {
             CloseableHttpClient client = getHttpClient();
 
             try {
+                post.setHeader("Content-Type", "application/json");
                 post.setEntity(new StringEntity(json.toString(), StandardCharsets.UTF_8));
                 CloseableHttpResponse response = client.execute(post);
 
