@@ -1,9 +1,13 @@
 package jenkins.plugins.slack;
 
 import hudson.ProxyConfiguration;
+import hudson.model.Run;
 import java.nio.charset.StandardCharsets;
+import java.util.Arrays;
+import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.stream.Collectors;
 import jenkins.model.Jenkins;
 import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
@@ -30,17 +34,19 @@ public class StandardSlackService implements SlackService {
 
     private static final Logger logger = Logger.getLogger(StandardSlackService.class.getName());
 
+    private Run run;
     private String host = "slack.com";
     private String baseUrl;
     private String teamDomain;
     private boolean botUser;
-    private String[] roomIds;
+    private List<String> roomIds;
     private boolean replyBroadcast;
     private boolean sendAsText;
     private String iconEmoji;
     private String username;
     private String responseString;
     private String populatedToken;
+    private boolean notifyCommitters;
 
     /**
      * @deprecated use {@link #StandardSlackService(String, String, boolean, String, boolean, String)} instead}
@@ -88,6 +94,7 @@ public class StandardSlackService implements SlackService {
     }
 
     public StandardSlackService(StandardSlackServiceBuilder standardSlackServiceBuilder) {
+        this.run = standardSlackServiceBuilder.run;
         this.baseUrl = standardSlackServiceBuilder.baseUrl;
         if (this.baseUrl != null && !this.baseUrl.isEmpty() && !this.baseUrl.endsWith("/")) {
             this.baseUrl += "/";
@@ -97,11 +104,12 @@ public class StandardSlackService implements SlackService {
         if (standardSlackServiceBuilder.roomId == null) {
             throw new IllegalArgumentException("Project Channel or Slack User ID must be specified.");
         }
-        this.roomIds = standardSlackServiceBuilder.roomId.split("[,; ]+");
+        this.roomIds = Arrays.asList(standardSlackServiceBuilder.roomId.split("[,; ]+"));
         this.replyBroadcast = standardSlackServiceBuilder.replyBroadcast;
         this.iconEmoji = correctEmojiFormat(standardSlackServiceBuilder.iconEmoji);
         this.username = standardSlackServiceBuilder.username;
         this.populatedToken = standardSlackServiceBuilder.populatedToken;
+        this.notifyCommitters = standardSlackServiceBuilder.notifyCommitters;
     }
 
     public static StandardSlackServiceBuilder builder() {
@@ -143,6 +151,15 @@ public class StandardSlackService implements SlackService {
     @Override
     public boolean publish(String message, JSONArray attachments, String color) {
         boolean result = true;
+        
+        // include committer userIds in roomIds
+        if (botUser && notifyCommitters && run != null) {
+            List<String> userIds = SlackUserIdResolver.resolveUserIdsForRun(run, populatedToken);
+            roomIds.addAll(userIds.stream()
+                    .map(userId -> "@" + userId)
+                    .collect(Collectors.toList())
+            );
+        }
         for (String roomId : roomIds) {
             HttpPost post;
             String url;
