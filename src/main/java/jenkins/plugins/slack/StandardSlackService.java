@@ -151,10 +151,12 @@ public class StandardSlackService implements SlackService {
     @Override
     public boolean publish(String message, JSONArray attachments, String color) {
         boolean result = true;
-        
+        CloseableHttpClient client = getHttpClient();
+  
         // include committer userIds in roomIds
         if (botUser && notifyCommitters && run != null) {
-            List<String> userIds = SlackUserIdResolver.resolveUserIdsForRun(run, populatedToken);
+            SlackUserIdResolver resolver = SlackUserIdResolver.get(populatedToken, client);
+            List<String> userIds = resolver.resolveUserIdsForRun(run);
             roomIds.addAll(userIds.stream()
                     .map(userId -> "@" + userId)
                     .collect(Collectors.toList())
@@ -216,7 +218,6 @@ public class StandardSlackService implements SlackService {
             }
 
             logger.fine("Posting: to " + roomId + " on " + teamDomain + " using " + url + ": " + attachments.toString() + " " + color);
-            CloseableHttpClient client = getHttpClient();
 
             try {
                 post.setHeader("Content-Type", "application/json");
