@@ -42,7 +42,6 @@ import static org.powermock.api.mockito.PowerMockito.spy;
 /**
  * Traditional Unit tests, allows testing null Jenkins.get()
  */
-@PowerMockIgnore({"javax.net.ssl.*"}) 
 @RunWith(PowerMockRunner.class)
 @PrepareForTest({Jenkins.class, SlackSendStep.class, CredentialsObtainer.class})
 public class SlackSendStepTest {

@@ -152,7 +152,7 @@ public class StandardSlackService implements SlackService {
     public boolean publish(String message, JSONArray attachments, String color) {
         boolean result = true;
         CloseableHttpClient client = getHttpClient();
-  
+
         // include committer userIds in roomIds
         if (botUser && notifyCommitters && run != null) {
             SlackUserIdResolver resolver = SlackUserIdResolver.get(populatedToken, client);
