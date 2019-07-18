@@ -57,7 +57,7 @@ public class SlackUserIdResolverTest {
 
     static final String EXPECTED_USER_ID = "W012A3CDE";
     static final String EMAIL_ADDRESS = "spengler@ghostbusters.example.com";
-    static final String TOKEN = "token";
+    static final String AUTH_TOKEN = "token";
 
     CloseableHttpClient httpClient = mock(CloseableHttpClient.class);
     CloseableHttpResponse response = mock(CloseableHttpResponse.class);
@@ -72,14 +72,21 @@ public class SlackUserIdResolverTest {
 
     @Test
     public void testResolveUserIdForEmailAddress() throws IOException {
-        String reponseString = IOUtils.toString(
+        when(statusLine.getStatusCode()).thenReturn(HttpStatus.SC_OK);
+        SlackUserIdResolver resolver = SlackUserIdResolver.get(AUTH_TOKEN, httpClient);
+
+        String reponseOkString = IOUtils.toString(
                 this.getClass().getResourceAsStream("lookUpByEmailResponseOK.json")
         );
-        when(statusLine.getStatusCode()).thenReturn(HttpStatus.SC_OK);
-        when(EntityUtils.toString(any(HttpEntity.class))).thenReturn(reponseString);
-        SlackUserIdResolver resolver = SlackUserIdResolver.get(TOKEN, httpClient);
+        when(EntityUtils.toString(any(HttpEntity.class))).thenReturn(reponseOkString);
         String userId = resolver.resolveUserIdForEmailAddress(EMAIL_ADDRESS);
-
         assertEquals(EXPECTED_USER_ID, userId);
+
+        String reponseErrorString = IOUtils.toString(
+                this.getClass().getResourceAsStream("lookUpByEmailResponseError.json")
+        );
+        when(EntityUtils.toString(any(HttpEntity.class))).thenReturn(reponseErrorString);
+        userId = resolver.resolveUserIdForEmailAddress(EMAIL_ADDRESS);
+        assertEquals(null, userId);
     }
 }
