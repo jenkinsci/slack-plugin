@@ -11,10 +11,12 @@ import org.apache.http.params.HttpParams;
 
 public class CloseableHttpResponseStub implements CloseableHttpResponse {
 
+    private HttpEntity entity;
     private int responseCode;
 
     public CloseableHttpResponseStub(int response) {
-        responseCode = response;
+        this.responseCode = response;
+        this.entity = null;
     }
 
     @Override
@@ -69,12 +71,12 @@ public class CloseableHttpResponseStub implements CloseableHttpResponse {
 
     @Override
     public HttpEntity getEntity() {
-        return null;
+        return entity;
     }
 
     @Override
     public void setEntity(HttpEntity httpEntity) {
-
+        this.entity = httpEntity;
     }
 
     @Override

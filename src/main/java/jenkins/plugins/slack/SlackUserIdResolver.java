@@ -23,7 +23,6 @@
  */
 package jenkins.plugins.slack;
 
-import edu.umd.cs.findbugs.annotations.NonNull;
 import hudson.model.AbstractBuild;
 import hudson.model.Run;
 import hudson.model.User;
@@ -64,31 +63,18 @@ public class SlackUserIdResolver {
     private static final String SLACK_USER_FIELD = "user";
     private static final String SLACK_ID_FIELD = "id";
 
-    private static SlackUserIdResolver instance = null;
     private final String authToken;
     private final CloseableHttpClient httpClient;
     private final List<MailAddressResolver> mailAddressResolvers;
 
-    private SlackUserIdResolver(String authToken, CloseableHttpClient httpClient, List<MailAddressResolver> mailAddressResolvers) {
+    public SlackUserIdResolver(String authToken, CloseableHttpClient httpClient, List<MailAddressResolver> mailAddressResolvers) {
         this.authToken = authToken;
         this.httpClient = httpClient;
-        this.mailAddressResolvers = mailAddressResolvers;
+        this.mailAddressResolvers = (mailAddressResolvers != null) ? mailAddressResolvers : MailAddressResolver.all();
     }
 
-    @NonNull
-    public static SlackUserIdResolver get(String authToken, CloseableHttpClient httpClient, List<MailAddressResolver> mailAddressResolvers) {
-        if (instance == null) {
-            if (mailAddressResolvers == null) {
-                mailAddressResolvers = MailAddressResolver.all();
-            }
-            instance = new SlackUserIdResolver(authToken, httpClient, mailAddressResolvers);
-        }
-        return instance;
-    }
-
-    @NonNull
-    public static SlackUserIdResolver get(String authToken, CloseableHttpClient httpClient) {
-        return get(authToken, httpClient, null);
+    public SlackUserIdResolver(String authToken, CloseableHttpClient httpClient) {
+        this(authToken, httpClient, null);
     }
 
     public List<String> resolveUserIdsForBuild(AbstractBuild build) {

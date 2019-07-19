@@ -156,7 +156,7 @@ public class StandardSlackService implements SlackService {
 
         // include committer userIds in roomIds
         if (botUser && notifyCommitters && run != null) {
-            SlackUserIdResolver resolver = SlackUserIdResolver.get(populatedToken, client);
+            SlackUserIdResolver resolver = new SlackUserIdResolver(populatedToken, client);
             List<String> userIds = resolver.resolveUserIdsForRun(run);
             roomIds.addAll(userIds.stream()
                     .distinct()

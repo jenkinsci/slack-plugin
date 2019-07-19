@@ -31,86 +31,85 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import org.apache.commons.io.IOUtils;
-import org.apache.http.HttpEntity;
 import org.apache.http.HttpStatus;
-import org.apache.http.StatusLine;
 import org.apache.http.client.methods.CloseableHttpResponse;
-import org.apache.http.client.methods.HttpUriRequest;
-import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.util.EntityUtils;
+import org.apache.http.entity.StringEntity;
 import org.junit.Before;
-import org.junit.Rule;
 import org.junit.Test;
-import org.junit.runner.RunWith;
 import org.jvnet.hudson.test.FakeChangeLogSCM.EntryImpl;
 import org.jvnet.hudson.test.FakeChangeLogSCM.FakeChangeLogSet;
-import org.jvnet.hudson.test.JenkinsRule;
-import org.powermock.core.classloader.annotations.PowerMockIgnore;
-import org.powermock.core.classloader.annotations.PrepareForTest;
-import org.powermock.modules.junit4.PowerMockRunner;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.any;
 import static org.powermock.api.mockito.PowerMockito.mock;
-import static org.powermock.api.mockito.PowerMockito.mockStatic;
 import static org.powermock.api.mockito.PowerMockito.when;
 
 /**
  *
  * @author stuartr
  */
-@RunWith(PowerMockRunner.class)
-@PowerMockIgnore({"javax.net.ssl.*"})
-@PrepareForTest(EntityUtils.class)
 public class SlackUserIdResolverTest {
 
-    static final String EXPECTED_USER_ID = "W012A3CDE";
-    static final String EMAIL_ADDRESS = "spengler@ghostbusters.example.com";
-    static final String USERNAME = "spengler";
-    static final String AUTH_TOKEN = "token";
+    private static final String EXPECTED_USER_ID = "W012A3CDE";
+    private static final String EMAIL_ADDRESS = "spengler@ghostbusters.example.com";
+    private static final String AUTH_TOKEN = "token";
 
-    @Rule
-    JenkinsRule jenkinsRule = new JenkinsRule();
+    private static String responseOKContent;
+    private static String responseErrorContent;
 
-    CloseableHttpClient httpClient = mock(CloseableHttpClient.class);
-    CloseableHttpResponse response = mock(CloseableHttpResponse.class);
-    StatusLine statusLine = mock(StatusLine.class);
-    SlackUserIdResolver resolver;
+    private CloseableHttpClientStub httpClient;
+    private SlackUserIdResolver resolver;
 
-    @Before
-    public void setupSlackUserIdResolver() throws Exception {
-        mockStatic(EntityUtils.class);
+    public SlackUserIdResolverTest() throws IOException {
+        responseOKContent = readResource("lookUpByEmailResponseOK.json");
+        responseErrorContent = readResource("lookUpByEmailResponseError.json");
+    }
 
-        // Set up the default HTTP response
-        String reponseOkString = IOUtils.toString(
-                this.getClass().getResourceAsStream("lookUpByEmailResponseOK.json")
-        );
-        when(EntityUtils.toString(any(HttpEntity.class))).thenReturn(reponseOkString);
-        when(statusLine.getStatusCode()).thenReturn(HttpStatus.SC_OK);
-        when(response.getStatusLine()).thenReturn(statusLine);
-        when(httpClient.execute(any(HttpUriRequest.class))).thenReturn(response);
+    private String readResource(String resourceName) throws IOException {
+        return IOUtils.toString(this.getClass().getResourceAsStream(resourceName));
+    }
 
-        // Setup MailAddressResolver mock
+    private CloseableHttpResponse getResponse(String content) throws IOException {
+        CloseableHttpResponseStub httpResponse = new CloseableHttpResponseStub(HttpStatus.SC_OK);
+        httpResponse.setEntity(new StringEntity(content));
+        return httpResponse;
+    }
+
+    private CloseableHttpResponse getResponseOK() throws IOException {
+        return getResponse(responseOKContent);
+    }
+
+    private CloseableHttpResponse getResponseError() throws IOException {
+        return getResponse(responseErrorContent);
+    }
+
+    private SlackUserIdResolver getResolver(CloseableHttpClientStub httpClient) {
         MailAddressResolver mailAddressResolver = mock(MailAddressResolver.class);
         when(mailAddressResolver.findMailAddressFor(any(User.class))).thenReturn(EMAIL_ADDRESS);
         List<MailAddressResolver> mailAddressResolverList = new ArrayList<>();
         mailAddressResolverList.add(mailAddressResolver);
 
-        // Create a reesolver for use by tests
-        resolver = SlackUserIdResolver.get(AUTH_TOKEN, httpClient, mailAddressResolverList);
+        return new SlackUserIdResolver(AUTH_TOKEN, httpClient, mailAddressResolverList);
+    }
+
+    @Before
+    public void setUp() {
+        httpClient = new CloseableHttpClientStub();
+        resolver = getResolver(httpClient);
     }
 
     @Test
     public void testResolveUserIdForEmailAddress() throws IOException {
-        String userId = resolver.resolveUserIdForEmailAddress(EMAIL_ADDRESS);
+        String userId;
+
+        // Test handling of a success response from Slack
+        httpClient.setHttpResponse(getResponseOK());
+        userId = resolver.resolveUserIdForEmailAddress(EMAIL_ADDRESS);
         assertEquals(EXPECTED_USER_ID, userId);
 
         // Test handling of an error response from Slack
-        String reponseErrorString = IOUtils.toString(
-                this.getClass().getResourceAsStream("lookUpByEmailResponseError.json")
-        );
-        when(EntityUtils.toString(any(HttpEntity.class))).thenReturn(reponseErrorString);
+        httpClient.setHttpResponse(getResponseError());
         userId = resolver.resolveUserIdForEmailAddress(EMAIL_ADDRESS);
         assertEquals(null, userId);
     }
@@ -119,12 +118,15 @@ public class SlackUserIdResolverTest {
     public void testResolveUserIdForUser() throws Exception {
         // MailAddressResolver is mocked to return EMAIL_ADDRESS associated with
         // the EXPECTED_USER_ID
+        httpClient.setHttpResponse(getResponseOK());
         String userId = resolver.resolveUserId(mock(User.class));
         assertEquals(EXPECTED_USER_ID, userId);
     }
 
     @Test
     public void testResolveUserIdForChangelogSet() throws Exception {
+        httpClient.setHttpResponse(getResponseOK());
+
         // Create a FakeChangeLogSet with a single Entry by a mocked User
         EntryImpl mockEntry = mock(EntryImpl.class);
         when(mockEntry.getAuthor()).thenReturn(mock(User.class));
