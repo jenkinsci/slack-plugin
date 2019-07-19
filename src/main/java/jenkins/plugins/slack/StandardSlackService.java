@@ -159,6 +159,7 @@ public class StandardSlackService implements SlackService {
             SlackUserIdResolver resolver = SlackUserIdResolver.get(populatedToken, client);
             List<String> userIds = resolver.resolveUserIdsForRun(run);
             roomIds.addAll(userIds.stream()
+                    .distinct()
                     .map(userId -> "@" + userId)
                     .collect(Collectors.toList())
             );
