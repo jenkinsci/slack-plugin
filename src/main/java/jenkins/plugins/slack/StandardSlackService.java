@@ -3,6 +3,7 @@ package jenkins.plugins.slack;
 import hudson.ProxyConfiguration;
 import hudson.model.Run;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.logging.Level;
@@ -104,7 +105,7 @@ public class StandardSlackService implements SlackService {
         if (standardSlackServiceBuilder.roomId == null) {
             throw new IllegalArgumentException("Project Channel or Slack User ID must be specified.");
         }
-        this.roomIds = Arrays.asList(standardSlackServiceBuilder.roomId.split("[,; ]+"));
+        this.roomIds = new ArrayList<>(Arrays.asList(standardSlackServiceBuilder.roomId.split("[,; ]+")));
         this.replyBroadcast = standardSlackServiceBuilder.replyBroadcast;
         this.iconEmoji = correctEmojiFormat(standardSlackServiceBuilder.iconEmoji);
         this.username = standardSlackServiceBuilder.username;
