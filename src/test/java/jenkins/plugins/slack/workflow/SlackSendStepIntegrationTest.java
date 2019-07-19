@@ -39,7 +39,7 @@ public class SlackSendStepIntegrationTest {
         job.setDefinition(new CpsFlowDefinition("slackSend(message: 'message', baseUrl: 'baseUrl', teamDomain: 'teamDomain', token: 'token', tokenCredentialId: 'tokenCredentialId', channel: '#channel', color: 'good', iconEmoji: ':+1:', username: 'username');", true));
         WorkflowRun run = jenkinsRule.assertBuildStatusSuccess(job.scheduleBuild2(0).get());
         //everything should come from step configuration
-        jenkinsRule.assertLogContains(Messages.slackSendStepValues("baseUrl/", "teamDomain", "#channel", "good", false, "tokenCredentialId", ":+1:", "username"), run);
+        jenkinsRule.assertLogContains(Messages.slackSendStepValues("baseUrl/", "teamDomain", "#channel", "good", false, "tokenCredentialId", false, ":+1:", "username"), run);
     }
 
     @Test

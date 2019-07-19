@@ -299,7 +299,7 @@ public class SlackSendStep extends Step {
 
             listener.getLogger().println(Messages.slackSendStepValues(
                     defaultIfEmpty(baseUrl), defaultIfEmpty(teamDomain), channel, defaultIfEmpty(color), botUser,
-                    defaultIfEmpty(tokenCredentialId), defaultIfEmpty(iconEmoji), defaultIfEmpty(username))
+                    defaultIfEmpty(tokenCredentialId), notifyCommitters, defaultIfEmpty(iconEmoji), defaultIfEmpty(username))
             );
             final String populatedToken;
             try {
