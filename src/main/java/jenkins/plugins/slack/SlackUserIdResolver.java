@@ -96,7 +96,7 @@ public class SlackUserIdResolver {
 
     public List<String> resolveUserIdsForChangeLogSet(ChangeLogSet changeLogSet) {
         return Arrays.stream(changeLogSet.getItems())
-                .map(entry -> resolveUserId(((Entry) entry).getAuthor()))
+                .map(item -> resolveUserId(((Entry) item).getAuthor()))
                 .filter(Objects::nonNull)
                 .collect(Collectors.toList());
     }
@@ -116,7 +116,7 @@ public class SlackUserIdResolver {
     }
 
     public String resolveUserId(User user) {
-        for (MailAddressResolver resolver : MailAddressResolver.LIST) {
+        for (MailAddressResolver resolver : MailAddressResolver.all()) {
             String emailAddress = resolver.findMailAddressFor(user);
             if (StringUtils.isNotEmpty(emailAddress)) {
                 String userId = resolveUserIdForEmailAddress(emailAddress);
