@@ -23,7 +23,6 @@
  */
 package jenkins.plugins.slack;
 
-import hudson.ExtensionList;
 import hudson.model.Run;
 import hudson.model.User;
 import hudson.scm.ChangeLogSet;
@@ -31,7 +30,6 @@ import hudson.tasks.MailAddressResolver;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import jenkins.model.Jenkins;
 import org.apache.commons.io.IOUtils;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpStatus;
@@ -64,7 +62,7 @@ import static org.powermock.api.mockito.PowerMockito.when;
  */
 @RunWith(PowerMockRunner.class)
 @PowerMockIgnore({"javax.net.ssl.*"})
-@PrepareForTest({EntityUtils.class, MailAddressResolver.class})
+@PrepareForTest(EntityUtils.class)
 public class SlackUserIdResolverTest {
 
     static final String EXPECTED_USER_ID = "W012A3CDE";
@@ -83,10 +81,6 @@ public class SlackUserIdResolverTest {
     @Before
     public void setupSlackUserIdResolver() throws Exception {
         mockStatic(EntityUtils.class);
-        mockStatic(MailAddressResolver.class);
-
-        // Create a reesolver for use by tests
-        resolver = SlackUserIdResolver.get(AUTH_TOKEN, httpClient);
 
         // Set up the default HTTP response
         String reponseOkString = IOUtils.toString(
@@ -98,16 +92,13 @@ public class SlackUserIdResolverTest {
         when(httpClient.execute(any(HttpUriRequest.class))).thenReturn(response);
 
         // Setup MailAddressResolver mock
-        Jenkins jenkins = jenkinsRule.getInstance();
         MailAddressResolver mailAddressResolver = mock(MailAddressResolver.class);
         when(mailAddressResolver.findMailAddressFor(any(User.class))).thenReturn(EMAIL_ADDRESS);
         List<MailAddressResolver> mailAddressResolverList = new ArrayList<>();
         mailAddressResolverList.add(mailAddressResolver);
 
-        // Create and mock ExtensionList for MailAddressResolver
-        ExtensionList extensionList = ExtensionList.create(jenkins, MailAddressResolver.class);
-        extensionList.addAll(mailAddressResolverList);
-        when(MailAddressResolver.all()).thenReturn(extensionList);
+        // Create a reesolver for use by tests
+        resolver = SlackUserIdResolver.get(AUTH_TOKEN, httpClient, mailAddressResolverList);
     }
 
     @Test

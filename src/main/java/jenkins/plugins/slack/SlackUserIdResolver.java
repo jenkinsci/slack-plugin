@@ -67,18 +67,28 @@ public class SlackUserIdResolver {
     private static SlackUserIdResolver instance = null;
     private final String authToken;
     private final CloseableHttpClient httpClient;
+    private final List<MailAddressResolver> mailAddressResolvers;
 
-    private SlackUserIdResolver(String authToken, CloseableHttpClient httpClient) {
+    private SlackUserIdResolver(String authToken, CloseableHttpClient httpClient, List<MailAddressResolver> mailAddressResolvers) {
         this.authToken = authToken;
         this.httpClient = httpClient;
+        this.mailAddressResolvers = mailAddressResolvers;
+    }
+
+    @NonNull
+    public static SlackUserIdResolver get(String authToken, CloseableHttpClient httpClient, List<MailAddressResolver> mailAddressResolvers) {
+        if (instance == null) {
+            if (mailAddressResolvers == null) {
+                mailAddressResolvers = MailAddressResolver.all();
+            }
+            instance = new SlackUserIdResolver(authToken, httpClient, mailAddressResolvers);
+        }
+        return instance;
     }
 
     @NonNull
     public static SlackUserIdResolver get(String authToken, CloseableHttpClient httpClient) {
-        if (instance == null) {
-            instance = new SlackUserIdResolver(authToken, httpClient);
-        }
-        return instance;
+        return get(authToken, httpClient, null);
     }
 
     public List<String> resolveUserIdsForBuild(AbstractBuild build) {
@@ -116,7 +126,7 @@ public class SlackUserIdResolver {
     }
 
     public String resolveUserId(User user) {
-        for (MailAddressResolver resolver : MailAddressResolver.all()) {
+        for (MailAddressResolver resolver : mailAddressResolvers) {
             String emailAddress = resolver.findMailAddressFor(user);
             if (StringUtils.isNotEmpty(emailAddress)) {
                 String userId = resolveUserIdForEmailAddress(emailAddress);
