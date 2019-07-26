@@ -210,9 +210,14 @@ public class StandardSlackService implements SlackService {
                 HttpEntity entity = response.getEntity();
                 if (botUser && entity != null) {
                     responseString = EntityUtils.toString(entity);
+                    try {
 
-                    org.json.JSONObject slackResponse = new org.json.JSONObject(responseString);
-                    result = slackResponse.getBoolean("ok");
+                        org.json.JSONObject slackResponse = new org.json.JSONObject(responseString);
+                        result = slackResponse.getBoolean("ok");
+                    } catch (org.json.JSONException ex) {
+                        logger.log(Level.WARNING, "Slack post may have failed.  Invalid JSON response: " + responseString);
+                        result = false;
+                    }
                 }
                 if (responseCode != HttpStatus.SC_OK || !result) {
                     logger.log(Level.WARNING, "Slack post may have failed. Response: " + responseString);
