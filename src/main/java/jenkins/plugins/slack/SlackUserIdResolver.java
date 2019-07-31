@@ -50,10 +50,6 @@ import org.apache.http.util.EntityUtils;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-/**
- *
- * @author stuartr
- */
 public class SlackUserIdResolver {
 
     private static final Logger LOGGER = Logger.getLogger(SlackUserIdResolver.class.getName());

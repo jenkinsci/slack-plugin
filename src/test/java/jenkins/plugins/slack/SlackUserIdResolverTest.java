@@ -45,10 +45,6 @@ import static org.mockito.Matchers.any;
 import static org.powermock.api.mockito.PowerMockito.mock;
 import static org.powermock.api.mockito.PowerMockito.when;
 
-/**
- *
- * @author stuartr
- */
 public class SlackUserIdResolverTest {
 
     private static final String EXPECTED_USER_ID = "W012A3CDE";
