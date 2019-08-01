@@ -38,6 +38,7 @@ import java.util.Objects;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
+import jenkins.plugins.slack.user.SlackUserProperty;
 import jenkins.scm.RunWithSCM;
 import org.apache.commons.lang.StringUtils;
 import org.apache.http.HttpEntity;
@@ -77,7 +78,7 @@ public class SlackUserIdResolver {
         if (run instanceof RunWithSCM) {
             RunWithSCM r = (RunWithSCM) run;
             return resolveUserIdsForChangeLogSets(r.getChangeSets());
-        } else if(run instanceof AbstractBuild) {
+        } else if (run instanceof AbstractBuild) {
             AbstractBuild build = (AbstractBuild) run;
             return resolveUserIdsForChangeLogSets(build.getChangeSets());
         } else {
@@ -107,13 +108,36 @@ public class SlackUserIdResolver {
     }
 
     public String resolveUserId(User user) {
-        return mailAddressResolvers.stream()
-            .map(resolver -> resolver.findMailAddressFor(user))
-            .filter(emailAddress -> StringUtils.isNotEmpty(emailAddress))
-            .map(this::resolveUserIdForEmailAddress)
-            .filter(userId -> StringUtils.isNotEmpty(userId))
-            .findAny()
-            .orElse(null);
+        String userId = null;
+        SlackUserProperty userProperty = user.getProperty(SlackUserProperty.class);
+        if (userProperty != null) {
+            userId = userProperty.getUserId();
+        } else {
+            userProperty = new SlackUserProperty(null, false);
+        }
+
+        if (StringUtils.isEmpty(userId)) {
+            userId = mailAddressResolvers.stream()
+                .map(resolver -> resolver.findMailAddressFor(user))
+                .filter(emailAddress -> StringUtils.isNotEmpty(emailAddress))
+                .map(this::resolveUserIdForEmailAddress)
+                .filter(id -> StringUtils.isNotEmpty(id))
+                .findAny()
+                .orElse(null);
+
+            userProperty.setUserId(userId);
+            try {
+                user.addProperty(userProperty);
+            } catch (IOException ex) {
+                LOGGER.log(Level.WARNING, "Failed to add SlackUserProperty to user: " + user.toString(), ex);
+            }
+        }
+
+        if (userProperty.getDisableNotifications()) {
+            userId = null;
+        }
+
+        return userId;
     }
 
     public String resolveUserIdForEmailAddress(String emailAddress) {

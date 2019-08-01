@@ -30,6 +30,7 @@ import hudson.tasks.MailAddressResolver;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import jenkins.plugins.slack.user.SlackUserProperty;
 import org.apache.commons.io.IOUtils;
 import org.apache.http.HttpStatus;
 import org.apache.http.client.methods.CloseableHttpResponse;
@@ -42,6 +43,8 @@ import org.jvnet.hudson.test.FakeChangeLogSCM.FakeChangeLogSet;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.any;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
 import static org.powermock.api.mockito.PowerMockito.mock;
 import static org.powermock.api.mockito.PowerMockito.when;
 
@@ -56,6 +59,7 @@ public class SlackUserIdResolverTest {
 
     private CloseableHttpClientStub httpClient;
     private SlackUserIdResolver resolver;
+    private MailAddressResolver mailAddressResolver;
 
     public SlackUserIdResolverTest() throws IOException {
         responseOKContent = readResource("lookUpByEmailResponseOK.json");
@@ -65,7 +69,8 @@ public class SlackUserIdResolverTest {
     @Before
     public void setUp() {
         httpClient = new CloseableHttpClientStub();
-        resolver = getResolver(httpClient);
+        mailAddressResolver = getMailAddressResolver();
+        resolver = getResolver(httpClient, mailAddressResolver);
     }
 
     @Test
@@ -90,6 +95,15 @@ public class SlackUserIdResolverTest {
         httpClient.setHttpResponse(getResponseOK());
         String userId = resolver.resolveUserId(mock(User.class));
         assertEquals(EXPECTED_USER_ID, userId);
+    }
+
+    @Test
+    public void testResolveUserIdForUserWithSlackUserProperty() throws Exception {
+        User mockUser = mock(User.class);
+        when(mockUser.getProperty(SlackUserProperty.class)).thenReturn(new SlackUserProperty(EXPECTED_USER_ID, false));
+        String userId = resolver.resolveUserId(mockUser);
+        assertEquals(EXPECTED_USER_ID, userId);
+        verify(mailAddressResolver, never()).findMailAddressFor(any(User.class));
     }
 
     @Test
@@ -140,12 +154,15 @@ public class SlackUserIdResolverTest {
         return getResponse(responseErrorContent);
     }
 
-    private SlackUserIdResolver getResolver(CloseableHttpClientStub httpClient) {
-        MailAddressResolver mailAddressResolver = mock(MailAddressResolver.class);
+    private MailAddressResolver getMailAddressResolver() {
+        mailAddressResolver = mock(MailAddressResolver.class);
         when(mailAddressResolver.findMailAddressFor(any(User.class))).thenReturn(EMAIL_ADDRESS);
+        return mailAddressResolver;
+    }
+
+    private SlackUserIdResolver getResolver(CloseableHttpClientStub httpClientMailAddressResolver, MailAddressResolver mailAddressResolver) {
         List<MailAddressResolver> mailAddressResolverList = new ArrayList<>();
         mailAddressResolverList.add(mailAddressResolver);
-
         return new SlackUserIdResolver(AUTH_TOKEN, httpClient, mailAddressResolverList);
     }
 
