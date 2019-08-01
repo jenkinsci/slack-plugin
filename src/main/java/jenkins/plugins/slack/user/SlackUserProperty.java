@@ -75,10 +75,8 @@ public class SlackUserProperty extends UserProperty {
         }
 
         @Override
-        public UserProperty newInstance(StaplerRequest req, JSONObject formData) throws FormException {
-            String userId = formData.optString("userId");
-            boolean disableNotifications = formData.optBoolean("disableNotifications");
-            return new SlackUserProperty(userId, disableNotifications);
+        public UserProperty newInstance(StaplerRequest req, JSONObject formData) {
+            return req.bindJSON(SlackUserProperty.class, formData);
         }
     }
 }
