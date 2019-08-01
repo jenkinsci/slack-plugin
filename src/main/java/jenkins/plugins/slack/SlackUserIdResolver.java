@@ -51,6 +51,7 @@ import org.apache.http.util.EntityUtils;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+@Restricted(NoExternalUse.class)
 public class SlackUserIdResolver {
 
     private static final Logger LOGGER = Logger.getLogger(SlackUserIdResolver.class.getName());
