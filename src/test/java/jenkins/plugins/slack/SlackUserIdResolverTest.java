@@ -62,33 +62,6 @@ public class SlackUserIdResolverTest {
         responseErrorContent = readResource("lookUpByEmailResponseError.json");
     }
 
-    private String readResource(String resourceName) throws IOException {
-        return IOUtils.toString(this.getClass().getResourceAsStream(resourceName));
-    }
-
-    private CloseableHttpResponse getResponse(String content) throws IOException {
-        CloseableHttpResponseStub httpResponse = new CloseableHttpResponseStub(HttpStatus.SC_OK);
-        httpResponse.setEntity(new StringEntity(content));
-        return httpResponse;
-    }
-
-    private CloseableHttpResponse getResponseOK() throws IOException {
-        return getResponse(responseOKContent);
-    }
-
-    private CloseableHttpResponse getResponseError() throws IOException {
-        return getResponse(responseErrorContent);
-    }
-
-    private SlackUserIdResolver getResolver(CloseableHttpClientStub httpClient) {
-        MailAddressResolver mailAddressResolver = mock(MailAddressResolver.class);
-        when(mailAddressResolver.findMailAddressFor(any(User.class))).thenReturn(EMAIL_ADDRESS);
-        List<MailAddressResolver> mailAddressResolverList = new ArrayList<>();
-        mailAddressResolverList.add(mailAddressResolver);
-
-        return new SlackUserIdResolver(AUTH_TOKEN, httpClient, mailAddressResolverList);
-    }
-
     @Before
     public void setUp() {
         httpClient = new CloseableHttpClientStub();
@@ -148,4 +121,32 @@ public class SlackUserIdResolverTest {
 
         assertTrue(userIdList.containsAll(expectedUserIdList));
     }
+
+    private String readResource(String resourceName) throws IOException {
+        return IOUtils.toString(this.getClass().getResourceAsStream(resourceName));
+    }
+
+    private CloseableHttpResponse getResponse(String content) throws IOException {
+        CloseableHttpResponseStub httpResponse = new CloseableHttpResponseStub(HttpStatus.SC_OK);
+        httpResponse.setEntity(new StringEntity(content));
+        return httpResponse;
+    }
+
+    private CloseableHttpResponse getResponseOK() throws IOException {
+        return getResponse(responseOKContent);
+    }
+
+    private CloseableHttpResponse getResponseError() throws IOException {
+        return getResponse(responseErrorContent);
+    }
+
+    private SlackUserIdResolver getResolver(CloseableHttpClientStub httpClient) {
+        MailAddressResolver mailAddressResolver = mock(MailAddressResolver.class);
+        when(mailAddressResolver.findMailAddressFor(any(User.class))).thenReturn(EMAIL_ADDRESS);
+        List<MailAddressResolver> mailAddressResolverList = new ArrayList<>();
+        mailAddressResolverList.add(mailAddressResolver);
+
+        return new SlackUserIdResolver(AUTH_TOKEN, httpClient, mailAddressResolverList);
+    }
+
 }

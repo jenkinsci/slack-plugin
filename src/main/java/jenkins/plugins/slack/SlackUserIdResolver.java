@@ -66,23 +66,22 @@ public class SlackUserIdResolver {
     public SlackUserIdResolver(String authToken, CloseableHttpClient httpClient, List<MailAddressResolver> mailAddressResolvers) {
         this.authToken = authToken;
         this.httpClient = httpClient;
-        this.mailAddressResolvers = (mailAddressResolvers != null) ? mailAddressResolvers : MailAddressResolver.all();
+        this.mailAddressResolvers = mailAddressResolvers != null ? mailAddressResolvers : MailAddressResolver.all();
     }
 
     public SlackUserIdResolver(String authToken, CloseableHttpClient httpClient) {
         this(authToken, httpClient, null);
     }
 
-    public List<String> resolveUserIdsForBuild(AbstractBuild build) {
-        return resolveUserIdsForChangeLogSets(build.getChangeSets());
-    }
-
     public List<String> resolveUserIdsForRun(Run run) {
         if (run instanceof RunWithSCM) {
             RunWithSCM r = (RunWithSCM) run;
             return resolveUserIdsForChangeLogSets(r.getChangeSets());
+        } else if(run instanceof AbstractBuild) {
+            AbstractBuild build = (AbstractBuild) run;
+            return resolveUserIdsForChangeLogSets(build.getChangeSets());
         } else {
-            return Collections.EMPTY_LIST;
+            return Collections.emptyList();
         }
     }
 
@@ -95,29 +94,26 @@ public class SlackUserIdResolver {
 
     public List<String> resolveUserIdsForChangeLogSets(List<ChangeLogSet> changeLogSets) {
         return changeLogSets.stream()
-                .map(changeLogSet -> resolveUserIdsForChangeLogSet(changeLogSet))
+                .map(this::resolveUserIdsForChangeLogSet)
                 .flatMap(Collection::stream)
                 .collect(Collectors.toList());
     }
 
     public List<String> resolveUserIdsForEmailAddresses(List<String> emailAddresses) {
         return emailAddresses.stream()
-                .map(address -> resolveUserIdForEmailAddress(address))
+                .map(this::resolveUserIdForEmailAddress)
                 .filter(Objects::nonNull)
                 .collect(Collectors.toList());
     }
 
     public String resolveUserId(User user) {
-        for (MailAddressResolver resolver : mailAddressResolvers) {
-            String emailAddress = resolver.findMailAddressFor(user);
-            if (StringUtils.isNotEmpty(emailAddress)) {
-                String userId = resolveUserIdForEmailAddress(emailAddress);
-                if (StringUtils.isNotEmpty(userId)) {
-                    return userId;
-                }
-            }
-        }
-        return null;
+        return mailAddressResolvers.stream()
+            .map(resolver -> resolver.findMailAddressFor(user))
+            .filter(emailAddress -> StringUtils.isNotEmpty(emailAddress))
+            .map(this::resolveUserIdForEmailAddress)
+            .filter(userId -> StringUtils.isNotEmpty(userId))
+            .findAny()
+            .orElse(null);
     }
 
     public String resolveUserIdForEmailAddress(String emailAddress) {
@@ -125,28 +121,23 @@ public class SlackUserIdResolver {
             return null;
         }
 
-        // prepare get method for looking up Slack userId by email address
+        String slackUserId = null;
         String url = String.format(LOOKUP_BY_EMAIL_METHOD_URL_FORMAT, authToken, emailAddress);
-
         HttpGet getRequest = new HttpGet(url);
-        try {
-            CloseableHttpResponse response = httpClient.execute(getRequest);
+        try (CloseableHttpResponse response = httpClient.execute(getRequest)) {
             int responseCode = response.getStatusLine().getStatusCode();
-            // inspect the response content if a 200 response code is received
             if (HttpStatus.SC_OK == responseCode) {
                 HttpEntity entity = response.getEntity();
                 JSONObject slackResponse = new JSONObject(EntityUtils.toString(entity));
                 // additionally, make sure the JSON response contains an 'ok: true' entry
                 if (slackResponse.optBoolean(SLACK_OK_FIELD)) {
                     JSONObject slackUser = slackResponse.getJSONObject(SLACK_USER_FIELD);
-                    return slackUser.getString(SLACK_ID_FIELD);
+                    slackUserId = slackUser.getString(SLACK_ID_FIELD);
                 }
             }
         } catch (IOException | ParseException | JSONException ex) {
             LOGGER.log(Level.WARNING, "Error getting userId from Slack", ex);
-        } finally {
-            getRequest.releaseConnection();
         }
-        return null;
+        return slackUserId;
     }
 }
