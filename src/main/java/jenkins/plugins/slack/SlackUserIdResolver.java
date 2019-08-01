@@ -113,9 +113,9 @@ public class SlackUserIdResolver {
         if (StringUtils.isEmpty(userId)) {
             userId = mailAddressResolvers.stream()
                 .map(resolver -> resolver.findMailAddressFor(user))
-                .filter(emailAddress -> StringUtils.isNotEmpty(emailAddress))
+                .filter(StringUtils::isNotEmpty)
                 .map(this::resolveUserIdForEmailAddress)
-                .filter(id -> StringUtils.isNotEmpty(id))
+                .filter(StringUtils::isNotEmpty)
                 .findAny()
                 .orElse(null);
 
