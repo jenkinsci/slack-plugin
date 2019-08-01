@@ -100,13 +100,6 @@ public class SlackUserIdResolver {
                 .collect(Collectors.toList());
     }
 
-    public List<String> resolveUserIdsForEmailAddresses(List<String> emailAddresses) {
-        return emailAddresses.stream()
-                .map(this::resolveUserIdForEmailAddress)
-                .filter(Objects::nonNull)
-                .collect(Collectors.toList());
-    }
-
     public String resolveUserId(User user) {
         String userId = null;
         SlackUserProperty userProperty = user.getProperty(SlackUserProperty.class);
