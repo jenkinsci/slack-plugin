@@ -74,6 +74,7 @@ public class SlackUserIdResolver {
         this(authToken, httpClient, null);
     }
 
+    @SuppressWarnings("unchecked")
     public List<String> resolveUserIdsForRun(Run run) {
         if (run instanceof RunWithSCM) {
             RunWithSCM r = (RunWithSCM) run;
