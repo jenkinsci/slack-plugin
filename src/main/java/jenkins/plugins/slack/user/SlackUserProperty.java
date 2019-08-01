@@ -71,7 +71,7 @@ public class SlackUserProperty extends UserProperty {
 
         @Override
         public String getDisplayName() {
-            return "Slack";
+            return "Slack User Settings";
         }
 
         @Override

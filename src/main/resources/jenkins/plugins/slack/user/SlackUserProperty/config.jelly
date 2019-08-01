@@ -1,9 +1,11 @@
 <?jelly escape-by-default='true'?>
 <j:jelly xmlns:j="jelly:core" xmlns:f="/lib/form">
-    <f:entry title="${%Slack User Id}">
-        <f:textbox field="userId"/>
+    <f:entry field="userId" title="${%User Id}">
+        <f:textbox />
     </f:entry>
-    <f:entry title="${%Disable Notifications}">
-        <f:checkbox field="disableNotifications"/>
-    </f:entry>
+    <f:section title="${%Slack Notifications}">
+        <f:entry field="disableNotifications" title="${%Disable}">
+            <f:checkbox />
+        </f:entry>
+    </f:section>
 </j:jelly>
