@@ -2,6 +2,7 @@ package jenkins.plugins.slack;
 
 import hudson.ProxyConfiguration;
 import hudson.model.Run;
+import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -152,106 +153,109 @@ public class StandardSlackService implements SlackService {
     @Override
     public boolean publish(String message, JSONArray attachments, String color) {
         boolean result = true;
-        CloseableHttpClient client = getHttpClient();
 
-        // include committer userIds in roomIds
-        if (botUser && notifyCommitters && run != null) {
-            SlackUserIdResolver resolver = new SlackUserIdResolver(populatedToken, client);
-            List<String> userIds = resolver.resolveUserIdsForRun(run);
-            roomIds.addAll(userIds.stream()
-                    .distinct()
-                    .map(userId -> "@" + userId)
-                    .collect(Collectors.toList())
-            );
-        }
-        for (String roomId : roomIds) {
-            HttpPost post;
-            String url;
-            String threadTs = "";
-
-            //thread_ts is passed once with roomId: Ex: roomId:threadTs
-            String[] splitThread = roomId.split("[:]+");
-            if (splitThread.length > 1) {
-                roomId = splitThread[0];
-                threadTs = splitThread[1];
+        try (CloseableHttpClient client = getHttpClient()) {
+            // include committer userIds in roomIds
+            if (botUser && notifyCommitters && run != null) {
+                SlackUserIdResolver resolver = new SlackUserIdResolver(populatedToken, client);
+                List<String> userIds = resolver.resolveUserIdsForRun(run);
+                roomIds.addAll(userIds.stream()
+                        .distinct()
+                        .map(userId -> "@" + userId)
+                        .collect(Collectors.toList())
+                );
             }
-            JSONObject json = new JSONObject();
-            json.put("channel", roomId);
-            if (StringUtils.isNotEmpty(message)) {
-                json.put("text", message);
-            }
-            if (attachments.size() > 0) {
-                json.put("attachments", attachments);
-            }
-            json.put("link_names", "1");
-            json.put("unfurl_links", "true");
-            json.put("unfurl_media", "true");
 
-            //prepare post methods for both requests types
-            if (!botUser || !StringUtils.isEmpty(baseUrl)) {
-                url = "https://" + teamDomain + "." + host + "/services/hooks/jenkins-ci?token=" + populatedToken;
-                if (!StringUtils.isEmpty(baseUrl)) {
-                    url = baseUrl + populatedToken;
-                }
-                post = new HttpPost(url);
+            for (String roomId : roomIds) {
+                HttpPost post;
+                String url;
+                String threadTs = "";
 
-            } else {
-                url = "https://slack.com/api/chat.postMessage";
+                //thread_ts is passed once with roomId: Ex: roomId:threadTs
+                String[] splitThread = roomId.split("[:]+");
+                if (splitThread.length > 1) {
+                    roomId = splitThread[0];
+                    threadTs = splitThread[1];
+                }
+                JSONObject json = new JSONObject();
+                json.put("channel", roomId);
+                if (StringUtils.isNotEmpty(message)) {
+                    json.put("text", message);
+                }
+                if (attachments.size() > 0) {
+                    json.put("attachments", attachments);
+                }
+                json.put("link_names", "1");
+                json.put("unfurl_links", "true");
+                json.put("unfurl_media", "true");
 
-                post = new HttpPost(url);
-                post.setHeader("Authorization", "Bearer " + populatedToken);
-                if (threadTs.length() > 1) {
-                    json.put("thread_ts", threadTs);
-                }
-                if (replyBroadcast) {
-                    json.put("reply_broadcast", "true");
-                }
-                if (StringUtils.isEmpty(iconEmoji) && StringUtils.isEmpty(username)) {
-                    json.put("as_user", "true");
-                }
-                else {
-                    if (StringUtils.isNotEmpty(iconEmoji)) {
-                        json.put("icon_emoji", iconEmoji);
+                //prepare post methods for both requests types
+                if (!botUser || !StringUtils.isEmpty(baseUrl)) {
+                    url = "https://" + teamDomain + "." + host + "/services/hooks/jenkins-ci?token=" + populatedToken;
+                    if (!StringUtils.isEmpty(baseUrl)) {
+                        url = baseUrl + populatedToken;
                     }
-                    if (StringUtils.isNotEmpty(username)) {
-                        json.put("username", username);
+                    post = new HttpPost(url);
+
+                } else {
+                    url = "https://slack.com/api/chat.postMessage";
+
+                    post = new HttpPost(url);
+                    post.setHeader("Authorization", "Bearer " + populatedToken);
+                    if (threadTs.length() > 1) {
+                        json.put("thread_ts", threadTs);
+                    }
+                    if (replyBroadcast) {
+                        json.put("reply_broadcast", "true");
+                    }
+                    if (StringUtils.isEmpty(iconEmoji) && StringUtils.isEmpty(username)) {
+                        json.put("as_user", "true");
+                    }
+                    else {
+                        if (StringUtils.isNotEmpty(iconEmoji)) {
+                            json.put("icon_emoji", iconEmoji);
+                        }
+                        if (StringUtils.isNotEmpty(username)) {
+                            json.put("username", username);
+                        }
                     }
                 }
-            }
 
-            logger.fine("Posting: to " + roomId + " on " + teamDomain + " using " + url + ": " + attachments.toString() + " " + color);
+                logger.fine("Posting: to " + roomId + " on " + teamDomain + " using " + url + ": " + attachments.toString() + " " + color);
 
-            try {
                 post.setHeader("Content-Type", "application/json");
                 post.setEntity(new StringEntity(json.toString(), StandardCharsets.UTF_8));
-                CloseableHttpResponse response = client.execute(post);
 
-                int responseCode = response.getStatusLine().getStatusCode();
-                HttpEntity entity = response.getEntity();
-                if (botUser && entity != null) {
-                    responseString = EntityUtils.toString(entity);
-                    try {
+                try (CloseableHttpResponse response = client.execute(post)) {
+                    int responseCode = response.getStatusLine().getStatusCode();
+                    HttpEntity entity = response.getEntity();
+                    if (botUser && entity != null) {
+                        responseString = EntityUtils.toString(entity);
+                        try {
 
-                        org.json.JSONObject slackResponse = new org.json.JSONObject(responseString);
-                        result = slackResponse.getBoolean("ok");
-                    } catch (org.json.JSONException ex) {
-                        logger.log(Level.WARNING, "Slack post may have failed.  Invalid JSON response: " + responseString);
-                        result = false;
+                            org.json.JSONObject slackResponse = new org.json.JSONObject(responseString);
+                            result = slackResponse.getBoolean("ok");
+                        } catch (org.json.JSONException ex) {
+                            logger.log(Level.WARNING, "Slack post may have failed.  Invalid JSON response: " + responseString);
+                            result = false;
+                        }
                     }
-                }
-                if (responseCode != HttpStatus.SC_OK || !result) {
-                    logger.log(Level.WARNING, "Slack post may have failed. Response: " + responseString);
-                    logger.log(Level.WARNING, "Response Code: " + responseCode);
+                    if (responseCode != HttpStatus.SC_OK || !result) {
+                        logger.log(Level.WARNING, "Slack post may have failed. Response: " + responseString);
+                        logger.log(Level.WARNING, "Response Code: " + responseCode);
+                        result = false;
+                    } else {
+                        logger.fine("Posting succeeded");
+                    }
+                } catch (Exception e) {
+                    logger.log(Level.WARNING, "Error posting to Slack", e);
                     result = false;
-                } else {
-                    logger.fine("Posting succeeded");
+                } finally {
+                    post.releaseConnection();
                 }
-            } catch (Exception e) {
-                logger.log(Level.WARNING, "Error posting to Slack", e);
-                result = false;
-            } finally {
-                post.releaseConnection();
             }
+        } catch (IOException e) {
+            logger.log(Level.WARNING, "Error closing HttpClient", e);
         }
         return result;
     }
