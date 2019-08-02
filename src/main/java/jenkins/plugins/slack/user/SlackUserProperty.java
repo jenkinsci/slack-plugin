@@ -29,6 +29,7 @@ import hudson.model.UserProperty;
 import hudson.model.UserPropertyDescriptor;
 import net.sf.json.JSONObject;
 import org.kohsuke.stapler.DataBoundConstructor;
+import org.kohsuke.stapler.DataBoundSetter;
 import org.kohsuke.stapler.StaplerRequest;
 import org.kohsuke.stapler.export.Exported;
 
@@ -38,9 +39,9 @@ public class SlackUserProperty extends UserProperty {
     private boolean disableNotifications;
 
     @DataBoundConstructor
-    public SlackUserProperty(String userId, boolean disableNotifications) {
-        this.userId = userId;
-        this.disableNotifications = disableNotifications;
+    public SlackUserProperty() {
+        this.userId = null;
+        this.disableNotifications = false;
     }
 
     @Exported
@@ -48,6 +49,7 @@ public class SlackUserProperty extends UserProperty {
         return userId;
     }
 
+    @DataBoundSetter
     public void setUserId(String userId) {
         this.userId = userId;
     }
@@ -57,6 +59,7 @@ public class SlackUserProperty extends UserProperty {
         return disableNotifications;
     }
 
+    @DataBoundSetter
     public void setDisableNotifications(boolean disableNotifications) {
         this.disableNotifications = disableNotifications;
     }
@@ -66,7 +69,7 @@ public class SlackUserProperty extends UserProperty {
 
         @Override
         public UserProperty newInstance(User user) {
-            return new SlackUserProperty(null, false);
+            return new SlackUserProperty();
         }
 
         @Override

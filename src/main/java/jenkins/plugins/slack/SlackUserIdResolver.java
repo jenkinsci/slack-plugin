@@ -110,7 +110,7 @@ public class SlackUserIdResolver {
         if (userProperty != null) {
             userId = userProperty.getUserId();
         } else {
-            userProperty = new SlackUserProperty(null, false);
+            userProperty = new SlackUserProperty();
         }
 
         if (StringUtils.isEmpty(userId)) {

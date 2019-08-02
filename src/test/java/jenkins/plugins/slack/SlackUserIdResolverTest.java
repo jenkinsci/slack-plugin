@@ -99,8 +99,10 @@ public class SlackUserIdResolverTest {
 
     @Test
     public void testResolveUserIdForUserWithSlackUserProperty() throws Exception {
+        SlackUserProperty userProperty = new SlackUserProperty();
+        userProperty.setUserId(EXPECTED_USER_ID);
         User mockUser = mock(User.class);
-        when(mockUser.getProperty(SlackUserProperty.class)).thenReturn(new SlackUserProperty(EXPECTED_USER_ID, false));
+        when(mockUser.getProperty(SlackUserProperty.class)).thenReturn(userProperty);
         String userId = resolver.resolveUserId(mockUser);
         assertEquals(EXPECTED_USER_ID, userId);
         verify(mailAddressResolver, never()).findMailAddressFor(any(User.class));
