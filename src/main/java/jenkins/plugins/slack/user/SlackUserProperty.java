@@ -40,8 +40,6 @@ public class SlackUserProperty extends UserProperty {
 
     @DataBoundConstructor
     public SlackUserProperty() {
-        this.userId = null;
-        this.disableNotifications = false;
     }
 
     @Exported
