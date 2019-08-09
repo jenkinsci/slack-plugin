@@ -21,25 +21,15 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package jenkins.plugins.slack;
+package jenkins.plugins.slack.user;
 
-import hudson.model.AbstractBuild;
-import hudson.model.Run;
+import hudson.Extension;
 import hudson.model.User;
-import hudson.scm.ChangeLogSet;
-import hudson.scm.ChangeLogSet.Entry;
 import hudson.tasks.MailAddressResolver;
 import java.io.IOException;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
-import java.util.Objects;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import java.util.stream.Collectors;
-import jenkins.plugins.slack.user.SlackUserProperty;
-import jenkins.scm.RunWithSCM;
 import org.apache.commons.lang.StringUtils;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpStatus;
@@ -50,91 +40,66 @@ import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.util.EntityUtils;
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.kohsuke.accmod.Restricted;
-import org.kohsuke.accmod.restrictions.NoExternalUse;
+import org.kohsuke.stapler.DataBoundConstructor;
 
-@Restricted(NoExternalUse.class)
-public class SlackUserIdResolver {
+public class EmailSlackUserIdResolver extends SlackUserIdResolver {
 
-    private static final Logger LOGGER = Logger.getLogger(SlackUserIdResolver.class.getName());
+    private static final Logger LOGGER = Logger.getLogger(EmailSlackUserIdResolver.class.getName());
 
-    private static final String LOOKUP_BY_EMAIL_METHOD_URL_FORMAT = "https://slack.com/api/users.lookupByEmail?token=%s&email=%s";
+    private static final String LOOKUP_BY_EMAIL_METHOD_URL = "https://slack.com/api/users.lookupByEmail";
+    private static final String LOOKUP_BY_EMAIL_METHOD_URL_FORMAT = LOOKUP_BY_EMAIL_METHOD_URL + "?token=%s&email=%s";
     private static final String SLACK_OK_FIELD = "ok";
     private static final String SLACK_USER_FIELD = "user";
     private static final String SLACK_ID_FIELD = "id";
 
-    private final String authToken;
-    private final CloseableHttpClient httpClient;
-    private final List<MailAddressResolver> mailAddressResolvers;
+    private String authToken;
+    private CloseableHttpClient httpClient;
+    private List<MailAddressResolver> mailAddressResolvers;
 
-    public SlackUserIdResolver(String authToken, CloseableHttpClient httpClient, List<MailAddressResolver> mailAddressResolvers) {
+    public EmailSlackUserIdResolver(String authToken, CloseableHttpClient httpClient, List<MailAddressResolver> mailAddressResolvers) {
         this.authToken = authToken;
         this.httpClient = httpClient;
         this.mailAddressResolvers = mailAddressResolvers != null ? mailAddressResolvers : MailAddressResolver.all();
     }
 
-    public SlackUserIdResolver(String authToken, CloseableHttpClient httpClient) {
+    public EmailSlackUserIdResolver(String authToken, CloseableHttpClient httpClient) {
         this(authToken, httpClient, null);
     }
 
-    @SuppressWarnings("unchecked")
-    public List<String> resolveUserIdsForRun(Run run) {
-        if (run instanceof RunWithSCM) {
-            RunWithSCM r = (RunWithSCM) run;
-            return resolveUserIdsForChangeLogSets(r.getChangeSets());
-        } else if (run instanceof AbstractBuild) {
-            AbstractBuild build = (AbstractBuild) run;
-            return resolveUserIdsForChangeLogSets(build.getChangeSets());
-        } else {
-            return Collections.emptyList();
-        }
+    @DataBoundConstructor
+    public EmailSlackUserIdResolver() {
+        this(null, null, null);
     }
 
-    public List<String> resolveUserIdsForChangeLogSet(ChangeLogSet changeLogSet) {
-        return Arrays.stream(changeLogSet.getItems())
-                .map(item -> resolveUserId(((Entry) item).getAuthor()))
-                .filter(Objects::nonNull)
-                .collect(Collectors.toList());
+    public String getAPIMethodURL() {
+        return LOOKUP_BY_EMAIL_METHOD_URL;
     }
 
-    public List<String> resolveUserIdsForChangeLogSets(List<ChangeLogSet> changeLogSets) {
-        return changeLogSets.stream()
-                .map(this::resolveUserIdsForChangeLogSet)
-                .flatMap(Collection::stream)
-                .collect(Collectors.toList());
+    public void setAuthToken(String authToken) {
+        this.authToken = authToken;
     }
 
-    public String resolveUserId(User user) {
-        String userId = null;
-        SlackUserProperty userProperty = user.getProperty(SlackUserProperty.class);
-        if (userProperty != null) {
-            userId = userProperty.getUserId();
-        } else {
-            userProperty = new SlackUserProperty();
+    public void setHttpClient(CloseableHttpClient httpClient) {
+        this.httpClient = httpClient;
+    }
+
+    public void setMailAddressResolvers(List<MailAddressResolver> mailAddressResolvers) {
+        this.mailAddressResolvers = mailAddressResolvers;
+    }
+
+    protected String resolveUserId(User user) {
+        // TODO: retrieve resolvers?
+        if (mailAddressResolvers == null) {
+            return null;
         }
 
-        if (StringUtils.isEmpty(userId)) {
-            userId = mailAddressResolvers.stream()
-                .map(resolver -> resolver.findMailAddressFor(user))
-                .filter(StringUtils::isNotEmpty)
-                .map(this::resolveUserIdForEmailAddress)
-                .filter(StringUtils::isNotEmpty)
-                .findAny()
-                .orElse(null);
-
-            userProperty.setUserId(userId);
-            try {
-                user.addProperty(userProperty);
-            } catch (IOException ex) {
-                LOGGER.log(Level.WARNING, "Failed to add SlackUserProperty to user: " + user.toString(), ex);
-            }
-        }
-
-        if (userProperty.getDisableNotifications()) {
-            userId = null;
-        }
-
-        return userId;
+       return mailAddressResolvers.stream()
+            .map(resolver -> resolver.findMailAddressFor(user))
+            .filter(StringUtils::isNotEmpty)
+            .map(this::resolveUserIdForEmailAddress)
+            .filter(StringUtils::isNotEmpty)
+            .findAny()
+            .orElse(null);
     }
 
     public String resolveUserIdForEmailAddress(String emailAddress) {
@@ -160,5 +125,14 @@ public class SlackUserIdResolver {
             LOGGER.log(Level.WARNING, "Error getting userId from Slack", ex);
         }
         return slackUserId;
+    }
+
+    @Extension
+    public static class DescriptorImpl extends SlackUserIdResolverDescriptor {
+
+        @Override
+        public String getDisplayName() {
+            return "Email User ID Resolver";
+        }
     }
 }

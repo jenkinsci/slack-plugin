@@ -1,6 +1,7 @@
 package jenkins.plugins.slack;
 
 import hudson.model.Run;
+import jenkins.plugins.slack.user.SlackUserIdResolver;
 
 public class StandardSlackServiceBuilder {
 
@@ -14,6 +15,7 @@ public class StandardSlackServiceBuilder {
     String username;
     String populatedToken;
     boolean notifyCommitters;
+    SlackUserIdResolver userIdResolver;
 
     public StandardSlackServiceBuilder() {
     }
@@ -65,6 +67,11 @@ public class StandardSlackServiceBuilder {
 
     public StandardSlackServiceBuilder withNotifyCommitters(boolean notifyCommitters) {
         this.notifyCommitters = notifyCommitters;
+        return this;
+    }
+
+    public StandardSlackServiceBuilder withSlackUserIdResolver(SlackUserIdResolver userIdResolver) {
+        this.userIdResolver = userIdResolver;
         return this;
     }
 

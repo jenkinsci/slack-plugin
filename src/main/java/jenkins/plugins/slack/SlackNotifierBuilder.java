@@ -1,6 +1,7 @@
 package jenkins.plugins.slack;
 
 import jenkins.plugins.slack.matrix.MatrixTriggerMode;
+import jenkins.plugins.slack.user.SlackUserIdResolver;;
 
 public class SlackNotifierBuilder {
     String baseUrl;
@@ -33,6 +34,7 @@ public class SlackNotifierBuilder {
     String customMessageNotBuilt;
     String customMessageUnstable;
     String customMessageFailure;
+    SlackUserIdResolver slackUserIdResolver;
 
     SlackNotifierBuilder() {
     }
@@ -184,6 +186,11 @@ public class SlackNotifierBuilder {
 
     public SlackNotifierBuilder withCustomMessageFailure(String customMessageFailure) {
         this.customMessageFailure = customMessageFailure;
+        return this;
+    }
+
+    public SlackNotifierBuilder withSlackUserIdResolver(SlackUserIdResolver slackUserIdResolver) {
+        this.slackUserIdResolver = slackUserIdResolver;
         return this;
     }
 

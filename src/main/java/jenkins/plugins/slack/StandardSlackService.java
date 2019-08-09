@@ -7,10 +7,12 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import jenkins.model.Jenkins;
+import jenkins.plugins.slack.user.SlackUserIdResolver;
 import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
 import org.apache.commons.lang3.StringUtils;
@@ -49,6 +51,7 @@ public class StandardSlackService implements SlackService {
     private String responseString;
     private String populatedToken;
     private boolean notifyCommitters;
+    private SlackUserIdResolver userIdResolver;
 
     /**
      * @deprecated use {@link #StandardSlackService(String, String, boolean, String, boolean, String)} instead}
@@ -112,6 +115,7 @@ public class StandardSlackService implements SlackService {
         this.username = standardSlackServiceBuilder.username;
         this.populatedToken = standardSlackServiceBuilder.populatedToken;
         this.notifyCommitters = standardSlackServiceBuilder.notifyCommitters;
+        this.userIdResolver = standardSlackServiceBuilder.userIdResolver;
     }
 
     public static StandardSlackServiceBuilder builder() {
@@ -156,10 +160,12 @@ public class StandardSlackService implements SlackService {
 
         try (CloseableHttpClient client = getHttpClient()) {
             // include committer userIds in roomIds
-            if (botUser && notifyCommitters && run != null) {
-                SlackUserIdResolver resolver = new SlackUserIdResolver(populatedToken, client);
-                List<String> userIds = resolver.resolveUserIdsForRun(run);
+            if (botUser && notifyCommitters && userIdResolver != null && run != null) {
+                userIdResolver.setAuthToken(populatedToken);
+                userIdResolver.setHttpClient(client);
+                List<String> userIds = userIdResolver.resolveUserIdsForRun(run);
                 roomIds.addAll(userIds.stream()
+                        .filter(Objects::nonNull)
                         .distinct()
                         .map(userId -> "@" + userId)
                         .collect(Collectors.toList())

@@ -30,6 +30,7 @@ import hudson.tasks.MailAddressResolver;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import jenkins.plugins.slack.user.EmailSlackUserIdResolver;
 import jenkins.plugins.slack.user.SlackUserProperty;
 import org.apache.commons.io.IOUtils;
 import org.apache.http.HttpStatus;
@@ -48,7 +49,7 @@ import static org.mockito.Mockito.verify;
 import static org.powermock.api.mockito.PowerMockito.mock;
 import static org.powermock.api.mockito.PowerMockito.when;
 
-public class SlackUserIdResolverTest {
+public class EmailSlackUserIdResolverTest {
 
     private static final String EXPECTED_USER_ID = "W012A3CDE";
     private static final String EMAIL_ADDRESS = "spengler@ghostbusters.example.com";
@@ -58,10 +59,10 @@ public class SlackUserIdResolverTest {
     private static String responseErrorContent;
 
     private CloseableHttpClientStub httpClient;
-    private SlackUserIdResolver resolver;
+    private EmailSlackUserIdResolver resolver;
     private MailAddressResolver mailAddressResolver;
 
-    public SlackUserIdResolverTest() throws IOException {
+    public EmailSlackUserIdResolverTest() throws IOException {
         responseOKContent = readResource("lookUpByEmailResponseOK.json");
         responseErrorContent = readResource("lookUpByEmailResponseError.json");
     }
@@ -93,7 +94,7 @@ public class SlackUserIdResolverTest {
         // MailAddressResolver is mocked to return EMAIL_ADDRESS associated with
         // the EXPECTED_USER_ID
         httpClient.setHttpResponse(getResponseOK());
-        String userId = resolver.resolveUserId(mock(User.class));
+        String userId = resolver.findOrResolveUserId(mock(User.class));
         assertEquals(EXPECTED_USER_ID, userId);
     }
 
@@ -103,7 +104,7 @@ public class SlackUserIdResolverTest {
         userProperty.setUserId(EXPECTED_USER_ID);
         User mockUser = mock(User.class);
         when(mockUser.getProperty(SlackUserProperty.class)).thenReturn(userProperty);
-        String userId = resolver.resolveUserId(mockUser);
+        String userId = resolver.findOrResolveUserId(mockUser);
         assertEquals(EXPECTED_USER_ID, userId);
         verify(mailAddressResolver, never()).findMailAddressFor(any(User.class));
     }
@@ -162,10 +163,10 @@ public class SlackUserIdResolverTest {
         return mailAddressResolver;
     }
 
-    private SlackUserIdResolver getResolver(CloseableHttpClientStub httpClientMailAddressResolver, MailAddressResolver mailAddressResolver) {
+    private EmailSlackUserIdResolver getResolver(CloseableHttpClientStub httpClientMailAddressResolver, MailAddressResolver mailAddressResolver) {
         List<MailAddressResolver> mailAddressResolverList = new ArrayList<>();
         mailAddressResolverList.add(mailAddressResolver);
-        return new SlackUserIdResolver(AUTH_TOKEN, httpClient, mailAddressResolverList);
+        return new EmailSlackUserIdResolver(AUTH_TOKEN, httpClient, mailAddressResolverList);
     }
 
 }
