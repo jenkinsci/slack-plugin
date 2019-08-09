@@ -88,7 +88,6 @@ public class EmailSlackUserIdResolver extends SlackUserIdResolver {
     }
 
     protected String resolveUserId(User user) {
-        // TODO: retrieve resolvers?
         if (mailAddressResolvers == null) {
             return null;
         }
