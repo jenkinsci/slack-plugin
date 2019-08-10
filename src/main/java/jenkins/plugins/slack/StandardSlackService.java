@@ -202,7 +202,7 @@ public class StandardSlackService implements SlackService {
             CloseableHttpClient client = getHttpClient();
 
             try {
-                post.setHeader("Content-Type", "application/json");
+                post.setHeader("Content-Type", "application/json; charset=utf-8");
                 post.setEntity(new StringEntity(json.toString(), StandardCharsets.UTF_8));
                 CloseableHttpResponse response = client.execute(post);
 
