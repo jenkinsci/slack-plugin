@@ -1,44 +1,35 @@
 <?jelly escape-by-default='true'?>
 <j:jelly xmlns:j="jelly:core" xmlns:f="/lib/form" xmlns:c="/lib/credentials">
-  <!--
-    This Jelly script is used to produce the global configuration option.
-
-    Hudson uses a set of tag libraries to provide uniformity in forms.
-    To determine where this tag is defined, first check the namespace URI,
-    and then look under $HUDSON/views/. For example, <f:section> is defined
-    in $HUDSON/views/lib/form/section.jelly.
-
-    It's also often useful to just check other similar scripts to see what
-    tags they use. Views are always organized according to its owner class,
-    so it should be straightforward to find them.
-  -->
-<f:section title="Global Slack Notifier Settings">
-    <f:entry title="Slack compatible app URL (optional)" help="/plugin/slack/help-globalConfig-slackBaseUrl.html">
-        <f:textbox field="baseUrl" />
-    </f:entry>
-    <f:entry title="Team Subdomain" help="/plugin/slack/help-globalConfig-slackTeamDomain.html">
-        <f:textbox field="teamDomain" />
-    </f:entry>
-    <f:entry title="Integration Token Credential ID" field="tokenCredentialId" help="/plugin/slack/help-globalConfig-tokenCredentialId.html">
-        <c:select/>
-    </f:entry>
-    <f:entry title="Is Bot User?" help="/plugin/slack/help-globalConfig-botUser.html">
-        <f:checkbox field="botUser" />
-    </f:entry>
-    <f:entry title="Send as Text?" help="/plugin/slack/help-globalConfig-sendAsText.html">
-        <f:checkbox field="sendAsText" />
-    </f:entry>
-    <f:entry title="Icon Emoji" help="/plugin/slack/help-globalConfig-iconEmoji.html">
-        <f:textbox field="iconEmoji" />
-    </f:entry>
-    <f:entry title="Username" help="/plugin/slack/help-globalConfig-username.html">
-        <f:textbox field="username" />
-    </f:entry>
-    <f:entry title="Channel or Slack ID" help="/plugin/slack/help-globalConfig-slackRoom.html">
-        <f:textbox field="room" />
-    </f:entry>
-    <f:validateButton
-        title="${%Test Connection}" progress="${%Testing...}"
-        method="testConnection" with="baseUrl,teamDomain,token,tokenCredentialId,botUser,sendAsText,iconEmoji,username,room" />
-  </f:section>
+    <f:section title="Slack">
+        <f:entry title="Workspace" field="teamDomain">
+            <f:textbox />
+        </f:entry>
+        <f:entry title="Credential" field="tokenCredentialId">
+            <c:select/>
+        </f:entry>
+        <f:entry title="Default channel / member id" field="room">
+            <f:textbox/>
+        </f:entry>
+        <f:entry title="Custom slack app bot user" field="botUser">
+            <f:checkbox />
+        </f:entry>
+        <f:advanced>
+            <f:entry title="Icon Emoji" field="iconEmoji">
+                <f:textbox/>
+            </f:entry>
+            <f:entry title="Username" field="username">
+                <f:textbox />
+            </f:entry>
+            <f:entry title="Send as text" field="sendAsText">
+                <f:checkbox/>
+            </f:entry>
+            <f:entry title="Override url" field="baseUrl">
+                <f:textbox />
+            </f:entry>
+        </f:advanced>
+        <f:validateButton
+                title="${%Test Connection}" progress="${%Testing...}"
+                method="testConnection"
+                with="baseUrl,teamDomain,token,tokenCredentialId,botUser,sendAsText,iconEmoji,username,room"/>
+    </f:section>
 </j:jelly>
