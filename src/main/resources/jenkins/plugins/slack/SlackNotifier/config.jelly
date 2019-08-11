@@ -1,122 +1,129 @@
 <?jelly escape-by-default='true'?>
 <j:jelly xmlns:j="jelly:core" xmlns:f="/lib/form" xmlns:c="/lib/credentials">
-    <f:entry title="Notify Build Start">
-        <f:checkbox field="startNotification" />
+    <f:entry title="Notify Build Start" field="startNotification">
+        <f:checkbox/>
     </f:entry>
 
-    <f:entry title="Notify Success">
-        <f:checkbox field="notifySuccess" />
+    <f:entry title="Notify Success" field="notifySuccess">
+        <f:checkbox/>
     </f:entry>
 
-    <f:entry title="Notify Aborted">
-        <f:checkbox field="notifyAborted" />
+    <f:entry title="Notify Aborted" field="notifyAborted">
+        <f:checkbox/>
     </f:entry>
 
-    <f:entry title="Notify Not Built">
-        <f:checkbox field="notifyNotBuilt"/>
+    <f:entry title="Notify Not Built" field="notifyNotBuilt">
+        <f:checkbox/>
     </f:entry>
 
-    <f:entry title="Notify Unstable">
-        <f:checkbox field="notifyUnstable" />
+    <f:entry title="Notify Unstable" field="notifyUnstable">
+        <f:checkbox/>
     </f:entry>
 
-    <f:entry title="Notify Regression">
-        <f:checkbox field="notifyRegression" />
+    <f:entry title="Notify Regression" field="notifyRegression">
+        <f:checkbox/>
     </f:entry>
 
-    <f:entry title="Notify Every Failure">
-        <f:checkbox field="notifyEveryFailure" />
+    <f:entry title="Notify Every Failure" field="notifyEveryFailure">
+        <f:checkbox/>
     </f:entry>
 
-    <f:entry title="Notify Back To Normal">
-        <f:checkbox field="notifyBackToNormal" />
+    <f:entry title="Notify Back To Normal" field="notifyBackToNormal">
+        <f:checkbox/>
     </f:entry>
 
-	<j:if test="${descriptor.isMatrixProject(it)}">
-	    <f:entry title="${%Trigger for matrix projects}" field="matrixTriggerMode">
-		    <f:enum>${it.description}</f:enum>
+    <j:if test="${descriptor.isMatrixProject(it)}">
+        <f:entry title="${%Trigger for matrix projects}" field="matrixTriggerMode">
+            <f:enum>${it.description}</f:enum>
         </f:entry>
-	</j:if>
+    </j:if>
 
     <f:advanced>
-        <f:entry title="Notify First Failure Only">
-            <f:checkbox field="notifyFailure" />
+        <f:entry title="Notify First Failure Only" field="notifyFailure">
+            <f:checkbox/>
         </f:entry>
-        <f:entry title="Notify Repeated Failure Only">
-            <f:checkbox field="notifyRepeatedFailure" />
+        <f:entry title="Notify Repeated Failure Only" field="notifyRepeatedFailure">
+            <f:checkbox/>
         </f:entry>
-        <f:entry title="Include Test Summary">
-            <f:checkbox field="includeTestSummary" />
+        <f:entry title="Include Test Summary" field="includeTestSummary">
+            <f:checkbox/>
         </f:entry>
-        <f:entry title="Include Failed Tests">
-            <f:checkbox field="includeFailedTests" />
+        <f:entry title="Include Failed Tests" field="includeFailedTests">
+            <f:checkbox/>
         </f:entry>
 
         <f:optionalBlock title="Include Custom Message" name="includeCustomMessage" inline="true"
-            checked="${instance.isAnyCustomMessagePopulated()}">
-            <f:entry title="Custom Message" field="customMessage" help="/plugin/slack/help-projectConfig-slackCustomMessage.html">
-                <f:textarea />
+                         checked="${instance.isAnyCustomMessagePopulated()}">
+            <f:entry title="Custom Message" field="customMessage">
+                <f:textarea/>
             </f:entry>
 
-            <f:entry title="Custom Message - Success" help="/plugin/slack/help-projectConfig-slackCustomMessage.html">
-                <f:textarea field="customMessageSuccess" />
+            <f:entry title="Custom Message - Success" field="customMessageSuccess"
+                     help="/descriptor/jenkins.plugins.slack.SlackNotifier/help/customMessage">
+                <f:textarea/>
             </f:entry>
 
-            <f:entry title="Custom Message - Build Aborted" help="/plugin/slack/help-projectConfig-slackCustomMessage.html">
-                <f:textarea field="customMessageAborted" />
+            <f:entry title="Custom Message - Build Aborted" field="customMessageAborted"
+                     help="/descriptor/jenkins.plugins.slack.SlackNotifier/help/customMessage">
+                <f:textarea/>
             </f:entry>
 
-            <f:entry title="Custom Message - Build Not Built" help="/plugin/slack/help-projectConfig-slackCustomMessage.html">
-                <f:textarea field="customMessageNotBuilt" />
+            <f:entry title="Custom Message - Build Not Built" field="customMessageNotBuilt"
+                     help="/descriptor/jenkins.plugins.slack.SlackNotifier/help/customMessage">
+                <f:textarea/>
             </f:entry>
 
-            <f:entry title="Custom Message - Build Unstable" help="/plugin/slack/help-projectConfig-slackCustomMessage.html">
-                <f:textarea field="customMessageUnstable" />
+            <f:entry title="Custom Message - Build Unstable" field="customMessageUnstable"
+                     help="/descriptor/jenkins.plugins.slack.SlackNotifier/help/customMessage">
+                <f:textarea/>
             </f:entry>
 
-            <f:entry title="Custom Message - Build Failure" help="/plugin/slack/help-projectConfig-slackCustomMessage.html">
-                <f:textarea field="customMessageFailure" />
+            <f:entry title="Custom Message - Build Failure" field="customMessageFailure"
+                     help="/descriptor/jenkins.plugins.slack.SlackNotifier/help/customMessage">
+                <f:textarea/>
             </f:entry>
         </f:optionalBlock>
 
 
-        <f:entry field="commitInfoChoice" title="Notification message includes" description="What commit information to include into notification message">
+        <f:entry field="commitInfoChoice" title="Notification message includes"
+                 description="What commit information to include into notification message">
             <f:select/>
         </f:entry>
 
-        <f:entry title="Slack compatible app URL (optional)" help="/plugin/slack/help-projectConfig-slackBaseUrl.html">
-            <f:textbox field="baseUrl" />
+        <f:entry title="Workspace" field="teamDomain">
+            <f:textbox/>
         </f:entry>
 
-        <f:entry title="Team Subdomain" help="/plugin/slack/help-projectConfig-slackTeamDomain.html">
-            <f:textbox field="teamDomain" />
+        <f:entry title="Override url" field="baseUrl">
+            <f:textbox/>
         </f:entry>
 
-        <f:entry title="Integration Token" help="/plugin/slack/help-projectConfig-slackToken.html">
-            <f:textbox field="authToken" />
+        <f:entry title="Credential" field="tokenCredentialId">
+            <c:select/>
         </f:entry>
 
-        <f:entry title="Integration Token Credential ID" help="/plugin/slack/help-projectConfig-slackTokenCredentialId.html" field="tokenCredentialId">
-            <c:select />
+        <f:entry title="Slack Token (deprecated)" field="authToken">
+            <f:textbox/>
         </f:entry>
 
-        <f:entry title="Is Bot User?" help="/plugin/slack/help-projectConfig-botUser.html">
-            <f:checkbox field="botUser"/>
+        <f:entry title="Custom slack app bot user" field="botUser">
+            <f:checkbox/>
         </f:entry>
 
-        <f:entry title="Icon Emoji" help="/plugin/slack/help-projectConfig-iconEmoji.html">
-            <f:textbox field="iconEmoji" />
+        <f:entry title="Icon Emoji" field="iconEmoji">
+            <f:textbox/>
         </f:entry>
 
-        <f:entry title="Username" help="/plugin/slack/help-projectConfig-username.html">
-            <f:textbox field="username" />
+        <f:entry title="Username" field="username">
+            <f:textbox/>
         </f:entry>
 
-        <f:entry title="Project Channel or Slack User ID" help="/plugin/slack/help-projectConfig-slackRoom.html">
-            <f:textbox field="room" />
+        <f:entry title="Channel / member id" field="room">
+            <f:textbox/>
         </f:entry>
         <f:validateButton
                 title="${%Test Connection}" progress="${%Testing...}"
-                method="testConnection" with="baseUrl,teamDomain,token,tokenCredentialId,botUser,iconEmoji,username,room"/>
+                method="testConnection"
+                with="baseUrl,teamDomain,token,tokenCredentialId,botUser,iconEmoji,username,room"/>
     </f:advanced>
 </j:jelly>

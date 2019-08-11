@@ -28,9 +28,6 @@ public class GlobalConfig extends GlobalConfiguration {
     }
 
     public FormValidation doCheckSlackOutgoingWebhookToken(@QueryParameter String value) {
-        if (value == null || value.trim().isEmpty())
-            return FormValidation.warning("Please set a Slack outgoing webhook token");
-
         return FormValidation.ok();
     }
 
@@ -43,9 +40,6 @@ public class GlobalConfig extends GlobalConfiguration {
     }
 
     public FormValidation doCheckSlackOutgoingWebhookURL(@QueryParameter String value) {
-        if (value == null || value.trim().isEmpty())
-            return FormValidation.warning("Please set a url endpoint");
-
         return FormValidation.ok();
     }
 

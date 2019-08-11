@@ -737,6 +737,20 @@ public class SlackNotifier extends Notifier {
             return model;
         }
 
+        public FormValidation doCheckTeamDomain(@QueryParameter String value, @QueryParameter String baseUrl) {
+            if (StringUtils.isNotBlank(value) && StringUtils.isNotBlank(baseUrl)) {
+                return FormValidation.error(Messages.workspaceNameAndBaseUrlSet());
+            }
+            return FormValidation.ok();
+        }
+
+        public FormValidation doCheckBaseUrl(@QueryParameter String value, @QueryParameter String teamDomain) {
+            if (StringUtils.isNotBlank(value) && StringUtils.isNotBlank(teamDomain)) {
+                return FormValidation.error(Messages.workspaceNameAndBaseUrlSet());
+            }
+            return FormValidation.ok();
+        }
+
         public ListBoxModel doFillTokenCredentialIdItems(@AncestorInPath Item context) {
 
             Jenkins jenkins = Jenkins.get();
