@@ -37,7 +37,6 @@
     <f:entry title="Channel or Slack ID" help="/plugin/slack/help-globalConfig-slackRoom.html">
         <f:textbox field="room" />
     </f:entry>
-    <!-- descriptor list -->
     <f:entry title="${%User ID Resolver}">
         <f:hetero-radio field="slackUserIdResolver" descriptors="${descriptor.getSlackUserIdResolverDescriptors()}" />
     </f:entry>
