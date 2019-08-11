@@ -12,7 +12,6 @@ import hudson.model.Project;
 import hudson.model.Run;
 import hudson.model.TaskListener;
 import hudson.security.ACL;
-import hudson.util.FormValidation;
 import hudson.util.ListBoxModel;
 import java.util.Objects;
 import java.util.Set;
@@ -41,7 +40,6 @@ import org.jenkinsci.plugins.workflow.steps.SynchronousNonBlockingStepExecution;
 import org.kohsuke.stapler.AncestorInPath;
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.DataBoundSetter;
-import org.kohsuke.stapler.QueryParameter;
 
 import static com.cloudbees.plugins.credentials.CredentialsProvider.lookupCredentials;
 
@@ -159,7 +157,7 @@ public class SlackSendStep extends Step {
 
     @DataBoundSetter
     public void setMessage(String message) {
-        this.message = message;
+        this.message = Util.fixEmpty(message);
     }
 
     public boolean getReplyBroadcast() {
@@ -191,7 +189,7 @@ public class SlackSendStep extends Step {
 
     @DataBoundSetter
     public void setIconEmoji(String iconEmoji) {
-        this.iconEmoji = iconEmoji;
+        this.iconEmoji = Util.fixEmpty(iconEmoji);
     }
 
     public String getUsername() {
@@ -200,7 +198,7 @@ public class SlackSendStep extends Step {
 
     @DataBoundSetter
     public void setUsername(String username) {
-        this.username = username;
+        this.username = Util.fixEmpty(username);
     }
 
     public boolean getNotifyCommitters() {
@@ -253,13 +251,6 @@ public class SlackSendStep extends Step {
                             ACL.SYSTEM,
                             new HostnameRequirement("*.slack.com"))
                     );
-        }
-
-        //WARN users that they should not use the plain/exposed token, but rather the token credential id
-        public FormValidation doCheckToken(@QueryParameter String value) {
-            //always show the warning - TODO investigate if there is a better way to handle this
-            return FormValidation
-                    .warning("Exposing your Integration Token is a security risk. Please use the Integration Token Credential ID");
         }
     }
 

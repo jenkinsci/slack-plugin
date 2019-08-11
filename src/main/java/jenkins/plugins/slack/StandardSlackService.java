@@ -229,7 +229,7 @@ public class StandardSlackService implements SlackService {
 
                 logger.fine("Posting: to " + roomId + " on " + teamDomain + " using " + url + ": " + attachments.toString() + " " + color);
 
-                post.setHeader("Content-Type", "application/json");
+                post.setHeader("Content-Type", "application/json; charset=utf-8");
                 post.setEntity(new StringEntity(json.toString(), StandardCharsets.UTF_8));
 
                 try (CloseableHttpResponse response = client.execute(post)) {
