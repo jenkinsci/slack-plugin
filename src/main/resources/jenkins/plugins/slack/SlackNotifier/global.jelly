@@ -27,7 +27,8 @@
                 <f:textbox/>
             </f:entry>
             <f:entry title="${%User ID Resolver}">
-                <f:hetero-radio field="slackUserIdResolver" descriptors="${descriptor.getSlackUserIdResolverDescriptors()}" />
+                <f:hetero-radio field="slackUserIdResolver"
+                                descriptors="${descriptor.getSlackUserIdResolverDescriptors()}"/>
             </f:entry>
         </f:advanced>
         <f:validateButton
