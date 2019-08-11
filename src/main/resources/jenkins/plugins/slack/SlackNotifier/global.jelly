@@ -2,7 +2,7 @@
 <j:jelly xmlns:j="jelly:core" xmlns:f="/lib/form" xmlns:c="/lib/credentials">
     <f:section title="Slack">
         <f:entry title="Workspace" field="teamDomain">
-            <f:textbox />
+            <f:textbox/>
         </f:entry>
         <f:entry title="Credential" field="tokenCredentialId">
             <c:select/>
@@ -11,20 +11,24 @@
             <f:textbox/>
         </f:entry>
         <f:entry title="Custom slack app bot user" field="botUser">
-            <f:checkbox />
+            <f:checkbox/>
         </f:entry>
         <f:advanced>
             <f:entry title="Icon Emoji" field="iconEmoji">
                 <f:textbox/>
             </f:entry>
             <f:entry title="Username" field="username">
-                <f:textbox />
+                <f:textbox/>
             </f:entry>
             <f:entry title="Send as text" field="sendAsText">
                 <f:checkbox/>
             </f:entry>
             <f:entry title="Override url" field="baseUrl">
-                <f:textbox />
+                <f:textbox/>
+            </f:entry>
+            <f:entry title="${%User ID Resolver}">
+                <f:hetero-radio field="slackUserIdResolver"
+                                descriptors="${descriptor.getSlackUserIdResolverDescriptors()}"/>
             </f:entry>
         </f:advanced>
         <f:validateButton

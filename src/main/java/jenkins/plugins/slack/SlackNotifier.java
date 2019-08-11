@@ -3,6 +3,7 @@ package jenkins.plugins.slack;
 import com.cloudbees.plugins.credentials.common.StandardListBoxModel;
 import com.cloudbees.plugins.credentials.domains.HostnameRequirement;
 import edu.umd.cs.findbugs.annotations.CheckForNull;
+import hudson.DescriptorExtensionList;
 import hudson.EnvVars;
 import hudson.Extension;
 import hudson.Launcher;
@@ -31,6 +32,8 @@ import jenkins.plugins.slack.logging.BuildAwareLogger;
 import jenkins.plugins.slack.logging.BuildKey;
 import jenkins.plugins.slack.logging.SlackNotificationsLogger;
 import jenkins.plugins.slack.matrix.MatrixTriggerMode;
+import jenkins.plugins.slack.user.SlackUserIdResolver;
+import jenkins.plugins.slack.user.SlackUserIdResolverDescriptor;
 import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
 import org.apache.commons.lang.StringUtils;
@@ -83,6 +86,7 @@ public class SlackNotifier extends Notifier {
     private String customMessageNotBuilt;
     private String customMessageUnstable;
     private String customMessageFailure;
+    private SlackUserIdResolver slackUserIdResolver;
 
     /** @deprecated use {@link #tokenCredentialId} */
     @SuppressWarnings("DeprecatedIsStillUsed")
@@ -275,6 +279,10 @@ public class SlackNotifier extends Notifier {
         return customMessageFailure;
     }
 
+    public SlackUserIdResolver getSlackUserIdResolver() {
+        return slackUserIdResolver;
+    }
+
     @DataBoundSetter
     public void setBaseUrl(String baseUrl) {
         this.baseUrl = baseUrl;
@@ -383,6 +391,11 @@ public class SlackNotifier extends Notifier {
     @DataBoundSetter
     public void setCustomMessageFailure(String customMessageFailure) {
         this.customMessageFailure = customMessageFailure;
+    }
+
+    @DataBoundSetter
+    public void setSlackUserIdResolver(SlackUserIdResolver slackUserIdResolver) {
+        this.slackUserIdResolver = slackUserIdResolver;
     }
 
     @DataBoundConstructor
@@ -496,6 +509,7 @@ public class SlackNotifier extends Notifier {
         } else {
             this.customMessage = null;
         }
+        this.slackUserIdResolver = slackNotifierBuilder.slackUserIdResolver;
     }
 
     public static SlackNotifierBuilder builder() {
@@ -529,6 +543,7 @@ public class SlackNotifier extends Notifier {
         String room = Util.fixEmpty(this.room) != null ? this.room : descriptor.getRoom();
         String iconEmoji = Util.fixEmpty(this.iconEmoji) != null ? this.iconEmoji : descriptor.getIconEmoji();
         String username = Util.fixEmpty(this.username) != null ? this.username : descriptor.getUsername();
+        SlackUserIdResolver slackUserIdResolver = this.slackUserIdResolver != null ? this.slackUserIdResolver : descriptor.getSlackUserIdResolver();
 
         EnvVars env;
         try {
@@ -552,6 +567,7 @@ public class SlackNotifier extends Notifier {
                         .withIconEmoji(iconEmoji)
                         .withUsername(username)
                         .withPopulatedToken(populatedToken)
+                        .withSlackUserIdResolver(slackUserIdResolver)
         );
     }
 
@@ -619,6 +635,7 @@ public class SlackNotifier extends Notifier {
         private String username;
         private String room;
         private String sendAs;
+        private SlackUserIdResolver slackUserIdResolver;
 
         public DescriptorImpl() {
             load();
@@ -725,6 +742,19 @@ public class SlackNotifier extends Notifier {
         @DataBoundSetter
         public void setSendAs(String sendAs) {
             this.sendAs = sendAs;
+        }
+
+        public SlackUserIdResolver getSlackUserIdResolver() {
+            return slackUserIdResolver;
+        }
+
+        @DataBoundSetter
+        public void setSlackUserIdResolver(SlackUserIdResolver slackUserIdResolver) {
+            this.slackUserIdResolver = slackUserIdResolver;
+        }
+
+        public DescriptorExtensionList<SlackUserIdResolver, SlackUserIdResolverDescriptor> getSlackUserIdResolverDescriptors() {
+            return SlackUserIdResolverDescriptor.all();
         }
 
         public ListBoxModel doFillCommitInfoChoiceItems() {

@@ -25,6 +25,7 @@ import jenkins.plugins.slack.SlackNotifier;
 import jenkins.plugins.slack.SlackService;
 import jenkins.plugins.slack.StandardSlackService;
 import jenkins.plugins.slack.StandardSlackServiceBuilder;
+import jenkins.plugins.slack.user.SlackUserIdResolver;
 import net.sf.json.JSON;
 import net.sf.json.JSONArray;
 import net.sf.json.JSONException;
@@ -63,6 +64,7 @@ public class SlackSendStep extends Step {
     private boolean sendAsText;
     private String iconEmoji;
     private String username;
+    private boolean notifyCommitters;
 
     @Nonnull
     public String getMessage() {
@@ -199,6 +201,15 @@ public class SlackSendStep extends Step {
         this.username = Util.fixEmpty(username);
     }
 
+    public boolean getNotifyCommitters() {
+        return notifyCommitters;
+    }
+
+    @DataBoundSetter
+    public void setNotifyCommitters(boolean notifyCommitters) {
+        this.notifyCommitters = notifyCommitters;
+    }
+
     @Override
     public StepExecution start(StepContext context) {
         return new SlackSendStepExecution(this, context);
@@ -272,13 +283,16 @@ public class SlackSendStep extends Step {
             boolean sendAsText = step.sendAsText || slackDesc.isSendAsText();
             String iconEmoji = step.iconEmoji != null ? step.iconEmoji : slackDesc.getIconEmoji();
             String username = step.username != null ? step.username : slackDesc.getUsername();
+            boolean notifyCommitters = step.notifyCommitters;
+            SlackUserIdResolver userIdResolver = slackDesc.getSlackUserIdResolver();
 
+            Run run = getContext().get(Run.class);
             TaskListener listener = getContext().get(TaskListener.class);
             Objects.requireNonNull(listener, "Listener is mandatory here");
 
             listener.getLogger().println(Messages.slackSendStepValues(
                     defaultIfEmpty(baseUrl), defaultIfEmpty(teamDomain), channel, defaultIfEmpty(color), botUser,
-                    defaultIfEmpty(tokenCredentialId), defaultIfEmpty(iconEmoji), defaultIfEmpty(username))
+                    defaultIfEmpty(tokenCredentialId), notifyCommitters, defaultIfEmpty(iconEmoji), defaultIfEmpty(username))
             );
             final String populatedToken;
             try {
@@ -289,7 +303,21 @@ public class SlackSendStep extends Step {
                 return null;
             }
 
-            SlackService slackService = getSlackService(baseUrl, teamDomain, botUser, channel, step.replyBroadcast, sendAsText, iconEmoji, username, populatedToken);
+            SlackService slackService = getSlackService(
+                run,
+                baseUrl,
+                teamDomain,
+                botUser,
+                channel,
+                step.replyBroadcast,
+                sendAsText,
+                iconEmoji,
+                username,
+                populatedToken,
+                notifyCommitters,
+                userIdResolver
+            );
+
             final boolean publishSuccess;
             if (sendAsText) {
                 publishSuccess = slackService.publish(step.message, new JSONArray(), color);
@@ -396,9 +424,10 @@ public class SlackSendStep extends Step {
         }
 
         //streamline unit testing
-        SlackService getSlackService(String baseUrl, String team, boolean botUser, String channel, boolean replyBroadcast, boolean sendAsText, String iconEmoji, String username, String populatedToken) {
+        SlackService getSlackService(Run run, String baseUrl, String team, boolean botUser, String channel, boolean replyBroadcast, boolean sendAsText, String iconEmoji, String username, String populatedToken, boolean notifyCommitters, SlackUserIdResolver userIdResolver) {
             return new StandardSlackService(
                     new StandardSlackServiceBuilder()
+                        .withRun(run)
                         .withBaseUrl(baseUrl)
                         .withTeamDomain(team)
                         .withBotUser(botUser)
@@ -407,6 +436,8 @@ public class SlackSendStep extends Step {
                         .withIconEmoji(iconEmoji)
                         .withUsername(username)
                         .withPopulatedToken(populatedToken)
+                        .withNotifyCommitters(notifyCommitters)
+                        .withSlackUserIdResolver(userIdResolver)
                     );
         }
     }
