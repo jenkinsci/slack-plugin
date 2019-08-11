@@ -131,7 +131,7 @@ public class EmailSlackUserIdResolver extends SlackUserIdResolver {
 
         @Override
         public String getDisplayName() {
-            return "Email User ID Resolver";
+            return "Slack email User ID Resolver";
         }
     }
 }
