@@ -2,8 +2,8 @@ package jenkins.plugins.slack;
 
 import hudson.model.AbstractBuild;
 import hudson.model.AbstractProject;
-import hudson.model.ItemGroup;
 import java.io.IOException;
+import jenkins.model.Jenkins;
 import jenkins.plugins.slack.logging.BuildAwareLogger;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -21,7 +21,7 @@ public class MessageBuilderEscapeTest {
         AbstractBuild build = mock(AbstractBuild.class);
         AbstractProject project = mock(AbstractProject.class);
         AbstractProject job = mock(AbstractProject.class);
-        ItemGroup group = mock(ItemGroup.class);
+        Jenkins jenkins = mock(Jenkins.class);
         SlackNotifier notifier = mock(SlackNotifier.class);
         BuildAwareLogger logger = mock(BuildAwareLogger.class);
         TokenExpander tokenExpander = mock(TokenExpander.class);
@@ -29,12 +29,10 @@ public class MessageBuilderEscapeTest {
         when(build.getDisplayName()).thenReturn("build");
         when(build.getProject()).thenReturn(project);
         when(build.getParent()).thenReturn(job);
-        when(job.getParent()).thenReturn(group);
-        when(group.getFullDisplayName()).thenReturn("group");
-        when(project.getParent()).thenReturn(group);
+        when(job.getParent()).thenReturn(jenkins);
+        when(project.getParent()).thenReturn(jenkins);
 
-        when(job.getFullDisplayName()).thenReturn("job");
-        when(project.getFullDisplayName()).thenReturn("project");
+        when(jenkins.getFullDisplayName()).thenReturn("jenkins");
 
         messageBuilder = new ActiveNotifier.MessageBuilder(notifier, build, logger, tokenExpander);
     }
