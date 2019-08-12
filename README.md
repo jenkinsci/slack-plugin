@@ -163,6 +163,9 @@ unclassified:
     tokenCredentialId: slack-token
 ```
 
+For more details see the configuration as code plugin documentation:
+https://github.com/jenkinsci/configuration-as-code-plugin#getting-started
+
 ## Developer instructions
 
 Install Maven and JDK.
