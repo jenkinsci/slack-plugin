@@ -143,9 +143,6 @@ option.
 
 ## Configuration as code
 
-General configuration docs:
-https://github.com/jenkinsci/configuration-as-code-plugin#getting-started
-
 This plugin supports configuration as code
 Add to your yaml file:
 ```yaml
@@ -165,6 +162,9 @@ unclassified:
     teamDomain: <your-slack-workspace-name> # i.e. your-company (just the workspace name not the full url)
     tokenCredentialId: slack-token
 ```
+
+For more details see the configuration as code plugin documentation:
+https://github.com/jenkinsci/configuration-as-code-plugin#getting-started
 
 ## Developer instructions
 
