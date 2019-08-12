@@ -143,6 +143,9 @@ option.
 
 ## Configuration as code
 
+General configuration docs:
+https://github.com/jenkinsci/configuration-as-code-plugin#getting-started
+
 This plugin supports configuration as code
 Add to your yaml file:
 ```yaml
