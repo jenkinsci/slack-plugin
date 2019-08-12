@@ -22,6 +22,7 @@ import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 
 import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
@@ -56,12 +57,12 @@ public class ActiveNotifierTest extends TestCase {
         when(slackNotifier.isMatrixRun(freeStyleBuild)).thenReturn(false);
         when(slackNotifier.isMatrixRun(matrixRun)).thenReturn(true);
         when(group.getFullDisplayName()).thenReturn("group");
-        when(matrixProject.getParent()).thenReturn(group);
+        doReturn(group).when(matrixProject).getParent();
         when(matrixProject.getLastBuild()).thenReturn(null);
         when(matrixProject.getFullDisplayName()).thenReturn("matrixProject");
         when(previousBuild.getPreviousCompletedBuild()).thenReturn(null);
         when(previousBuild.getResult()).thenReturn(Result.SUCCESS);
-        when(configuration.getParent()).thenReturn(matrixProject);
+        doReturn(matrixProject).when(configuration).getParent();
         when(configuration.getLastBuild()).thenReturn(previousBuild);
         when(configuration.getFullDisplayName()).thenReturn("matrixProject");
         when(matrixRun.getAction(CauseAction.class)).thenReturn(null);
@@ -69,8 +70,9 @@ public class ActiveNotifierTest extends TestCase {
         when(matrixRun.hasChangeSetComputed()).thenReturn(false);
         when(matrixRun.getNumber()).thenReturn(1);
         when(matrixRun.getResult()).thenReturn(Result.FAILURE);
-        when(freeStyleBuild.getParent()).thenReturn(freeStyleProject);
-        when(freeStyleProject.getParent()).thenReturn(group);
+
+        doReturn(freeStyleProject).when(freeStyleBuild).getParent();
+        doReturn(group).when(freeStyleProject).getParent();
         when(freeStyleProject.getLastBuild()).thenReturn(null);
         when(freeStyleProject.getFullDisplayName()).thenReturn("freeStyleProject");
         when(slackFactory.apply(matrixRun)).thenReturn(slack);
