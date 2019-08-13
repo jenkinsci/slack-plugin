@@ -2,9 +2,9 @@ package jenkins.plugins.slack.workflow;
 
 import hudson.model.FreeStyleBuild;
 import hudson.model.FreeStyleProject;
-import hudson.model.ItemGroup;
 import java.util.Arrays;
 import java.util.Collection;
+import jenkins.model.Jenkins;
 import jenkins.plugins.slack.ActiveNotifier;
 import jenkins.plugins.slack.TokenExpander;
 import jenkins.plugins.slack.logging.BuildAwareLogger;
@@ -13,9 +13,9 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
-import org.mockito.Mockito;
 
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 @RunWith(Parameterized.class)
 public class MessageBuilderTest extends TestCase {
@@ -35,13 +35,14 @@ public class MessageBuilderTest extends TestCase {
         this.build = mock(FreeStyleBuild.class);
         FreeStyleProject project = mock(FreeStyleProject.class);
 
-        Mockito.when(build.getProject()).thenReturn(project);
-        Mockito.when(build.getDisplayName()).thenReturn(buildDisplayName);
+        when(build.getProject()).thenReturn(project);
+        when(build.getDisplayName()).thenReturn(buildDisplayName);
 
-        ItemGroup ig = mock(ItemGroup.class);
-        Mockito.when(ig.getFullDisplayName()).thenReturn("");
-        Mockito.when(project.getParent()).thenReturn(ig);
-        Mockito.when(project.getDisplayName()).thenReturn(projectDisplayName);
+        Jenkins jenkins = mock(Jenkins.class);
+        when(jenkins.getFullDisplayName()).thenReturn("");
+
+        when(project.getParent()).thenReturn(jenkins);
+        when(project.getDisplayName()).thenReturn(projectDisplayName);
 
         this.expectedResult = expectedResult;
 

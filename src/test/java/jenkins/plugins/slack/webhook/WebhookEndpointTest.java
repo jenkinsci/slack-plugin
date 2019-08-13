@@ -9,14 +9,12 @@ import jenkins.model.GlobalConfiguration;
 import jenkins.plugins.slack.webhook.model.JsonResponse;
 import jenkins.plugins.slack.webhook.model.SlackPostData;
 import jenkins.plugins.slack.webhook.model.SlackTextMessage;
-import net.sf.json.JSONObject;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.jvnet.hudson.test.JenkinsRule;
 import org.jvnet.hudson.test.JenkinsRule.WebClient;
 import org.kohsuke.stapler.RequestImpl;
-import org.mockito.Mockito;
 
 import static com.gargoylesoftware.htmlunit.HttpMethod.POST;
 import static java.net.HttpURLConnection.HTTP_NOT_FOUND;
@@ -26,6 +24,8 @@ import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.nullValue;
 import static org.junit.Assert.assertThat;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -50,7 +50,7 @@ public class WebhookEndpointTest {
         data = new SlackPostData();
         data.setToken("GOOD_TOKEN");
         data.setTrigger_word("jenkins");
-        when(req.bindJSON(Mockito.eq(SlackPostData.class), Mockito.any(JSONObject.class))).thenReturn(data);
+        when(req.bindJSON(eq(SlackPostData.class), any())).thenReturn(data);
     }
 
     @Test
@@ -135,7 +135,7 @@ public class WebhookEndpointTest {
     }
 
     @Test
-    public void testRunNonExistantProject() throws Exception {
+    public void testRunNonExistentProject() throws Exception {
         setConfigSettings();
         data.setText("jenkins run project-1");
         JsonResponse response = (JsonResponse) endpoint.doIndex(req);
@@ -154,7 +154,7 @@ public class WebhookEndpointTest {
     }
 
     @Test
-    public void testGetProjectBuildLogWithNonExistantProject() throws Exception {
+    public void testGetProjectBuildLogWithNonExistentProject() throws Exception {
         setConfigSettings();
         data.setText("jenkins get project_1 #1 log");
         JsonResponse response = (JsonResponse) endpoint.doIndex(req);
