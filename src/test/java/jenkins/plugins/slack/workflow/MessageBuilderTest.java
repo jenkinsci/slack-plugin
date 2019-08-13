@@ -2,7 +2,6 @@ package jenkins.plugins.slack.workflow;
 
 import hudson.model.FreeStyleBuild;
 import hudson.model.FreeStyleProject;
-import hudson.model.ItemGroup;
 import java.util.Arrays;
 import java.util.Collection;
 import jenkins.model.Jenkins;
@@ -14,7 +13,6 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
-import org.mockito.Mockito;
 
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
