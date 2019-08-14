@@ -1,7 +1,7 @@
 package jenkins.plugins.slack;
 
 import jenkins.plugins.slack.matrix.MatrixTriggerMode;
-import jenkins.plugins.slack.user.SlackUserIdResolver;;
+import jenkins.plugins.slack.user.SlackUserIdResolver;
 
 public class SlackNotifierBuilder {
     String baseUrl;
