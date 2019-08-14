@@ -36,7 +36,7 @@ public class SlackNotifierTest extends TestCase {
     }
 
     @Parameterized.Parameters
-    public static Collection businessTypeKeys() {
+    public static Collection<Object[]> businessTypeKeys() {
         return Arrays.asList(new Object[][]{
                 {new SlackServiceStub(), true, FormValidation.Kind.OK},
                 {new SlackServiceStub(), false, FormValidation.Kind.ERROR},

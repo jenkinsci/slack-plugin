@@ -7,7 +7,6 @@ import org.apache.http.HttpEntity;
 import org.apache.http.ProtocolVersion;
 import org.apache.http.StatusLine;
 import org.apache.http.client.methods.CloseableHttpResponse;
-import org.apache.http.params.HttpParams;
 
 public class CloseableHttpResponseStub implements CloseableHttpResponse {
 
@@ -165,12 +164,14 @@ public class CloseableHttpResponseStub implements CloseableHttpResponse {
     }
 
     @Override
-    public HttpParams getParams() {
+    @SuppressWarnings("deprecation") //  deprecated abstract method
+    public org.apache.http.params.HttpParams getParams() {
         return null;
     }
 
     @Override
-    public void setParams(HttpParams httpParams) {
+    @SuppressWarnings("deprecation") //  deprecated abstract method
+    public void setParams(org.apache.http.params.HttpParams httpParams) {
 
     }
 }

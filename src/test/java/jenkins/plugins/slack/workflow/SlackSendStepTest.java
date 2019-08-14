@@ -6,7 +6,8 @@ import hudson.model.Run;
 import hudson.model.TaskListener;
 import java.io.IOException;
 import java.io.PrintStream;
-import java.util.Arrays;
+import java.nio.charset.StandardCharsets;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import jenkins.model.Jenkins;
@@ -167,7 +168,7 @@ public class SlackSendStepTest {
         attachment1.put("author_name", "Name of the author");
         attachment1.put("author_icon", "Avatar for author");
 
-        step.setAttachments(Arrays.asList(attachment1));
+        step.setAttachments(Collections.singletonList(attachment1));
         SlackSendStep.SlackSendStepExecution stepExecution = spy(new SlackSendStep.SlackSendStepExecution(step, stepContextMock));
 
         when(Jenkins.get()).thenReturn(jenkins);
@@ -461,7 +462,8 @@ public class SlackSendStepTest {
         when(stepExecution.getSlackService(eq(run), anyString(), anyString(), anyBoolean(), anyString(), anyBoolean(), anyBoolean(), any(), any(), any(), anyBoolean(), any(SlackUserIdResolver.class))).thenReturn(slackServiceMock);
 
         String savedResponse = IOUtils.toString(
-                this.getClass().getResourceAsStream("response.json")
+                this.getClass().getResourceAsStream("response.json"),
+                StandardCharsets.UTF_8
         );
         when(slackServiceMock.getResponseString()).thenReturn(savedResponse);
         when(slackServiceMock.publish(anyString(), anyString())).thenReturn(true);

@@ -13,7 +13,6 @@ import hudson.model.AbstractProject;
 import hudson.model.BuildListener;
 import hudson.model.Item;
 import hudson.model.Project;
-import hudson.security.ACL;
 import hudson.tasks.BuildStepDescriptor;
 import hudson.tasks.BuildStepMonitor;
 import hudson.tasks.Notifier;
@@ -47,7 +46,7 @@ import org.kohsuke.stapler.QueryParameter;
 import org.kohsuke.stapler.StaplerRequest;
 import org.kohsuke.stapler.verb.POST;
 
-import static com.cloudbees.plugins.credentials.CredentialsProvider.lookupCredentials;
+import static java.util.Collections.singletonList;
 
 public class SlackNotifier extends Notifier {
 
@@ -782,7 +781,6 @@ public class SlackNotifier extends Notifier {
         }
 
         public ListBoxModel doFillTokenCredentialIdItems(@AncestorInPath Item context) {
-
             Jenkins jenkins = Jenkins.get();
 
             if(context == null && !jenkins.hasPermission(Jenkins.ADMINISTER) ||
@@ -791,13 +789,8 @@ public class SlackNotifier extends Notifier {
             }
 
             return new StandardListBoxModel()
-                    .withEmptySelection()
-                    .withAll(lookupCredentials(
-                            StringCredentials.class,
-                            context,
-                            ACL.SYSTEM,
-                            new HostnameRequirement("*.slack.com"))
-                    );
+                    .includeEmptyValue()
+                    .include(context, StringCredentials.class, singletonList(new HostnameRequirement("*.slack.com")));
         }
 
         public boolean isApplicable(Class<? extends AbstractProject> aClass) {

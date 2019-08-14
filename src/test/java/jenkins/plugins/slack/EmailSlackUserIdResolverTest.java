@@ -28,6 +28,7 @@ import hudson.model.User;
 import hudson.scm.ChangeLogSet;
 import hudson.tasks.MailAddressResolver;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 import jenkins.plugins.slack.user.EmailSlackUserIdResolver;
@@ -42,8 +43,9 @@ import org.jvnet.hudson.test.FakeChangeLogSCM.EntryImpl;
 import org.jvnet.hudson.test.FakeChangeLogSCM.FakeChangeLogSet;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
-import static org.mockito.Matchers.any;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.powermock.api.mockito.PowerMockito.mock;
@@ -71,7 +73,7 @@ public class EmailSlackUserIdResolverTest {
     public void setUp() {
         httpClient = new CloseableHttpClientStub();
         mailAddressResolver = getMailAddressResolver();
-        resolver = getResolver(httpClient, mailAddressResolver);
+        resolver = getResolver(mailAddressResolver);
     }
 
     @Test
@@ -86,7 +88,7 @@ public class EmailSlackUserIdResolverTest {
         // Test handling of an error response from Slack
         httpClient.setHttpResponse(getResponseError());
         userId = resolver.resolveUserIdForEmailAddress(EMAIL_ADDRESS);
-        assertEquals(null, userId);
+        assertNull(userId);
     }
 
     @Test
@@ -99,7 +101,7 @@ public class EmailSlackUserIdResolverTest {
     }
 
     @Test
-    public void testResolveUserIdForUserWithSlackUserProperty() throws Exception {
+    public void testResolveUserIdForUserWithSlackUserProperty() {
         SlackUserProperty userProperty = new SlackUserProperty();
         userProperty.setUserId(EXPECTED_USER_ID);
         User mockUser = mock(User.class);
@@ -140,7 +142,7 @@ public class EmailSlackUserIdResolverTest {
     }
 
     private String readResource(String resourceName) throws IOException {
-        return IOUtils.toString(this.getClass().getResourceAsStream(resourceName));
+        return IOUtils.toString(this.getClass().getResourceAsStream(resourceName), StandardCharsets.UTF_8);
     }
 
     private CloseableHttpResponse getResponse(String content) throws IOException {
@@ -163,7 +165,7 @@ public class EmailSlackUserIdResolverTest {
         return mailAddressResolver;
     }
 
-    private EmailSlackUserIdResolver getResolver(CloseableHttpClientStub httpClientMailAddressResolver, MailAddressResolver mailAddressResolver) {
+    private EmailSlackUserIdResolver getResolver(MailAddressResolver mailAddressResolver) {
         List<MailAddressResolver> mailAddressResolverList = new ArrayList<>();
         mailAddressResolverList.add(mailAddressResolver);
         return new EmailSlackUserIdResolver(AUTH_TOKEN, httpClient, mailAddressResolverList);

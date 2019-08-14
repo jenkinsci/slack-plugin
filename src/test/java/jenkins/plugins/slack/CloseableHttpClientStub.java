@@ -1,16 +1,13 @@
 package jenkins.plugins.slack;
 
-import org.apache.commons.httpclient.HttpStatus;
 import org.apache.http.HttpHost;
 import org.apache.http.HttpRequest;
+import org.apache.http.HttpStatus;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpUriRequest;
-import org.apache.http.conn.ClientConnectionManager;
 import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.params.HttpParams;
 import org.apache.http.protocol.HttpContext;
 
-@SuppressWarnings("deprecation") // lots of deprecated abstract methods
 public class CloseableHttpClientStub extends CloseableHttpClient {
 
     private int numberOfCallsToExecuteMethod;
@@ -33,7 +30,8 @@ public class CloseableHttpClientStub extends CloseableHttpClient {
     }
 
     @Override
-    public ClientConnectionManager getConnectionManager() {
+    @SuppressWarnings("deprecation") //  deprecated abstract method
+    public org.apache.http.conn.ClientConnectionManager getConnectionManager() {
         return null;
     }
 
@@ -43,7 +41,8 @@ public class CloseableHttpClientStub extends CloseableHttpClient {
     }
 
     @Override
-    public HttpParams getParams() {
+    @SuppressWarnings("deprecation") //  deprecated abstract method
+    public org.apache.http.params.HttpParams getParams() {
         return null;
     }
 

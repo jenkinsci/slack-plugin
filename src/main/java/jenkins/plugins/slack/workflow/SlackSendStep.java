@@ -11,7 +11,6 @@ import hudson.model.Item;
 import hudson.model.Project;
 import hudson.model.Run;
 import hudson.model.TaskListener;
-import hudson.security.ACL;
 import hudson.util.ListBoxModel;
 import java.util.Objects;
 import java.util.Set;
@@ -41,7 +40,7 @@ import org.kohsuke.stapler.AncestorInPath;
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.DataBoundSetter;
 
-import static com.cloudbees.plugins.credentials.CredentialsProvider.lookupCredentials;
+import static java.util.Collections.singletonList;
 
 /**
  * Workflow step to send a Slack channel notification.
@@ -235,7 +234,6 @@ public class SlackSendStep extends Step {
         }
 
         public ListBoxModel doFillTokenCredentialIdItems(@AncestorInPath Item item) {
-
             Jenkins jenkins = Jenkins.get();
 
             if (item == null && !jenkins.hasPermission(Jenkins.ADMINISTER) ||
@@ -244,13 +242,8 @@ public class SlackSendStep extends Step {
             }
 
             return new StandardListBoxModel()
-                    .withEmptySelection()
-                    .withAll(lookupCredentials(
-                            StringCredentials.class,
-                            item,
-                            ACL.SYSTEM,
-                            new HostnameRequirement("*.slack.com"))
-                    );
+                    .includeEmptyValue()
+                    .include(item, StringCredentials.class, singletonList(new HostnameRequirement("*.slack.com")));
         }
     }
 
