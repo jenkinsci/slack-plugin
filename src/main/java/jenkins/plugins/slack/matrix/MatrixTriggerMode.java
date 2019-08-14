@@ -1,6 +1,3 @@
-/**
- * Borrowed from https://github.com/jenkinsci/hipchat-plugin
- */
 package jenkins.plugins.slack.matrix;
 
 import jenkins.plugins.slack.Messages;
