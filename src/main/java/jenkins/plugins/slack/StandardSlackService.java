@@ -22,6 +22,7 @@ import org.apache.http.HttpStatus;
 import org.apache.http.auth.AuthScope;
 import org.apache.http.auth.UsernamePasswordCredentials;
 import org.apache.http.client.CredentialsProvider;
+import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.conn.routing.HttpRoutePlanner;
@@ -290,7 +291,14 @@ public class StandardSlackService implements SlackService {
     }
 
     protected CloseableHttpClient getHttpClient() {
-        final HttpClientBuilder clientBuilder = HttpClients.custom();
+        int timeoutInSeconds = 60;
+
+        RequestConfig config = RequestConfig.custom()
+                .setConnectTimeout(timeoutInSeconds * 1000)
+                .setConnectionRequestTimeout(timeoutInSeconds * 1000)
+                .setSocketTimeout(timeoutInSeconds * 1000).build();
+
+        final HttpClientBuilder clientBuilder = HttpClients.custom().setDefaultRequestConfig(config);
         final CredentialsProvider credentialsProvider = new BasicCredentialsProvider();
         clientBuilder.setDefaultCredentialsProvider(credentialsProvider);
 
