@@ -1,7 +1,5 @@
 package jenkins.plugins.slack.workflow;
 
-import com.cloudbees.plugins.credentials.common.StandardListBoxModel;
-import com.cloudbees.plugins.credentials.domains.HostnameRequirement;
 import com.google.common.collect.ImmutableSet;
 import groovy.json.JsonOutput;
 import hudson.AbortException;
@@ -30,7 +28,6 @@ import net.sf.json.JSONArray;
 import net.sf.json.JSONException;
 import net.sf.json.JSONObject;
 import net.sf.json.groovy.JsonSlurper;
-import org.jenkinsci.plugins.plaincredentials.StringCredentials;
 import org.jenkinsci.plugins.workflow.steps.Step;
 import org.jenkinsci.plugins.workflow.steps.StepContext;
 import org.jenkinsci.plugins.workflow.steps.StepDescriptor;
@@ -40,7 +37,7 @@ import org.kohsuke.stapler.AncestorInPath;
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.DataBoundSetter;
 
-import static java.util.Collections.singletonList;
+import static jenkins.plugins.slack.SlackNotifier.DescriptorImpl.findTokenCredentialIdItems;
 
 /**
  * Workflow step to send a Slack channel notification.
@@ -234,16 +231,7 @@ public class SlackSendStep extends Step {
         }
 
         public ListBoxModel doFillTokenCredentialIdItems(@AncestorInPath Item item) {
-            Jenkins jenkins = Jenkins.get();
-
-            if (item == null && !jenkins.hasPermission(Jenkins.ADMINISTER) ||
-                    item != null && !item.hasPermission(Item.EXTENDED_READ)) {
-                return new StandardListBoxModel();
-            }
-
-            return new StandardListBoxModel()
-                    .includeEmptyValue()
-                    .include(item, StringCredentials.class, singletonList(new HostnameRequirement("*.slack.com")));
+            return findTokenCredentialIdItems(item);
         }
     }
 
