@@ -13,6 +13,7 @@ import hudson.model.AbstractProject;
 import hudson.model.BuildListener;
 import hudson.model.Item;
 import hudson.model.Project;
+import hudson.security.ACL;
 import hudson.tasks.BuildStepDescriptor;
 import hudson.tasks.BuildStepMonitor;
 import hudson.tasks.Notifier;
@@ -39,6 +40,8 @@ import org.apache.commons.lang.StringUtils;
 import org.jenkinsci.Symbol;
 import org.jenkinsci.plugins.displayurlapi.DisplayURLProvider;
 import org.jenkinsci.plugins.plaincredentials.StringCredentials;
+import org.kohsuke.accmod.Restricted;
+import org.kohsuke.accmod.restrictions.NoExternalUse;
 import org.kohsuke.stapler.AncestorInPath;
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.DataBoundSetter;
@@ -781,16 +784,21 @@ public class SlackNotifier extends Notifier {
         }
 
         public ListBoxModel doFillTokenCredentialIdItems(@AncestorInPath Item context) {
+            return findTokenCredentialIdItems(context);
+        }
+
+        @Restricted(NoExternalUse.class)
+        public static ListBoxModel findTokenCredentialIdItems(@AncestorInPath Item context) {
             Jenkins jenkins = Jenkins.get();
 
-            if(context == null && !jenkins.hasPermission(Jenkins.ADMINISTER) ||
+            if (context == null && !jenkins.hasPermission(Jenkins.ADMINISTER) ||
                     context != null && !context.hasPermission(Item.EXTENDED_READ)) {
                 return new StandardListBoxModel();
             }
 
             return new StandardListBoxModel()
                     .includeEmptyValue()
-                    .include(context, StringCredentials.class, singletonList(new HostnameRequirement("*.slack.com")));
+                    .includeAs(ACL.SYSTEM, context, StringCredentials.class, singletonList(new HostnameRequirement("*.slack.com")));
         }
 
         public boolean isApplicable(Class<? extends AbstractProject> aClass) {
