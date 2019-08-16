@@ -2,7 +2,6 @@ package jenkins.plugins.slack;
 
 import hudson.model.AbstractBuild;
 import hudson.model.AbstractProject;
-import java.io.IOException;
 import jenkins.model.Jenkins;
 import jenkins.plugins.slack.logging.BuildAwareLogger;
 import org.junit.BeforeClass;
@@ -38,7 +37,7 @@ public class MessageBuilderEscapeTest {
     }
 
     @Test
-    public void testEscapeAnchor() throws IOException {
+    public void testEscapeAnchor() {
         String input = "<a href='target'>test</a>";
         String expected = "<'target'|test>";
         String escaped = messageBuilder.escape(input);
@@ -46,7 +45,7 @@ public class MessageBuilderEscapeTest {
     }
 
     @Test
-    public void testEscapePercent() throws IOException {
+    public void testEscapePercent() {
         String input = "hello % world";
         String expected = "hello % world";
         String escaped = messageBuilder.escape(input);
@@ -54,7 +53,7 @@ public class MessageBuilderEscapeTest {
     }
 
     @Test
-    public void testEscapeBraces() throws IOException {
+    public void testEscapeBraces() {
         String input = "something { is } odd";
         String expected = "something { is } odd";
         String escaped = messageBuilder.escape(input);
@@ -62,7 +61,7 @@ public class MessageBuilderEscapeTest {
     }
 
     @Test
-    public void testEscapeBracesInLink() throws IOException {
+    public void testEscapeBracesInLink() {
         String input = "<a href='target'>test { case }</a>";
         String expected = "<'target'|test { case }>";
         String escaped = messageBuilder.escape(input);

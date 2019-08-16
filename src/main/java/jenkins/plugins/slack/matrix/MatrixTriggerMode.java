@@ -1,6 +1,3 @@
-/**
- * Borrowed from https://github.com/jenkinsci/hipchat-plugin
- */
 package jenkins.plugins.slack.matrix;
 
 import jenkins.plugins.slack.Messages;
@@ -20,7 +17,7 @@ public enum MatrixTriggerMode {
     public final boolean forParent;
     public final boolean forChild;
 
-    private MatrixTriggerMode(Localizable description, boolean forParent, boolean forChild) {
+    MatrixTriggerMode(Localizable description, boolean forParent, boolean forChild) {
         this.description = description;
         this.forParent = forParent;
         this.forChild = forChild;

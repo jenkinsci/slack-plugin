@@ -34,6 +34,6 @@ public abstract class SlackUserIdResolverDescriptor extends Descriptor<SlackUser
 
     public static DescriptorExtensionList<SlackUserIdResolver, SlackUserIdResolverDescriptor> all() {
         Jenkins jenkins = Jenkins.get();
-        return jenkins.<SlackUserIdResolver, SlackUserIdResolverDescriptor>getDescriptorList(SlackUserIdResolver.class);
+        return jenkins.getDescriptorList(SlackUserIdResolver.class);
     }
 }
