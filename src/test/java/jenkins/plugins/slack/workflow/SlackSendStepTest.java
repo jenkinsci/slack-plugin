@@ -13,6 +13,7 @@ import java.util.Map;
 import jenkins.model.Jenkins;
 import jenkins.plugins.slack.CredentialsObtainer;
 import jenkins.plugins.slack.SlackNotifier;
+import jenkins.plugins.slack.SlackRequest;
 import jenkins.plugins.slack.SlackService;
 import jenkins.plugins.slack.user.NoSlackUserIdResolver;
 import jenkins.plugins.slack.user.SlackUserIdResolver;
@@ -152,8 +153,61 @@ public class SlackSendStepTest {
 
         stepExecution.run();
         verify(slackServiceMock, times(0)).publish("message", "");
-        verify(slackServiceMock, times(1)).publish("message", attachments, "");
 
+        SlackRequest expectedSlackRequest = SlackRequest.builder()
+                .withAttachments(attachments)
+                .withMessage("message")
+                .withColor("").build();
+        verify(slackServiceMock, times(1)).publish(expectedSlackRequest);
+
+    }
+
+    @Test
+    public void testStepWithBlocks() throws Exception {
+        SlackSendStep step = new SlackSendStep();
+        step.setMessage("message");
+        step.setTokenCredentialId("tokenCredentialId");
+        step.setBotUser(true);
+        step.setTeamDomain("teamDomain");
+        step.setChannel("channel");
+
+        Map<String, String> blocks = new HashMap<>();
+        blocks.put("title", "Title of the message");
+        blocks.put("author_name", "Name of the author");
+        blocks.put("author_icon", "Avatar for author");
+
+        step.setBlocks(Collections.singletonList(blocks));
+
+        SlackSendStep.SlackSendStepExecution stepExecution = spy(new SlackSendStep.SlackSendStepExecution(step, stepContextMock));
+
+        when(Jenkins.get()).thenReturn(jenkins);
+
+        PowerMockito.when(CredentialsObtainer.getTokenToUse(anyString(), any(Item.class), any())).thenReturn("token");
+
+        when(taskListenerMock.getLogger()).thenReturn(printStreamMock);
+        NoSlackUserIdResolver noSlackUserIdResolver = new NoSlackUserIdResolver();
+        when(slackDescMock.getSlackUserIdResolver()).thenReturn(noSlackUserIdResolver);
+
+        doNothing().when(printStreamMock).println();
+
+        when(stepExecution.getSlackService(eq(run), any(), anyString(), anyBoolean(), anyString(), anyBoolean(), anyBoolean(), any(), any(), any(), anyBoolean(), any(SlackUserIdResolver.class))).thenReturn(slackServiceMock);
+
+        stepExecution.run();
+        verify(slackServiceMock, times(0)).publish("message", "");
+
+
+        JSONArray expectedBlocks = new JSONArray();
+        JSONObject jsonObject = new JSONObject();
+        jsonObject.put("title", "Title of the message");
+        jsonObject.put("author_name", "Name of the author");
+        jsonObject.put("author_icon", "Avatar for author");
+        expectedBlocks.add(jsonObject);
+
+        SlackRequest slackRequest = SlackRequest.builder()
+                .withMessage("message")
+                .withBlocks(expectedBlocks)
+                .build();
+        verify(slackServiceMock, times(1)).publish(slackRequest);
     }
 
     @Test
@@ -195,7 +249,12 @@ public class SlackSendStepTest {
         jsonObject.put("author_icon", "Avatar for author");
         jsonObject.put("fallback", "message");
         expectedAttachments.add(jsonObject);
-        verify(slackServiceMock, times(1)).publish("message", expectedAttachments, "");
+
+        SlackRequest expectedSlackRequest = SlackRequest.builder()
+                .withAttachments(expectedAttachments)
+                .withMessage("message")
+                .withColor("").build();
+        verify(slackServiceMock, times(1)).publish(expectedSlackRequest);
     }
 
     @Test

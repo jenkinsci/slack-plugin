@@ -63,6 +63,11 @@ public class SlackNotifierTest extends TestCase {
             return response;
         }
 
+        @Override
+        public boolean publish(SlackRequest slackRequest) {
+            return response;
+        }
+
         public boolean publish(String message, String color) {
             return response;
         }

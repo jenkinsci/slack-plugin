@@ -54,6 +54,7 @@ public class StandardSlackService implements SlackService {
     private boolean notifyCommitters;
     private SlackUserIdResolver userIdResolver;
 
+
     /**
      * @deprecated use {@link #StandardSlackService(String, String, boolean, String, boolean, String)} instead}
      */
@@ -86,12 +87,12 @@ public class StandardSlackService implements SlackService {
     @Deprecated
     public StandardSlackService(String baseUrl, String teamDomain, boolean botUser, String roomId, boolean replyBroadcast, String populatedToken) {
         this(builder()
-            .withBaseUrl(baseUrl)
-            .withTeamDomain(teamDomain)
-            .withBotUser(botUser)
-            .withRoomId(roomId)
-            .withReplyBroadcast(replyBroadcast)
-            .withPopulatedToken(populatedToken)
+                .withBaseUrl(baseUrl)
+                .withTeamDomain(teamDomain)
+                .withBotUser(botUser)
+                .withRoomId(roomId)
+                .withReplyBroadcast(replyBroadcast)
+                .withPopulatedToken(populatedToken)
         );
         if (populatedToken == null) {
             throw new IllegalArgumentException("No slack token found, setup a secret text credential and configure it to be used");
@@ -131,33 +132,14 @@ public class StandardSlackService implements SlackService {
         return publish(message, "warning");
     }
 
-    public boolean publish(String message, String color) {
-        //prepare attachments first
-        JSONObject field = new JSONObject();
-        field.put("short", false);
-        field.put("value", message);
-
-        JSONArray fields = new JSONArray();
-        fields.add(field);
-
-        JSONObject attachment = new JSONObject();
-        attachment.put("fallback", message);
-        attachment.put("color", color);
-        attachment.put("fields", fields);
-        JSONArray mrkdwn = new JSONArray();
-        mrkdwn.add("pretext");
-        mrkdwn.add("text");
-        mrkdwn.add("fields");
-        attachment.put("mrkdwn_in", mrkdwn);
-        JSONArray attachments = new JSONArray();
-        attachments.add(attachment);
-
-        return publish(null, attachments, color);
-    }
-
     @Override
-    public boolean publish(String message, JSONArray attachments, String color) {
+    public boolean publish(SlackRequest slackRequest) {
         boolean result = true;
+
+        String message = slackRequest.getMessage();
+        JSONArray attachments = slackRequest.getAttachments();
+        JSONArray blocks = slackRequest.getBlocks();
+        String color = slackRequest.getColor();
 
         try (CloseableHttpClient client = getHttpClient()) {
             // include committer userIds in roomIds
@@ -192,6 +174,10 @@ public class StandardSlackService implements SlackService {
                 if (attachments.size() > 0) {
                     json.put("attachments", attachments);
                 }
+
+                if (blocks.size() > 0) {
+                    json.put("blocks", blocks);
+                }
                 json.put("link_names", "1");
                 json.put("unfurl_links", "true");
                 json.put("unfurl_media", "true");
@@ -217,8 +203,7 @@ public class StandardSlackService implements SlackService {
                     }
                     if (StringUtils.isEmpty(iconEmoji) && StringUtils.isEmpty(username)) {
                         json.put("as_user", "true");
-                    }
-                    else {
+                    } else {
                         if (StringUtils.isNotEmpty(iconEmoji)) {
                             json.put("icon_emoji", iconEmoji);
                         }
@@ -266,6 +251,43 @@ public class StandardSlackService implements SlackService {
         }
         return result;
     }
+
+    @Override
+    public boolean publish(String message, String color) {
+        //prepare attachments first
+        JSONObject field = new JSONObject();
+        field.put("short", false);
+        field.put("value", message);
+
+        JSONArray fields = new JSONArray();
+        fields.add(field);
+
+        JSONObject attachment = new JSONObject();
+        attachment.put("fallback", message);
+        attachment.put("color", color);
+        attachment.put("fields", fields);
+        JSONArray mrkdwn = new JSONArray();
+        mrkdwn.add("pretext");
+        mrkdwn.add("text");
+        mrkdwn.add("fields");
+        attachment.put("mrkdwn_in", mrkdwn);
+        JSONArray attachments = new JSONArray();
+        attachments.add(attachment);
+
+        return publish(null, attachments, color);
+    }
+
+    @Override
+    public boolean publish(String message, JSONArray attachments, String color) {
+        return publish(
+                SlackRequest.builder()
+                        .withMessage(message)
+                        .withAttachments(attachments)
+                        .withColor(color)
+                        .build()
+        );
+    }
+
 
     private String getTokenToUse(String authTokenCredentialId, String token) {
         if (!StringUtils.isEmpty(authTokenCredentialId)) {

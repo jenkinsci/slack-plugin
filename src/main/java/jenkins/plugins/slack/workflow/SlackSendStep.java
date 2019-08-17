@@ -19,6 +19,7 @@ import jenkins.model.Jenkins;
 import jenkins.plugins.slack.CredentialsObtainer;
 import jenkins.plugins.slack.Messages;
 import jenkins.plugins.slack.SlackNotifier;
+import jenkins.plugins.slack.SlackRequest;
 import jenkins.plugins.slack.SlackService;
 import jenkins.plugins.slack.StandardSlackService;
 import jenkins.plugins.slack.StandardSlackServiceBuilder;
@@ -56,6 +57,7 @@ public class SlackSendStep extends Step {
     private String teamDomain;
     private boolean failOnError;
     private Object attachments;
+    private Object blocks;
     private boolean replyBroadcast;
     private boolean sendAsText;
     private String iconEmoji;
@@ -149,6 +151,15 @@ public class SlackSendStep extends Step {
 
     public Object getAttachments() {
         return attachments;
+    }
+
+    public Object getBlocks() {
+        return blocks;
+    }
+
+    @DataBoundSetter
+    public void setBlocks(Object blocks) {
+        this.blocks = blocks;
     }
 
     @DataBoundSetter
@@ -312,12 +323,27 @@ public class SlackSendStep extends Step {
                         }
                     }
                 }
-                publishSuccess = slackService.publish(step.message, jsonArray, color);
+                publishSuccess = slackService.publish(
+                        SlackRequest.builder()
+                                .withMessage(step.message)
+                                .withAttachments(jsonArray)
+                                .withColor(color)
+                                .build()
+                );
+            } else if (step.blocks != null) {
+                JSONArray jsonArray = getBlocksAsJSONArray();
+
+                publishSuccess = slackService.publish(
+                        SlackRequest.builder()
+                                .withMessage(step.message)
+                                .withBlocks(jsonArray)
+                                .build()
+                );
             } else if (step.message != null) {
                 publishSuccess = slackService.publish(step.message, color);
             } else {
                 listener.error(Messages
-                        .notificationFailedWithException(new IllegalArgumentException("No message or attachments provided")));
+                        .notificationFailedWithException(new IllegalArgumentException("No message, attachments or blocks provided")));
                 return null;
             }
             SlackResponse response = null;
@@ -350,6 +376,29 @@ public class SlackSendStep extends Step {
             return response;
         }
 
+        JSONArray getBlocksAsJSONArray() throws Exception {
+            final TaskListener listener = getContext().get(TaskListener.class);
+            final String jsonString = JsonOutput.toJson(step.blocks);
+
+            return convertStringToJsonArray(listener, jsonString, "Blocks");
+        }
+
+        private JSONArray convertStringToJsonArray(TaskListener listener, String jsonString, String fieldType) {
+            JsonSlurper jsonSlurper = new JsonSlurper();
+            JSON json;
+            try {
+                json = jsonSlurper.parseText(jsonString);
+            } catch (JSONException e) {
+                listener.error(Messages.notificationFailedWithException(e));
+                return null;
+            }
+            if (!(json instanceof JSONArray)) {
+                listener.error(Messages.notificationFailedWithException(new IllegalArgumentException(fieldType + " must be JSONArray")));
+                return null;
+            }
+            return (JSONArray) json;
+        }
+
         JSONArray getAttachmentsAsJSONArray() throws Exception {
             final TaskListener listener = getContext().get(TaskListener.class);
             final String jsonString;
@@ -359,19 +408,7 @@ public class SlackSendStep extends Step {
                 jsonString = JsonOutput.toJson(step.attachments);
             }
 
-            JsonSlurper jsonSlurper = new JsonSlurper();
-            JSON json = null;
-            try {
-                json = jsonSlurper.parseText(jsonString);
-            } catch (JSONException e) {
-                listener.error(Messages.notificationFailedWithException(e));
-                return null;
-            }
-            if (!(json instanceof JSONArray)) {
-                listener.error(Messages.notificationFailedWithException(new IllegalArgumentException("Attachments must be JSONArray")));
-                return null;
-            }
-            return (JSONArray) json;
+            return convertStringToJsonArray(listener, jsonString, "Attachments");
         }
 
         /**

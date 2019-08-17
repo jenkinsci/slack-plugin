@@ -11,7 +11,8 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.jvnet.hudson.test.JenkinsRule;
 
-public class SlackSendStepIntegrationTest {
+public class
+SlackSendStepIntegrationTest {
     @Rule
     public JenkinsRule jenkinsRule = new JenkinsRule();
 
