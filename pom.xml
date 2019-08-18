@@ -17,7 +17,7 @@
 
     <properties>
         <jenkins.version>2.164.3</jenkins.version>
-        <hpi.compatibleSinceVersion>2.0</hpi.compatibleSinceVersion>
+        <hpi.compatibleSinceVersion>2.32</hpi.compatibleSinceVersion>
 
         <revision>2.4</revision>
         <changelist>-SNAPSHOT</changelist>
