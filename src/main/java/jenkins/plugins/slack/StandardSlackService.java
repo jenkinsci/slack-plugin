@@ -171,11 +171,11 @@ public class StandardSlackService implements SlackService {
                 if (StringUtils.isNotEmpty(message)) {
                     json.put("text", message);
                 }
-                if (attachments.size() > 0) {
+                if (attachments != null && !attachments.isEmpty()) {
                     json.put("attachments", attachments);
                 }
 
-                if (blocks.size() > 0) {
+                if (blocks != null && !blocks.isEmpty()) {
                     json.put("blocks", blocks);
                 }
                 json.put("link_names", "1");
@@ -213,7 +213,7 @@ public class StandardSlackService implements SlackService {
                     }
                 }
 
-                logger.fine("Posting: to " + roomId + " on " + teamDomain + " using " + url + ": " + attachments.toString() + " " + color);
+                logger.fine("Posting: to " + roomId + " on " + teamDomain + " using " + url + ":  " + color);
 
                 post.setHeader("Content-Type", "application/json; charset=utf-8");
                 post.setEntity(new StringEntity(json.toString(), StandardCharsets.UTF_8));
