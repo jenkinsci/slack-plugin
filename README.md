@@ -31,10 +31,10 @@ applications like [RocketChat][rocketchat] and [Mattermost][mattermost].
 slackSend color: 'good', message: 'Message from Jenkins Pipeline'
 ```
 
-Additionally you can pass a JSONArray in order to send complex
+Additionally you can pass attachments or blocks in order to send complex
 messages, for example:
 
-```
+```groovy
 def attachments = [
   [
     text: 'I find your lack of faith disturbing!',
@@ -45,8 +45,39 @@ def attachments = [
 
 slackSend(channel: '#general', attachments: attachments)
 ```
-For more information about slack messages see [Slack Messages Api](https://api.slack.com/docs/messages)
-and [Slack attachments Api](https://api.slack.com/docs/message-attachments)
+
+```groovy
+blocks = [
+	[
+		"type": "section",
+		"text": [
+			"type": "mrkdwn",
+			"text": "Hello, Assistant to the Regional Manager Dwight! *Michael Scott* wants to know where you'd like to take the Paper Company investors to dinner tonight.\n\n *Please select a restaurant:*"
+		]
+	],
+    [
+		"type": "divider"
+	],
+	[
+		"type": "section",
+		"text": [
+			"type": "mrkdwn",
+			"text": "*Farmhouse Thai Cuisine*\n:star::star::star::star: 1528 reviews\n They do have some vegan options, like the roti and curry, plus they have a ton of salad stuff and noodles can be ordered without meat!! They have something for everyone here"
+		],
+		"accessory": [
+			"type": "image",
+			"image_url": "https://s3-media3.fl.yelpcdn.com/bphoto/c7ed05m9lC2EmA3Aruue7A/o.jpg",
+			"alt_text": "alt text for image"
+		]
+	]
+]
+
+slackSend(channel: '#general', blocks: blocks)
+```
+
+For more information about slack messages see [Slack Messages Api](https://api.slack.com/docs/messages), [Slack attachments Api](https://api.slack.com/docs/message-attachments) and [Block kit](https://api.slack.com/block-kit)
+
+Note the attachments API is classified as legacy, with blocks as the replacement.
 
 #### Threads Support
 
