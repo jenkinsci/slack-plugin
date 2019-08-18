@@ -104,6 +104,8 @@ public class SlackUploadFileStep extends Step {
 
     public static class SlackUploadFileStepExecution extends SynchronousNonBlockingStepExecution<Void> {
 
+        private static final long serialVersionUID = 1L;
+        
         private transient final SlackUploadFileStep step;
 
         SlackUploadFileStepExecution(SlackUploadFileStep step, StepContext context) {
