@@ -12,7 +12,6 @@ import java.util.HashMap;
 import java.util.Map;
 import jenkins.model.Jenkins;
 import jenkins.plugins.slack.CredentialsObtainer;
-import jenkins.plugins.slack.HttpClient;
 import jenkins.plugins.slack.SlackNotifier;
 import jenkins.plugins.slack.SlackRequest;
 import jenkins.plugins.slack.SlackService;
@@ -49,7 +48,7 @@ import static org.mockito.MockitoAnnotations.initMocks;
  * Traditional Unit tests, allows testing null Jenkins.get()
  */
 @RunWith(PowerMockRunner.class)
-@PrepareForTest({Jenkins.class, SlackSendStep.class, CredentialsObtainer.class, HttpClient.class})
+@PrepareForTest({Jenkins.class, SlackSendStep.class, CredentialsObtainer.class})
 @PowerMockIgnore({"com.sun.org.apache.xerces.*", "javax.xml.*", "org.xml.*"})
 public class SlackSendStepTest {
 
@@ -70,14 +69,17 @@ public class SlackSendStepTest {
     @Mock
     SlackNotifier.DescriptorImpl slackDescMock;
 
+    @Mock
+    Item item;
+
     @Before
     public void setUp() throws IOException, InterruptedException {
         initMocks(this);
 
         PowerMockito.mockStatic(Jenkins.class);
         PowerMockito.mockStatic(CredentialsObtainer.class);
-        PowerMockito.mockStatic(HttpClient.class);
         when(jenkins.getDescriptorByType(SlackNotifier.DescriptorImpl.class)).thenReturn(slackDescMock);
+        when(CredentialsObtainer.getItemForCredentials(any())).thenReturn(item);
         PowerMockito.when(Jenkins.get()).thenReturn(jenkins);
         when(taskListenerMock.getLogger()).thenReturn(printStreamMock);
         when(stepContextMock.get(Run.class)).thenReturn(run);
