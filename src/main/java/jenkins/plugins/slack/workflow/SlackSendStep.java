@@ -6,13 +6,11 @@ import hudson.AbortException;
 import hudson.Extension;
 import hudson.Util;
 import hudson.model.Item;
-import hudson.model.Project;
 import hudson.model.Run;
 import hudson.model.TaskListener;
 import hudson.util.ListBoxModel;
 import java.util.Objects;
 import java.util.Set;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.annotation.Nonnull;
 import jenkins.model.Jenkins;
@@ -38,6 +36,7 @@ import org.kohsuke.stapler.AncestorInPath;
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.DataBoundSetter;
 
+import static jenkins.plugins.slack.CredentialsObtainer.getItemForCredentials;
 import static jenkins.plugins.slack.SlackNotifier.DescriptorImpl.findTokenCredentialIdItems;
 
 /**
@@ -261,7 +260,7 @@ public class SlackSendStep extends Step {
         protected SlackResponse run() throws Exception {
 
             Jenkins jenkins = Jenkins.get();
-            Item item = getItemForCredentials();
+            Item item = getItemForCredentials(getContext());
             SlackNotifier.DescriptorImpl slackDesc = jenkins.getDescriptorByType(SlackNotifier.DescriptorImpl.class);
 
             String baseUrl = step.baseUrl != null ? step.baseUrl : slackDesc.getBaseUrl();
@@ -409,32 +408,6 @@ public class SlackSendStep extends Step {
             }
 
             return convertStringToJsonArray(listener, jsonString, "Attachments");
-        }
-
-        /**
-         * Tries to obtain the proper Item object to provide to CredentialsProvider.
-         * Project works for freestyle jobs, the parent of the Run works for pipelines.
-         * In case the proper item cannot be found, null is returned, since when null is provided to CredentialsProvider,
-         * it will internally use Jenkins.getInstance() which effectively only allows global credentials.
-         *
-         * @return the item to use for CredentialsProvider credential lookup
-         */
-        private Item getItemForCredentials() {
-            Item item = null;
-            try {
-                item = getContext().get(Project.class);
-                if (item == null) {
-                    Run run = getContext().get(Run.class);
-                    if (run != null) {
-                        item = run.getParent();
-                    } else {
-                        item = null;
-                    }
-                }
-            } catch (Exception e) {
-                logger.log(Level.INFO, "Exception obtaining item for credentials lookup. Only global credentials will be available", e);
-            }
-            return item;
         }
 
         private String defaultIfEmpty(String value) {

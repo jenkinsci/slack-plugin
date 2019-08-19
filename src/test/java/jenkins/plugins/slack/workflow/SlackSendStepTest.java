@@ -69,6 +69,9 @@ public class SlackSendStepTest {
     @Mock
     SlackNotifier.DescriptorImpl slackDescMock;
 
+    @Mock
+    Item item;
+
     @Before
     public void setUp() throws IOException, InterruptedException {
         initMocks(this);
@@ -76,6 +79,7 @@ public class SlackSendStepTest {
         PowerMockito.mockStatic(Jenkins.class);
         PowerMockito.mockStatic(CredentialsObtainer.class);
         when(jenkins.getDescriptorByType(SlackNotifier.DescriptorImpl.class)).thenReturn(slackDescMock);
+        when(CredentialsObtainer.getItemForCredentials(any())).thenReturn(item);
         PowerMockito.when(Jenkins.get()).thenReturn(jenkins);
         when(taskListenerMock.getLogger()).thenReturn(printStreamMock);
         when(stepContextMock.get(Run.class)).thenReturn(run);

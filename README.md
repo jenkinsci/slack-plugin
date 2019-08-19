@@ -79,6 +79,18 @@ For more information about slack messages see [Slack Messages Api](https://api.s
 
 Note the attachments API is classified as legacy, with blocks as the replacement.
 
+#### File upload
+
+You can upload files to slack with this plugin:
+```groovy
+node {
+  sh "echo hey > blah.txt"
+  slackUploadFile filePath: '*.txt', initialComment:  'HEY HEY'
+}
+```
+
+This feature requires botUser mode.
+
 #### Threads Support
 
 You can send a message and create a thread on that message using the pipeline step.
@@ -87,11 +99,9 @@ target channel to create a thread. All messages of a thread should use the same 
 
 Example:
 ```
-node {
-    def slackResponse = slackSend(channel: "cool-threads", message: "Here is the primary message")
-    slackSend(channel: slackResponse.threadId, message: "Thread reply #1")
-    slackSend(channel: slackResponse.threadId, message: "Thread reply #2")
-}
+def slackResponse = slackSend(channel: "cool-threads", message: "Here is the primary message")
+slackSend(channel: slackResponse.threadId, message: "Thread reply #1")
+slackSend(channel: slackResponse.threadId, message: "Thread reply #2")
 ```
 
 This feature requires botUser mode.
@@ -100,15 +110,13 @@ Messages that are posted to a thread can also optionally be broadcasted to the
 channel. Set `replyBroadcast: true` to do so. For example:
 
 ```
-node {
-    def slackResponse = slackSend(channel: "ci", message: "Started build")
-    slackSend(channel: slackResponse.threadId, message: "Build still in progress")
-    slackSend(
-        channel: slackResponse.threadId,
-        replyBroadcast: true,
-        message: "Build failed. Broadcast to channel for better visibility."
-    )
-}
+def slackResponse = slackSend(channel: "ci", message: "Started build")
+slackSend(channel: slackResponse.threadId, message: "Build still in progress")
+slackSend(
+    channel: slackResponse.threadId,
+    replyBroadcast: true,
+    message: "Build failed. Broadcast to channel for better visibility."
+)
 ```
 
 #### Unfurling Links
@@ -118,9 +126,7 @@ You can allow link unfurling if you send the message as text. This only works in
 Example:
 
 ```
-node {
-    slackSend(channel: "news-update", message: "https://www.nytimes.com", sendAsText: true)
-}
+slackSend(channel: "news-update", message: "https://www.nytimes.com", sendAsText: true)
 ```
 
 ## Install Instructions for Slack compatible application
