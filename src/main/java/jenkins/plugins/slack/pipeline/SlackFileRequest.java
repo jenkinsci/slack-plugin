@@ -1,7 +1,10 @@
 package jenkins.plugins.slack.pipeline;
 
 import hudson.FilePath;
+import org.kohsuke.accmod.Restricted;
+import org.kohsuke.accmod.restrictions.NoExternalUse;
 
+@Restricted(NoExternalUse.class)
 public class SlackFileRequest {
     private final String fileToUploadPath;
     private final String token;
@@ -10,7 +13,6 @@ public class SlackFileRequest {
     private final String initialComment;
     private final FilePath filePath;
 
-    // TODO builder
     public SlackFileRequest(FilePath filePath, String token, String channels, String initialComment, String fileToUploadPath) {
         this.token = token;
         this.channels = channels;
