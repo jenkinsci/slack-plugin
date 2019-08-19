@@ -89,6 +89,8 @@ node {
 }
 ```
 
+This feature requires botUser mode.
+
 #### Threads Support
 
 You can send a message and create a thread on that message using the pipeline step.
