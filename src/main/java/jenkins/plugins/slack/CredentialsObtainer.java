@@ -83,9 +83,7 @@ public class CredentialsObtainer {
         }
         return item;
     }
-
-
-
+    
     private static StringCredentials getCredentialWithId(String credentialId, List<StringCredentials> credentials) {
         CredentialsMatcher matcher = CredentialsMatchers.withId(credentialId);
         return CredentialsMatchers.firstOrNull(credentials, matcher);
