@@ -3,7 +3,6 @@ package jenkins.plugins.slack.pipeline;
 import com.google.common.collect.ImmutableSet;
 import hudson.Extension;
 import hudson.FilePath;
-import hudson.Launcher;
 import hudson.Util;
 import hudson.model.Item;
 import hudson.model.Run;
@@ -83,7 +82,7 @@ public class SlackUploadFileStep extends Step {
 
         @Override
         public Set<? extends Class<?>> getRequiredContext() {
-            return ImmutableSet.of(Run.class, TaskListener.class, Launcher.class, FilePath.class);
+            return ImmutableSet.of(Run.class, TaskListener.class, FilePath.class);
         }
 
         @Override
@@ -116,8 +115,6 @@ public class SlackUploadFileStep extends Step {
         @Override
         protected Void run() throws IOException, InterruptedException, ExecutionException {
             TaskListener listener = getContext().get(TaskListener.class);
-            Launcher launcher = getContext().get(Launcher.class);
-
             FilePath filePath = getContext().get(FilePath.class);
 
             Item item = getItemForCredentials(getContext());
@@ -133,11 +130,11 @@ public class SlackUploadFileStep extends Step {
                     filePath, populatedToken, channel, step.initialComment, step.filePath
             );
 
-            assert launcher != null;
-            VirtualChannel virtualChannel = launcher.getChannel();
+            assert filePath != null;
+            VirtualChannel virtualChannel = filePath.getChannel();
             assert virtualChannel != null;
 
-            virtualChannel.callAsync(new SlackUploadFileRunner(listener, slackFileRequest)).get();
+            virtualChannel.callAsync(new SlackUploadFileRunner(listener, Jenkins.get().proxy, slackFileRequest)).get();
 
             return null;
         }

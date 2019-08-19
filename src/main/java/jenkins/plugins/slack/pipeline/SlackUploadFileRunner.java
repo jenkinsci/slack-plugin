@@ -1,6 +1,7 @@
 package jenkins.plugins.slack.pipeline;
 
 import hudson.FilePath;
+import hudson.ProxyConfiguration;
 import hudson.model.TaskListener;
 import hudson.util.DirScanner;
 import hudson.util.FileVisitor;
@@ -38,14 +39,16 @@ class SlackUploadFileRunner extends MasterToSlaveCallable<Boolean, Throwable> im
 
     private final TaskListener listener;
     private final String initialComment;
+    private final ProxyConfiguration proxy;
 
-    SlackUploadFileRunner(TaskListener listener, SlackFileRequest slackFileRequest) {
+    SlackUploadFileRunner(TaskListener listener, ProxyConfiguration proxy, SlackFileRequest slackFileRequest) {
         this.listener = listener;
         this.filePath = slackFileRequest.getFilePath();
             this.fileToUploadPath = slackFileRequest.getFileToUploadPath();
         this.channels = slackFileRequest.getChannels();
         this.initialComment = slackFileRequest.getInitialComment();
         this.token = slackFileRequest.getToken();
+        this.proxy = proxy;
     }
 
     @Override
@@ -73,7 +76,7 @@ class SlackUploadFileRunner extends MasterToSlaveCallable<Boolean, Throwable> im
     }
 
     private boolean doIt(File file) {
-        try (CloseableHttpClient client = HttpClient.getCloseableHttpClient()) {
+        try (CloseableHttpClient client = HttpClient.getCloseableHttpClient(proxy)) {
             MultipartEntityBuilder multipartEntityBuilder = MultipartEntityBuilder.create()
                     .setMode(HttpMultipartMode.BROWSER_COMPATIBLE)
                     .addBinaryBody("file", file, ContentType.DEFAULT_BINARY, file.getName())

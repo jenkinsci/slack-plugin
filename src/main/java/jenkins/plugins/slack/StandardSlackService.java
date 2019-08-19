@@ -1,5 +1,6 @@
 package jenkins.plugins.slack;
 
+import hudson.ProxyConfiguration;
 import hudson.model.Run;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -10,6 +11,7 @@ import java.util.Objects;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
+import jenkins.model.Jenkins;
 import jenkins.plugins.slack.user.SlackUserIdResolver;
 import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
@@ -301,7 +303,9 @@ public class StandardSlackService implements SlackService {
     }
 
     protected CloseableHttpClient getHttpClient() {
-        return HttpClient.getCloseableHttpClient();
+        Jenkins jenkins = Jenkins.getInstanceOrNull();
+        ProxyConfiguration proxy = jenkins != null ? jenkins.proxy : null;
+        return HttpClient.getCloseableHttpClient(proxy);
     }
 
     void setHost(String host) {
