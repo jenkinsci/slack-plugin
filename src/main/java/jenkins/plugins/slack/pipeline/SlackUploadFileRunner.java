@@ -42,7 +42,7 @@ class SlackUploadFileRunner extends MasterToSlaveCallable<Boolean, Throwable> im
     SlackUploadFileRunner(TaskListener listener, SlackFileRequest slackFileRequest) {
         this.listener = listener;
         this.filePath = slackFileRequest.getFilePath();
-        this.fileToUploadPath  = slackFileRequest.getFileToUploadPath();
+        this.fileToUploadPath = slackFileRequest.getFileToUploadPath();
         this.channels = slackFileRequest.getChannels();
         this.initialComment = slackFileRequest.getInitialComment();
         this.token = slackFileRequest.getToken();
