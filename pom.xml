@@ -13,7 +13,7 @@
     <version>${revision}${changelist}</version>
     <name>Slack Notification Plugin</name>
     <description>A Build status publisher that notifies channels on a Slack team</description>
-    <url>http://wiki.jenkins-ci.org/display/JENKINS/Slack+Plugin</url>
+    <url>https://github.com/jenkinsci/slack-plugin</url>
 
     <properties>
         <revision>2.32</revision>
