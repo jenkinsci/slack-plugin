@@ -16,6 +16,7 @@ import jenkins.plugins.slack.user.SlackUserIdResolver;
 import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.http.Header;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpStatus;
 import org.apache.http.client.methods.CloseableHttpResponse;
@@ -211,15 +212,14 @@ public class StandardSlackService implements SlackService {
                 try (CloseableHttpResponse response = client.execute(post)) {
                     int responseCode = response.getStatusLine().getStatusCode();
                     HttpEntity entity = response.getEntity();
+                    Header contentTypeHeader = response.getLastHeader("Content-Type");
                     if (botUser && entity != null) {
                         responseString = EntityUtils.toString(entity);
-                        try {
-
+                        if (contentTypeHeader.getValue().startsWith("application/json")) {
                             org.json.JSONObject slackResponse = new org.json.JSONObject(responseString);
                             result = slackResponse.getBoolean("ok");
-                        } catch (org.json.JSONException ex) {
-                            logger.log(Level.WARNING, "Slack post may have failed.  Invalid JSON response: " + responseString);
-                            result = false;
+                        } else {
+                            result = responseString.equals("ok");
                         }
                     }
                     if (responseCode != HttpStatus.SC_OK || !result) {
