@@ -9,23 +9,6 @@ import static org.junit.Assert.assertTrue;
 
 public class StandardSlackServiceTest {
     /**
-     * Publish should generally not rethrow exceptions, or it will cause a build job to fail at end.
-     */
-    @Test
-    public void publishWithBadHostShouldNotRethrowExceptions() {
-        StandardSlackService service = new StandardSlackService(
-                StandardSlackService.builder()
-                        .withBaseUrl("")
-                        .withTeamDomain("foo")
-                        .withBotUser(false)
-                        .withRoomId("#general")
-                        .withReplyBroadcast(false)
-                        .withPopulatedToken("token"));
-        service.setHost("hostvaluethatwillcausepublishtofail");
-        service.publish("message");
-    }
-
-    /**
      * Use a valid host, but an invalid team domain
      */
     @Test
@@ -39,6 +22,19 @@ public class StandardSlackServiceTest {
                         .withReplyBroadcast(false)
                         .withPopulatedToken("token"));
         service.publish("message");
+    }
+
+    @Test
+    public void badConfigurationWillBeCorrected() {
+        StandardSlackService service = new StandardSlackService(
+                StandardSlackService.builder()
+                        .withBaseUrl("https://example.slack.com/services/hooks/jenkins-ci")
+                        .withRoomId("general")
+                        .withBotUser(true)
+        );
+        service.correctMisconfigurationOfBaseUrl();
+
+        assertEquals("example", service.getTeamDomain());
     }
 
     /**

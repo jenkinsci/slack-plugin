@@ -1,5 +1,6 @@
 package jenkins.plugins.slack;
 
+import com.google.common.annotations.VisibleForTesting;
 import hudson.ProxyConfiguration;
 import hudson.model.Run;
 import java.io.IOException;
@@ -10,6 +11,8 @@ import java.util.List;
 import java.util.Objects;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import jenkins.model.Jenkins;
 import jenkins.plugins.slack.user.SlackUserIdResolver;
@@ -28,9 +31,9 @@ import org.jenkinsci.plugins.plaincredentials.StringCredentials;
 public class StandardSlackService implements SlackService {
 
     private static final Logger logger = Logger.getLogger(StandardSlackService.class.getName());
+    private static final Pattern JENKINS_CI_HOOK_REGEX = Pattern.compile("https://(?<teamDomain>.*)\\.slack\\.com/services/hooks/jenkins-ci.*");
 
     private Run run;
-    private String host = "slack.com";
     private String baseUrl;
     private String teamDomain;
     private boolean botUser;
@@ -122,6 +125,21 @@ public class StandardSlackService implements SlackService {
         return publish(message, "warning");
     }
 
+    /**
+     * The slack jenkins CI app documentation is incorrect, but they haven't updated it after asking
+     * This confused users and causes them to mis-configure the application
+     * We correct it to reduce the amount of support needed
+     */
+    void correctMisconfigurationOfBaseUrl() {
+        Matcher matcher = JENKINS_CI_HOOK_REGEX.matcher(baseUrl);
+        if (StringUtils.isNotEmpty(baseUrl) && matcher.matches()) {
+            teamDomain = matcher.group("teamDomain");
+            logger.warning("Overriding base url to team domain '" + teamDomain + "' this is due to " +
+                    "mis-configuration, you don't need to set base url unless you're using a slack compatible app like mattermost");
+            botUser = false;
+        }
+    }
+
     @Override
     public boolean publish(SlackRequest slackRequest) {
         boolean result = true;
@@ -172,9 +190,11 @@ public class StandardSlackService implements SlackService {
                 json.put("unfurl_links", "true");
                 json.put("unfurl_media", "true");
 
+                correctMisconfigurationOfBaseUrl();
+
                 //prepare post methods for both requests types
-                if (!botUser || !StringUtils.isEmpty(baseUrl)) {
-                    url = "https://" + teamDomain + "." + host + "/services/hooks/jenkins-ci?token=" + populatedToken;
+                if (!botUser || StringUtils.isNotEmpty(baseUrl)) {
+                    url = "https://" + teamDomain + "." + "slack.com" + "/services/hooks/jenkins-ci?token=" + populatedToken;
                     if (!StringUtils.isEmpty(baseUrl)) {
                         url = baseUrl + populatedToken;
                     }
@@ -308,7 +328,8 @@ public class StandardSlackService implements SlackService {
         return HttpClient.getCloseableHttpClient(proxy);
     }
 
-    void setHost(String host) {
-        this.host = host;
+    @VisibleForTesting
+    String getTeamDomain() {
+        return teamDomain;
     }
 }
