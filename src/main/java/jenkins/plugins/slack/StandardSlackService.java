@@ -190,7 +190,9 @@ public class StandardSlackService implements SlackService {
                 json.put("unfurl_links", "true");
                 json.put("unfurl_media", "true");
 
-                correctMisconfigurationOfBaseUrl();
+                if (baseUrl != null) {
+                    correctMisconfigurationOfBaseUrl();
+                }
 
                 //prepare post methods for both requests types
                 if (!botUser || StringUtils.isNotEmpty(baseUrl)) {
