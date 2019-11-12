@@ -79,7 +79,7 @@ slackSend(channel: '#general', blocks: blocks)
 
 For more information about slack messages see [Slack Messages Api](https://api.slack.com/docs/messages), [Slack attachments Api](https://api.slack.com/docs/message-attachments) and [Block kit](https://api.slack.com/block-kit)
 
-Note the attachments API is classified as legacy, with blocks as the replacement (but blocks are onnly supported when using a bot user through a custom slack app).
+Note: the attachments API is classified as legacy, with blocks as the replacement (but blocks are only supported when using a bot user through a custom slack app).
 
 #### File upload
 
