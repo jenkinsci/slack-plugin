@@ -47,7 +47,7 @@ def attachments = [
 slackSend(channel: '#general', attachments: attachments)
 ```
 
-Blocks (this feature requires a 'bot user' integration):
+Blocks (this feature requires a 'bot user' and a custom slack app):
 ```groovy
 blocks = [
 	[
