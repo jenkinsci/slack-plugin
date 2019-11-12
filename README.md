@@ -31,9 +31,10 @@ applications like [RocketChat][rocketchat] and [Mattermost][mattermost].
 slackSend color: 'good', message: 'Message from Jenkins Pipeline'
 ```
 
-Additionally you can pass attachments or blocks in order to send complex
+Additionally you can pass attachments or blocks (requires bot user) in order to send complex
 messages, for example:
 
+Attachments:
 ```groovy
 def attachments = [
   [
@@ -46,6 +47,7 @@ def attachments = [
 slackSend(channel: '#general', attachments: attachments)
 ```
 
+Blocks (this feature requires a 'bot user' and a custom slack app):
 ```groovy
 blocks = [
 	[
@@ -77,7 +79,7 @@ slackSend(channel: '#general', blocks: blocks)
 
 For more information about slack messages see [Slack Messages Api](https://api.slack.com/docs/messages), [Slack attachments Api](https://api.slack.com/docs/message-attachments) and [Block kit](https://api.slack.com/block-kit)
 
-Note the attachments API is classified as legacy, with blocks as the replacement.
+Note: the attachments API is classified as legacy, with blocks as the replacement (but blocks are only supported when using a bot user through a custom slack app).
 
 #### File upload
 
