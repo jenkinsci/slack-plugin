@@ -81,8 +81,8 @@ class SlackUploadFileRunner extends MasterToSlaveCallable<Boolean, Throwable> im
             String theChannels = channels;
 
             //thread_ts is passed once with roomId: Ex: roomId:threadTs
-            String[] splitThread = channels.split("[:]+");
-            if (splitThread.length > 1) {
+            String[] splitThread = channels.split(":", 2);
+            if (splitThread.length == 2) {
                 theChannels = splitThread[0];
                 threadTs = splitThread[1];
             }
