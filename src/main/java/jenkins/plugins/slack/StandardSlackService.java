@@ -31,7 +31,7 @@ import org.jenkinsci.plugins.plaincredentials.StringCredentials;
 public class StandardSlackService implements SlackService {
 
     private static final Logger logger = Logger.getLogger(StandardSlackService.class.getName());
-    private static final Pattern JENKINS_CI_HOOK_REGEX = Pattern.compile("https://(?<teamDomain>.*)\\.slack\\.com/services/hooks/jenkins-ci.*");
+    static final Pattern JENKINS_CI_HOOK_REGEX = Pattern.compile("https://(?<teamDomain>.*)\\.slack\\.com/services/hooks/jenkins-ci.*");
 
     private Run run;
     private String baseUrl;
