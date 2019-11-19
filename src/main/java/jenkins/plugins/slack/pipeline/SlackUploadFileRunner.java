@@ -77,15 +77,30 @@ class SlackUploadFileRunner extends MasterToSlaveCallable<Boolean, Throwable> im
 
     private boolean doIt(File file) {
         try (CloseableHttpClient client = HttpClient.getCloseableHttpClient(proxy)) {
+            String threadTs = null;
+            String theChannels = channels;
+
+            //thread_ts is passed once with roomId: Ex: roomId:threadTs
+            String[] splitThread = channels.split(":", 2);
+            if (splitThread.length == 2) {
+                theChannels = splitThread[0];
+                threadTs = splitThread[1];
+            }
+
             MultipartEntityBuilder multipartEntityBuilder = MultipartEntityBuilder.create()
                     .setMode(HttpMultipartMode.BROWSER_COMPATIBLE)
                     .addBinaryBody("file", file, ContentType.DEFAULT_BINARY, file.getName())
                     .addTextBody("token", token, ContentType.DEFAULT_TEXT)
-                    .addTextBody("channels", channels, ContentType.DEFAULT_TEXT);
+                    .addTextBody("channels", theChannels, ContentType.DEFAULT_TEXT);
 
             if (initialComment != null) {
                 multipartEntityBuilder = multipartEntityBuilder
                         .addTextBody("initial_comment", initialComment, ContentType.DEFAULT_TEXT);
+            }
+
+            if (threadTs != null) {
+                multipartEntityBuilder = multipartEntityBuilder
+                        .addTextBody("thread_ts", threadTs, ContentType.DEFAULT_TEXT);
             }
 
             HttpUriRequest request = RequestBuilder
