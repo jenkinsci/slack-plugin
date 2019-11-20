@@ -780,6 +780,11 @@ public class SlackNotifier extends Notifier {
             if (StringUtils.isNotBlank(value) && StringUtils.isNotBlank(teamDomain)) {
                 return FormValidation.error(Messages.workspaceNameAndBaseUrlSet());
             }
+
+            if (StringUtils.isNotBlank(value) && StandardSlackService.JENKINS_CI_HOOK_REGEX.matcher(value).matches()) {
+                return FormValidation.error(Messages.baseUrlIsJenkinsCiAppUrl());
+            }
+
             return FormValidation.ok();
         }
 
