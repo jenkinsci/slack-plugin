@@ -223,7 +223,7 @@ If you've entered something into `Override url` then try clearing it out, that f
 ### Enable additional logging
 Add a [log recorder](https://support.cloudbees.com/hc/en-us/articles/204880580-How-do-I-create-a-logger-in-Jenkins-for-troubleshooting-and-diagnostic-information-) for the [StandardSlackService](https://github.com/jenkinsci/slack-plugin/blob/master/src/main/java/jenkins/plugins/slack/StandardSlackService.java) class this should give you additional details on what's going on.
 
-If you still can't figure it out please raise an issue with as much information as possible about your config and any relevent logs.
+If you still can't figure it out please raise an issue with as much information as possible about your config and any relevant logs.
 
 ## Developer instructions
 
