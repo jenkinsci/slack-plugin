@@ -133,15 +133,14 @@ slackSend(channel: "news-update", message: "https://www.nytimes.com", sendAsText
 
 ## Install Instructions for Slack compatible application
 
-1. Log into Slack compatible application.
+1. Log into the Slack compatible application.
 2. Create a Webhook (it may need to be enabled in system console) by visiting
    Integrations.
 3. You should now have a URL with a token.  Something like
    `https://mydomain.com/hooks/xxxx` where `xxxx` is the integration token and
    `https://mydomain.com/hooks/` is the `Slack compatible app URL`.
 4. Install this plugin on your Jenkins server.
-5. Configure it in your Jenkins job (and optionally as global configuration) and
-   **add it as a Post-build action**.
+5. Follow the freestyle or pipeline instructions for the slack installation instructions.
 
 If you want to configure a notification to be sent to Slack for **all jobs**, you may want to also consider installing an additional plugin called [Global Slack Notifier plugin](https://github.com/jenkinsci/global-slack-notifier-plugin).
 
