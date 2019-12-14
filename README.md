@@ -21,17 +21,17 @@ applications like [RocketChat][rocketchat] and [Mattermost][mattermost].
     1. Search for `slack`,
     1. Check the box next to install.
 
-### Freestyle job
-1. Configure it in your Jenkins job (and optionally as global configuration) and
-   **add it as a Post-build action**.
-   
+![image][img-plugin-manager]
+
+If you want to configure a notification to be sent to Slack for **all jobs**, you may want to also consider installing an additional plugin called [Global Slack Notifier plugin](https://plugins.jenkins.io/global-slack-notifier).
+
 ### Pipeline job
 
 ```
 slackSend color: 'good', message: 'Message from Jenkins Pipeline'
 ```
 
-Additionally you can pass attachments or blocks (requires bot user) in order to send complex
+Additionally you can pass attachments or blocks (requires [bot user](#bot-user-mode)) in order to send complex
 messages, for example:
 
 Attachments:
@@ -40,14 +40,14 @@ def attachments = [
   [
     text: 'I find your lack of faith disturbing!',
     fallback: 'Hey, Vader seems to be mad at you.',
-    color: '#ff0000'
+    color: '#ff0000
   ]
 ]
 
 slackSend(channel: '#general', attachments: attachments)
 ```
 
-Blocks (this feature requires a 'bot user' and a custom slack app):
+Blocks (this feature requires a '[bot user](#bot-user-mode)' and a custom slack app):
 ```groovy
 blocks = [
 	[
@@ -91,7 +91,7 @@ node {
 }
 ```
 
-This feature requires botUser mode.
+This feature requires [botUser](#bot-user-mode) mode.
 
 #### Threads Support
 
@@ -106,7 +106,7 @@ slackSend(channel: slackResponse.threadId, message: "Thread reply #1")
 slackSend(channel: slackResponse.threadId, message: "Thread reply #2")
 ```
 
-This feature requires botUser mode.
+This feature requires [botUser](#bot-user-mode) mode.
 
 Messages that are posted to a thread can also optionally be broadcasted to the
 channel. Set `replyBroadcast: true` to do so. For example:
@@ -131,6 +131,10 @@ Example:
 slackSend(channel: "news-update", message: "https://www.nytimes.com", sendAsText: true)
 ```
 
+### Freestyle job
+1. Configure it in your Jenkins job (and optionally as global configuration) and
+   **add it as a Post-build action**.
+
 ## Install Instructions for Slack compatible application
 
 1. Log into the Slack compatible application.
@@ -141,8 +145,6 @@ slackSend(channel: "news-update", message: "https://www.nytimes.com", sendAsText
    `https://mydomain.com/hooks/` is the `Slack compatible app URL`.
 4. Install this plugin on your Jenkins server.
 5. Follow the freestyle or pipeline instructions for the slack installation instructions.
-
-If you want to configure a notification to be sent to Slack for **all jobs**, you may want to also consider installing an additional plugin called [Global Slack Notifier plugin](https://github.com/jenkinsci/global-slack-notifier-plugin).
 
 ## Security
 
@@ -155,8 +157,7 @@ Create a new ***Secret text*** credential:
 ![image][img-secret-text]
 
 
-Select that credential as the value for the ***Integration Token Credential
-ID*** field:
+Select that credential as the value for the ***Credential*** field:
 
 ![image][img-token-credential]
 
@@ -166,18 +167,6 @@ You can send messages to channels or you can notify individual users via their
 slackbot.  In order to notify an individual user, use the syntax `@user_id` in
 place of the project channel.  Mentioning users by display name may work, but it
 is not unique and will not work if it is an ambiguous match.    
-
-## Bot user option
-
-This plugin supports sending notifications via bot users. You can enable bot
-user support from both global and project configurations. If the notification
-will be sent to a user via direct message, default integration sends it via
-@slackbot. You can use this option if you want to send messages via a bot user.
-You need to provide the `Bot User OAuth Access Token` credential as the
-integration token credentials to use this feature.
-
-The bot user option is not supported if you use the *Slack compatible app URL*
-option.
 
 ## Configuration as code
 
@@ -203,6 +192,41 @@ unclassified:
 
 For more details see the configuration as code plugin documentation:
 https://github.com/jenkinsci/configuration-as-code-plugin#getting-started
+
+## Bot user mode
+
+There's two ways to authenticate with slack using this plugin,
+
+1. Using the "Jenkins CI" app written by Slack, it's what is known as a 'legacy app' written directly into the slack code base
+and not maintained anymore.
+1. Creating your own custom "Slack app" and installing it to your workspace.
+
+The benefit of using your own custom "Slack app" is that you get to use all of the modern features that Slack has released in the last few years to
+Slack apps and not to legacy apps.
+
+These include:
+* Threading
+* File upload
+* Custom app emoji per message
+* Blocks
+
+The bot user option is not supported if you use the *Slack compatible app URL*
+option.
+
+### Creating your app
+
+Note: These docs may become outdated as Slack changes their website, if they do become outdated please send a PR here to update the docs.
+
+1. Go to https://api.slack.com/ and click "Start building".
+1. Pick an app name, i.e. "Jenkins" and a workspace that you'll be installing it to.
+1. Go to basic information and set the default icon in "Display information"
+you can get the Jenkins logo from: https://jenkins.io/artwork/
+1. Navigate to "OAuth & Permissions"
+1. Add the `chat:write:bot` and `bot` scopes.
+1. Copy the "Bot User OAuth Access Token" from the "OAuth & Permissions" page and create a "Secret text" credential in Jenkins with this.
+1. Tick the "Custom slack app bot user" option in the Slack configuration in "Manage Jenkins".
+1. Invite the Jenkins bot user into the Slack channel(s) you wish to be notified in
+1. Click test connection
 
 ## Troubleshooting connection failure
 
@@ -257,4 +281,5 @@ Create an HPI file to install in Jenkins (HPI file will be in
 [rocketchat]: https://rocket.chat/
 [mattermost]: https://about.mattermost.com/
 [img-secret-text]: https://cloud.githubusercontent.com/assets/983526/17971588/6c26dfa0-6aa9-11e6-808c-3e139446e013.png
-[img-token-credential]: https://cloud.githubusercontent.com/assets/983526/17971458/ec296bf6-6aa8-11e6-8d19-06d9f1c9d611.png
+[img-token-credential]: /docs/global-config.png
+[img-plugin-manager]: /docs/plugin-manager-search.png
