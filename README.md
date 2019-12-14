@@ -156,7 +156,6 @@ Create a new ***Secret text*** credential:
 
 ![image][img-secret-text]
 
-
 Select that credential as the value for the ***Credential*** field:
 
 ![image][img-token-credential]
@@ -196,10 +195,9 @@ https://github.com/jenkinsci/configuration-as-code-plugin#getting-started
 ## Bot user mode
 
 There's two ways to authenticate with slack using this plugin,
-
-1. Using the "Jenkins CI" app written by Slack, it's what is known as a 'legacy app' written directly into the slack code base
+ 1. Using the "Jenkins CI" app written by Slack, it's what is known as a 'legacy app' written directly into the slack code base
 and not maintained anymore.
-1. Creating your own custom "Slack app" and installing it to your workspace.
+ 1. Creating your own custom "Slack app" and installing it to your workspace.
 
 The benefit of using your own custom "Slack app" is that you get to use all of the modern features that Slack has released in the last few years to
 Slack apps and not to legacy apps.
@@ -217,10 +215,9 @@ option.
 
 Note: These docs may become outdated as Slack changes their website, if they do become outdated please send a PR here to update the docs.
 
-1. Go to https://api.slack.com/ and click "Start building".
+1. Go to <https://api.slack.com/> and click "Start building".
 1. Pick an app name, i.e. "Jenkins" and a workspace that you'll be installing it to.
-1. Go to basic information and set the default icon in "Display information"
-you can get the Jenkins logo from: https://jenkins.io/artwork/
+1. Go to basic information and set the default icon in "Display information" you can get the Jenkins logo from: <https://jenkins.io/artwork/>
 1. Navigate to "OAuth & Permissions"
 1. Add the `chat:write:bot` and `bot` scopes.
 1. Copy the "Bot User OAuth Access Token" from the "OAuth & Permissions" page and create a "Secret text" credential in Jenkins with this.
