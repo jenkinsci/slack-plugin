@@ -39,7 +39,7 @@ def attachments = [
   [
     text: 'I find your lack of faith disturbing!',
     fallback: 'Hey, Vader seems to be mad at you.',
-    color: '#ff0000
+    color: '#ff0000'
   ]
 ]
 
@@ -261,24 +261,24 @@ If you still can't figure it out please raise an issue with as much information 
 Install Maven and JDK.
 
 ```shell
-    $ mvn -version | grep -v home
-    Apache Maven 3.3.9 (bb52d8502b132ec0a5a3f4c09453c07478323dc5; 2015-11-10T08:41:47-08:00)
-    Java version: 1.7.0_79, vendor: Oracle Corporation
-    Default locale: en_US, platform encoding: UTF-8
-    OS name: "linux", version: "4.4.0-65-generic", arch: "amd64", family: "unix"
+$ mvn -version | grep -v home
+Apache Maven 3.3.9 (bb52d8502b132ec0a5a3f4c09453c07478323dc5; 2015-11-10T08:41:47-08:00)
+Java version: 1.7.0_79, vendor: Oracle Corporation
+Default locale: en_US, platform encoding: UTF-8
+OS name: "linux", version: "4.4.0-65-generic", arch: "amd64", family: "unix"
 ```
 
 Run unit tests
 
 ```shell
-    mvn test
+mvn test
 ```
 
 Create an HPI file to install in Jenkins (HPI file will be in
 `target/slack.hpi`).
 
 ```shell
-    mvn clean package
+mvn clean package
 ```
 
 [jenkins-builds]: https://ci.jenkins.io/job/Plugins/job/slack-plugin/job/master/
