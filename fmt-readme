@@ -1,0 +1,6 @@
+#!/bin/bash
+
+# install with npm install -g remark-cli
+
+remark README.md  > README.md.2 && mv README.md.2 README.md
+
