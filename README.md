@@ -133,6 +133,16 @@ Example:
 slackSend(channel: "news-update", message: "https://www.nytimes.com", sendAsText: true)
 ```
 
+#### Colors
+
+Any hex triplet (i.e. `'#AA1100'`) can be used for the color of the message. There are also three builtin color options:
+
+| Name      | Color  |
+| --------- | ------ |
+| `good`    | green  |
+| `warning` | yellow |
+| `danger`  | red    |
+
 ### Freestyle job
 
 1.  Configure it in your Jenkins job (and optionally as global configuration) and
