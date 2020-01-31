@@ -3,6 +3,8 @@ package jenkins.plugins.slack;
 import hudson.ProxyConfiguration;
 import org.apache.http.HttpHost;
 import org.apache.http.auth.AuthScope;
+import org.apache.http.auth.Credentials;
+import org.apache.http.auth.NTCredentials;
 import org.apache.http.auth.UsernamePasswordCredentials;
 import org.apache.http.client.CredentialsProvider;
 import org.apache.http.client.config.RequestConfig;
@@ -40,10 +42,20 @@ public class HttpClient {
             // Consider it to be passed if username specified. Sufficient?
             if (username != null && !"".equals(username.trim())) {
                 credentialsProvider.setCredentials(new AuthScope(proxyHost),
-                        new UsernamePasswordCredentials(username, password));
+                        createCredentials(username, password));
             }
         }
         return clientBuilder.build();
+    }
+
+    private static Credentials createCredentials(String userName, String password) {
+        if (userName.indexOf('\\') >= 0){
+            final String domain = userName.substring(0, userName.indexOf('\\'));
+            final String user = userName.substring(userName.indexOf('\\') + 1);
+            return new NTCredentials(user, password, "", domain);
+        } else {
+            return new UsernamePasswordCredentials(userName, password);
+        }
     }
 
 }
