@@ -52,7 +52,7 @@
     </distributionManagement>
     
     <issueManagement>
-        <system>GitHub</system>
+        <system>GitHub Issues</system>
         <url>https://github.com/jenkinsci/slack-plugin/issues</url>
     </issueManagement>
 
