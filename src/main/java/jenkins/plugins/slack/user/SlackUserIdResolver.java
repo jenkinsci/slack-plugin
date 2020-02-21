@@ -63,11 +63,13 @@ public abstract class SlackUserIdResolver extends AbstractDescribableImpl<SlackU
 
         if (StringUtils.isEmpty(userId)) {
             userId = resolveUserId(user);
-            userProperty.setUserId(userId);
-            try {
-                user.addProperty(userProperty);
-            } catch (IOException ex) {
-                LOGGER.log(Level.WARNING, "Failed to add SlackUserProperty to user: " + user.toString(), ex);
+            if (userId != null) {
+                userProperty.setUserId(userId);
+                try {
+                    user.addProperty(userProperty);
+                } catch (IOException ex) {
+                    LOGGER.log(Level.WARNING, "Failed to add SlackUserProperty to user: " + user.toString(), ex);
+                }
             }
         }
 
