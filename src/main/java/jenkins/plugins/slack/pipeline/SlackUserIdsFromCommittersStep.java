@@ -37,27 +37,17 @@ import static jenkins.plugins.slack.CredentialsObtainer.getItemForCredentials;
 import static jenkins.plugins.slack.SlackNotifier.DescriptorImpl.findTokenCredentialIdItems;
 
 /**
- * Workflow step to send a Slack channel notification.
+ * Pipeline step to resolve a Slack UserIds from the set of commit authors
  */
 public class SlackUserIdsFromCommittersStep extends Step {
 
     private static final Logger logger = Logger.getLogger(SlackUserIdsFromCommittersStep.class.getName());
 
-    private String token;
     private String tokenCredentialId;
     private boolean botUser;
 
     @DataBoundConstructor
     public SlackUserIdsFromCommittersStep() {
-    }
-
-    public String getToken() {
-        return token;
-    }
-
-    @DataBoundSetter
-    public void setToken(final String token) {
-        this.token = Util.fixEmpty(token);
     }
 
     public String getTokenCredentialId() {
@@ -128,7 +118,6 @@ public class SlackUserIdsFromCommittersStep extends Step {
 
             final String tokenCredentialId = step.tokenCredentialId != null ? step.tokenCredentialId
                     : slackDesc.getTokenCredentialId();
-            final String token = step.token;
             final boolean botUser = step.botUser || slackDesc.isBotUser();
             final SlackUserIdResolver userIdResolver = slackDesc.getSlackUserIdResolver();
 
@@ -143,7 +132,7 @@ public class SlackUserIdsFromCommittersStep extends Step {
 
             final String populatedToken;
             try {
-                populatedToken = CredentialsObtainer.getTokenToUse(tokenCredentialId, item, token);
+                populatedToken = CredentialsObtainer.getTokenToUse(tokenCredentialId, item, null);
             } catch (final IllegalArgumentException e) {
                 listener.error(Messages.notificationFailedWithException(e));
                 return null;
