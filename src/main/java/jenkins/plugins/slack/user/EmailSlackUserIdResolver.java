@@ -89,6 +89,7 @@ public class EmailSlackUserIdResolver extends SlackUserIdResolver {
 
     protected String resolveUserId(User user) {
         if (mailAddressResolvers == null) {
+            LOGGER.fine("No mail address resolver found");
             return null;
         }
 
@@ -102,7 +103,13 @@ public class EmailSlackUserIdResolver extends SlackUserIdResolver {
     }
 
     public String resolveUserIdForEmailAddress(String emailAddress) {
-        if (StringUtils.isEmpty(emailAddress) || StringUtils.isEmpty(authToken)) {
+        if (StringUtils.isEmpty(emailAddress)) {
+            LOGGER.fine("Email address was empty");
+            return null;
+        }
+
+        if (StringUtils.isEmpty(authToken)) {
+            LOGGER.fine("Auth token was empty");
             return null;
         }
 
