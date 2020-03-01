@@ -25,7 +25,7 @@ public class SlackUserIdsFromCommittersStepIntegrationTest {
     }
 
     @Test
-    public void test_run_passes() throws Exception {
+    public void testRunPasses() throws Exception {
         Jenkins jenkins = j.jenkins;
 
         SystemCredentialsProvider instance = SystemCredentialsProvider.getInstance();
