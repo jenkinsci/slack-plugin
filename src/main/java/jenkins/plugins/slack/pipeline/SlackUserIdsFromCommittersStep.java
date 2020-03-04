@@ -126,7 +126,7 @@ public class SlackUserIdsFromCommittersStep extends Step {
             Objects.requireNonNull(listener, "Listener is mandatory here");
 
             if (!botUser) {
-                listener.getLogger().println("The slackUserIdFromEmail step requires bot user mode");
+                listener.getLogger().println("The slackUserIdsFromCommitters step requires bot user mode");
                 return null;
             }
 
