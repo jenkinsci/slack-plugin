@@ -141,7 +141,7 @@ public class SlackUserIdsFromCommittersStep extends Step {
             final List<String> slackUserIds = new ArrayList<>();
             try (CloseableHttpClient client = getHttpClient()) {
                 // include committer userIds in roomIds
-                if (botUser && userIdResolver != null && run != null) {
+                if (userIdResolver != null && run != null) {
                     userIdResolver.setAuthToken(populatedToken);
                     userIdResolver.setHttpClient(client);
                     final List<String> userIds = userIdResolver.resolveUserIdsForRun(run);
