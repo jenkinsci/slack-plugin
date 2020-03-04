@@ -133,6 +133,31 @@ Example:
 slackSend(channel: "news-update", message: "https://www.nytimes.com", sendAsText: true)
 ```
 
+#### User Id Look Up
+
+There are two pipeline steps available to help with user id look up.
+
+A user id can be resolved from a user's email address with the `slackUserIdFromEmail` step.
+
+Example:
+
+```groovy
+def userId = slackUserIdFromEmail('spengler@ghostbusters.example.com')
+slackSend(color: 'good', message: "<@$userId> Message from Jenkins Pipeline")
+```
+
+A list of user ids can be resolved against the set of changeset commit authors with the `slackUserIdsFromCommitters` step.
+
+Example:
+
+```groovy
+def userIds = slackUserIdsFromCommitters()
+def userIdsString = userIds.collect { "<@$it>" }.join(' ')
+slackSend(color: 'good', message: "$userIds Message from Jenkins Pipeline")
+```
+
+This feature requires [botUser](#bot-user-mode) mode.
+
 ### Freestyle job
 
 1.  Configure it in your Jenkins job (and optionally as global configuration) and
@@ -168,7 +193,11 @@ Select that credential as the value for the **_Credential_** field:
 You can send messages to channels or you can notify individual users via their
 slackbot.  In order to notify an individual user, use the syntax `@user_id` in
 place of the project channel.  Mentioning users by display name may work, but it
-is not unique and will not work if it is an ambiguous match.    
+is not unique and will not work if it is an ambiguous match.
+
+## User Mentions
+
+Use the syntax `<@user_id>` in a message to mention users directly. See [User Id Look Up](#user-id-look-up) for pipeline steps to help with user id look up.
 
 ## Configuration as code
 
