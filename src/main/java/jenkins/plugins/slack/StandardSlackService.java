@@ -46,6 +46,7 @@ public class StandardSlackService implements SlackService {
     private String populatedToken;
     private boolean notifyCommitters;
     private SlackUserIdResolver userIdResolver;
+    private String updateMessage;
 
 
     /**
@@ -111,6 +112,7 @@ public class StandardSlackService implements SlackService {
         this.populatedToken = standardSlackServiceBuilder.populatedToken;
         this.notifyCommitters = standardSlackServiceBuilder.notifyCommitters;
         this.userIdResolver = standardSlackServiceBuilder.userIdResolver;
+        this.updateMessage = standardSlackServiceBuilder.updateMessage;
     }
 
     public static StandardSlackServiceBuilder builder() {
@@ -145,6 +147,7 @@ public class StandardSlackService implements SlackService {
         boolean result = true;
 
         String message = slackRequest.getMessage();
+        String updateMessage = slackRequest.getUpdateMessage();
         JSONArray attachments = slackRequest.getAttachments();
         JSONArray blocks = slackRequest.getBlocks();
         String color = slackRequest.getColor();
@@ -190,6 +193,13 @@ public class StandardSlackService implements SlackService {
                 json.put("unfurl_links", "true");
                 json.put("unfurl_media", "true");
 
+                String apiEndpoint = "chat.postMessage";
+
+                if (StringUtils.isNotEmpty(updateMessage)) {
+                    json.put("ts", updateMessage);
+                    apiEndpoint = "chat.update";
+                }
+
                 if (baseUrl != null) {
                     correctMisconfigurationOfBaseUrl();
                 }
@@ -203,7 +213,7 @@ public class StandardSlackService implements SlackService {
                     post = new HttpPost(url);
 
                 } else {
-                    url = "https://slack.com/api/chat.postMessage";
+                    url = "https://slack.com/api/" + apiEndpoint;
 
                     post = new HttpPost(url);
                     post.setHeader("Authorization", "Bearer " + populatedToken);
@@ -294,6 +304,43 @@ public class StandardSlackService implements SlackService {
         return publish(
                 SlackRequest.builder()
                         .withMessage(message)
+                        .withAttachments(attachments)
+                        .withColor(color)
+                        .build()
+        );
+    }
+
+    @Override
+    public boolean publish(String message, String color, String updateMessage) {
+        //prepare attachments first
+        JSONObject field = new JSONObject();
+        field.put("short", false);
+        field.put("value", message);
+
+        JSONArray fields = new JSONArray();
+        fields.add(field);
+
+        JSONObject attachment = new JSONObject();
+        attachment.put("fallback", message);
+        attachment.put("color", color);
+        attachment.put("fields", fields);
+        JSONArray mrkdwn = new JSONArray();
+        mrkdwn.add("pretext");
+        mrkdwn.add("text");
+        mrkdwn.add("fields");
+        attachment.put("mrkdwn_in", mrkdwn);
+        JSONArray attachments = new JSONArray();
+        attachments.add(attachment);
+
+        return publish(null, attachments, color, updateMessage);
+    }
+
+    @Override
+    public boolean publish(String message, JSONArray attachments, String color, String updateMessage) {
+        return publish(
+                SlackRequest.builder()
+                        .withMessage(message)
+                        .withUpdateMessage(updateMessage)
                         .withAttachments(attachments)
                         .withColor(color)
                         .build()

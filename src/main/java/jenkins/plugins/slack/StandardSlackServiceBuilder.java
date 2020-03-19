@@ -16,6 +16,7 @@ public class StandardSlackServiceBuilder {
     String populatedToken;
     boolean notifyCommitters;
     SlackUserIdResolver userIdResolver;
+    String updateMessage;
 
     public StandardSlackServiceBuilder() {
     }
@@ -72,6 +73,11 @@ public class StandardSlackServiceBuilder {
 
     public StandardSlackServiceBuilder withSlackUserIdResolver(SlackUserIdResolver userIdResolver) {
         this.userIdResolver = userIdResolver;
+        return this;
+    }
+
+    public StandardSlackServiceBuilder withUpdateMessage(String updateMessage) {
+        this.updateMessage = updateMessage;
         return this;
     }
 

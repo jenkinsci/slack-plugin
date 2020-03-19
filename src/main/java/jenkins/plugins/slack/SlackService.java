@@ -9,7 +9,11 @@ public interface SlackService {
 
     boolean publish(String message, String color);
 
+    boolean publish(String message, String color, String updateMessage);
+
     boolean publish(String message, JSONArray attachments, String color);
+
+    boolean publish(String message, JSONArray attachments, String color, String updateMessage);
 
     String getResponseString();
 }

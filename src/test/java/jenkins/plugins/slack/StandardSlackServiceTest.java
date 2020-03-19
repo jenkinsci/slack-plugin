@@ -207,6 +207,22 @@ public class StandardSlackServiceTest {
     }
 
     @Test
+    public void sendAsBotUserWithUpdate() {
+        StandardSlackServiceStub service = new StandardSlackServiceStub(
+                StandardSlackService.builder()
+                        .withBaseUrl("")
+                        .withTeamDomain("domain")
+                        .withBotUser(true)
+                        .withRoomId("#room1:1528317530")
+                        .withPopulatedToken("token")
+                        .withUpdateMessage("132124"));
+        CloseableHttpClientStub httpClientStub = new CloseableHttpClientStub();
+        httpClientStub.setHttpStatus(HttpStatus.SC_OK);
+        service.setHttpClient(httpClientStub);
+        assertTrue(service.publish("message"));
+    }
+
+    @Test
     public void populatedTokenIsUsed() {
         final String populatedToken = "secret-text";
         StandardSlackServiceStub service = new StandardSlackServiceStub(

@@ -73,7 +73,17 @@ public class SlackNotifierTest extends TestCase {
         }
 
         @Override
+        public boolean publish(String message, String color, String updateMessage) {
+            return response;
+        }
+
+        @Override
         public boolean publish(String message, JSONArray attachments, String color) {
+            return response;
+        }
+
+        @Override
+        public boolean publish(String message, JSONArray attachments, String color, String updateMessage) {
             return response;
         }
 
