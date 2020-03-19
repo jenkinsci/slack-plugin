@@ -46,7 +46,7 @@ public class StandardSlackService implements SlackService {
     private String populatedToken;
     private boolean notifyCommitters;
     private SlackUserIdResolver userIdResolver;
-    private String updateMessage;
+    private String timestamp;
 
 
     /**
@@ -112,7 +112,7 @@ public class StandardSlackService implements SlackService {
         this.populatedToken = standardSlackServiceBuilder.populatedToken;
         this.notifyCommitters = standardSlackServiceBuilder.notifyCommitters;
         this.userIdResolver = standardSlackServiceBuilder.userIdResolver;
-        this.updateMessage = standardSlackServiceBuilder.updateMessage;
+        this.timestamp = standardSlackServiceBuilder.timestamp;
     }
 
     public static StandardSlackServiceBuilder builder() {
@@ -147,7 +147,7 @@ public class StandardSlackService implements SlackService {
         boolean result = true;
 
         String message = slackRequest.getMessage();
-        String updateMessage = slackRequest.getUpdateMessage();
+        String timestamp = slackRequest.getTimestamp();
         JSONArray attachments = slackRequest.getAttachments();
         JSONArray blocks = slackRequest.getBlocks();
         String color = slackRequest.getColor();
@@ -195,8 +195,8 @@ public class StandardSlackService implements SlackService {
 
                 String apiEndpoint = "chat.postMessage";
 
-                if (StringUtils.isNotEmpty(updateMessage)) {
-                    json.put("ts", updateMessage);
+                if (StringUtils.isNotEmpty(timestamp)) {
+                    json.put("ts", timestamp);
                     apiEndpoint = "chat.update";
                 }
 
@@ -311,7 +311,7 @@ public class StandardSlackService implements SlackService {
     }
 
     @Override
-    public boolean publish(String message, String color, String updateMessage) {
+    public boolean publish(String message, String color, String timestamp) {
         //prepare attachments first
         JSONObject field = new JSONObject();
         field.put("short", false);
@@ -332,15 +332,15 @@ public class StandardSlackService implements SlackService {
         JSONArray attachments = new JSONArray();
         attachments.add(attachment);
 
-        return publish(null, attachments, color, updateMessage);
+        return publish(null, attachments, color, timestamp);
     }
 
     @Override
-    public boolean publish(String message, JSONArray attachments, String color, String updateMessage) {
+    public boolean publish(String message, JSONArray attachments, String color, String timestamp) {
         return publish(
                 SlackRequest.builder()
                         .withMessage(message)
-                        .withUpdateMessage(updateMessage)
+                        .withTimestamp(timestamp)
                         .withAttachments(attachments)
                         .withColor(color)
                         .build()

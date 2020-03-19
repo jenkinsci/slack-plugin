@@ -473,11 +473,11 @@ public class SlackSendStepTest {
     }
 
     @Test
-    public void testUpdateMessage() throws Exception {
+    public void testTimestamp() throws Exception {
         SlackSendStep step = new SlackSendStep();
         step.setMessage("message");
         step.setUsername("username");
-        step.setUpdateMessage("1241242.124124");
+        step.setTimestamp("1241242.124124");
 
         SlackSendStep.SlackSendStepExecution stepExecution = spy(new SlackSendStep.SlackSendStepExecution(step, stepContextMock));
 

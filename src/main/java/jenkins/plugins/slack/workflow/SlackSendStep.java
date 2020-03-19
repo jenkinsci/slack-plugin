@@ -47,7 +47,7 @@ public class SlackSendStep extends Step {
     private static final Logger logger = Logger.getLogger(SlackSendStep.class.getName());
 
     private String message;
-    private String updateMessage;
+    private String timestamp;
     private String color;
     private String token;
     private String tokenCredentialId;
@@ -69,8 +69,8 @@ public class SlackSendStep extends Step {
         return message;
     }
 
-    public String getUpdateMessage() {
-        return updateMessage;
+    public String getTimestamp() {
+        return timestamp;
     }
 
     public String getColor() {
@@ -172,8 +172,8 @@ public class SlackSendStep extends Step {
     }
 
     @DataBoundSetter
-    public void setUpdateMessage(String updateMessage) {
-        this.updateMessage = Util.fixEmpty(updateMessage);
+    public void setTimestamp(String timestamp) {
+        this.timestamp = Util.fixEmpty(timestamp);
     }
 
     public boolean getReplyBroadcast() {
@@ -321,8 +321,8 @@ public class SlackSendStep extends Step {
 
             final boolean publishSuccess;
             if (sendAsText) {
-                if (step.updateMessage != null) {
-                    publishSuccess = slackService.publish(step.message, new JSONArray(), color, step.updateMessage);
+                if (step.timestamp != null) {
+                    publishSuccess = slackService.publish(step.message, new JSONArray(), color, step.timestamp);
                 } else {
                     publishSuccess = slackService.publish(step.message, new JSONArray(), color);
                 }
@@ -341,7 +341,7 @@ public class SlackSendStep extends Step {
                                 .withMessage(step.message)
                                 .withAttachments(jsonArray)
                                 .withColor(color)
-                                .withUpdateMessage(step.updateMessage)
+                                .withTimestamp(step.timestamp)
                                 .build()
                 );
             } else if (step.blocks != null) {
@@ -351,12 +351,12 @@ public class SlackSendStep extends Step {
                         SlackRequest.builder()
                                 .withMessage(step.message)
                                 .withBlocks(jsonArray)
-                                .withUpdateMessage(step.updateMessage)
+                                .withTimestamp(step.timestamp)
                                 .build()
                 );
             } else if (step.message != null) {
-                if (step.updateMessage != null) {
-                    publishSuccess = slackService.publish(step.message, color, step.updateMessage);
+                if (step.timestamp != null) {
+                    publishSuccess = slackService.publish(step.message, color, step.timestamp);
                 } else {
                     publishSuccess = slackService.publish(step.message, color);
                 }
