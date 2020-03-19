@@ -132,7 +132,7 @@ Example:
 
 ```groovy
 def slackResponse = slackSend(channel: "updating-stuff", message: "Here is the primary message")
-slackSend(channel: "updating-stuff", message: "Update message now", timestamp: slackResponse.getTs)
+slackSend(channel: "updating-stuff", message: "Update message now", timestamp: slackResponse.ts)
 ```
 
 This feature requires [botUser](#bot-user-mode) mode.
