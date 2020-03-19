@@ -35,10 +35,10 @@ public class SlackSendStepIntegrationTest {
     public void test_global_config_override() throws Exception {
         WorkflowJob job = jenkinsRule.jenkins.createProject(WorkflowJob.class, "workflow");
         //just define message
-        job.setDefinition(new CpsFlowDefinition("slackSend(message: 'message', baseUrl: 'baseUrl', teamDomain: 'teamDomain', token: 'token', tokenCredentialId: 'tokenCredentialId', channel: '#channel', color: 'good', iconEmoji: ':+1:', username: 'username');", true));
+        job.setDefinition(new CpsFlowDefinition("slackSend(message: 'message', baseUrl: 'baseUrl', teamDomain: 'teamDomain', token: 'token', tokenCredentialId: 'tokenCredentialId', channel: '#channel', color: 'good', iconEmoji: ':+1:', username: 'username', timestamp: '124124.12412');", true));
         WorkflowRun run = jenkinsRule.assertBuildStatusSuccess(job.scheduleBuild2(0).get());
         //everything should come from step configuration
-        jenkinsRule.assertLogContains(Messages.slackSendStepValues("baseUrl/", "teamDomain", "#channel", "good", false, "tokenCredentialId", false, ":+1:", "username"), run);
+        jenkinsRule.assertLogContains(Messages.slackSendStepValues("baseUrl/", "teamDomain", "#channel", "good", false, "tokenCredentialId", false, ":+1:", "username", "124124.12412"), run);
     }
 
     @Test
