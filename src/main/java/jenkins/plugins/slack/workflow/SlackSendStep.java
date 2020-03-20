@@ -47,6 +47,7 @@ public class SlackSendStep extends Step {
     private static final Logger logger = Logger.getLogger(SlackSendStep.class.getName());
 
     private String message;
+    private String timestamp;
     private String color;
     private String token;
     private String tokenCredentialId;
@@ -66,6 +67,10 @@ public class SlackSendStep extends Step {
     @Nonnull
     public String getMessage() {
         return message;
+    }
+
+    public String getTimestamp() {
+        return timestamp;
     }
 
     public String getColor() {
@@ -164,6 +169,11 @@ public class SlackSendStep extends Step {
     @DataBoundSetter
     public void setMessage(String message) {
         this.message = Util.fixEmpty(message);
+    }
+
+    @DataBoundSetter
+    public void setTimestamp(String timestamp) {
+        this.timestamp = Util.fixEmpty(timestamp);
     }
 
     public boolean getReplyBroadcast() {
@@ -283,7 +293,7 @@ public class SlackSendStep extends Step {
 
             listener.getLogger().println(Messages.slackSendStepValues(
                     defaultIfEmpty(baseUrl), defaultIfEmpty(teamDomain), channel, defaultIfEmpty(color), botUser,
-                    defaultIfEmpty(tokenCredentialId), notifyCommitters, defaultIfEmpty(iconEmoji), defaultIfEmpty(username))
+                    defaultIfEmpty(tokenCredentialId), notifyCommitters, defaultIfEmpty(iconEmoji), defaultIfEmpty(username), defaultIfEmpty(step.timestamp))
             );
             final String populatedToken;
             try {
@@ -311,7 +321,11 @@ public class SlackSendStep extends Step {
 
             final boolean publishSuccess;
             if (sendAsText) {
-                publishSuccess = slackService.publish(step.message, new JSONArray(), color);
+                if (step.timestamp != null) {
+                    publishSuccess = slackService.publish(step.message, new JSONArray(), color, step.timestamp);
+                } else {
+                    publishSuccess = slackService.publish(step.message, new JSONArray(), color);
+                }
             } else if (step.attachments != null) {
                 JSONArray jsonArray = getAttachmentsAsJSONArray();
                 for (Object object : jsonArray) {
@@ -327,6 +341,7 @@ public class SlackSendStep extends Step {
                                 .withMessage(step.message)
                                 .withAttachments(jsonArray)
                                 .withColor(color)
+                                .withTimestamp(step.timestamp)
                                 .build()
                 );
             } else if (step.blocks != null) {
@@ -336,10 +351,15 @@ public class SlackSendStep extends Step {
                         SlackRequest.builder()
                                 .withMessage(step.message)
                                 .withBlocks(jsonArray)
+                                .withTimestamp(step.timestamp)
                                 .build()
                 );
             } else if (step.message != null) {
-                publishSuccess = slackService.publish(step.message, color);
+                if (step.timestamp != null) {
+                    publishSuccess = slackService.publish(step.message, color, step.timestamp);
+                } else {
+                    publishSuccess = slackService.publish(step.message, color);
+                }
             } else {
                 listener.error(Messages
                         .notificationFailedWithException(new IllegalArgumentException("No message, attachments or blocks provided")));

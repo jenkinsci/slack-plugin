@@ -123,6 +123,21 @@ slackSend(
 )
 ```
 
+#### Update Messages
+
+You can update the content of a previously sent message using the pipeline step.
+The step returns an object which you can use to retrieve the timestamp and channelId
+NOTE: The slack API requires the channel ID for `chat.update` calls.
+
+Example:
+
+```groovy
+def slackResponse = slackSend(channel: "updating-stuff", message: "Here is the primary message")
+slackSend(channel: slackResponse.channelId, message: "Update message now", timestamp: slackResponse.ts)
+```
+
+This feature requires [botUser](#bot-user-mode) mode.
+
 #### Unfurling Links
 
 You can allow link unfurling if you send the message as text. This only works in a text message, as attachments cannot be unfurled.

@@ -6,10 +6,11 @@ import net.sf.json.JSONArray;
 public class SlackRequest {
     private String message;
     private String color;
+    private String timestamp;
     private JSONArray attachments;
     private JSONArray blocks;
 
-    private SlackRequest(String message, String color, JSONArray attachments, JSONArray blocks) {
+    private SlackRequest(String message, String color, JSONArray attachments, JSONArray blocks, String timestamp) {
         if (blocks != null && color != null) {
             throw new IllegalArgumentException("Color is not supported when blocks are set");
         }
@@ -18,6 +19,7 @@ public class SlackRequest {
         this.color = color;
         this.attachments = attachments;
         this.blocks = blocks;
+        this.timestamp = timestamp;
     }
 
     public static SlackRequestBuilder builder() {
@@ -26,6 +28,10 @@ public class SlackRequest {
 
     public String getMessage() {
         return message;
+    }
+
+    public String getTimestamp() {
+        return timestamp;
     }
 
     public String getColor() {
@@ -47,23 +53,25 @@ public class SlackRequest {
         SlackRequest that = (SlackRequest) o;
         return Objects.equals(message, that.message) &&
                 Objects.equals(color, that.color) &&
+                Objects.equals(timestamp, that.timestamp) &&
                 Objects.equals(attachments, that.attachments) &&
                 Objects.equals(blocks, that.blocks);
     }
 
     @Override
     public String toString() {
-        return String.format("SlackRequest{message='%s', color='%s', attachments=%s, blocks=%s}", message, color, attachments, blocks);
+        return String.format("SlackRequest{message='%s', color='%s', attachments=%s, blocks=%s, timestamp='%s'}", message, color, attachments, blocks, timestamp);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(message, color, attachments, blocks);
+        return Objects.hash(message, color, attachments, blocks, timestamp);
     }
 
     public static class SlackRequestBuilder {
         private String message;
         private String color;
+        private String timestamp;
         private JSONArray attachments;
         private JSONArray blocks;
 
@@ -80,6 +88,11 @@ public class SlackRequest {
             return this;
         }
 
+        public SlackRequestBuilder withTimestamp(String timestamp) {
+            this.timestamp = timestamp;
+            return this;
+        }
+
         public SlackRequestBuilder withAttachments(JSONArray attachments) {
             this.attachments = attachments;
             return this;
@@ -91,7 +104,7 @@ public class SlackRequest {
         }
 
         public SlackRequest build() {
-            return new SlackRequest(message, color, attachments, blocks);
+            return new SlackRequest(message, color, attachments, blocks, timestamp);
         }
 
     }

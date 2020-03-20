@@ -473,6 +473,42 @@ public class SlackSendStepTest {
     }
 
     @Test
+    public void testTimestamp() throws Exception {
+        SlackSendStep step = new SlackSendStep();
+        step.setMessage("message");
+        step.setUsername("username");
+        step.setTimestamp("1241242.124124");
+
+        SlackSendStep.SlackSendStepExecution stepExecution = spy(new SlackSendStep.SlackSendStepExecution(step, stepContextMock));
+
+        when(Jenkins.get()).thenReturn(jenkins);
+
+        PowerMockito.when(CredentialsObtainer.getTokenToUse(eq("globalTokenCredentialId"), any(Item.class), any())).thenReturn("token");
+
+        when(stepContextMock.get(Project.class)).thenReturn(project);
+
+        when(slackDescMock.getBaseUrl()).thenReturn("globalBaseUrl");
+        when(slackDescMock.getTeamDomain()).thenReturn("globalTeamDomain");
+        when(slackDescMock.getTokenCredentialId()).thenReturn("globalTokenCredentialId");
+        when(slackDescMock.isBotUser()).thenReturn(false);
+        when(slackDescMock.getRoom()).thenReturn("globalChannel");
+        when(slackDescMock.getIconEmoji()).thenReturn(":+1:");
+
+        NoSlackUserIdResolver noSlackUserIdResolver = new NoSlackUserIdResolver();
+        when(slackDescMock.getSlackUserIdResolver()).thenReturn(noSlackUserIdResolver);
+
+        when(taskListenerMock.getLogger()).thenReturn(printStreamMock);
+        doNothing().when(printStreamMock).println();
+
+        when(stepExecution.getSlackService(eq(run), anyString(), anyString(), anyBoolean(), anyString(), anyBoolean(), anyBoolean(), any(), any(), any(), anyBoolean(), any(SlackUserIdResolver.class))).thenReturn(slackServiceMock);
+
+        stepExecution.run();
+        verify(stepExecution, times(1)).getSlackService(run, "globalBaseUrl", "globalTeamDomain",
+                false, "globalChannel", false, false, ":+1:", "username","token", false, noSlackUserIdResolver);
+        verify(slackServiceMock, times(1)).publish("message", "", "1241242.124124");
+    }
+
+    @Test
     public void testNonNullEmptyColor() throws Exception {
         SlackSendStep step = new SlackSendStep();
         step.setMessage("message");
