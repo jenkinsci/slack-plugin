@@ -185,7 +185,7 @@ public class StandardSlackService implements SlackService {
                     post.setHeader("Authorization", "Bearer " + populatedToken);
                 }
 
-                logger.fine("Posting: to " + roomId + " on " + teamDomain + " using " + url);
+                logger.fine("Posting: to " + roomId + " on " + teamDomain + " using " + url + ". " + json.toString());
 
                 post.setHeader("Content-Type", "application/json; charset=utf-8");
                 post.setEntity(new StringEntity(json.toString(), StandardCharsets.UTF_8));
