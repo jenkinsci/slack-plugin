@@ -146,12 +146,6 @@ public class StandardSlackService implements SlackService {
     public boolean publish(SlackRequest slackRequest) {
         boolean result = true;
 
-        String message = slackRequest.getMessage();
-        String timestamp = slackRequest.getTimestamp();
-        JSONArray attachments = slackRequest.getAttachments();
-        JSONArray blocks = slackRequest.getBlocks();
-        String color = slackRequest.getColor();
-
         try (CloseableHttpClient client = getHttpClient()) {
             // include committer userIds in roomIds
             if (botUser && notifyCommitters && userIdResolver != null && run != null) {
@@ -169,36 +163,8 @@ public class StandardSlackService implements SlackService {
             for (String roomId : roomIds) {
                 HttpPost post;
                 String url;
-                String threadTs = "";
 
-                //thread_ts is passed once with roomId: Ex: roomId:threadTs
-                String[] splitThread = roomId.split("[:]+");
-                if (splitThread.length > 1) {
-                    roomId = splitThread[0];
-                    threadTs = splitThread[1];
-                }
-                JSONObject json = new JSONObject();
-                json.put("channel", roomId);
-                if (StringUtils.isNotEmpty(message)) {
-                    json.put("text", message);
-                }
-                if (attachments != null && !attachments.isEmpty()) {
-                    json.put("attachments", attachments);
-                }
-
-                if (blocks != null && !blocks.isEmpty()) {
-                    json.put("blocks", blocks);
-                }
-                json.put("link_names", "1");
-                json.put("unfurl_links", "true");
-                json.put("unfurl_media", "true");
-
-                String apiEndpoint = "chat.postMessage";
-
-                if (StringUtils.isNotEmpty(timestamp)) {
-                    json.put("ts", timestamp);
-                    apiEndpoint = "chat.update";
-                }
+                JSONObject json = slackRequest.getBody(roomId);
 
                 if (baseUrl != null) {
                     correctMisconfigurationOfBaseUrl();
@@ -213,29 +179,13 @@ public class StandardSlackService implements SlackService {
                     post = new HttpPost(url);
 
                 } else {
-                    url = "https://slack.com/api/" + apiEndpoint;
+                    url = "https://slack.com/api/" + slackRequest.getApiEndpoint();
 
                     post = new HttpPost(url);
                     post.setHeader("Authorization", "Bearer " + populatedToken);
-                    if (threadTs.length() > 1) {
-                        json.put("thread_ts", threadTs);
-                    }
-                    if (replyBroadcast) {
-                        json.put("reply_broadcast", "true");
-                    }
-                    if (StringUtils.isEmpty(iconEmoji) && StringUtils.isEmpty(username)) {
-                        json.put("as_user", "true");
-                    } else {
-                        if (StringUtils.isNotEmpty(iconEmoji)) {
-                            json.put("icon_emoji", iconEmoji);
-                        }
-                        if (StringUtils.isNotEmpty(username)) {
-                            json.put("username", username);
-                        }
-                    }
                 }
 
-                logger.fine("Posting: to " + roomId + " on " + teamDomain + " using " + url + ":  " + color);
+                logger.fine("Posting: to " + roomId + " on " + teamDomain + " using " + url);
 
                 post.setHeader("Content-Type", "application/json; charset=utf-8");
                 post.setEntity(new StringEntity(json.toString(), StandardCharsets.UTF_8));
@@ -301,13 +251,7 @@ public class StandardSlackService implements SlackService {
 
     @Override
     public boolean publish(String message, JSONArray attachments, String color) {
-        return publish(
-                SlackRequest.builder()
-                        .withMessage(message)
-                        .withAttachments(attachments)
-                        .withColor(color)
-                        .build()
-        );
+        return publish(message, attachments, null, color, null);
     }
 
     @Override
@@ -337,14 +281,31 @@ public class StandardSlackService implements SlackService {
 
     @Override
     public boolean publish(String message, JSONArray attachments, String color, String timestamp) {
-        return publish(
-                SlackRequest.builder()
-                        .withMessage(message)
-                        .withTimestamp(timestamp)
-                        .withAttachments(attachments)
-                        .withColor(color)
-                        .build()
-        );
+        return publish(message, attachments, null, color, timestamp);
+    }
+
+    @Override
+    public boolean publish(String message, JSONArray attachments, JSONArray blocks, String color, String timestamp) {
+        SlackMessageRequest.SlackMessageRequestBuilder builder = SlackMessageRequest.builder()
+                .withMessage(message)
+                .withTimestamp(timestamp)
+                .withAttachments(attachments)
+                .withBlocks(blocks)
+                .withColor(color)
+                .withReplyBroadcast(replyBroadcast);
+
+        if (StringUtils.isEmpty(iconEmoji) && StringUtils.isEmpty(username)) {
+            builder = builder.withAsUser(true);
+        } else {
+            if (StringUtils.isNotEmpty(iconEmoji)) {
+                builder = builder.withIconEmoji(iconEmoji);
+            }
+            if (StringUtils.isNotEmpty(username)) {
+                builder = builder.withUsername(username);
+            }
+        }
+
+        return publish(builder.build());
     }
 
 

@@ -15,5 +15,7 @@ public interface SlackService {
 
     boolean publish(String message, JSONArray attachments, String color, String timestamp);
 
+    boolean publish(String message, JSONArray attachments, JSONArray blocks, String color, String timestamp);
+
     String getResponseString();
 }

@@ -87,6 +87,11 @@ public class SlackNotifierTest extends TestCase {
             return response;
         }
 
+        @Override
+        public boolean publish(String message, JSONArray attachments, JSONArray blocks, String color, String timestamp) {
+            return response;
+        }
+
         public void setResponse(boolean response) {
             this.response = response;
         }
