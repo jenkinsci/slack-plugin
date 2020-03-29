@@ -10,7 +10,6 @@ import hudson.model.Run;
 import hudson.scm.ChangeLogSet;
 import hudson.scm.ChangeLogSet.AffectedFile;
 import hudson.scm.ChangeLogSet.Entry;
-import hudson.tasks.junit.TestResultAction;
 import hudson.tasks.test.AbstractTestResultAction;
 import hudson.tasks.test.TestResult;
 import hudson.triggers.SCMTrigger;
