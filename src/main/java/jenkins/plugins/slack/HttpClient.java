@@ -28,7 +28,10 @@ public class HttpClient {
                 .setConnectionRequestTimeout(timeoutInSeconds * 1000)
                 .setSocketTimeout(timeoutInSeconds * 1000).build();
 
-        final HttpClientBuilder clientBuilder = HttpClients.custom().setDefaultRequestConfig(config);
+        final HttpClientBuilder clientBuilder = HttpClients
+            .custom()
+            .useSystemProperties()
+            .setDefaultRequestConfig(config);
         final CredentialsProvider credentialsProvider = new BasicCredentialsProvider();
         clientBuilder.setDefaultCredentialsProvider(credentialsProvider);
 
