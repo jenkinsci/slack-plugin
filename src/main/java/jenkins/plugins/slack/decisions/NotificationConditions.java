@@ -22,6 +22,7 @@ public class NotificationConditions implements Predicate<Context> {
                 new OnNotBuilt(preferences, log),
                 new OnBackToNormal(preferences, log),
                 new OnSuccess(preferences, log),
+                new OnRegression(preferences, log),
                 new OnUnstable(preferences, log)
         ));
     }

@@ -10,7 +10,6 @@ import hudson.model.Run;
 import hudson.scm.ChangeLogSet;
 import hudson.scm.ChangeLogSet.AffectedFile;
 import hudson.scm.ChangeLogSet.Entry;
-import hudson.tasks.junit.TestResultAction;
 import hudson.tasks.test.AbstractTestResultAction;
 import hudson.tasks.test.TestResult;
 import hudson.triggers.SCMTrigger;
@@ -102,26 +101,6 @@ public class ActiveNotifier implements FineGrainedNotifier {
     }
 
     public void finalized(AbstractBuild r) {
-        if (skipOnMatrixChildren(r)) {
-            return;
-        }
-        AbstractProject<?, ?> project = r.getProject();
-        Result result = r.getResult();
-        AbstractBuild<?, ?> previousBuild = project.getLastBuild();
-        if (null != previousBuild) {
-            do {
-                previousBuild = previousBuild.getPreviousCompletedBuild();
-            } while (previousBuild != null && previousBuild.getResult() == Result.ABORTED);
-            Result previousResult = (previousBuild != null) ? previousBuild.getResult() : Result.SUCCESS;
-            if(null != previousResult && (result != null && result.isWorseThan(previousResult) || moreTestFailuresThanPreviousBuild(r, previousBuild)) && notifier.getNotifyRegression()) {
-                String message = getBuildStatusMessage(r, notifier.getIncludeTestSummary(),
-                        notifier.getIncludeFailedTests(), notifier.getIncludeCustomMessage());
-                if (notifier.getCommitInfoChoice().showAnything()) {
-                    message = message + "\n" + getCommitList(r);
-                }
-                slackFactory.apply(r).publish(message, getBuildColor(r));
-            }
-        }
     }
 
     public void completed(AbstractBuild r) {
@@ -159,31 +138,6 @@ public class ActiveNotifier implements FineGrainedNotifier {
             return !(matrixTriggerMode != null && matrixTriggerMode.forChild);
         }
         return false;
-    }
-
-    private boolean moreTestFailuresThanPreviousBuild(AbstractBuild currentBuild, AbstractBuild<?, ?> previousBuild) {
-        if (getTestResult(currentBuild) != null && getTestResult(previousBuild) != null) {
-            if (getTestResult(currentBuild).getFailCount() > getTestResult(previousBuild).getFailCount())
-                return true;
-
-            // test if different tests failed.
-            return !getFailedTestIds(currentBuild).equals(getFailedTestIds(previousBuild));
-        }
-        return false;
-    }
-
-    private TestResultAction getTestResult(AbstractBuild build) {
-        return build.getAction(TestResultAction.class);
-    }
-
-    private Set<String> getFailedTestIds(AbstractBuild currentBuild) {
-        Set<String> failedTestIds = new HashSet<>();
-        List<? extends TestResult> failedTests = getTestResult(currentBuild).getFailedTests();
-        for(TestResult result : failedTests) {
-            failedTestIds.add(result.getId());
-        }
-
-        return failedTestIds;
     }
 
     String getChanges(AbstractBuild r, boolean includeCustomMessage) {
