@@ -2,6 +2,7 @@ package jenkins.plugins.slack.decisions;
 
 import hudson.model.AbstractBuild;
 import hudson.model.Result;
+import hudson.tasks.junit.TestResultAction;
 import javax.annotation.Nullable;
 import jenkins.plugins.slack.logging.BuildKey;
 
@@ -31,5 +32,28 @@ public class Context {
             return null;
         }
         return current.getResult();
+    }
+
+    public Result currentResultOrSuccess() {
+        if (current == null || current.getResult() == null) {
+            return Result.SUCCESS;
+        }
+        return current.getResult();
+    }
+
+    @Nullable
+    private TestResultAction getTestResult(AbstractBuild<?, ?> build) {
+        if (build == null) { return null; }
+        return build.getAction(TestResultAction.class);
+    }
+
+    @Nullable
+    public TestResultAction getPreviousTestResult() {
+        return getTestResult(previous);
+    }
+
+    @Nullable
+    public TestResultAction getCurrentTestResult() {
+        return getTestResult(current);
     }
 }

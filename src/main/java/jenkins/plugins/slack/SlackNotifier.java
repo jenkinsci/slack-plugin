@@ -586,10 +586,6 @@ public class SlackNotifier extends Notifier {
         JenkinsTokenExpander tokenExpander = new JenkinsTokenExpander(listener);
         try {
             new ActiveNotifier(this, slackFactory(listener), log, tokenExpander).completed(build);
-            if (notifyRegression) {
-                log.debug(buildKey, "Performing finalize notifications");
-                new ActiveNotifier(this, slackFactory(listener), log, tokenExpander).finalized(build);
-            }
         } catch (Exception e) {
             log.info(buildKey,"Exception attempting Slack notification: " + e.getMessage());
         }
