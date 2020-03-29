@@ -1,10 +1,7 @@
 package jenkins.plugins.slack.decisions;
 
-import hudson.model.AbstractBuild;
 import hudson.model.Result;
-import hudson.tasks.junit.TestResult;
 import hudson.tasks.junit.TestResultAction;
-import java.util.Collections;
 import jenkins.plugins.slack.logging.BuildAwareLogger;
 import org.junit.Before;
 import org.junit.Test;

@@ -33,7 +33,7 @@ public class OnRegression implements Condition {
         return log;
     }
 
-    public boolean moreTestFailuresThanPrevious(Context context) {
+    private boolean moreTestFailuresThanPrevious(Context context) {
         TestResultAction currentTestResult = context.getCurrentTestResult();
         TestResultAction previousTestResult = context.getPreviousTestResult();
         if (currentTestResult != null && previousTestResult != null) {
