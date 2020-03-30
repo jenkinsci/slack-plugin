@@ -151,6 +151,8 @@ slackResponse.addReaction("thumbsup")
 
 This may only work reliably in channels (as opposed to private messages) due to [limitations in the Slack API](https://api.slack.com/methods/chat.postMessage) (See "Post to an IM channel").
 
+This feature requires [botUser](#bot-user-mode) mode and the `reactions:write` API scope.
+
 #### Unfurling Links
 
 You can allow link unfurling if you send the message as text. This only works in a text message, as attachments cannot be unfurled.
@@ -257,7 +259,7 @@ For more details see the configuration as code plugin documentation:
 
 There's two ways to authenticate with slack using this plugin.
 
-1.  Using the "Jenkins CI" app written by Slack,
+1.  Using the "Jenkins CI" app written by Slack, 
     it's what is known as a 'legacy app' written directly into the slack code base and not maintained anymore.
 
 2.  Creating your own custom "Slack app" and installing it to your workspace.

@@ -1,7 +1,6 @@
 package jenkins.plugins.slack.workflow;
 
 import java.io.Serializable;
-import jenkins.plugins.slack.SlackReactionRequest;
 import jenkins.plugins.slack.SlackService;
 import org.apache.commons.lang.StringUtils;
 import org.jenkinsci.plugins.scriptsecurity.sandbox.whitelists.Whitelisted;
@@ -49,14 +48,15 @@ public class SlackResponse implements Serializable {
         }
     }
 
+    /**
+     * Add an emoji reaction to the message that this `SlackResponse` points to.
+     *
+     * @param emojiName - name of the emoji (no colons), e.g. `thumbsup`
+     *
+     * @return boolean indicating whether the API request succeeded
+     */
     @Whitelisted
     public boolean addReaction(String emojiName) {
-        return slackService.publish(
-            SlackReactionRequest.builder()
-                    .withChannelId(channelId)
-                    .withTimestamp(ts)
-                    .withEmojiName(emojiName)
-                    .build()
-        );
+        return slackService.addReaction(channelId, ts, emojiName);
     }
 }

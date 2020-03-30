@@ -13,6 +13,7 @@ import java.util.Map;
 import jenkins.model.Jenkins;
 import jenkins.plugins.slack.CredentialsObtainer;
 import jenkins.plugins.slack.SlackNotifier;
+import jenkins.plugins.slack.SlackRequest;
 import jenkins.plugins.slack.SlackService;
 import jenkins.plugins.slack.user.NoSlackUserIdResolver;
 import jenkins.plugins.slack.user.SlackUserIdResolver;
@@ -157,7 +158,11 @@ public class SlackSendStepTest {
         stepExecution.run();
         verify(slackServiceMock, times(0)).publish("message", "");
 
-        verify(slackServiceMock, times(1)).publish("message", attachments, "", null);
+        SlackRequest expectedSlackRequest = SlackRequest.builder()
+                .withAttachments(attachments)
+                .withMessage("message")
+                .withColor("").build();
+        verify(slackServiceMock, times(1)).publish(expectedSlackRequest);
 
     }
 
@@ -202,7 +207,11 @@ public class SlackSendStepTest {
         jsonObject.put("author_icon", "Avatar for author");
         expectedBlocks.add(jsonObject);
 
-        verify(slackServiceMock, times(1)).publish("message", null, expectedBlocks, null, null);
+        SlackRequest slackRequest = SlackRequest.builder()
+                .withMessage("message")
+                .withBlocks(expectedBlocks)
+                .build();
+        verify(slackServiceMock, times(1)).publish(slackRequest);
     }
 
     @Test
@@ -245,7 +254,11 @@ public class SlackSendStepTest {
         jsonObject.put("fallback", "message");
         expectedAttachments.add(jsonObject);
 
-        verify(slackServiceMock, times(1)).publish("message", expectedAttachments, "", null);
+        SlackRequest expectedSlackRequest = SlackRequest.builder()
+                .withAttachments(expectedAttachments)
+                .withMessage("message")
+                .withColor("").build();
+        verify(slackServiceMock, times(1)).publish(expectedSlackRequest);
     }
 
     @Test

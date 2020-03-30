@@ -88,7 +88,7 @@ public class SlackNotifierTest extends TestCase {
         }
 
         @Override
-        public boolean publish(String message, JSONArray attachments, JSONArray blocks, String color, String timestamp) {
+        public boolean addReaction(String channelId, String timestamp, String emojiName) {
             return response;
         }
 

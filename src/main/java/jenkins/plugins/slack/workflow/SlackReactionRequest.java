@@ -4,7 +4,7 @@ import java.util.Objects;
 import net.sf.json.JSONObject;
 import org.apache.commons.lang3.StringUtils;
 
-public class SlackReactionRequest implements SlackRequest {
+public class SlackReactionRequest {
     private String channelId;
     private String timestamp;
     private String emojiName;
@@ -23,14 +23,7 @@ public class SlackReactionRequest implements SlackRequest {
         return new SlackReactionRequestBuilder();
     }
 
-    public String getApiEndpoint() {
-        return "reactions.add";
-    }
-
-    // We don't use the room id passed in by the SlackService because the reactions.add API endpoint
-    // rejects it. We have to use the internal channel id returned as part of the chat.postMessage
-    // response.
-    public JSONObject getBody(String roomId) {
+    public JSONObject getBody() {
         JSONObject json = new JSONObject();
         json.put("channel", channelId);
         json.put("timestamp", timestamp);
@@ -70,7 +63,7 @@ public class SlackReactionRequest implements SlackRequest {
         return Objects.hash(channelId, timestamp, emojiName);
     }
 
-    public static class SlackReactionRequestBuilder implements SlackRequestBuilder {
+    public static class SlackReactionRequestBuilder {
         private String channelId;
         private String timestamp;
         private String emojiName;

@@ -17,6 +17,7 @@ import jenkins.model.Jenkins;
 import jenkins.plugins.slack.CredentialsObtainer;
 import jenkins.plugins.slack.Messages;
 import jenkins.plugins.slack.SlackNotifier;
+import jenkins.plugins.slack.SlackRequest;
 import jenkins.plugins.slack.SlackService;
 import jenkins.plugins.slack.StandardSlackService;
 import jenkins.plugins.slack.StandardSlackServiceBuilder;
@@ -335,11 +336,24 @@ public class SlackSendStep extends Step {
                         }
                     }
                 }
-                publishSuccess = slackService.publish(step.message, jsonArray, color, step.timestamp);
+                publishSuccess = slackService.publish(
+                        SlackRequest.builder()
+                                .withMessage(step.message)
+                                .withAttachments(jsonArray)
+                                .withColor(color)
+                                .withTimestamp(step.timestamp)
+                                .build()
+                );
             } else if (step.blocks != null) {
                 JSONArray jsonArray = getBlocksAsJSONArray();
 
-                publishSuccess = slackService.publish(step.message, null, jsonArray, null, step.timestamp);
+                publishSuccess = slackService.publish(
+                        SlackRequest.builder()
+                                .withMessage(step.message)
+                                .withBlocks(jsonArray)
+                                .withTimestamp(step.timestamp)
+                                .build()
+                );
             } else if (step.message != null) {
                 if (step.timestamp != null) {
                     publishSuccess = slackService.publish(step.message, color, step.timestamp);
