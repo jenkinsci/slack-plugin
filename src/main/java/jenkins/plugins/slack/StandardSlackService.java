@@ -264,8 +264,8 @@ public class StandardSlackService implements SlackService {
             }
 
             String apiEndpoint = "chat.postMessage";
-
-            if (StringUtils.isNotEmpty(slackRequest.getTimestamp())) {
+            String timestamp = slackRequest.getTimestamp();
+            if (StringUtils.isNotEmpty(timestamp)) {
                 json.put("ts", timestamp);
                 apiEndpoint = "chat.update";
             }
@@ -351,16 +351,26 @@ public class StandardSlackService implements SlackService {
         );
     }
 
+    /**
+     * Add an emoji reaction to a message
+     *
+     * @param channelId - Slack's internal channel id (i.e. what's returned in a `chat.postMessage` response)
+     * @param timestamp - Timestamp identifying the message
+     * @param emojiName - The name of the emoji to add in reaction to the message (no colons)
+     *
+     * @return boolean indicating whether the API request succeeded
+     */
     @Override
     public boolean addReaction(String channelId, String timestamp, String emojiName) {
-        JSONObject body = SlackReactionRequest.builder()
+        JSONObject json = SlackReactionRequest.builder()
                 .withChannelId(channelId)
                 .withTimestamp(timestamp)
                 .withEmojiName(emojiName)
                 .build()
                 .getBody();
 
-        return makeApiPost("reactions.add", body);
+        logger.fine("Adding reaction:  " + json.toString());
+        return makeApiPost("reactions.add", json);
     }
 
     private String getTokenToUse(String authTokenCredentialId, String token) {
