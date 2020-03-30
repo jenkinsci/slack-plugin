@@ -7,10 +7,12 @@ import org.jenkinsci.plugins.scriptsecurity.sandbox.whitelists.Whitelisted;
 import org.json.JSONObject;
 
 public class SlackResponse implements Serializable {
+    private static final long serialVersionUID = 1L;
+
     private static final String THREAD_ID = "ts";
     private static final String CHANNEL = "channel";
 
-    private SlackService slackService;
+    private transient SlackService slackService;
     private String channelId;
     private String ts;
 
@@ -57,6 +59,7 @@ public class SlackResponse implements Serializable {
      */
     @Whitelisted
     public boolean addReaction(String emojiName) {
+        if (slackService == null) return false;
         return slackService.addReaction(channelId, ts, emojiName);
     }
 }
