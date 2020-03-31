@@ -76,11 +76,6 @@ public class StandardSlackServiceBuilder {
         return this;
     }
 
-    public StandardSlackServiceBuilder withTimestamp(String timestamp) {
-        this.timestamp = timestamp;
-        return this;
-    }
-
     public StandardSlackService build() { return new StandardSlackService(this); }
 
 }
