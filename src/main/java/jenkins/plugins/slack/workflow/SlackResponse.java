@@ -59,7 +59,10 @@ public class SlackResponse implements Serializable {
      */
     @Whitelisted
     public boolean addReaction(String emojiName) {
-        if (slackService == null) return false;
+        if (slackService == null) {
+            return false;
+        }
+
         return slackService.addReaction(channelId, ts, emojiName);
     }
 }
