@@ -6,11 +6,11 @@ import net.sf.json.JSONObject;
 import org.apache.commons.lang3.StringUtils;
 
 public class SlackRequest {
-    private String message;
-    private String color;
-    private String timestamp;
-    private JSONArray attachments;
-    private JSONArray blocks;
+    private final String message;
+    private final String color;
+    private final String timestamp;
+    private final JSONArray attachments;
+    private final JSONArray blocks;
 
     private SlackRequest(String message, String color, JSONArray attachments, JSONArray blocks, String timestamp) {
         if (blocks != null && color != null) {

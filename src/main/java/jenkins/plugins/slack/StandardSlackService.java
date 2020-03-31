@@ -33,21 +33,18 @@ public class StandardSlackService implements SlackService {
     private static final Logger logger = Logger.getLogger(StandardSlackService.class.getName());
     static final Pattern JENKINS_CI_HOOK_REGEX = Pattern.compile("https://(?<teamDomain>.*)\\.slack\\.com/services/hooks/jenkins-ci.*");
 
-    private Run run;
+    private final Run run;
     private String baseUrl;
     private String teamDomain;
     private boolean botUser;
-    private List<String> roomIds;
-    private boolean replyBroadcast;
-    private boolean sendAsText;
-    private String iconEmoji;
-    private String username;
+    private final List<String> roomIds;
+    private final boolean replyBroadcast;
+    private final String iconEmoji;
+    private final String username;
     private String responseString;
     private String populatedToken;
-    private boolean notifyCommitters;
-    private SlackUserIdResolver userIdResolver;
-    private String timestamp;
-
+    private final boolean notifyCommitters;
+    private final SlackUserIdResolver userIdResolver;
 
     /**
      * @deprecated use {@link #StandardSlackService(String, String, boolean, String, boolean, String)} instead}
@@ -112,7 +109,6 @@ public class StandardSlackService implements SlackService {
         this.populatedToken = standardSlackServiceBuilder.populatedToken;
         this.notifyCommitters = standardSlackServiceBuilder.notifyCommitters;
         this.userIdResolver = standardSlackServiceBuilder.userIdResolver;
-        this.timestamp = standardSlackServiceBuilder.timestamp;
     }
 
     public static StandardSlackServiceBuilder builder() {
@@ -150,7 +146,7 @@ public class StandardSlackService implements SlackService {
      *
      * @return boolean indicating whether the API request succeeded
      */
-    boolean makeApiPost(String apiEndpoint, JSONObject body) {
+    boolean postToSlack(String apiEndpoint, JSONObject body) {
         boolean result = true;
 
         if (baseUrl != null) {
@@ -161,9 +157,7 @@ public class StandardSlackService implements SlackService {
             HttpPost post;
             String url;
 
-            //prepare post methods for both requests types
             if (!botUser || StringUtils.isNotEmpty(baseUrl)) {
-                // TODO how does this work for non-chat.postMessage requests?
                 url = "https://" + teamDomain + "." + "slack.com" + "/services/hooks/jenkins-ci?token=" + populatedToken;
                 if (!StringUtils.isEmpty(baseUrl)) {
                     url = baseUrl + populatedToken;
@@ -272,7 +266,7 @@ public class StandardSlackService implements SlackService {
 
             logger.fine("Posting: to " + roomId + " on " + teamDomain + ":  " + json.toString());
 
-            boolean individualResult = makeApiPost(apiEndpoint, json);
+            boolean individualResult = postToSlack(apiEndpoint, json);
             result = result && individualResult;
         }
         return result;
@@ -281,6 +275,12 @@ public class StandardSlackService implements SlackService {
     @Override
     public boolean publish(String message, String color) {
         //prepare attachments first
+        JSONArray attachments = prepareAttachments(message, color);
+
+        return publish(null, attachments, color);
+    }
+
+    private JSONArray prepareAttachments(String message, String color) {
         JSONObject field = new JSONObject();
         field.put("short", false);
         field.put("value", message);
@@ -300,7 +300,7 @@ public class StandardSlackService implements SlackService {
         JSONArray attachments = new JSONArray();
         attachments.add(attachment);
 
-        return publish(null, attachments, color);
+        return attachments;
     }
 
     @Override
@@ -317,24 +317,7 @@ public class StandardSlackService implements SlackService {
     @Override
     public boolean publish(String message, String color, String timestamp) {
         //prepare attachments first
-        JSONObject field = new JSONObject();
-        field.put("short", false);
-        field.put("value", message);
-
-        JSONArray fields = new JSONArray();
-        fields.add(field);
-
-        JSONObject attachment = new JSONObject();
-        attachment.put("fallback", message);
-        attachment.put("color", color);
-        attachment.put("fields", fields);
-        JSONArray mrkdwn = new JSONArray();
-        mrkdwn.add("pretext");
-        mrkdwn.add("text");
-        mrkdwn.add("fields");
-        attachment.put("mrkdwn_in", mrkdwn);
-        JSONArray attachments = new JSONArray();
-        attachments.add(attachment);
+        JSONArray attachments = prepareAttachments(message, color);
 
         return publish(null, attachments, color, timestamp);
     }
@@ -370,7 +353,7 @@ public class StandardSlackService implements SlackService {
                 .getBody();
 
         logger.fine("Adding reaction:  " + json.toString());
-        return makeApiPost("reactions.add", json);
+        return postToSlack("reactions.add", json);
     }
 
     private String getTokenToUse(String authTokenCredentialId, String token) {

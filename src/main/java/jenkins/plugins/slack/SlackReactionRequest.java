@@ -5,9 +5,9 @@ import net.sf.json.JSONObject;
 import org.apache.commons.lang3.StringUtils;
 
 public class SlackReactionRequest {
-    private String channelId;
-    private String timestamp;
-    private String emojiName;
+    private final String channelId;
+    private final String timestamp;
+    private final String emojiName;
 
     private SlackReactionRequest(String channelId, String timestamp, String emojiName) {
         if (StringUtils.isEmpty(channelId) || StringUtils.isEmpty(timestamp) || StringUtils.isEmpty(emojiName)) {

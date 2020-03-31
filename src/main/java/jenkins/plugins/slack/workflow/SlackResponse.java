@@ -12,7 +12,7 @@ public class SlackResponse implements Serializable {
     private static final String THREAD_ID = "ts";
     private static final String CHANNEL = "channel";
 
-    private transient SlackService slackService;
+    private final transient SlackService slackService;
     private String channelId;
     private String ts;
 
