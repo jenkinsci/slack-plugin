@@ -214,8 +214,7 @@ public class StandardSlackServiceTest {
                         .withTeamDomain("domain")
                         .withBotUser(true)
                         .withRoomId("#room1:1528317530")
-                        .withPopulatedToken("token")
-                        .withTimestamp("132124"));
+                        .withPopulatedToken("token"));
         CloseableHttpClientStub httpClientStub = new CloseableHttpClientStub();
         httpClientStub.setHttpStatus(HttpStatus.SC_OK);
         service.setHttpClient(httpClientStub);

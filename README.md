@@ -138,6 +138,25 @@ slackSend(channel: slackResponse.channelId, message: "Update message now", times
 
 This feature requires [botUser](#bot-user-mode) mode.
 
+#### Emoji Reactions
+
+Add an emoji reaction to a previously-sent message like this:
+
+Example:
+
+```groovy
+def slackResponse = slackSend(channel: "emoji-demo", message: "Here is the primary message")
+slackResponse.addReaction("thumbsup")
+```
+
+![image][img-emoji-reaction]
+
+This may only work reliably in channels (as opposed to private messages) due to [limitations in the Slack API](https://api.slack.com/methods/chat.postMessage) (See "Post to an IM channel").
+
+This does not currently work in a situation where Jenkins is restarted between sending the initial message and adding the reaction. If this is something you need, please file an issue.
+
+This feature requires [botUser](#bot-user-mode) mode and the `reactions:write` API scope.
+
 #### Unfurling Links
 
 You can allow link unfurling if you send the message as text. This only works in a text message, as attachments cannot be unfurled.
@@ -347,6 +366,8 @@ mvn clean package
 [rocketchat]: https://rocket.chat/
 
 [mattermost]: https://about.mattermost.com/
+
+[img-emoji-reaction]: /docs/emoji-reaction.png
 
 [img-secret-text]: https://cloud.githubusercontent.com/assets/983526/17971588/6c26dfa0-6aa9-11e6-808c-3e139446e013.png
 

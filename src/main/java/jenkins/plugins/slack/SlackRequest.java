@@ -2,13 +2,15 @@ package jenkins.plugins.slack;
 
 import java.util.Objects;
 import net.sf.json.JSONArray;
+import net.sf.json.JSONObject;
+import org.apache.commons.lang3.StringUtils;
 
 public class SlackRequest {
-    private String message;
-    private String color;
-    private String timestamp;
-    private JSONArray attachments;
-    private JSONArray blocks;
+    private final String message;
+    private final String color;
+    private final String timestamp;
+    private final JSONArray attachments;
+    private final JSONArray blocks;
 
     private SlackRequest(String message, String color, JSONArray attachments, JSONArray blocks, String timestamp) {
         if (blocks != null && color != null) {
@@ -24,6 +26,30 @@ public class SlackRequest {
 
     public static SlackRequestBuilder builder() {
         return new SlackRequestBuilder();
+    }
+
+    public JSONObject getBody() {
+        JSONObject json = new JSONObject();
+
+        if (StringUtils.isNotEmpty(message)) {
+            json.put("text", message);
+        }
+        if (attachments != null && !attachments.isEmpty()) {
+            json.put("attachments", attachments);
+        }
+
+        if (blocks != null && !blocks.isEmpty()) {
+            json.put("blocks", blocks);
+        }
+        json.put("link_names", "1");
+        json.put("unfurl_links", "true");
+        json.put("unfurl_media", "true");
+
+        if (StringUtils.isNotEmpty(timestamp)) {
+            json.put("ts", timestamp);
+        }
+
+        return json;
     }
 
     public String getMessage() {

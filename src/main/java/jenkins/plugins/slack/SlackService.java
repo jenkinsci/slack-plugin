@@ -15,5 +15,7 @@ public interface SlackService {
 
     boolean publish(String message, JSONArray attachments, String color, String timestamp);
 
+    boolean addReaction(String channelId, String timestamp, String emojiName);
+
     String getResponseString();
 }

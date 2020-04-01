@@ -87,6 +87,11 @@ public class SlackNotifierTest extends TestCase {
             return response;
         }
 
+        @Override
+        public boolean addReaction(String channelId, String timestamp, String emojiName) {
+            return response;
+        }
+
         public void setResponse(boolean response) {
             this.response = response;
         }

@@ -371,7 +371,7 @@ public class SlackSendStep extends Step {
                 if (responseString != null) {
                     try {
                         org.json.JSONObject result = new org.json.JSONObject(responseString);
-                        response = new SlackResponse(result);
+                        response = new SlackResponse(result, slackService);
                     } catch (org.json.JSONException ex) {
                         listener.error(Messages.failedToParseSlackResponse(responseString));
                         if (step.failOnError) {
@@ -379,7 +379,7 @@ public class SlackSendStep extends Step {
                         }
                     }
                 } else {
-                    return new SlackResponse();
+                    return new SlackResponse(slackService);
                 }
             } else if (step.failOnError) {
                 if (responseString != null) {
