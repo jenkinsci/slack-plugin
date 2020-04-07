@@ -10,7 +10,7 @@
 
     <artifactId>slack</artifactId>
     <packaging>hpi</packaging>
-    <version>2.39</version>
+    <version>${revision}${changelist}</version>
     <name>Slack Notification Plugin</name>
     <description>A Build status publisher that notifies channels on a Slack team</description>
     <url>https://github.com/jenkinsci/slack-plugin</url>
@@ -21,7 +21,7 @@
         <jenkins.version>2.164.3</jenkins.version>
         <hpi.compatibleSinceVersion>2.32</hpi.compatibleSinceVersion>
 
-        <revision>2.38</revision>
+        <revision>2.40</revision>
         <changelist>-SNAPSHOT</changelist>
         <java.level>8</java.level>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -41,7 +41,7 @@
         <connection>scm:git:ssh://git@github.com/jenkinsci/slack-plugin.git</connection>
         <developerConnection>scm:git:ssh://git@github.com/jenkinsci/slack-plugin.git</developerConnection>
         <url>https://github.com/jenkinsci/slack-plugin</url>
-        <tag>slack-2.39</tag>
+        <tag>${scmTag}</tag>
     </scm>
 
     <distributionManagement>
