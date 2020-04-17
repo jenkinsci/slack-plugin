@@ -29,6 +29,7 @@ class SlackUploadFileRunner extends MasterToSlaveCallable<Boolean, Throwable> im
     private static final long serialVersionUID = 1L;
     private static final String API_URL = "https://slack.com/api/files.upload";
     private static final Logger logger = Logger.getLogger(SlackUploadFileRunner.class.getName());
+    private static final String UPLOAD_FAILED_TEMPLATE = "Slack upload may have failed. Response: ";
 
     private final FilePath filePath;
     private String fileToUploadPath;
@@ -114,24 +115,25 @@ class SlackUploadFileRunner extends MasterToSlaveCallable<Boolean, Throwable> im
                     HttpEntity entity = response.getEntity();
                     return entity != null ? new org.json.JSONObject(EntityUtils.toString(entity)) : null;
                 } else {
-                    logger.log(Level.WARNING, "Slack upload may have failed. Response: " + status);
+                    logger.log(Level.WARNING, UPLOAD_FAILED_TEMPLATE + status);
                     return null;
                 }
             };
 
             org.json.JSONObject responseBody = client.execute(request, responseHandler);
 
-            if (responseBody != null) {
-                return responseBody.getBoolean("ok");
-            } else {
+            if (responseBody != null && !responseBody.getBoolean("ok")) {
+                listener.getLogger().println(UPLOAD_FAILED_TEMPLATE + responseBody.toString());
                 return false;
+            } else {
+                return true;
             }
         } catch (Exception e) {
             String msg = "Exception uploading file '" + file + "' to Slack ";
             logger.log(Level.WARNING, msg, e);
             listener.getLogger().println(msg + e.getMessage());
         }
-        return false;
+        return true;
     }
 
 }
