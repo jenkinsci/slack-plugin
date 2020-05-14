@@ -190,7 +190,7 @@ def userIdsString = userIds.collect { "<@$it>" }.join(' ')
 slackSend(color: 'good', message: "$userIds Message from Jenkins Pipeline")
 ```
 
-This feature requires [botUser](#bot-user-mode) mode.
+This feature requires [botUser](#bot-user-mode) mode and the `users:read` and `users:read.email` API scopes.
 
 ### Freestyle job
 
