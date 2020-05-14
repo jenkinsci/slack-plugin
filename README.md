@@ -190,7 +190,7 @@ def userIdsString = userIds.collect { "<@$it>" }.join(' ')
 slackSend(color: 'good', message: "$userIds Message from Jenkins Pipeline")
 ```
 
-This feature requires [botUser](#bot-user-mode) mode.
+This feature requires [botUser](#bot-user-mode) mode and the `users:read` and `users:read.email` API scopes.
 
 ### Freestyle job
 
@@ -290,7 +290,8 @@ Note: These docs may become outdated as Slack changes their website, if they do 
 3.  Go to basic information and set the default icon in "Display information" you can get the Jenkins logo from: <https://jenkins.io/artwork/>.
 4.  Navigate to "OAuth & Permissions".
 5.  Add `chat:write` OAuth Scope to "Bot Token Scopes".
-6.  (optional) add `files:write` OAuth Scope if you will be uploading files
+    1.  (optional) add `files:write` OAuth Scope if you will be uploading files.
+    2.  (optional) add `users:read` and `users:read.email` OAuth Scope if you will be looking users up by email (using slackUserIdFromEmail(...) or slackUserIdsFromCommiters() steps)
 6.  Install the app to a workspace to generate "Bot User OAuth Access Token".
 7.  Copy the "Bot User OAuth Access Token" and create a "Secret text" credential in Jenkins with this.
 8.  Tick the "Is Bot User?" option in the Slack configuration in "Manage Jenkins".
