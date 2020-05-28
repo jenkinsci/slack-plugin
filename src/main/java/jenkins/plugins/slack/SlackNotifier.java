@@ -584,11 +584,7 @@ public class SlackNotifier extends Notifier {
         BuildAwareLogger log = createLogger(listener);
         log.debug(buildKey, "Performing complete notifications");
         JenkinsTokenExpander tokenExpander = new JenkinsTokenExpander(listener);
-        try {
-            new ActiveNotifier(this, slackFactory(listener), log, tokenExpander).completed(build);
-        } catch (Exception e) {
-            log.info(buildKey,"Exception attempting Slack notification: " + e.getMessage());
-        }
+        new ActiveNotifier(this, slackFactory(listener), log, tokenExpander).completed(build);
         return true;
     }
 
@@ -596,13 +592,9 @@ public class SlackNotifier extends Notifier {
     public boolean prebuild(AbstractBuild<?, ?> build, BuildListener listener) {
         String buildKey = BuildKey.format(build);
         BuildAwareLogger log = createLogger(listener);
-        try {
-            if (startNotification) {
-                log.debug(buildKey, "Performing start notifications");
-                new ActiveNotifier(this, slackFactory(listener), log, new JenkinsTokenExpander(listener)).started(build);
-            }
-        } catch (Exception e) {
-            log.info(buildKey,"Exception attempting Slack notification: " + e.getMessage());
+        if (startNotification) {
+            log.debug(buildKey, "Performing start notifications");
+            new ActiveNotifier(this, slackFactory(listener), log, new JenkinsTokenExpander(listener)).started(build);
         }
         return super.prebuild(build, listener);
     }
