@@ -187,7 +187,7 @@ Example:
 ```groovy
 def userIds = slackUserIdsFromCommitters()
 def userIdsString = userIds.collect { "<@$it>" }.join(' ')
-slackSend(color: 'good', message: "$userIds Message from Jenkins Pipeline")
+slackSend(color: 'good', message: "$userIdsString Message from Jenkins Pipeline")
 ```
 
 This feature requires [botUser](#bot-user-mode) mode and the `users:read` and `users:read.email` API scopes.
