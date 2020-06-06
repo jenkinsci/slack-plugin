@@ -20,7 +20,7 @@ applications like [RocketChat][rocketchat] and [Mattermost][mattermost].
     3.  Change the tab to `Available`,
     4.  Search for `slack`,
     5.  Check the box next to install.
-
+ 
 ![image][img-plugin-manager]
 
 If you want to configure a notification to be sent to Slack for **all jobs**, you may want to also consider installing an additional plugin called [Global Slack Notifier plugin](https://plugins.jenkins.io/global-slack-notifier).
