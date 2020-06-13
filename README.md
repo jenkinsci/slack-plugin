@@ -1,8 +1,9 @@
 # Slack plugin for Jenkins
 
-## Maintainer away 21st December - 14th January
-
-[![Build Status](https://ci.jenkins.io/buildStatus/icon?job=Plugins/slack-plugin/master)](https://ci.jenkins.io/job/Plugins/slack-plugin/master)
+[![Build Status][jenkins-status]][jenkins-builds]
+[![Jenkins Plugin][plugin-version-badge]][plugin]
+[![GitHub release][github-release-badge]][github-release]
+[![Jenkins Plugin Installs][plugin-install-badge]][plugin]
 [![Slack Signup][slack-badge]][slack-signup] (click to sign up)
 
 Provides Jenkins notification integration with Slack or Slack compatible
@@ -10,41 +11,88 @@ applications like [RocketChat][rocketchat] and [Mattermost][mattermost].
 
 ## Install Instructions for Slack
 
-1. Get a Slack account: https://slack.com/
-2. Configure the Jenkins integration:
-   https://my.slack.com/services/new/jenkins-ci
-3. Install this plugin on your Jenkins server.
+1.  Get a Slack account: <https://slack.com/>
+2.  Configure the Jenkins integration: <https://my.slack.com/services/new/jenkins-ci>
+3.  Install this plugin on your Jenkins server:
 
-### Freestyle job
-1. Configure it in your Jenkins job (and optionally as global configuration) and
-   **add it as a Post-build action**.
-   
+    1.  From the Jenkins homepage navigate to `Manage Jenkins`
+    2.  Navigate to `Manage Plugins`,
+    3.  Change the tab to `Available`,
+    4.  Search for `slack`,
+    5.  Check the box next to install.
+
+![image][img-plugin-manager]
+
+If you want to configure a notification to be sent to Slack for **all jobs**, you may want to also consider installing an additional plugin called [Global Slack Notifier plugin](https://plugins.jenkins.io/global-slack-notifier).
+
 ### Pipeline job
 
-```
-slackSend color: 'good', message: 'Message from Jenkins Pipeline'
+    slackSend color: 'good', message: 'Message from Jenkins Pipeline'
+
+Additionally you can pass attachments or blocks (requires [bot user](#bot-user-mode)) in order to send complex
+messages, for example:
+
+Attachments:
+
+```groovy
+def attachments = [
+  [
+    text: 'I find your lack of faith disturbing!',
+    fallback: 'Hey, Vader seems to be mad at you.',
+    color: '#ff0000'
+  ]
+]
+
+slackSend(channel: '#general', attachments: attachments)
 ```
 
-Additionally you can pass a JSONArray as a String in order to send complex
-messages, as per the example:
+Blocks (this feature requires a '[bot user](#bot-user-mode)' and a custom slack app):
 
+```groovy
+blocks = [
+	[
+		"type": "section",
+		"text": [
+			"type": "mrkdwn",
+			"text": "Hello, Assistant to the Regional Manager Dwight! *Michael Scott* wants to know where you'd like to take the Paper Company investors to dinner tonight.\n\n *Please select a restaurant:*"
+		]
+	],
+    [
+		"type": "divider"
+	],
+	[
+		"type": "section",
+		"text": [
+			"type": "mrkdwn",
+			"text": "*Farmhouse Thai Cuisine*\n:star::star::star::star: 1528 reviews\n They do have some vegan options, like the roti and curry, plus they have a ton of salad stuff and noodles can be ordered without meat!! They have something for everyone here"
+		],
+		"accessory": [
+			"type": "image",
+			"image_url": "https://s3-media3.fl.yelpcdn.com/bphoto/c7ed05m9lC2EmA3Aruue7A/o.jpg",
+			"alt_text": "alt text for image"
+		]
+	]
+]
+
+slackSend(channel: '#general', blocks: blocks)
 ```
-import net.sf.json.JSONArray;
-import net.sf.json.JSONObject;
+
+For more information about slack messages see [Slack Messages Api](https://api.slack.com/docs/messages), [Slack attachments Api](https://api.slack.com/docs/message-attachments) and [Block kit](https://api.slack.com/block-kit)
+
+Note: the attachments API is classified as legacy, with blocks as the replacement (but blocks are only supported when using a bot user through a custom slack app).
+
+#### File upload
+
+You can upload files to slack with this plugin:
+
+```groovy
 node {
-    JSONArray attachments = new JSONArray();
-    JSONObject attachment = new JSONObject();
-
-    attachment.put('text','I find your lack of faith disturbing!');
-    attachment.put('fallback','Hey, Vader seems to be mad at you.');
-    attachment.put('color','#ff0000');
-
-    attachments.add(attachment);
-    slackSend(color: '#00FF00', channel: '@gustavo.maia', attachments: attachments.toString())
+  sh "echo hey > blah.txt"
+  slackUploadFile filePath: '*.txt', initialComment:  'HEY HEY'
 }
 ```
-For more information about slack messages see [Slack Messages Api](https://api.slack.com/docs/messages)
-and [Slack attachments Api](https://api.slack.com/docs/message-attachments)
+
+This feature requires [botUser](#bot-user-mode) mode.
 
 #### Threads Support
 
@@ -53,42 +101,124 @@ The step returns an object which you can use to retrieve the thread ID. Send new
 target channel to create a thread. All messages of a thread should use the same thread ID.
 
 Example:
-```
-node {
-    def slackResponse = slackSend(channel: "cool-threads", message: "Here is the primary message")
-    slackSend(channel: slackResponse.threadId, message: "Thread reply #1")
-    slackSend(channel: slackResponse.threadId, message: "Thread reply #2")
-}
+
+```groovy
+def slackResponse = slackSend(channel: "cool-threads", message: "Here is the primary message")
+slackSend(channel: slackResponse.threadId, message: "Thread reply #1")
+slackSend(channel: slackResponse.threadId, message: "Thread reply #2")
 ```
 
-This feature requires botUser mode.
+This feature requires [botUser](#bot-user-mode) mode.
 
+Messages that are posted to a thread can also optionally be broadcasted to the
+channel. Set `replyBroadcast: true` to do so. For example:
+
+```groovy
+def slackResponse = slackSend(channel: "ci", message: "Started build")
+slackSend(channel: slackResponse.threadId, message: "Build still in progress")
+slackSend(
+    channel: slackResponse.threadId,
+    replyBroadcast: true,
+    message: "Build failed. Broadcast to channel for better visibility."
+)
+```
+
+#### Update Messages
+
+You can update the content of a previously sent message using the pipeline step.
+The step returns an object which you can use to retrieve the timestamp and channelId
+NOTE: The slack API requires the channel ID for `chat.update` calls.
+
+Example:
+
+```groovy
+def slackResponse = slackSend(channel: "updating-stuff", message: "Here is the primary message")
+slackSend(channel: slackResponse.channelId, message: "Update message now", timestamp: slackResponse.ts)
+```
+
+This feature requires [botUser](#bot-user-mode) mode.
+
+#### Emoji Reactions
+
+Add an emoji reaction to a previously-sent message like this:
+
+Example:
+
+```groovy
+def slackResponse = slackSend(channel: "emoji-demo", message: "Here is the primary message")
+slackResponse.addReaction("thumbsup")
+```
+
+![image][img-emoji-reaction]
+
+This may only work reliably in channels (as opposed to private messages) due to [limitations in the Slack API](https://api.slack.com/methods/chat.postMessage) (See "Post to an IM channel").
+
+This does not currently work in a situation where Jenkins is restarted between sending the initial message and adding the reaction. If this is something you need, please file an issue.
+
+This feature requires [botUser](#bot-user-mode) mode and the `reactions:write` API scope.
+
+#### Unfurling Links
+
+You can allow link unfurling if you send the message as text. This only works in a text message, as attachments cannot be unfurled.
+
+Example:
+
+```groovy
+slackSend(channel: "news-update", message: "https://www.nytimes.com", sendAsText: true)
+```
+
+#### User Id Look Up
+
+There are two pipeline steps available to help with user id look up.
+
+A user id can be resolved from a user's email address with the `slackUserIdFromEmail` step.
+
+Example:
+
+```groovy
+def userId = slackUserIdFromEmail('spengler@ghostbusters.example.com')
+slackSend(color: 'good', message: "<@$userId> Message from Jenkins Pipeline")
+```
+
+A list of user ids can be resolved against the set of changeset commit authors with the `slackUserIdsFromCommitters` step.
+
+Example:
+
+```groovy
+def userIds = slackUserIdsFromCommitters()
+def userIdsString = userIds.collect { "<@$it>" }.join(' ')
+slackSend(color: 'good', message: "$userIdsString Message from Jenkins Pipeline")
+```
+
+This feature requires [botUser](#bot-user-mode) mode and the `users:read` and `users:read.email` API scopes.
+
+### Freestyle job
+
+1.  Configure it in your Jenkins job (and optionally as global configuration) and
+    **add it as a Post-build action**.
 
 ## Install Instructions for Slack compatible application
 
-1. Log into Slack compatible application.
-2. Create a Webhook (it may need to be enabled in system console) by visiting
-   Integrations.
-3. You should now have a URL with a token.  Something like
-   `https://mydomain.com/hooks/xxxx` where `xxxx` is the integration token and
-   `https://mydomain.com/hooks/` is the `Slack compatible app URL`.
-4. Install this plugin on your Jenkins server.
-5. Configure it in your Jenkins job (and optionally as global configuration) and
-   **add it as a Post-build action**.
+1.  Log into the Slack compatible application.
+2.  Create a Webhook (it may need to be enabled in system console) by visiting
+    Integrations.
+3.  You should now have a URL with a token.  Something like
+    `https://mydomain.com/hooks/xxxx` where `xxxx` is the integration token and
+    `https://mydomain.com/hooks/` is the `Slack compatible app URL`.
+4.  Install this plugin on your Jenkins server.
+5.  Follow the freestyle or pipeline instructions for the slack installation instructions.
 
 ## Security
 
 Use Jenkins Credentials and a credential ID to configure the Slack integration
 token. It is a security risk to expose your integration token using the previous
-*Integration Token* setting.
+_Integration Token_ setting.
 
-Create a new ***Secret text*** credential:
+Create a new **_Secret text_** credential:
 
 ![image][img-secret-text]
 
-
-Select that credential as the value for the ***Integration Token Credential
-ID*** field:
+Select that credential as the value for the **_Credential_** field:
 
 ![image][img-token-credential]
 
@@ -97,24 +227,17 @@ ID*** field:
 You can send messages to channels or you can notify individual users via their
 slackbot.  In order to notify an individual user, use the syntax `@user_id` in
 place of the project channel.  Mentioning users by display name may work, but it
-is not unique and will not work if it is an ambiguous match.    
+is not unique and will not work if it is an ambiguous match.
 
-## Bot user option
+## User Mentions
 
-This plugin supports sending notifications via bot users. You can enable bot
-user support from both global and project configurations. If the notification
-will be sent to a user via direct message, default integration sends it via
-@slackbot, you can use this option if you want to send messages via a bot user.
-You need to provide credentials of the bot user for integration token
-credentials to use this feature.
-
-Bot user option is not supported, if you use Base Url for a Slack compatible
-application.
+Use the syntax `<@user_id>` in a message to mention users directly. See [User Id Look Up](#user-id-look-up) for pipeline steps to help with user id look up.
 
 ## Configuration as code
 
 This plugin supports configuration as code
 Add to your yaml file:
+
 ```yaml
 credentials:
   system:
@@ -133,11 +256,88 @@ unclassified:
     tokenCredentialId: slack-token
 ```
 
+For more details see the configuration as code plugin documentation:
+<https://github.com/jenkinsci/configuration-as-code-plugin#getting-started>
+
+## Bot user mode
+
+There's two ways to authenticate with slack using this plugin.
+
+1.  Using the "Jenkins CI" app written by Slack, 
+    it's what is known as a 'legacy app' written directly into the slack code base and not maintained anymore.
+
+2.  Creating your own custom "Slack app" and installing it to your workspace.
+
+The benefit of using your own custom "Slack app" is that you get to use all of the modern features that Slack has released in the last few years to
+Slack apps and not to legacy apps.
+
+These include:
+
+-   Threading
+-   File upload
+-   Custom app emoji per message
+-   Blocks
+
+The bot user option is not supported if you use the _Slack compatible app URL_
+option.
+
+### Creating your app
+
+Note: These docs may become outdated as Slack changes their website, if they do become outdated please send a PR here to update the docs.
+
+1.  Go to <https://api.slack.com/apps> and click "Create New App".
+2.  Pick an app name, i.e. "Jenkins" and a workspace that you'll be installing it to.
+3.  Click "Create App". This will leave you on the "Basic Information" screen for your new app.
+3.  Scroll down to "Display Information" and fill it out. You can get the Jenkins logo from: <https://jenkins.io/artwork/>.
+4.  Scroll back up to "Add features and functionality".
+5.  Click "Permissions" to navigate to the "OAuth & Permissions" page.
+6.  Scroll down to "Scopes". Under "Bot Token Scopes"
+    1.  Add `chat:write` Scope.
+    2.  (optional) Add `files:write` Scope if you will be uploading files.
+    3.  (optional) Add `reactions:write` Scope if you will be [adding reactions](#emoji-reactions).
+    4.  (optional) Add `users:read` and `users:read.email` Scope if you will be [looking users up by email](#user-id-look-up).
+7.  (optional) Click "App Home" in the sidebar
+    1.  (optional) Edit the slack display name for the bot.
+    2.  Return to the "OAuth & Permissions" page.
+8.  At the top of the page, click "Install App to Workspace". This will generate a "Bot User OAuth Access Token".
+9.  Copy the "Bot User OAuth Access Token".
+10. *On Jenkins*: Find the Slack configuration in "Manage Jenkins → Configure System".
+    1.  *On Jenkins*: Click "Add" to create a new "Secret text" Credential with that token.
+    2.  *On Jenkins*: Select the new "Secret text" in the dropdown.
+    3.  *On Jenkins*: Make note of the "Default channel / member id".
+    4.  *On Jenkins*: Tick the "Custom slack app bot user" option.
+11. Invite the Jenkins bot user into the Slack channel(s) you wish to be notified in.
+12. *On Jenkins*: Click test connection. A message will be sent to the default channel / default member.
+
+## Troubleshooting connection failure
+
+When testing the connection, you may see errors like:
+
+```text
+    WARNING j.p.slack.StandardSlackService#publish: Response Code: 404
+```
+
+There's a couple of things to try:
+
+### Have you enabled bot user mode?
+
+If you've ticked `Custom slack app bot user` then try unticking it, that mode is for when you've created a custom app and installed it to your workspace instead of the default Jenkins app made by Slack
+
+### Have you set the override URL?
+
+If you've entered something into `Override url` then try clearing it out, that field is only needed for slack compatible apps like mattermost.
+
+### Enable additional logging
+
+Add a [log recorder](https://support.cloudbees.com/hc/en-us/articles/204880580-How-do-I-create-a-logger-in-Jenkins-for-troubleshooting-and-diagnostic-information-) for the [StandardSlackService](https://github.com/jenkinsci/slack-plugin/blob/master/src/main/java/jenkins/plugins/slack/StandardSlackService.java) class this should give you additional details on what's going on.
+
+If you still can't figure it out please raise an issue with as much information as possible about your config and any relevant logs.
+
 ## Developer instructions
 
 Install Maven and JDK.
 
-```
+```shell
 $ mvn -version | grep -v home
 Apache Maven 3.3.9 (bb52d8502b132ec0a5a3f4c09453c07478323dc5; 2015-11-10T08:41:47-08:00)
 Java version: 1.7.0_79, vendor: Oracle Corporation
@@ -147,18 +347,43 @@ OS name: "linux", version: "4.4.0-65-generic", arch: "amd64", family: "unix"
 
 Run unit tests
 
-    mvn test
+```shell
+mvn test
+```
 
 Create an HPI file to install in Jenkins (HPI file will be in
 `target/slack.hpi`).
 
-    mvn clean package
+```shell
+mvn clean package
+```
 
-[jenkins-builds]: https://jenkins.ci.cloudbees.com/job/plugins/job/slack-plugin/
-[jenkins-status]: https://jenkins.ci.cloudbees.com/buildStatus/icon?job=plugins/slack-plugin
+[jenkins-builds]: https://ci.jenkins.io/job/Plugins/job/slack-plugin/job/master/
+
+[jenkins-status]: https://ci.jenkins.io/buildStatus/icon?job=Plugins/slack-plugin/master
+
 [slack-badge]: https://jenkins-slack-testing-signup.herokuapp.com/badge.svg
+
 [slack-signup]: https://jenkins-slack-testing-signup.herokuapp.com/
+
+[plugin-version-badge]: https://img.shields.io/jenkins/plugin/v/slack.svg
+
+[plugin-install-badge]: https://img.shields.io/jenkins/plugin/i/slack.svg?color=blue
+
+[plugin]: https://plugins.jenkins.io/slack
+
+[github-release-badge]: https://img.shields.io/github/release/jenkinsci/slack-plugin.svg?label=release
+
+[github-release]: https://github.com/jenkinsci/slack-plugin/releases/latest
+
 [rocketchat]: https://rocket.chat/
+
 [mattermost]: https://about.mattermost.com/
+
+[img-emoji-reaction]: /docs/emoji-reaction.png
+
 [img-secret-text]: https://cloud.githubusercontent.com/assets/983526/17971588/6c26dfa0-6aa9-11e6-808c-3e139446e013.png
-[img-token-credential]: https://cloud.githubusercontent.com/assets/983526/17971458/ec296bf6-6aa8-11e6-8d19-06d9f1c9d611.png
+
+[img-token-credential]: /docs/global-config.png
+
+[img-plugin-manager]: /docs/plugin-manager-search.png

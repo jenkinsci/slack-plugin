@@ -1,29 +1,35 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <?jelly escape-by-default='true'?>
 <j:jelly xmlns:j="jelly:core" xmlns:f="/lib/form" xmlns:c="/lib/credentials">
+    <f:entry field="channel" title="Channel">
+        <f:textbox />
+    </f:entry>
     <f:entry field="message" title="Message">
         <f:textbox/>
     </f:entry>
-    <f:entry field="color" title="Color">
-        <f:textbox/>
-    </f:entry>
     <f:advanced>
-        <f:entry field="channel" title="Channel">
+        <f:entry field="color" title="Color">
+            <f:textbox/>
+        </f:entry>
+        <f:entry field="teamDomain" title="Workspace">
             <f:textbox />
         </f:entry>
-        <f:entry field="tokenCredentialId" title="Integration Token Credential ID">
+        <f:entry field="tokenCredentialId" title="Credential">
              <c:select/>
         </f:entry>
-        <f:entry field="token" title="Integration Token">
-            <f:textbox />
-        </f:entry>
-        <f:entry field="botUser" title="Is Bot User?">
+        <f:entry field="botUser" title="Custom slack app bot user">
             <f:checkbox />
         </f:entry>
-        <f:entry field="teamDomain" title="Team Domain">
+        <f:entry field="notifyCommitters" title="${%Notify Committers?}">
+            <f:checkbox />
+        </f:entry>
+        <f:entry field="iconEmoji" title="Icon Emoji">
             <f:textbox />
         </f:entry>
-        <f:entry field="baseUrl" title="Slack compatible app URL (optional)">
+        <f:entry field="username" title="Username">
+            <f:textbox />
+        </f:entry>
+        <f:entry field="baseUrl" title="Override url">
              <f:textbox />
         </f:entry>
         <f:entry field="failOnError">

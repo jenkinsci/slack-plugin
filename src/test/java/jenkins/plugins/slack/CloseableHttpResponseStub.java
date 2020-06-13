@@ -1,22 +1,25 @@
 package jenkins.plugins.slack;
 
-import org.apache.http.*;
-import org.apache.http.client.methods.CloseableHttpResponse;
-import org.apache.http.params.HttpParams;
-
-import java.io.IOException;
 import java.util.Locale;
+import org.apache.http.Header;
+import org.apache.http.HeaderIterator;
+import org.apache.http.HttpEntity;
+import org.apache.http.ProtocolVersion;
+import org.apache.http.StatusLine;
+import org.apache.http.client.methods.CloseableHttpResponse;
 
 public class CloseableHttpResponseStub implements CloseableHttpResponse {
 
+    private HttpEntity entity;
     private int responseCode;
 
     public CloseableHttpResponseStub(int response) {
-        responseCode = response;
+        this.responseCode = response;
+        this.entity = null;
     }
 
     @Override
-    public void close() throws IOException {
+    public void close() {
 
     }
 
@@ -67,12 +70,12 @@ public class CloseableHttpResponseStub implements CloseableHttpResponse {
 
     @Override
     public HttpEntity getEntity() {
-        return null;
+        return entity;
     }
 
     @Override
     public void setEntity(HttpEntity httpEntity) {
-
+        this.entity = httpEntity;
     }
 
     @Override
@@ -161,12 +164,14 @@ public class CloseableHttpResponseStub implements CloseableHttpResponse {
     }
 
     @Override
-    public HttpParams getParams() {
+    @SuppressWarnings("deprecation") //  deprecated abstract method
+    public org.apache.http.params.HttpParams getParams() {
         return null;
     }
 
     @Override
-    public void setParams(HttpParams httpParams) {
+    @SuppressWarnings("deprecation") //  deprecated abstract method
+    public void setParams(org.apache.http.params.HttpParams httpParams) {
 
     }
 }
