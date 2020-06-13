@@ -8,7 +8,7 @@
 
 Provides Jenkins notification integration with Slack or Slack compatible
 applications like [RocketChat][rocketchat] and [Mattermost][mattermost].
-
+ 
 ## Install Instructions for Slack
 
 1.  Get a Slack account: <https://slack.com/>
