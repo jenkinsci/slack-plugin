@@ -11,7 +11,7 @@ applications like [RocketChat][rocketchat] and [Mattermost][mattermost].
 
 ## Install Instructions for Slack
 
-1.  Get a Slack account: <https://slack.com/>
+1.  Get a Slack account: <https://slack.com/> 
 2.  Configure the Jenkins integration: <https://my.slack.com/services/new/jenkins-ci>
 3.  Install this plugin on your Jenkins server:
 
