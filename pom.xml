@@ -16,11 +16,8 @@
     <url>https://github.com/jenkinsci/slack-plugin</url>
 
     <properties>
-        <revision>2.32</revision>
-        <changelist>-SNAPSHOT</changelist>
         <jenkins.version>2.164.3</jenkins.version>
         <hpi.compatibleSinceVersion>2.32</hpi.compatibleSinceVersion>
-
         <revision>2.41</revision>
         <changelist>-SNAPSHOT</changelist>
         <java.level>8</java.level>

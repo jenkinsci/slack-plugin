@@ -47,6 +47,8 @@ public class SlackSendStep extends Step {
     private static final Logger logger = Logger.getLogger(SlackSendStep.class.getName());
 
     private String message;
+    private boolean uploadFiles;
+    private String artifactIncludes;
     private String timestamp;
     private String color;
     private String token;
@@ -107,6 +109,24 @@ public class SlackSendStep extends Step {
     @DataBoundSetter
     public void setBotUser(boolean botUser) {
         this.botUser = botUser;
+    }
+
+    @DataBoundSetter
+    public void setUploadFiles(boolean uploadFiles) {
+        this.uploadFiles = uploadFiles;
+    }
+
+    public boolean getUploadFiles() {
+        return uploadFiles;
+    }
+
+    public String getArtifactIncludes() {
+        return artifactIncludes;
+    }
+
+    @DataBoundSetter
+    public void setArtifactIncludes(String artifactIncludes) {
+        this.artifactIncludes = artifactIncludes;
     }
 
     public String getChannel() {

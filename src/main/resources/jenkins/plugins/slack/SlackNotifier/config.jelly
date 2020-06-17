@@ -84,11 +84,17 @@
             </f:entry>
         </f:optionalBlock>
 
-
         <f:entry field="commitInfoChoice" title="Notification message includes"
                  description="What commit information to include into notification message">
             <f:select/>
         </f:entry>
+        
+        <f:optionalBlock title="Upload build artifacts" name="uploadFiles" inline="true"
+                 checked="${instance.getUploadFiles()}">
+            <f:entry title="Artifact includes" field="artifactIncludes">
+	            <f:textbox/>
+	        </f:entry>
+        </f:optionalBlock>          
 
         <f:entry title="Workspace" field="teamDomain">
             <f:textbox/>

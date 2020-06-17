@@ -1,20 +1,27 @@
 package jenkins.plugins.slack;
 
 import com.google.common.annotations.VisibleForTesting;
+import hudson.FilePath;
 import hudson.ProxyConfiguration;
+import hudson.Util;
 import hudson.model.Run;
+import java.io.File;
 import java.io.IOException;
+import java.io.PrintStream;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
+import java.util.concurrent.ExecutionException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import jenkins.model.Jenkins;
+import jenkins.plugins.slack.pipeline.SlackFileRequest;
+import jenkins.plugins.slack.pipeline.SlackUploadFileRunner;
 import jenkins.plugins.slack.user.SlackUserIdResolver;
 import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
@@ -203,6 +210,43 @@ public class StandardSlackService implements SlackService {
             }
         } catch (IOException e) {
             logger.log(Level.WARNING, "Error closing HttpClient", e);
+        }
+        return result;
+    }
+
+    /**
+     * Make an HTTP POST upload to the Slack API
+     *
+     * @param apiEndpoint - The API endpoint to request, e.g. `files.upload`
+     * @param includes - includes comma-separated Ant-style globs as per {@link Util#createFileSet(File, String, String)} using {@code /} as a path separator;
+     *
+     * @return boolean indicating whether the API request succeeded
+     */
+    public boolean upload(FilePath workspace, String artifactIncludes, PrintStream log) {
+        boolean result = true;
+        if(workspace!=null) {
+            for(String roomId : roomIds) {
+                SlackFileRequest slackFileRequest = new SlackFileRequest(
+                workspace, populatedToken, roomId, null, artifactIncludes);
+                try {
+                    workspace.getChannel().callAsync(new SlackUploadFileRunner(log, Jenkins.get().proxy, slackFileRequest)).get();
+                } catch (IllegalStateException e) {
+                    logger.log(Level.WARNING, "IllegalStateException", e);
+                    result = false;
+                } catch (InterruptedException e) {
+                    logger.log(Level.WARNING, "InterruptedException", e);
+                    result = false;
+                } catch (ExecutionException e) {
+                    logger.log(Level.WARNING, "ExecutionException", e);
+                    result = false;
+                } catch (IOException e) {
+                    logger.log(Level.WARNING, "Error closing HttpClient", e);
+                    result = false;
+                }
+            }
+        } else {
+            logger.log(Level.WARNING, "Could not get workspace for current execution");
+            result = false;
         }
         return result;
     }

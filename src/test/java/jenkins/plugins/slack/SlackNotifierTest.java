@@ -1,6 +1,8 @@
 package jenkins.plugins.slack;
 
+import hudson.FilePath;
 import hudson.util.FormValidation;
+import java.io.PrintStream;
 import java.util.Arrays;
 import java.util.Collection;
 import junit.framework.TestCase;
@@ -98,6 +100,11 @@ public class SlackNotifierTest extends TestCase {
 
         public String getResponseString() {
             return null;
+        }
+
+        @Override
+        public boolean upload(FilePath workspace, String artifactIncludes, PrintStream log) {
+            return this.response;
         }
     }
 }

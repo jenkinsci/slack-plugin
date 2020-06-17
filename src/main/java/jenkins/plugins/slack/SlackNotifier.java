@@ -2,7 +2,6 @@ package jenkins.plugins.slack;
 
 import com.cloudbees.plugins.credentials.common.StandardListBoxModel;
 import com.cloudbees.plugins.credentials.domains.HostnameRequirement;
-import edu.umd.cs.findbugs.annotations.CheckForNull;
 import hudson.DescriptorExtensionList;
 import hudson.EnvVars;
 import hudson.Extension;
@@ -25,6 +24,7 @@ import java.util.function.Function;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Stream;
+import javax.annotation.CheckForNull;
 import javax.annotation.Nonnull;
 import jenkins.model.Jenkins;
 import jenkins.plugins.slack.config.GlobalCredentialMigrator;
@@ -79,6 +79,8 @@ public class SlackNotifier extends Notifier {
     private boolean notifyRepeatedFailure;
     private boolean includeTestSummary;
     private boolean includeFailedTests;
+    private boolean uploadFiles;
+    private String artifactIncludes;
     private MatrixTriggerMode matrixTriggerMode;
     private CommitInfoChoice commitInfoChoice;
     private boolean includeCustomMessage;
@@ -249,6 +251,14 @@ public class SlackNotifier extends Notifier {
         return includeFailedTests;
     }
 
+    public boolean getUploadFiles() {
+        return uploadFiles;
+    }
+
+    public String getArtifactIncludes() {
+        return artifactIncludes;
+    }
+
     public boolean getNotifyRepeatedFailure() {
         return notifyRepeatedFailure;
     }
@@ -356,6 +366,16 @@ public class SlackNotifier extends Notifier {
     }
 
     @DataBoundSetter
+    public void setUploadFiles(boolean uploadFiles) {
+        this.uploadFiles = uploadFiles;
+    }
+
+    @DataBoundSetter
+    public void setArtifactIncludes(String artifactIncludes) {
+        this.artifactIncludes = artifactIncludes;
+    }
+
+    @DataBoundSetter
     public void setNotifyRepeatedFailure(boolean notifyRepeatedFailure) {
         this.notifyRepeatedFailure = notifyRepeatedFailure;
     }
@@ -409,13 +429,13 @@ public class SlackNotifier extends Notifier {
     public SlackNotifier(final String baseUrl, final String teamDomain, final String authToken, final boolean botUser, final String room, final String tokenCredentialId,
                          final String sendAs, final boolean startNotification, final boolean notifyAborted, final boolean notifyFailure,
                          final boolean notifyNotBuilt, final boolean notifySuccess, final boolean notifyUnstable, final boolean notifyRegression, final boolean notifyBackToNormal,
-                         final boolean notifyRepeatedFailure, final boolean includeTestSummary, final boolean includeFailedTests,
+                         final boolean notifyRepeatedFailure, final boolean includeTestSummary, final boolean includeFailedTests, final boolean uploadFiles, final String artifactIncludes,
                          CommitInfoChoice commitInfoChoice, boolean includeCustomMessage, String customMessage) {
         this(
                 baseUrl, teamDomain, authToken, botUser, room, tokenCredentialId, sendAs, startNotification,
                 notifyAborted, notifyFailure, notifyNotBuilt, notifySuccess, notifyUnstable, notifyRegression,
-                notifyBackToNormal, notifyRepeatedFailure, includeTestSummary, includeFailedTests,
-                commitInfoChoice, includeCustomMessage, customMessage, null, null, null, null, null
+                notifyBackToNormal, notifyRepeatedFailure, includeTestSummary, includeFailedTests, uploadFiles,
+                artifactIncludes, commitInfoChoice, includeCustomMessage, customMessage, null, null, null, null, null
         );
     }
 
@@ -423,13 +443,13 @@ public class SlackNotifier extends Notifier {
     public SlackNotifier(final String baseUrl, final String teamDomain, final String authToken, final boolean botUser, final String room, final String tokenCredentialId,
                          final String sendAs, final boolean startNotification, final boolean notifyAborted, final boolean notifyFailure,
                          final boolean notifyNotBuilt, final boolean notifySuccess, final boolean notifyUnstable, final boolean notifyRegression, final boolean notifyBackToNormal,
-                         final boolean notifyRepeatedFailure, final boolean includeTestSummary, final boolean includeFailedTests,
+                         final boolean notifyRepeatedFailure, final boolean includeTestSummary, final boolean includeFailedTests, final boolean uploadFiles, final String artifactIncludes,
                          CommitInfoChoice commitInfoChoice, boolean includeCustomMessage, String customMessage, String customMessageSuccess,
                          String customMessageAborted, String customMessageNotBuilt, String customMessageUnstable, String customMessageFailure) {
         this(
                 baseUrl, teamDomain, authToken, botUser, room, tokenCredentialId, sendAs, startNotification,
                 notifyAborted, notifyFailure, notifyNotBuilt, notifySuccess, notifyUnstable, notifyRegression,
-                notifyBackToNormal, notifyRepeatedFailure, includeTestSummary, includeFailedTests, MatrixTriggerMode.ONLY_CONFIGURATIONS,
+                notifyBackToNormal, notifyRepeatedFailure, includeTestSummary, includeFailedTests, uploadFiles, artifactIncludes, MatrixTriggerMode.ONLY_CONFIGURATIONS,
                 commitInfoChoice, includeCustomMessage, customMessage, customMessageSuccess, customMessageAborted, customMessageNotBuilt,
                 customMessageUnstable, customMessageFailure
         );
@@ -439,7 +459,7 @@ public class SlackNotifier extends Notifier {
     public SlackNotifier(final String baseUrl, final String teamDomain, final String authToken, final boolean botUser, final String room, final String tokenCredentialId,
                          final String sendAs, final boolean startNotification, final boolean notifyAborted, final boolean notifyFailure,
                          final boolean notifyNotBuilt, final boolean notifySuccess, final boolean notifyUnstable, final boolean notifyRegression, final boolean notifyBackToNormal,
-                         final boolean notifyRepeatedFailure, final boolean includeTestSummary, final boolean includeFailedTests, MatrixTriggerMode matrixTriggerMode,
+                         final boolean notifyRepeatedFailure, final boolean includeTestSummary, final boolean includeFailedTests, final boolean uploadFiles, final String artifactIncludes, MatrixTriggerMode matrixTriggerMode,
                          CommitInfoChoice commitInfoChoice, boolean includeCustomMessage, String customMessage, String customMessageSuccess,
                          String customMessageAborted, String customMessageNotBuilt, String customMessageUnstable, String customMessageFailure) {
         this(new SlackNotifierBuilder()
@@ -461,6 +481,8 @@ public class SlackNotifier extends Notifier {
                 .withNotifyRepeatedFailure(notifyRepeatedFailure)
                 .withIncludeTestSummary(includeTestSummary)
                 .withIncludeFailedTests(includeFailedTests)
+                .withUploadFiles(uploadFiles)
+                .withAtrifactIncludes(artifactIncludes)
                 .withMatrixTriggerMode(matrixTriggerMode)
                 .withCommitInfoChoice(commitInfoChoice)
                 .withIncludeCustomMessage(includeCustomMessage)
@@ -498,6 +520,8 @@ public class SlackNotifier extends Notifier {
         this.notifyRepeatedFailure = slackNotifierBuilder.notifyRepeatedFailure;
         this.includeTestSummary = slackNotifierBuilder.includeTestSummary;
         this.includeFailedTests = slackNotifierBuilder.includeFailedTests;
+        this.uploadFiles = slackNotifierBuilder.uploadFiles;
+        this.artifactIncludes = slackNotifierBuilder.artifactIncludes;
         this.matrixTriggerMode = slackNotifierBuilder.matrixTriggerMode;
         this.commitInfoChoice = slackNotifierBuilder.commitInfoChoice;
         this.includeCustomMessage = slackNotifierBuilder.includeCustomMessage;
@@ -527,7 +551,6 @@ public class SlackNotifier extends Notifier {
                 customMessageUnstable,
                 customMessageFailure
         ).anyMatch(StringUtils::isNotEmpty);
-
     }
 
     public BuildStepMonitor getRequiredMonitorService() {

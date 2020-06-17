@@ -46,4 +46,9 @@ public class SlackNotificationsLogger implements BuildAwareLogger {
         system.info(() -> String.join(" ", key, formattedMessage));
         user.println(String.join(" ", PLUGIN_KEY, formattedMessage));
     }
+
+    @Override
+    public PrintStream getUserLogger() {
+        return this.user;
+    }
 }
