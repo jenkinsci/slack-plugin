@@ -27,7 +27,7 @@ If you want to configure a notification to be sent to Slack for **all jobs**, yo
 
 ### Pipeline job
 
-    slackSend color: 'good', message: 'Message from Jenkins Pipeline'
+    slackSend color: "good", message: "Message from Jenkins Pipeline"
 
 Additionally you can pass attachments or blocks (requires [bot user](#bot-user-mode)) in order to send complex
 messages, for example:
@@ -43,7 +43,7 @@ def attachments = [
   ]
 ]
 
-slackSend(channel: '#general', attachments: attachments)
+slackSend(channel: "#general", attachments: attachments)
 ```
 
 Blocks (this feature requires a '[bot user](#bot-user-mode)' and a custom slack app):
@@ -74,7 +74,7 @@ blocks = [
 	]
 ]
 
-slackSend(channel: '#general', blocks: blocks)
+slackSend(channel: "#general", blocks: blocks)
 ```
 
 For more information about slack messages see [Slack Messages Api](https://api.slack.com/docs/messages), [Slack attachments Api](https://api.slack.com/docs/message-attachments) and [Block kit](https://api.slack.com/block-kit)
@@ -88,7 +88,7 @@ You can upload files to slack with this plugin:
 ```groovy
 node {
   sh "echo hey > blah.txt"
-  slackUploadFile filePath: '*.txt', initialComment:  'HEY HEY'
+  slackUploadFile filePath: "*.txt", initialComment:  "HEY HEY"
 }
 ```
 
@@ -177,7 +177,7 @@ Example:
 
 ```groovy
 def userId = slackUserIdFromEmail('spengler@ghostbusters.example.com')
-slackSend(color: 'good', message: "<@$userId> Message from Jenkins Pipeline")
+slackSend(color: "good", message: "<@$userId> Message from Jenkins Pipeline")
 ```
 
 A list of user ids can be resolved against the set of changeset commit authors with the `slackUserIdsFromCommitters` step.
@@ -187,7 +187,7 @@ Example:
 ```groovy
 def userIds = slackUserIdsFromCommitters()
 def userIdsString = userIds.collect { "<@$it>" }.join(' ')
-slackSend(color: 'good', message: "$userIdsString Message from Jenkins Pipeline")
+slackSend(color: "good", message: "$userIdsString Message from Jenkins Pipeline")
 ```
 
 This feature requires [botUser](#bot-user-mode) mode and the `users:read` and `users:read.email` API scopes.
