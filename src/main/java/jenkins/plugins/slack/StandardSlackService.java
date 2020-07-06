@@ -1,6 +1,7 @@
 package jenkins.plugins.slack;
 
 import com.google.common.annotations.VisibleForTesting;
+import edu.umd.cs.findbugs.annotations.CheckForNull;
 import hudson.ProxyConfiguration;
 import hudson.model.Run;
 import java.io.IOException;
@@ -91,7 +92,7 @@ public class StandardSlackService implements SlackService {
         this.populatedToken = populatedToken;
     }
 
-    public StandardSlackService(StandardSlackServiceBuilder standardSlackServiceBuilder) {
+    public StandardSlackService(@CheckForNull StandardSlackServiceBuilder standardSlackServiceBuilder) {
         this.run = standardSlackServiceBuilder.run;
         this.baseUrl = standardSlackServiceBuilder.baseUrl;
         if (this.baseUrl != null && !this.baseUrl.isEmpty() && !this.baseUrl.endsWith("/")) {
