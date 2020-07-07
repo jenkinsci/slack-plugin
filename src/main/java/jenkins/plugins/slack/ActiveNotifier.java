@@ -128,7 +128,7 @@ public class ActiveNotifier implements FineGrainedNotifier {
                     message = message + "\n" + getCommitList(r);
                 }
                 slackFactory.apply(r).publish(message, getBuildColor(r));
-                if(notifier.getUploadFiles()) {
+                if (notifier.getUploadFiles()) {
                     slackFactory.apply(r).upload(r.getWorkspace(), notifier.getArtifactIncludes(), log.getUserLogger());
                 }
             }
