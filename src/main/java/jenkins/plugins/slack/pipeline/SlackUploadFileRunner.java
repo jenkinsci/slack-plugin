@@ -26,6 +26,7 @@ import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.util.EntityUtils;
 import org.json.JSONObject;
 
+@Restricted(NoExternalUse.class)
 public class SlackUploadFileRunner extends MasterToSlaveCallable<Boolean, Throwable> implements Serializable {
 
     private static final long serialVersionUID = 1L;
