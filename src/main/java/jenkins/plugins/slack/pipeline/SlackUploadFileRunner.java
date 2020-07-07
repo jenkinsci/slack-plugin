@@ -99,7 +99,7 @@ public class SlackUploadFileRunner extends MasterToSlaveCallable<Boolean, Throwa
                 theChannels = splitThread[0];
                 threadTs = splitThread[1];
             }
-            for(File file:files) {
+            for (File file:files) {
                  MultipartEntityBuilder multipartEntityBuilder = MultipartEntityBuilder.create()
                         .setMode(HttpMultipartMode.BROWSER_COMPATIBLE)
                         .addTextBody("channels", theChannels, ContentType.DEFAULT_TEXT)
