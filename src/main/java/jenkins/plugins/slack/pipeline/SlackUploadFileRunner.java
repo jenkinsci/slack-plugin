@@ -118,7 +118,7 @@ public class SlackUploadFileRunner extends MasterToSlaveCallable<Boolean, Throwa
                 HttpUriRequest request = RequestBuilder
                         .post(API_URL)
                         .setEntity(multipartEntityBuilder.build())
-                        .addHeader("Authorization", "Bearer "+token)
+                        .addHeader("Authorization", "Bearer " + token)
                         .build();
                 ResponseHandler<JSONObject> responseHandler = response -> {
                     int status = response.getStatusLine().getStatusCode();
