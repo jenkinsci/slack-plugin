@@ -230,11 +230,8 @@ public class StandardSlackService implements SlackService {
                 workspace, populatedToken, roomId, null, artifactIncludes);
                 try {
                     workspace.getChannel().callAsync(new SlackUploadFileRunner(log, Jenkins.get().proxy, slackFileRequest)).get();
-                } catch (IllegalStateException e) {
-                    logger.log(Level.WARNING, "IllegalStateException", e);
-                    result = false;
-                } catch (InterruptedException e) {
-                    logger.log(Level.WARNING, "InterruptedException", e);
+                } catch (IllegalStateException | InterruptedException e) {
+                    logger.log(Level.WARNING, "Exception", e);
                     result = false;
                 } catch (ExecutionException e) {
                     logger.log(Level.WARNING, "ExecutionException", e);
