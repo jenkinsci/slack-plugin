@@ -123,6 +123,15 @@ slackSend(
 )
 ```
 
+If you wish to upload a file to a thread, you can do so by specifying the channel, and the timestamp 
+of the thread you want to add the file to, separated by a colon. For example:
+
+```groovy
+def slackResponse = slackSend(channel: "cool-threads", message: "Here is the primary message")
+sh "echo hey > blah.txt"
+slackUploadFile(channel: "cool-threads:" + slackResponse.ts, filePath: "*.txt", initialComment:  "A file, inside a thread.")
+```
+
 #### Update Messages
 
 You can update the content of a previously sent message using the pipeline step.
