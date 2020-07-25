@@ -27,6 +27,8 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
         <hamcrest.version>2.2</hamcrest.version>
+        <checkstyle.failsOnError>true</checkstyle.failsOnError>
+        <checkstyle.failOnViolation>true</checkstyle.failOnViolation>
     </properties>
 
     <licenses>
@@ -252,7 +254,8 @@
                             <includeTestSourceDirectory>true</includeTestSourceDirectory>
                             <encoding>UTF-8</encoding>
                             <consoleOutput>true</consoleOutput>
-                            <failsOnError>true</failsOnError>
+                            <failsOnError>${checkstyle.failsOnError}</failsOnError>
+                            <failOnViolation>${checkstyle.failOnViolation}</failOnViolation>
                         </configuration>
                         <goals>
                             <goal>check</goal>
