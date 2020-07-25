@@ -23,6 +23,7 @@ import hudson.util.ListBoxModel;
 import java.util.NoSuchElementException;
 import java.util.function.Function;
 import java.util.logging.Level;
+import java.util.List;
 import java.util.logging.Logger;
 import java.util.stream.Stream;
 import javax.annotation.Nonnull;
