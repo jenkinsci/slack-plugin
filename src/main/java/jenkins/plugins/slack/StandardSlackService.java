@@ -8,10 +8,12 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Set;
 import java.util.Objects;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.regex.Matcher;
+import edu.umd.cs.findbugs.annotations.CheckForNull;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import jenkins.model.Jenkins;
@@ -91,7 +93,7 @@ public class StandardSlackService implements SlackService {
         this.populatedToken = populatedToken;
     }
 
-    public StandardSlackService(StandardSlackServiceBuilder standardSlackServiceBuilder) {
+    public StandardSlackService(@CheckForNull StandardSlackServiceBuilder standardSlackServiceBuilder) {
         this.run = standardSlackServiceBuilder.run;
         this.baseUrl = standardSlackServiceBuilder.baseUrl;
         if (this.baseUrl != null && !this.baseUrl.isEmpty() && !this.baseUrl.endsWith("/")) {
