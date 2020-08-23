@@ -2,6 +2,8 @@ package jenkins.plugins.slack;
 
 import com.cloudbees.plugins.credentials.common.StandardListBoxModel;
 import com.cloudbees.plugins.credentials.domains.HostnameRequirement;
+import edu.umd.cs.findbugs.annotations.CheckForNull;
+import edu.umd.cs.findbugs.annotations.NonNull;
 import hudson.DescriptorExtensionList;
 import hudson.EnvVars;
 import hudson.Extension;
@@ -24,8 +26,6 @@ import java.util.function.Function;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Stream;
-import javax.annotation.CheckForNull;
-import javax.annotation.Nonnull;
 import jenkins.model.Jenkins;
 import jenkins.plugins.slack.config.GlobalCredentialMigrator;
 import jenkins.plugins.slack.logging.BuildAwareLogger;
@@ -429,13 +429,12 @@ public class SlackNotifier extends Notifier {
     public SlackNotifier(final String baseUrl, final String teamDomain, final String authToken, final boolean botUser, final String room, final String tokenCredentialId,
                          final String sendAs, final boolean startNotification, final boolean notifyAborted, final boolean notifyFailure,
                          final boolean notifyNotBuilt, final boolean notifySuccess, final boolean notifyUnstable, final boolean notifyRegression, final boolean notifyBackToNormal,
-                         final boolean notifyRepeatedFailure, final boolean includeTestSummary, final boolean includeFailedTests, final boolean uploadFiles, final String artifactIncludes,
+                         final boolean notifyRepeatedFailure, final boolean includeTestSummary, final boolean includeFailedTests,
                          CommitInfoChoice commitInfoChoice, boolean includeCustomMessage, String customMessage) {
         this(
                 baseUrl, teamDomain, authToken, botUser, room, tokenCredentialId, sendAs, startNotification,
                 notifyAborted, notifyFailure, notifyNotBuilt, notifySuccess, notifyUnstable, notifyRegression,
-                notifyBackToNormal, notifyRepeatedFailure, includeTestSummary, includeFailedTests, uploadFiles,
-                artifactIncludes, commitInfoChoice, includeCustomMessage, customMessage, null, null, null, null, null
+                notifyBackToNormal, notifyRepeatedFailure, includeTestSummary, includeFailedTests, commitInfoChoice, includeCustomMessage, customMessage, null, null, null, null, null
         );
     }
 
@@ -443,13 +442,13 @@ public class SlackNotifier extends Notifier {
     public SlackNotifier(final String baseUrl, final String teamDomain, final String authToken, final boolean botUser, final String room, final String tokenCredentialId,
                          final String sendAs, final boolean startNotification, final boolean notifyAborted, final boolean notifyFailure,
                          final boolean notifyNotBuilt, final boolean notifySuccess, final boolean notifyUnstable, final boolean notifyRegression, final boolean notifyBackToNormal,
-                         final boolean notifyRepeatedFailure, final boolean includeTestSummary, final boolean includeFailedTests, final boolean uploadFiles, final String artifactIncludes,
+                         final boolean notifyRepeatedFailure, final boolean includeTestSummary, final boolean includeFailedTests,
                          CommitInfoChoice commitInfoChoice, boolean includeCustomMessage, String customMessage, String customMessageSuccess,
                          String customMessageAborted, String customMessageNotBuilt, String customMessageUnstable, String customMessageFailure) {
         this(
                 baseUrl, teamDomain, authToken, botUser, room, tokenCredentialId, sendAs, startNotification,
                 notifyAborted, notifyFailure, notifyNotBuilt, notifySuccess, notifyUnstable, notifyRegression,
-                notifyBackToNormal, notifyRepeatedFailure, includeTestSummary, includeFailedTests, uploadFiles, artifactIncludes, MatrixTriggerMode.ONLY_CONFIGURATIONS,
+                notifyBackToNormal, notifyRepeatedFailure, includeTestSummary, includeFailedTests, MatrixTriggerMode.ONLY_CONFIGURATIONS,
                 commitInfoChoice, includeCustomMessage, customMessage, customMessageSuccess, customMessageAborted, customMessageNotBuilt,
                 customMessageUnstable, customMessageFailure
         );
@@ -459,7 +458,7 @@ public class SlackNotifier extends Notifier {
     public SlackNotifier(final String baseUrl, final String teamDomain, final String authToken, final boolean botUser, final String room, final String tokenCredentialId,
                          final String sendAs, final boolean startNotification, final boolean notifyAborted, final boolean notifyFailure,
                          final boolean notifyNotBuilt, final boolean notifySuccess, final boolean notifyUnstable, final boolean notifyRegression, final boolean notifyBackToNormal,
-                         final boolean notifyRepeatedFailure, final boolean includeTestSummary, final boolean includeFailedTests, final boolean uploadFiles, final String artifactIncludes, MatrixTriggerMode matrixTriggerMode,
+                         final boolean notifyRepeatedFailure, final boolean includeTestSummary, final boolean includeFailedTests, MatrixTriggerMode matrixTriggerMode,
                          CommitInfoChoice commitInfoChoice, boolean includeCustomMessage, String customMessage, String customMessageSuccess,
                          String customMessageAborted, String customMessageNotBuilt, String customMessageUnstable, String customMessageFailure) {
         this(new SlackNotifierBuilder()
@@ -481,8 +480,6 @@ public class SlackNotifier extends Notifier {
                 .withNotifyRepeatedFailure(notifyRepeatedFailure)
                 .withIncludeTestSummary(includeTestSummary)
                 .withIncludeFailedTests(includeFailedTests)
-                .withUploadFiles(uploadFiles)
-                .withAtrifactIncludes(artifactIncludes)
                 .withMatrixTriggerMode(matrixTriggerMode)
                 .withCommitInfoChoice(commitInfoChoice)
                 .withIncludeCustomMessage(includeCustomMessage)
@@ -865,7 +862,7 @@ public class SlackNotifier extends Notifier {
             return project.getClass().getName().equals(MATRIX_PROJECT_CLASS_NAME);
         }
 
-        @Nonnull
+        @NonNull
         @Override
         public String getDisplayName() {
             return PLUGIN_DISPLAY_NAME;
