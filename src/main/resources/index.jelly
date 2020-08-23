@@ -4,5 +4,5 @@
   Since we don't really have anything dynamic here, let's just use static HTML. 
 -->
 <div>
-  This plugin is a Slack notifier that can publish build status, messages and files to Slack channels.
+  Integrates Jenkins with Slack, allows publishing build statuses, messages and files to Slack channels.
 </div>
