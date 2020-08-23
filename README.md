@@ -204,6 +204,7 @@ This feature requires [botUser](#bot-user-mode) mode and the `users:read` and `u
 #### Colors
 
 _Warning: This functionality is not supported if you are using the `blocks` layout mode_
+
 Any hex triplet (i.e. `'#AA1100'`) can be used for the color of the message. There are also three builtin color options:
 
 | Name      | Color  |
