@@ -121,7 +121,7 @@ public abstract class SlackUserIdResolver extends AbstractDescribableImpl<SlackU
 
     /**
      * All registered {@link SlackUserIdResolver}s.
-     * @return
+     * @return all SlackUserIdResolver as an ExtensionList
      */
     public static ExtensionList<SlackUserIdResolver> all() {
         return Jenkins.get().getExtensionList(SlackUserIdResolver.class);

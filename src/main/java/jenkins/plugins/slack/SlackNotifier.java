@@ -684,7 +684,7 @@ public class SlackNotifier extends Notifier {
          * Deprecated for removal in 3.0
          *
          * Use tokenCredentialId instead
-         * @param String token
+         * @param token is a token String
          */
         @Deprecated
         @DataBoundSetter

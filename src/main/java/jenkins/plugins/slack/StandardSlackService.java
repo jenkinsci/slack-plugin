@@ -101,12 +101,12 @@ public class StandardSlackService implements SlackService {
     }
     /**
      * @deprecated use {@link #StandardSlackService(String, String, boolean, String, boolean, String)} instead}
-     * @param baseUrl
-     * @param teamDomain
-     * @param botUser
-     * @param roomId
-     * @param replyBroadcast
-     * @param populatedToken
+     * @param baseUrl is a base URL
+     * @param teamDomain is a teamDomain
+     * @param botUser is a bot User
+     * @param roomId is a room Id
+     * @param replyBroadcast is replayBroadcast
+     * @param populatedToken is populated Token
      */
     @Deprecated
     public StandardSlackService(String baseUrl, String teamDomain, boolean botUser, String roomId, boolean replyBroadcast, String populatedToken) {
@@ -126,7 +126,7 @@ public class StandardSlackService implements SlackService {
 
     /**
      * Default constructor
-     * @param standardSlackServiceBuilder
+     * @param standardSlackServiceBuilder is a StandardSlackServiceBuilder
      */
     public StandardSlackService(StandardSlackServiceBuilder standardSlackServiceBuilder) {
         this.run = standardSlackServiceBuilder.run;
