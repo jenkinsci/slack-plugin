@@ -55,6 +55,11 @@ public class StandardSlackService implements SlackService {
 
     /**
      * @deprecated use {@link #StandardSlackService(String, String, boolean, String, boolean, String)} instead}
+     * @param baseUrl
+     * @param teamDomain
+     * @param authTokenCredentialId
+     * @param botUser
+     * @param roomId
      */
     @Deprecated
     public StandardSlackService(String baseUrl, String teamDomain, String authTokenCredentialId, boolean botUser, String roomId) {
@@ -63,6 +68,12 @@ public class StandardSlackService implements SlackService {
 
     /**
      * @deprecated use {@link #StandardSlackService(String, String, boolean, String, boolean, String)} instead}
+     * @param baseUrl
+     * @param teamDomain
+     * @param token
+     * @param authTokenCredentialId
+     * @param botUser
+     * @param roomId
      */
     @Deprecated
     public StandardSlackService(String baseUrl, String teamDomain, String token, String authTokenCredentialId, boolean botUser, String roomId) {
@@ -71,6 +82,13 @@ public class StandardSlackService implements SlackService {
 
     /**
      * @deprecated use {@link #StandardSlackService(String, String, boolean, String, boolean, String)} instead}
+     * @param baseUrl
+     * @param teamDomain
+     * @param token
+     * @param authTokenCredentialId
+     * @param botUser
+     * @param roomId
+     * @param replyBroadcast
      */
     @Deprecated
     public StandardSlackService(String baseUrl, String teamDomain, String token, String authTokenCredentialId, boolean botUser, String roomId, boolean replyBroadcast) {
@@ -81,7 +99,15 @@ public class StandardSlackService implements SlackService {
             throw new IllegalArgumentException("No slack token found, setup a secret text credential and configure it to be used");
         }
     }
-
+    /**
+     * @deprecated use {@link #StandardSlackService(String, String, boolean, String, boolean, String)} instead}
+     * @param baseUrl
+     * @param teamDomain
+     * @param botUser
+     * @param roomId
+     * @param replyBroadcast
+     * @param populatedToken
+     */
     @Deprecated
     public StandardSlackService(String baseUrl, String teamDomain, boolean botUser, String roomId, boolean replyBroadcast, String populatedToken) {
         this(builder()
@@ -98,6 +124,10 @@ public class StandardSlackService implements SlackService {
         this.populatedToken = populatedToken;
     }
 
+    /**
+     * Default constructor
+     * @param standardSlackServiceBuilder
+     */
     public StandardSlackService(StandardSlackServiceBuilder standardSlackServiceBuilder) {
         this.run = standardSlackServiceBuilder.run;
         this.baseUrl = standardSlackServiceBuilder.baseUrl;
@@ -217,9 +247,9 @@ public class StandardSlackService implements SlackService {
     /**
      * Make an HTTP POST upload to the Slack API
      *
-     * @param apiEndpoint - The API endpoint to request, e.g. `files.upload`
+     * @param workspace - job workspace
      * @param includes - includes comma-separated Ant-style globs as per {@link Util#createFileSet(File, String, String)} using {@code /} as a path separator;
-     *
+     * @param log - print log stream
      * @return boolean indicating whether the API request succeeded
      */
     public boolean upload(FilePath workspace, String artifactIncludes, PrintStream log) {
