@@ -55,11 +55,11 @@ public class StandardSlackService implements SlackService {
 
     /**
      * @deprecated use {@link #StandardSlackService(String, String, boolean, String, boolean, String)} instead}
-     * @param baseUrl
-     * @param teamDomain
+     * @param baseUrl is a base URL
+     * @param teamDomain is a teamDomain
      * @param authTokenCredentialId
-     * @param botUser
-     * @param roomId
+     * @param botUser is a bot User
+     * @param roomId is a room Id
      */
     @Deprecated
     public StandardSlackService(String baseUrl, String teamDomain, String authTokenCredentialId, boolean botUser, String roomId) {
@@ -68,12 +68,12 @@ public class StandardSlackService implements SlackService {
 
     /**
      * @deprecated use {@link #StandardSlackService(String, String, boolean, String, boolean, String)} instead}
-     * @param baseUrl
-     * @param teamDomain
-     * @param token
+     * @param baseUrl is a base URL
+     * @param teamDomain is a teamDomain
+     * @param token is a token
      * @param authTokenCredentialId
-     * @param botUser
-     * @param roomId
+     * @param botUser is a bot User
+     * @param roomId is a room Id
      */
     @Deprecated
     public StandardSlackService(String baseUrl, String teamDomain, String token, String authTokenCredentialId, boolean botUser, String roomId) {
@@ -82,13 +82,13 @@ public class StandardSlackService implements SlackService {
 
     /**
      * @deprecated use {@link #StandardSlackService(String, String, boolean, String, boolean, String)} instead}
-     * @param baseUrl
-     * @param teamDomain
-     * @param token
+     * @param baseUrl is a base URL
+     * @param teamDomain is a teamDomain
+     * @param token is a token
      * @param authTokenCredentialId
-     * @param botUser
-     * @param roomId
-     * @param replyBroadcast
+     * @param botUser is a bot User
+     * @param roomId is a room Id
+     * @param replyBroadcast is a replyBroadcast
      */
     @Deprecated
     public StandardSlackService(String baseUrl, String teamDomain, String token, String authTokenCredentialId, boolean botUser, String roomId, boolean replyBroadcast) {
@@ -248,7 +248,7 @@ public class StandardSlackService implements SlackService {
      * Make an HTTP POST upload to the Slack API
      *
      * @param workspace - job workspace
-     * @param includes - includes comma-separated Ant-style globs as per {@link Util#createFileSet(File, String, String)} using {@code /} as a path separator;
+     * @param artifactIncludes - includes comma-separated Ant-style globs as per {@link Util#createFileSet(File, String, String)} using {@code /} as a path separator;
      * @param log - print log stream
      * @return boolean indicating whether the API request succeeded
      */
