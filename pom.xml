@@ -16,10 +16,10 @@
     <url>https://github.com/jenkinsci/slack-plugin</url>
 
     <properties>
-        <jenkins.version>2.222.4</jenkins.version>
-        <hpi.compatibleSinceVersion>2.32</hpi.compatibleSinceVersion>
         <revision>2.42</revision>
         <changelist>-SNAPSHOT</changelist>
+        <jenkins.version>2.222.4</jenkins.version>
+        <hpi.compatibleSinceVersion>2.32</hpi.compatibleSinceVersion>
         <java.level>8</java.level>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
