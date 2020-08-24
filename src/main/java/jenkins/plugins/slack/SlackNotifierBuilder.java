@@ -25,6 +25,8 @@ public class SlackNotifierBuilder {
     boolean notifyRepeatedFailure;
     boolean includeTestSummary;
     boolean includeFailedTests;
+    boolean uploadFiles;
+    String artifactIncludes;
     MatrixTriggerMode matrixTriggerMode;
     CommitInfoChoice commitInfoChoice;
     boolean includeCustomMessage;
@@ -141,6 +143,16 @@ public class SlackNotifierBuilder {
 
     public SlackNotifierBuilder withIncludeFailedTests(boolean includeFailedTests) {
         this.includeFailedTests = includeFailedTests;
+        return this;
+    }
+
+    public SlackNotifierBuilder withUploadFiles(boolean uploadFiles) {
+        this.uploadFiles = uploadFiles;
+        return this;
+    }
+
+    public SlackNotifierBuilder withAtrifactIncludes(String artifactIncludes) {
+        this.artifactIncludes = artifactIncludes;
         return this;
     }
 

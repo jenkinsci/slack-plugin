@@ -1,20 +1,27 @@
 package jenkins.plugins.slack;
 
 import com.google.common.annotations.VisibleForTesting;
+import hudson.FilePath;
 import hudson.ProxyConfiguration;
+import hudson.Util;
 import hudson.model.Run;
+import java.io.File;
 import java.io.IOException;
+import java.io.PrintStream;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
+import java.util.concurrent.ExecutionException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import jenkins.model.Jenkins;
+import jenkins.plugins.slack.pipeline.SlackFileRequest;
+import jenkins.plugins.slack.pipeline.SlackUploadFileRunner;
 import jenkins.plugins.slack.user.SlackUserIdResolver;
 import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
@@ -48,6 +55,11 @@ public class StandardSlackService implements SlackService {
 
     /**
      * @deprecated use {@link #StandardSlackService(String, String, boolean, String, boolean, String)} instead}
+     * @param baseUrl is a base URL
+     * @param teamDomain is a teamDomain
+     * @param authTokenCredentialId
+     * @param botUser is a bot User
+     * @param roomId is a room Id
      */
     @Deprecated
     public StandardSlackService(String baseUrl, String teamDomain, String authTokenCredentialId, boolean botUser, String roomId) {
@@ -56,6 +68,12 @@ public class StandardSlackService implements SlackService {
 
     /**
      * @deprecated use {@link #StandardSlackService(String, String, boolean, String, boolean, String)} instead}
+     * @param baseUrl is a base URL
+     * @param teamDomain is a teamDomain
+     * @param token is a token
+     * @param authTokenCredentialId
+     * @param botUser is a bot User
+     * @param roomId is a room Id
      */
     @Deprecated
     public StandardSlackService(String baseUrl, String teamDomain, String token, String authTokenCredentialId, boolean botUser, String roomId) {
@@ -64,6 +82,13 @@ public class StandardSlackService implements SlackService {
 
     /**
      * @deprecated use {@link #StandardSlackService(String, String, boolean, String, boolean, String)} instead}
+     * @param baseUrl is a base URL
+     * @param teamDomain is a teamDomain
+     * @param token is a token
+     * @param authTokenCredentialId
+     * @param botUser is a bot User
+     * @param roomId is a room Id
+     * @param replyBroadcast is a replyBroadcast
      */
     @Deprecated
     public StandardSlackService(String baseUrl, String teamDomain, String token, String authTokenCredentialId, boolean botUser, String roomId, boolean replyBroadcast) {
@@ -74,7 +99,15 @@ public class StandardSlackService implements SlackService {
             throw new IllegalArgumentException("No slack token found, setup a secret text credential and configure it to be used");
         }
     }
-
+    /**
+     * @deprecated use {@link #StandardSlackService(String, String, boolean, String, boolean, String)} instead}
+     * @param baseUrl is a base URL
+     * @param teamDomain is a teamDomain
+     * @param botUser is a bot User
+     * @param roomId is a room Id
+     * @param replyBroadcast is replayBroadcast
+     * @param populatedToken is populated Token
+     */
     @Deprecated
     public StandardSlackService(String baseUrl, String teamDomain, boolean botUser, String roomId, boolean replyBroadcast, String populatedToken) {
         this(builder()
@@ -91,6 +124,10 @@ public class StandardSlackService implements SlackService {
         this.populatedToken = populatedToken;
     }
 
+    /**
+     * Default constructor
+     * @param standardSlackServiceBuilder is a StandardSlackServiceBuilder
+     */
     public StandardSlackService(StandardSlackServiceBuilder standardSlackServiceBuilder) {
         this.run = standardSlackServiceBuilder.run;
         this.baseUrl = standardSlackServiceBuilder.baseUrl;
@@ -203,6 +240,40 @@ public class StandardSlackService implements SlackService {
             }
         } catch (IOException e) {
             logger.log(Level.WARNING, "Error closing HttpClient", e);
+        }
+        return result;
+    }
+
+    /**
+     * Make an HTTP POST upload to the Slack API
+     *
+     * @param workspace - job workspace
+     * @param artifactIncludes - includes comma-separated Ant-style globs as per {@link Util#createFileSet(File, String, String)} using {@code /} as a path separator;
+     * @param log - print log stream
+     * @return boolean indicating whether the API request succeeded
+     */
+    public boolean upload(FilePath workspace, String artifactIncludes, PrintStream log) {
+        boolean result = true;
+        if(workspace!=null) {
+            for(String roomId : roomIds) {
+                SlackFileRequest slackFileRequest = new SlackFileRequest(
+                workspace, populatedToken, roomId, null, artifactIncludes);
+                try {
+                    workspace.getChannel().callAsync(new SlackUploadFileRunner(log, Jenkins.get().proxy, slackFileRequest)).get();
+                } catch (IllegalStateException | InterruptedException e) {
+                    logger.log(Level.WARNING, "Exception", e);
+                    result = false;
+                } catch (ExecutionException e) {
+                    logger.log(Level.WARNING, "ExecutionException", e);
+                    result = false;
+                } catch (IOException e) {
+                    logger.log(Level.WARNING, "Error closing HttpClient", e);
+                    result = false;
+                }
+            }
+        } else {
+            logger.log(Level.WARNING, "Could not get workspace for current execution");
+            result = false;
         }
         return result;
     }

@@ -64,7 +64,7 @@ public class CredentialsObtainer {
      * Project works for freestyle jobs, the parent of the Run works for pipelines.
      * In case the proper item cannot be found, null is returned, since when null is provided to CredentialsProvider,
      * it will internally use Jenkins.getInstance() which effectively only allows global credentials.
-     *
+     * @param context is a StepContext
      * @return the item to use for CredentialsProvider credential lookup
      */
     @Restricted(NoExternalUse.class)
