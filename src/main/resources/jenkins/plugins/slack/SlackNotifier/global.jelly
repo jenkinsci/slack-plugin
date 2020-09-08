@@ -33,7 +33,7 @@
         </f:advanced>
         <f:validateButton
                 title="${%Test Connection}" progress="${%Testing...}"
-                method="testConnection"
+                method="testConnectionGlobal"
                 with="baseUrl,teamDomain,token,tokenCredentialId,botUser,sendAsText,iconEmoji,username,room"/>
     </f:section>
 </j:jelly>

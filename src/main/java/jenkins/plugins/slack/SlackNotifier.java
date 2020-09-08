@@ -871,6 +871,56 @@ public class SlackNotifier extends Notifier {
         }
 
         @POST
+        public FormValidation doTestConnectionGlobal(
+                @QueryParameter("baseUrl") final String baseUrl,
+                @QueryParameter("teamDomain") final String teamDomain,
+                @QueryParameter("tokenCredentialId") final String tokenCredentialId,
+                @QueryParameter("botUser") final boolean botUser,
+                @QueryParameter("room") final String room,
+                @QueryParameter("sendAsText") final boolean sendAsText,
+                @QueryParameter("iconEmoji") final String iconEmoji,
+                @QueryParameter("username") final String username
+        ) {
+            Jenkins.get().checkPermission(Jenkins.ADMINISTER);
+
+            try {
+                String targetUrl = baseUrl;
+                if(targetUrl != null && !targetUrl.isEmpty() && !targetUrl.endsWith("/")) {
+                    targetUrl += "/";
+                }
+
+                SlackService testSlackService = getSlackService(StandardSlackService.builder()
+                                .withBaseUrl(targetUrl)
+                                .withTeamDomain(teamDomain)
+                                .withBotUser(botUser)
+                                .withRoomId(room)
+                                .withIconEmoji(iconEmoji)
+                                .withUsername(username),
+                        tokenCredentialId, null
+                );
+
+                return validateConnection(sendAsText, testSlackService);
+            } catch (Exception e) {
+                logger.log(Level.WARNING, "Slack config form validation error", e);
+                return FormValidation.error("Client error : " + e.getMessage());
+            }
+        }
+
+        private FormValidation validateConnection(boolean sendAsText, SlackService testSlackService) {
+            String message = "Slack/Jenkins plugin: you're all set on " + DisplayURLProvider.get().getRoot();
+            boolean success;
+            if (sendAsText) {
+                success = testSlackService.publish(message, new JSONArray(), "");
+            } else {
+                success = testSlackService.publish(message, "good");
+            }
+            return success ? FormValidation.ok("Success") : FormValidation.error(
+                    getErrorMessage(testSlackService.getResponseString())
+            );
+        }
+
+
+        @POST
         public FormValidation doTestConnection(@QueryParameter("baseUrl") final String baseUrl,
                                                @QueryParameter("teamDomain") final String teamDomain,
                                                @QueryParameter("tokenCredentialId") final String tokenCredentialId,
@@ -914,16 +964,7 @@ public class SlackNotifier extends Notifier {
                         targetTokenCredentialId, project
                 );
 
-                String message = "Slack/Jenkins plugin: you're all set on " + DisplayURLProvider.get().getRoot();
-                boolean success;
-                if (targetSendAsText) {
-                    success = testSlackService.publish(message, new JSONArray(), "");
-                } else {
-                    success = testSlackService.publish(message, "good");
-                }
-                return success ? FormValidation.ok("Success") : FormValidation.error(
-                        getErrorMessage(testSlackService.getResponseString())
-                );
+                return validateConnection(targetSendAsText, testSlackService);
             } catch (Exception e) {
                 logger.log(Level.WARNING, "Slack config form validation error", e);
                 return FormValidation.error("Client error : " + e.getMessage());
