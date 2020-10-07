@@ -624,7 +624,7 @@ public class SlackNotifier extends Notifier {
     }
 
     private static BuildAwareLogger createLogger(BuildListener listener) {
-        return new SlackNotificationsLogger(logger, listener.getLogger());
+        return new SlackNotificationsLogger(logger, listener);
     }
 
     public boolean isMatrixRun(AbstractBuild<?, ?> build) {

@@ -5,9 +5,9 @@ import hudson.FilePath;
 import hudson.ProxyConfiguration;
 import hudson.Util;
 import hudson.model.Run;
+import hudson.model.TaskListener;
 import java.io.File;
 import java.io.IOException;
-import java.io.PrintStream;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -252,7 +252,7 @@ public class StandardSlackService implements SlackService {
      * @param log - print log stream
      * @return boolean indicating whether the API request succeeded
      */
-    public boolean upload(FilePath workspace, String artifactIncludes, PrintStream log) {
+    public boolean upload(FilePath workspace, String artifactIncludes, TaskListener log) {
         boolean result = true;
         if(workspace!=null) {
             for(String roomId : roomIds) {

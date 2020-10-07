@@ -7,7 +7,6 @@ import hudson.util.DirScanner;
 import hudson.util.FileVisitor;
 import java.io.File;
 import java.io.IOException;
-import java.io.PrintStream;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
@@ -40,22 +39,12 @@ public class SlackUploadFileRunner extends MasterToSlaveCallable<Boolean, Throwa
 
     private final String token;
 
-    private final transient PrintStream logPrintStream;
+    private final TaskListener listener;
     private final String initialComment;
     private final ProxyConfiguration proxy;
 
     public SlackUploadFileRunner(TaskListener listener, ProxyConfiguration proxy, SlackFileRequest slackFileRequest) {
-        this.logPrintStream = listener.getLogger();
-        this.filePath = slackFileRequest.getFilePath();
-        this.fileToUploadPath = slackFileRequest.getFileToUploadPath();
-        this.channels = slackFileRequest.getChannels();
-        this.initialComment = slackFileRequest.getInitialComment();
-        this.token = slackFileRequest.getToken();
-        this.proxy = proxy;
-    }
-
-    public SlackUploadFileRunner(PrintStream logPrintStream, ProxyConfiguration proxy, SlackFileRequest slackFileRequest) {
-        this.logPrintStream = logPrintStream;
+        this.listener = listener;
         this.filePath = slackFileRequest.getFilePath();
         this.fileToUploadPath = slackFileRequest.getFileToUploadPath();
         this.channels = slackFileRequest.getChannels();
@@ -66,21 +55,23 @@ public class SlackUploadFileRunner extends MasterToSlaveCallable<Boolean, Throwa
 
     @Override
     public Boolean call() throws Throwable {
-        logPrintStream.println(String.format("Using dirname=%s and includeMask=%s", filePath.getRemote(), fileToUploadPath));
+        logger.info(filePath + "");
+        logger.info(fileToUploadPath);
+        listener.getLogger().println(String.format("Using dirname=%s and includeMask=%s", filePath.getRemote(), fileToUploadPath));
 
         final List<File> files = new ArrayList<>();
         new DirScanner.Glob(fileToUploadPath, null).scan(new File(filePath.getRemote()), new FileVisitor() {
             @Override
             public void visit(File file, String relativePath) {
                 if (file.isFile()) {
-                    logPrintStream.println("Adding file " + file.getAbsolutePath());
+                    listener.getLogger().println("Adding file " + file.getAbsolutePath());
                     files.add(file);
                 }
             }
         });
 
         if (files.isEmpty()) {
-            logPrintStream.println("No files found for mask=" + this.filePath);
+            listener.getLogger().println("No files found for mask=" + this.filePath);
             return false;
         }
 
@@ -132,13 +123,13 @@ public class SlackUploadFileRunner extends MasterToSlaveCallable<Boolean, Throwa
                 try {
                     org.json.JSONObject responseBody = client.execute(request, responseHandler);
                     if (responseBody != null && !responseBody.getBoolean("ok")) {
-                        logPrintStream.println(UPLOAD_FAILED_TEMPLATE + responseBody.toString());
+                        listener.getLogger().println(UPLOAD_FAILED_TEMPLATE + responseBody.toString());
                         return false;
                     }
                 } catch (IOException e) {
                     String msg = "Exception uploading files '" + file + "' to Slack ";
                     logger.log(Level.WARNING, msg, e);
-                    logPrintStream.println(msg + e.getMessage());
+                    listener.getLogger().println(msg + e.getMessage());
                 }
             }
         return true;

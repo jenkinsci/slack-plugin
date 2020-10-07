@@ -1,18 +1,18 @@
 package jenkins.plugins.slack.logging;
 
 import hudson.model.AbstractBuild;
-import java.io.PrintStream;
+import hudson.model.TaskListener;
 import java.util.logging.Logger;
 import jenkins.plugins.slack.SlackNotifier;
 
 public class SlackNotificationsLogger implements BuildAwareLogger {
     private static final String PLUGIN_KEY = String.format("[%s]", SlackNotifier.DescriptorImpl.PLUGIN_DISPLAY_NAME);
     private final Logger system;
-    private final PrintStream user;
+    private final TaskListener user;
 
-    public SlackNotificationsLogger(Logger system, PrintStream user) {
+    public SlackNotificationsLogger(Logger system, TaskListener listener) {
         this.system = system;
-        this.user = user;
+        this.user = listener;
     }
 
     /**
@@ -44,11 +44,11 @@ public class SlackNotificationsLogger implements BuildAwareLogger {
     public void info(String key, String message, Object... args) {
         String formattedMessage = String.format(message, args);
         system.info(() -> String.join(" ", key, formattedMessage));
-        user.println(String.join(" ", PLUGIN_KEY, formattedMessage));
+        user.getLogger().println(String.join(" ", PLUGIN_KEY, formattedMessage));
     }
 
     @Override
-    public PrintStream getUserLogger() {
-        return this.user;
+    public TaskListener getTaskListener() {
+        return user;
     }
 }
