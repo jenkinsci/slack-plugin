@@ -129,7 +129,7 @@ public class ActiveNotifier implements FineGrainedNotifier {
                 }
                 slackFactory.apply(r).publish(message, getBuildColor(r));
                 if (notifier.getUploadFiles()) {
-                    slackFactory.apply(r).upload(r.getWorkspace(), notifier.getArtifactIncludes(), log.getUserLogger());
+                    slackFactory.apply(r).upload(r.getWorkspace(), notifier.getArtifactIncludes(), log.getTaskListener());
                 }
             }
         }

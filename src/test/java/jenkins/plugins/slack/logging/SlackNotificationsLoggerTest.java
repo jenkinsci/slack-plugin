@@ -1,5 +1,6 @@
 package jenkins.plugins.slack.logging;
 
+import hudson.model.TaskListener;
 import java.io.PrintStream;
 import java.util.function.Supplier;
 import java.util.logging.Logger;
@@ -11,14 +12,16 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
 import static org.junit.Assert.assertEquals;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyZeroInteractions;
+import static org.mockito.Mockito.when;
 
 public class SlackNotificationsLoggerTest {
     @Mock
     private Logger system;
     @Mock
-    private PrintStream user;
+    private TaskListener user;
     @Captor
     private ArgumentCaptor<Supplier<String>> messageSupplier;
     private SlackNotificationsLogger logger;
@@ -45,9 +48,12 @@ public class SlackNotificationsLoggerTest {
         String expectedUserLog = "[Slack Notifications] a 100% useful sort of message";
         String expectedSystemLog = "[Project #17] a 100% useful sort of message";
 
+        PrintStream printStream = mock(PrintStream.class);
+        when(user.getLogger()).thenReturn(printStream);
+
         logger.info("[Project #17]", "a %s useful sort %s message", "100%", "of");
 
-        verify(user).println(expectedUserLog);
+        verify(user.getLogger()).println(expectedUserLog);
         verify(system).info(messageSupplier.capture());
         assertEquals(expectedSystemLog, messageSupplier.getValue().get());
     }
