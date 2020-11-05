@@ -315,8 +315,9 @@ Note: These docs may become outdated as Slack changes their website, if they do 
 6.  Scroll down to "Scopes". Under "Bot Token Scopes"
     1.  Add `chat:write` Scope.
     2.  (optional) Add `files:write` Scope if you will be uploading files.
-    3.  (optional) Add `reactions:write` Scope if you will be [adding reactions](#emoji-reactions).
-    4.  (optional) Add `users:read` and `users:read.email` Scope if you will be [looking users up by email](#user-id-look-up).
+    3.  (optional) Add `chat:write.customize` Scope if you will be sending messages with a custom username and/or avatar.
+    4.  (optional) Add `reactions:write` Scope if you will be [adding reactions](#emoji-reactions).
+    5.  (optional) Add `users:read` and `users:read.email` Scope if you will be [looking users up by email](#user-id-look-up).
 7.  (optional) Click "App Home" in the sidebar
     1.  (optional) Edit the slack display name for the bot.
     2.  Return to the "OAuth & Permissions" page.
