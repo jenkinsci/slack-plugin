@@ -94,7 +94,15 @@ public class EmailSlackUserIdResolver extends SlackUserIdResolver {
         }
 
        return mailAddressResolvers.stream()
-            .map(resolver -> resolver.findMailAddressFor(user))
+            .map(resolver -> {
+                try {
+                    return resolver.findMailAddressFor(user);
+                } catch (Exception ex) {
+                    LOGGER.log(Level.WARNING, String.format(
+                        "The email resolver '%s' failed", resolver.getClass().getName()), ex);
+                    return null;
+              }
+            })
             .filter(StringUtils::isNotEmpty)
             .map(this::resolveUserIdForEmailAddress)
             .filter(StringUtils::isNotEmpty)
