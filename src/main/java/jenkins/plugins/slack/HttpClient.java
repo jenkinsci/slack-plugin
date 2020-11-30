@@ -35,7 +35,7 @@ public class HttpClient {
         final CredentialsProvider credentialsProvider = new BasicCredentialsProvider();
         clientBuilder.setDefaultCredentialsProvider(credentialsProvider);
 
-        if (proxy != null && !isNoProxyHost("", proxy.getNoProxyHost())) {
+        if (proxy != null && !isNoProxyHost("https://slack.com", proxy.getNoProxyHost())) {
             
             final HttpHost proxyHost = new HttpHost(proxy.name, proxy.port);
             final HttpRoutePlanner routePlanner = new DefaultProxyRoutePlanner(proxyHost);
