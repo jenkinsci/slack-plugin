@@ -35,7 +35,8 @@ public class HttpClient {
         final CredentialsProvider credentialsProvider = new BasicCredentialsProvider();
         clientBuilder.setDefaultCredentialsProvider(credentialsProvider);
 
-        if (proxy != null) {
+        if (proxy != null && !isNoProxyHost("", proxy.getNoProxyHost())) {
+            
             final HttpHost proxyHost = new HttpHost(proxy.name, proxy.port);
             final HttpRoutePlanner routePlanner = new DefaultProxyRoutePlanner(proxyHost);
             clientBuilder.setRoutePlanner(routePlanner);
@@ -49,6 +50,17 @@ public class HttpClient {
             }
         }
         return clientBuilder.build();
+    }
+    
+    private static boolean isNoProxyHost(String host, String noProxyHost) {
+        if (host!=null && noProxyHost!=null) {
+            for (Pattern p : ProxyConfiguration.getNoProxyHostPatterns(noProxyHost)) {
+                if (p.matcher(host).matches()) {
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 
     private static Credentials createCredentials(String userName, String password) {
