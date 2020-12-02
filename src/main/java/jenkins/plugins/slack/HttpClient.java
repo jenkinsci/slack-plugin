@@ -1,6 +1,7 @@
 package jenkins.plugins.slack;
 
 import hudson.ProxyConfiguration;
+import jenkins.plugins.slack.NoProxyHostCheckerRoutePlanner;
 import org.apache.http.HttpHost;
 import org.apache.http.auth.AuthScope;
 import org.apache.http.auth.Credentials;
@@ -13,7 +14,6 @@ import org.apache.http.impl.client.BasicCredentialsProvider;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.impl.client.HttpClients;
-import org.apache.http.impl.conn.DefaultProxyRoutePlanner;
 import org.kohsuke.accmod.Restricted;
 import org.kohsuke.accmod.restrictions.NoExternalUse;
 
@@ -37,7 +37,7 @@ public class HttpClient {
 
         if (proxy != null) {
             final HttpHost proxyHost = new HttpHost(proxy.name, proxy.port);
-            final HttpRoutePlanner routePlanner = new DefaultProxyRoutePlanner(proxyHost);
+            final HttpRoutePlanner routePlanner = new NoProxyHostCheckerRoutePlanner(proxy.getNoProxyHost(), proxyHost);
             clientBuilder.setRoutePlanner(routePlanner);
 
             String username = proxy.getUserName();
@@ -60,5 +60,4 @@ public class HttpClient {
             return new UsernamePasswordCredentials(userName, password);
         }
     }
-
 }
