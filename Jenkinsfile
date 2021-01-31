@@ -1,3 +1,5 @@
+@Library('pipeline-library@enable-jacoco') _
+
 // Builds a module using https://github.com/jenkins-infra/pipeline-library
 def configurations = [
         [ platform: "linux", jdk: "8", jenkins: null ],
