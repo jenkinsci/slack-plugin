@@ -32,10 +32,12 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.apache.commons.lang.StringUtils;
 import org.apache.http.HttpEntity;
+import org.apache.http.HttpHeaders;
 import org.apache.http.HttpStatus;
 import org.apache.http.ParseException;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
+import org.apache.http.entity.ContentType;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.util.EntityUtils;
 import org.json.JSONException;
@@ -46,8 +48,9 @@ public class EmailSlackUserIdResolver extends SlackUserIdResolver {
 
     private static final Logger LOGGER = Logger.getLogger(EmailSlackUserIdResolver.class.getName());
 
+    private static final String AUTHORIZATION_BEARER_TOKEN_FORMAT = "Bearer %s";
     private static final String LOOKUP_BY_EMAIL_METHOD_URL = "https://slack.com/api/users.lookupByEmail";
-    private static final String LOOKUP_BY_EMAIL_METHOD_URL_FORMAT = LOOKUP_BY_EMAIL_METHOD_URL + "?token=%s&email=%s";
+    private static final String LOOKUP_BY_EMAIL_METHOD_URL_FORMAT = LOOKUP_BY_EMAIL_METHOD_URL + "?email=%s";
     private static final String SLACK_OK_FIELD = "ok";
     private static final String SLACK_USER_FIELD = "user";
     private static final String SLACK_ID_FIELD = "id";
@@ -122,8 +125,10 @@ public class EmailSlackUserIdResolver extends SlackUserIdResolver {
         }
 
         String slackUserId = null;
-        String url = String.format(LOOKUP_BY_EMAIL_METHOD_URL_FORMAT, authToken, emailAddress);
+        String url = String.format(LOOKUP_BY_EMAIL_METHOD_URL_FORMAT, emailAddress);
         HttpGet getRequest = new HttpGet(url);
+        getRequest.addHeader(HttpHeaders.CONTENT_TYPE, ContentType.APPLICATION_FORM_URLENCODED.getMimeType());
+        getRequest.addHeader(HttpHeaders.AUTHORIZATION, String.format(AUTHORIZATION_BEARER_TOKEN_FORMAT, authToken));
         try (CloseableHttpResponse response = httpClient.execute(getRequest)) {
             int responseCode = response.getStatusLine().getStatusCode();
             if (HttpStatus.SC_OK == responseCode) {
