@@ -41,6 +41,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.jvnet.hudson.test.FakeChangeLogSCM.EntryImpl;
 import org.jvnet.hudson.test.FakeChangeLogSCM.FakeChangeLogSet;
+import org.mockito.MockedStatic;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
@@ -48,6 +49,7 @@ import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.mockStatic;
 import static org.powermock.api.mockito.PowerMockito.mock;
 import static org.powermock.api.mockito.PowerMockito.when;
 
@@ -98,6 +100,20 @@ public class EmailSlackUserIdResolverTest {
         httpClient.setHttpResponse(getResponseOK());
         String userId = resolver.findOrResolveUserId(mock(User.class));
         assertEquals(EXPECTED_USER_ID, userId);
+    }
+
+    @Test
+    public void testResolveUserIdForUserWithoutResolver() throws Exception {
+        try (MockedStatic<MailAddressResolver> mailResolver = mockStatic(MailAddressResolver.class)) {
+            mailResolver.when(() -> MailAddressResolver.resolve(any(User.class))).thenReturn(EMAIL_ADDRESS);
+            resolver.setMailAddressResolvers(null);
+            httpClient.setHttpResponse(getResponseOK());
+
+            String userId = resolver.findOrResolveUserId(mock(User.class));
+
+            assertEquals(EXPECTED_USER_ID, userId);
+            mailResolver.verify(() -> MailAddressResolver.resolve(any(User.class)));
+        }
     }
 
     @Test

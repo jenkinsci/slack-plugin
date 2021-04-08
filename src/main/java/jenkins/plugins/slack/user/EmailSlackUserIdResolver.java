@@ -27,9 +27,12 @@ import hudson.Extension;
 import hudson.model.User;
 import hudson.tasks.MailAddressResolver;
 import java.io.IOException;
+import java.util.Collection;
 import java.util.List;
+import java.util.Optional;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.stream.Stream;
 import org.apache.commons.lang.StringUtils;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpHeaders;
@@ -62,7 +65,7 @@ public class EmailSlackUserIdResolver extends SlackUserIdResolver {
     public EmailSlackUserIdResolver(String authToken, CloseableHttpClient httpClient, List<MailAddressResolver> mailAddressResolvers) {
         this.authToken = authToken;
         this.httpClient = httpClient;
-        this.mailAddressResolvers = mailAddressResolvers != null ? mailAddressResolvers : MailAddressResolver.all();
+        this.mailAddressResolvers = mailAddressResolvers;
     }
 
     public EmailSlackUserIdResolver(String authToken, CloseableHttpClient httpClient) {
@@ -91,12 +94,9 @@ public class EmailSlackUserIdResolver extends SlackUserIdResolver {
     }
 
     protected String resolveUserId(User user) {
-        if (mailAddressResolvers == null) {
-            LOGGER.fine("No mail address resolver found");
-            return null;
-        }
-
-       return mailAddressResolvers.stream()
+       return Optional.ofNullable(mailAddressResolvers)
+            .map(Collection::stream)
+            .orElseGet(Stream::empty)
             .map(resolver -> {
                 try {
                     return resolver.findMailAddressFor(user);
@@ -110,7 +110,7 @@ public class EmailSlackUserIdResolver extends SlackUserIdResolver {
             .map(this::resolveUserIdForEmailAddress)
             .filter(StringUtils::isNotEmpty)
             .findAny()
-            .orElse(null);
+            .orElseGet(() -> resolveUserIdForEmailAddress(MailAddressResolver.resolve(user)));
     }
 
     public String resolveUserIdForEmailAddress(String emailAddress) {
