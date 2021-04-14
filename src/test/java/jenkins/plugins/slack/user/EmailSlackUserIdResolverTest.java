@@ -21,7 +21,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package jenkins.plugins.slack;
+package jenkins.plugins.slack.user;
 
 import hudson.model.Run;
 import hudson.model.User;
@@ -31,33 +31,26 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
-import jenkins.plugins.slack.user.EmailSlackUserIdResolver;
-import jenkins.plugins.slack.user.SlackUserProperty;
+import jenkins.plugins.slack.CloseableHttpClientStub;
+import jenkins.plugins.slack.CloseableHttpResponseStub;
 import org.apache.commons.io.IOUtils;
 import org.apache.http.HttpStatus;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.entity.StringEntity;
 import org.junit.Before;
 import org.junit.Test;
-import org.junit.runner.RunWith;
 import org.jvnet.hudson.test.FakeChangeLogSCM.EntryImpl;
 import org.jvnet.hudson.test.FakeChangeLogSCM.FakeChangeLogSet;
-import org.powermock.api.mockito.PowerMockito;
-import org.powermock.core.classloader.annotations.PrepareForTest;
-import org.powermock.modules.junit4.PowerMockRunner;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.powermock.api.mockito.PowerMockito.mock;
 import static org.powermock.api.mockito.PowerMockito.when;
 
-@RunWith(PowerMockRunner.class)
-@PrepareForTest({MailAddressResolver.class})
 public class EmailSlackUserIdResolverTest {
 
     private static final String EXPECTED_USER_ID = "W012A3CDE";
@@ -81,7 +74,6 @@ public class EmailSlackUserIdResolverTest {
         httpClient = new CloseableHttpClientStub();
         mailAddressResolver = getMailAddressResolver();
         resolver = getResolver(mailAddressResolver);
-        PowerMockito.mockStatic(MailAddressResolver.class);
     }
 
     @Test
@@ -111,17 +103,12 @@ public class EmailSlackUserIdResolverTest {
     @Test
     public void testResolveUserIdForUserWithoutResolver() throws Exception {
 
-        PowerMockito.when(MailAddressResolver.resolve(any(User.class))).thenReturn(EMAIL_ADDRESS);
-
-        resolver.setMailAddressResolvers(null);
+        resolver = new EmailSlackUserIdResolver(AUTH_TOKEN, httpClient, null, user -> {return EMAIL_ADDRESS;});
         httpClient.setHttpResponse(getResponseOK());
 
         String userId = resolver.findOrResolveUserId(mock(User.class));
 
         assertEquals(EXPECTED_USER_ID, userId);
-        PowerMockito.verifyStatic(MailAddressResolver.class, times(1));
-        MailAddressResolver.resolve(any(User.class));
-
     }
 
     @Test

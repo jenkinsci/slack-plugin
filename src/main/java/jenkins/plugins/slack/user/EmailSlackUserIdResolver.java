@@ -23,6 +23,7 @@
  */
 package jenkins.plugins.slack.user;
 
+import com.google.common.annotations.VisibleForTesting;
 import hudson.Extension;
 import hudson.model.User;
 import hudson.tasks.MailAddressResolver;
@@ -30,6 +31,7 @@ import java.io.IOException;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
+import java.util.function.Function;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Stream;
@@ -61,11 +63,18 @@ public class EmailSlackUserIdResolver extends SlackUserIdResolver {
     private String authToken;
     private CloseableHttpClient httpClient;
     private List<MailAddressResolver> mailAddressResolvers;
+    private Function<User, String> defaultMailAddressResolver;
 
-    public EmailSlackUserIdResolver(String authToken, CloseableHttpClient httpClient, List<MailAddressResolver> mailAddressResolvers) {
+    @VisibleForTesting
+    EmailSlackUserIdResolver(String authToken, CloseableHttpClient httpClient, List<MailAddressResolver> mailAddressResolvers, Function<User, String> defaultMailAddressResolver) {
         this.authToken = authToken;
         this.httpClient = httpClient;
         this.mailAddressResolvers = mailAddressResolvers;
+        this.defaultMailAddressResolver = defaultMailAddressResolver;
+    }
+
+    public EmailSlackUserIdResolver(String authToken, CloseableHttpClient httpClient, List<MailAddressResolver> mailAddressResolvers) {
+        this(authToken, httpClient, mailAddressResolvers, MailAddressResolver::resolve);
     }
 
     public EmailSlackUserIdResolver(String authToken, CloseableHttpClient httpClient) {
@@ -74,7 +83,7 @@ public class EmailSlackUserIdResolver extends SlackUserIdResolver {
 
     @DataBoundConstructor
     public EmailSlackUserIdResolver() {
-        this(null, null, null);
+        this(null, null);
     }
 
     public String getAPIMethodURL() {
@@ -110,7 +119,7 @@ public class EmailSlackUserIdResolver extends SlackUserIdResolver {
             .map(this::resolveUserIdForEmailAddress)
             .filter(StringUtils::isNotEmpty)
             .findAny()
-            .orElseGet(() -> resolveUserIdForEmailAddress(MailAddressResolver.resolve(user)));
+            .orElseGet(() -> resolveUserIdForEmailAddress(defaultMailAddressResolver.apply(user)));
     }
 
     public String resolveUserIdForEmailAddress(String emailAddress) {
@@ -125,18 +134,18 @@ public class EmailSlackUserIdResolver extends SlackUserIdResolver {
         }
 
         String slackUserId = null;
-        String url = String.format(LOOKUP_BY_EMAIL_METHOD_URL_FORMAT, emailAddress);
-        HttpGet getRequest = new HttpGet(url);
+        final String url = String.format(LOOKUP_BY_EMAIL_METHOD_URL_FORMAT, emailAddress);
+        final HttpGet getRequest = new HttpGet(url);
         getRequest.addHeader(HttpHeaders.CONTENT_TYPE, ContentType.APPLICATION_FORM_URLENCODED.getMimeType());
         getRequest.addHeader(HttpHeaders.AUTHORIZATION, String.format(AUTHORIZATION_BEARER_TOKEN_FORMAT, authToken));
         try (CloseableHttpResponse response = httpClient.execute(getRequest)) {
-            int responseCode = response.getStatusLine().getStatusCode();
+            final int responseCode = response.getStatusLine().getStatusCode();
             if (HttpStatus.SC_OK == responseCode) {
-                HttpEntity entity = response.getEntity();
-                JSONObject slackResponse = new JSONObject(EntityUtils.toString(entity));
+                final HttpEntity entity = response.getEntity();
+                final JSONObject slackResponse = new JSONObject(EntityUtils.toString(entity));
                 // additionally, make sure the JSON response contains an 'ok: true' entry
                 if (slackResponse.optBoolean(SLACK_OK_FIELD)) {
-                    JSONObject slackUser = slackResponse.getJSONObject(SLACK_USER_FIELD);
+                    final JSONObject slackUser = slackResponse.getJSONObject(SLACK_USER_FIELD);
                     slackUserId = slackUser.getString(SLACK_ID_FIELD);
                 }
             }
