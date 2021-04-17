@@ -21,7 +21,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package jenkins.plugins.slack;
+package jenkins.plugins.slack.user;
 
 import hudson.model.Run;
 import hudson.model.User;
@@ -31,8 +31,8 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
-import jenkins.plugins.slack.user.EmailSlackUserIdResolver;
-import jenkins.plugins.slack.user.SlackUserProperty;
+import jenkins.plugins.slack.CloseableHttpClientStub;
+import jenkins.plugins.slack.CloseableHttpResponseStub;
 import org.apache.commons.io.IOUtils;
 import org.apache.http.HttpStatus;
 import org.apache.http.client.methods.CloseableHttpResponse;
@@ -97,6 +97,17 @@ public class EmailSlackUserIdResolverTest {
         // the EXPECTED_USER_ID
         httpClient.setHttpResponse(getResponseOK());
         String userId = resolver.findOrResolveUserId(mock(User.class));
+        assertEquals(EXPECTED_USER_ID, userId);
+    }
+
+    @Test
+    public void testResolveUserIdForUserWithoutResolver() throws Exception {
+
+        resolver = new EmailSlackUserIdResolver(AUTH_TOKEN, httpClient, null, user -> {return EMAIL_ADDRESS;});
+        httpClient.setHttpResponse(getResponseOK());
+
+        String userId = resolver.findOrResolveUserId(mock(User.class));
+
         assertEquals(EXPECTED_USER_ID, userId);
     }
 
