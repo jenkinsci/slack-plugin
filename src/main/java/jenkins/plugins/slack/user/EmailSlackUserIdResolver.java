@@ -103,23 +103,29 @@ public class EmailSlackUserIdResolver extends SlackUserIdResolver {
     }
 
     protected String resolveUserId(User user) {
-       return Optional.ofNullable(mailAddressResolvers)
-            .map(Collection::stream)
-            .orElseGet(Stream::empty)
-            .map(resolver -> {
-                try {
-                    return resolver.findMailAddressFor(user);
-                } catch (Exception ex) {
-                    LOGGER.log(Level.WARNING, String.format(
-                        "The email resolver '%s' failed", resolver.getClass().getName()), ex);
-                    return null;
-              }
-            })
-            .filter(StringUtils::isNotEmpty)
-            .map(this::resolveUserIdForEmailAddress)
-            .filter(StringUtils::isNotEmpty)
-            .findAny()
-            .orElseGet(() -> resolveUserIdForEmailAddress(defaultMailAddressResolver.apply(user)));
+        Optional<String> userId = Optional.ofNullable(mailAddressResolvers)
+                .map(Collection::stream)
+                .orElseGet(Stream::empty)
+                .map(resolver -> {
+                    try {
+                        return resolver.findMailAddressFor(user);
+                    } catch (Exception ex) {
+                        LOGGER.log(Level.WARNING, String.format(
+                                "The email resolver '%s' failed", resolver.getClass().getName()), ex);
+                        return null;
+                    }
+                })
+                .filter(StringUtils::isNotEmpty)
+                .map(this::resolveUserIdForEmailAddress)
+                .filter(StringUtils::isNotEmpty)
+                .findAny();
+
+        if (userId.isPresent()) {
+            return userId.get();
+        } else {
+            // Return value can be null, so Optional.orElseGet(Supplier) doesn't work.
+            return resolveUserIdForEmailAddress(defaultMailAddressResolver.apply(user));
+        }
     }
 
     public String resolveUserIdForEmailAddress(String emailAddress) {
