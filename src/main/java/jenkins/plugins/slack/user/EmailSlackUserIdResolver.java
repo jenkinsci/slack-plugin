@@ -60,15 +60,12 @@ public class EmailSlackUserIdResolver extends SlackUserIdResolver {
     private static final String SLACK_USER_FIELD = "user";
     private static final String SLACK_ID_FIELD = "id";
 
-    private String authToken;
-    private CloseableHttpClient httpClient;
     private List<MailAddressResolver> mailAddressResolvers;
     private Function<User, String> defaultMailAddressResolver;
 
     @VisibleForTesting
     EmailSlackUserIdResolver(String authToken, CloseableHttpClient httpClient, List<MailAddressResolver> mailAddressResolvers, Function<User, String> defaultMailAddressResolver) {
-        this.authToken = authToken;
-        this.httpClient = httpClient;
+        super(authToken, httpClient);
         this.mailAddressResolvers = mailAddressResolvers;
         this.defaultMailAddressResolver = defaultMailAddressResolver;
     }
@@ -88,14 +85,6 @@ public class EmailSlackUserIdResolver extends SlackUserIdResolver {
 
     public String getAPIMethodURL() {
         return LOOKUP_BY_EMAIL_METHOD_URL;
-    }
-
-    public void setAuthToken(String authToken) {
-        this.authToken = authToken;
-    }
-
-    public void setHttpClient(CloseableHttpClient httpClient) {
-        this.httpClient = httpClient;
     }
 
     public void setMailAddressResolvers(List<MailAddressResolver> mailAddressResolvers) {
