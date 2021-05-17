@@ -109,11 +109,13 @@ public class EmailSlackUserIdResolver extends SlackUserIdResolver {
                 .filter(StringUtils::isNotEmpty)
                 .findAny();
 
+        // Return value can be null, so Optional.orElseGet(Supplier) doesn't work.
         if (userId.isPresent()) {
             return userId.get();
-        } else {
-            // Return value can be null, so Optional.orElseGet(Supplier) doesn't work.
+        } else if (defaultMailAddressResolver != null){
             return resolveUserIdForEmailAddress(defaultMailAddressResolver.apply(user));
+        } else {
+            return null;
         }
     }
 

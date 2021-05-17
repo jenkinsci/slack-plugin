@@ -123,6 +123,16 @@ public class EmailSlackUserIdResolverTest {
     }
 
     @Test
+    public void testResolveUserIdForUserWithoutDefaultMailAddressResolver() throws Exception {
+        mailAddressResolver = mock(MailAddressResolver.class);
+        resolver = new EmailSlackUserIdResolver(AUTH_TOKEN, httpClient, Collections.singletonList(mailAddressResolver), null);
+        httpClient.setHttpResponse(getResponseOK());
+
+        String userId = resolver.resolveUserId(mock(User.class));
+        assertNull(userId);
+    }
+
+    @Test
     public void testResolveUserIdForUserWithoutResolver() throws Exception {
 
         resolver = new EmailSlackUserIdResolver(AUTH_TOKEN, httpClient, null, user -> {return EMAIL_ADDRESS;});
