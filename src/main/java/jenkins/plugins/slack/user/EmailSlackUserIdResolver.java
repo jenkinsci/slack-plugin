@@ -60,15 +60,12 @@ public class EmailSlackUserIdResolver extends SlackUserIdResolver {
     private static final String SLACK_USER_FIELD = "user";
     private static final String SLACK_ID_FIELD = "id";
 
-    private String authToken;
-    private CloseableHttpClient httpClient;
     private List<MailAddressResolver> mailAddressResolvers;
     private Function<User, String> defaultMailAddressResolver;
 
     @VisibleForTesting
     EmailSlackUserIdResolver(String authToken, CloseableHttpClient httpClient, List<MailAddressResolver> mailAddressResolvers, Function<User, String> defaultMailAddressResolver) {
-        this.authToken = authToken;
-        this.httpClient = httpClient;
+        super(authToken, httpClient);
         this.mailAddressResolvers = mailAddressResolvers;
         this.defaultMailAddressResolver = defaultMailAddressResolver;
     }
@@ -90,36 +87,36 @@ public class EmailSlackUserIdResolver extends SlackUserIdResolver {
         return LOOKUP_BY_EMAIL_METHOD_URL;
     }
 
-    public void setAuthToken(String authToken) {
-        this.authToken = authToken;
-    }
-
-    public void setHttpClient(CloseableHttpClient httpClient) {
-        this.httpClient = httpClient;
-    }
-
     public void setMailAddressResolvers(List<MailAddressResolver> mailAddressResolvers) {
         this.mailAddressResolvers = mailAddressResolvers;
     }
 
     protected String resolveUserId(User user) {
-       return Optional.ofNullable(mailAddressResolvers)
-            .map(Collection::stream)
-            .orElseGet(Stream::empty)
-            .map(resolver -> {
-                try {
-                    return resolver.findMailAddressFor(user);
-                } catch (Exception ex) {
-                    LOGGER.log(Level.WARNING, String.format(
-                        "The email resolver '%s' failed", resolver.getClass().getName()), ex);
-                    return null;
-              }
-            })
-            .filter(StringUtils::isNotEmpty)
-            .map(this::resolveUserIdForEmailAddress)
-            .filter(StringUtils::isNotEmpty)
-            .findAny()
-            .orElseGet(() -> resolveUserIdForEmailAddress(defaultMailAddressResolver.apply(user)));
+        Optional<String> userId = Optional.ofNullable(mailAddressResolvers)
+                .map(Collection::stream)
+                .orElseGet(Stream::empty)
+                .map(resolver -> {
+                    try {
+                        return resolver.findMailAddressFor(user);
+                    } catch (Exception ex) {
+                        LOGGER.log(Level.WARNING, String.format(
+                                "The email resolver '%s' failed", resolver.getClass().getName()), ex);
+                        return null;
+                    }
+                })
+                .filter(StringUtils::isNotEmpty)
+                .map(this::resolveUserIdForEmailAddress)
+                .filter(StringUtils::isNotEmpty)
+                .findAny();
+
+        // Return value can be null, so Optional.orElseGet(Supplier) doesn't work.
+        if (userId.isPresent()) {
+            return userId.get();
+        } else if (defaultMailAddressResolver != null){
+            return resolveUserIdForEmailAddress(defaultMailAddressResolver.apply(user));
+        } else {
+            return null;
+        }
     }
 
     public String resolveUserIdForEmailAddress(String emailAddress) {

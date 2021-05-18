@@ -31,6 +31,7 @@ public class NoSlackUserIdResolver extends SlackUserIdResolver {
 
     @DataBoundConstructor
     public NoSlackUserIdResolver() {
+        super(null, null);
     }
 
     protected String resolveUserId(User user) {

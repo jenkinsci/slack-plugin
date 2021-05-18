@@ -49,8 +49,13 @@ public abstract class SlackUserIdResolver extends AbstractDescribableImpl<SlackU
 
     private static final Logger LOGGER = Logger.getLogger(SlackUserIdResolver.class.getName());
 
-    private String authToken;
-    private CloseableHttpClient httpClient;
+    protected String authToken;
+    protected CloseableHttpClient httpClient;
+
+    protected SlackUserIdResolver(String authToken, CloseableHttpClient httpClient) {
+        this.authToken = authToken;
+        this.httpClient = httpClient;
+    }
 
     public final String findOrResolveUserId(User user) {
         String userId = null;

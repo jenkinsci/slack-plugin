@@ -30,6 +30,7 @@ import hudson.tasks.MailAddressResolver;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import jenkins.plugins.slack.CloseableHttpClientStub;
 import jenkins.plugins.slack.CloseableHttpResponseStub;
@@ -98,6 +99,37 @@ public class EmailSlackUserIdResolverTest {
         httpClient.setHttpResponse(getResponseOK());
         String userId = resolver.findOrResolveUserId(mock(User.class));
         assertEquals(EXPECTED_USER_ID, userId);
+    }
+
+    @Test
+    public void testResolveUserIdForUserWithoutEmailAddress() throws Exception {
+        mailAddressResolver = mock(MailAddressResolver.class);
+        resolver = new EmailSlackUserIdResolver(AUTH_TOKEN, httpClient, Collections.singletonList(mailAddressResolver), user -> null);
+        httpClient.setHttpResponse(getResponseOK());
+
+        String userId = resolver.resolveUserId(mock(User.class));
+        assertNull(userId);
+    }
+
+    @Test
+    public void testResolveUserIdWithoutAuthToken() throws Exception {
+        mailAddressResolver = mock(MailAddressResolver.class);
+        resolver = new EmailSlackUserIdResolver(AUTH_TOKEN, httpClient, Collections.singletonList(mailAddressResolver), user -> EMAIL_ADDRESS);
+        resolver.setAuthToken(null);
+        httpClient.setHttpResponse(getResponseOK());
+
+        String userId = resolver.resolveUserId(mock(User.class));
+        assertNull(userId);
+    }
+
+    @Test
+    public void testResolveUserIdForUserWithoutDefaultMailAddressResolver() throws Exception {
+        mailAddressResolver = mock(MailAddressResolver.class);
+        resolver = new EmailSlackUserIdResolver(AUTH_TOKEN, httpClient, Collections.singletonList(mailAddressResolver), null);
+        httpClient.setHttpResponse(getResponseOK());
+
+        String userId = resolver.resolveUserId(mock(User.class));
+        assertNull(userId);
     }
 
     @Test
