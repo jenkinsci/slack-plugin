@@ -21,5 +21,15 @@ public interface SlackService {
 
     boolean addReaction(String channelId, String timestamp, String emojiName);
 
+    /**
+     * Remove an emoji reaction to a message.
+     * @param channelId - Slack's internal channel id (i.e. what's returned in a `chat.postMessage` response)
+     * @param timestamp - Timestamp identifying the message
+     * @param emojiName - The name of the emoji to add in reaction to the message (no colons)
+     *
+     * @return boolean indicating whether the API request succeeded
+     */
+    boolean removeReaction(String channelId, String timestamp, String emojiName);
+
     String getResponseString();
 }

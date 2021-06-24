@@ -94,6 +94,11 @@ public class SlackNotifierTest extends TestCase {
             return response;
         }
 
+        @Override
+        public boolean removeReaction(String channelId, String timestamp, String emojiName) {
+            return response;
+        }
+
         public void setResponse(boolean response) {
             this.response = response;
         }
