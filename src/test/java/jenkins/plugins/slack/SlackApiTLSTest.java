@@ -1,21 +1,15 @@
 package jenkins.plugins.slack;
 
 import java.io.IOException;
-import java.security.NoSuchAlgorithmException;
-import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLException;
 import org.apache.http.StatusLine;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpPost;
-import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
 import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.HttpClientBuilder;
-import org.apache.http.impl.client.HttpClients;
 import org.junit.Test;
 
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.junit.Assert.fail;
 
 public class SlackApiTLSTest {
 
