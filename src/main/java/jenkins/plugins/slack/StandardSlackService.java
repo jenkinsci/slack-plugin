@@ -440,7 +440,8 @@ public class StandardSlackService implements SlackService {
                 .getBody();
 
         logger.fine("Removing reaction:  " + json.toString());
-        return postToSlack("reactions.remove", json);    }
+        return postToSlack("reactions.remove", json);
+    }
 
     private String getTokenToUse(String authTokenCredentialId, String token) {
         if (!StringUtils.isEmpty(authTokenCredentialId)) {
