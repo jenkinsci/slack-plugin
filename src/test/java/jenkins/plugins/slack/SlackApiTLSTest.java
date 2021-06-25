@@ -1,7 +1,6 @@
 package jenkins.plugins.slack;
 
 import java.io.IOException;
-import javax.net.ssl.SSLException;
 import org.apache.http.StatusLine;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpPost;
