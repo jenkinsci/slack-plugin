@@ -34,24 +34,4 @@ public class SlackApiTLSTest {
             e.printStackTrace();
         }
     }
-
-    @Test
-    public void connectToAPIUsingTLS11() throws NoSuchAlgorithmException {
-        final HttpClientBuilder clientBuilder = HttpClients
-            .custom()
-            .setSSLSocketFactory(new SSLConnectionSocketFactory(SSLContext.getDefault(),
-                new String[] { "TLSv1.1" }, null,
-                SSLConnectionSocketFactory.getDefaultHostnameVerifier()));
-        try (CloseableHttpClient httpClient = clientBuilder.build()) {
-            HttpPost post = new HttpPost(SLACK_API_TEST);
-            post.setHeader("Content-Type", "application/json; charset=utf-8");
-            try (CloseableHttpResponse ignored = httpClient.execute(post)) {
-                fail("Slack no longer accepts anything below TLSv1.2");
-            } catch (SSLException ex) {
-                assertThat(ex.getMessage(), is("Received fatal alert: protocol_version"));
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
 }
