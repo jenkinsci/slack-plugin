@@ -428,7 +428,7 @@ public class StandardSlackService implements SlackService {
     }
 
     /**
-     * Implementation of {@link SlackService#removeReaction(String, String, String)}
+     * Remove an emoji reaction from a message.
      */
     @Override
     public boolean removeReaction(String channelId, String timestamp, String emojiName) {
