@@ -160,6 +160,17 @@ slackResponse.addReaction("thumbsup")
 
 ![image][img-emoji-reaction]
 
+You can remove an emoji reaction to a previously-sent message like this:
+
+Example:
+
+```groovy
+def slackResponse = slackSend(channel: "emoji-demo", message: "Here is the primary message")
+slackResponse.addReaction("thumbsup")
+// ... do some stuff
+slackResponse.removeReaction("thumbsup")
+```
+
 This may only work reliably in channels (as opposed to private messages) due to [limitations in the Slack API](https://api.slack.com/methods/chat.postMessage) (See "Post to an IM channel").
 
 This does not currently work in a situation where Jenkins is restarted between sending the initial message and adding the reaction. If this is something you need, please file an issue.

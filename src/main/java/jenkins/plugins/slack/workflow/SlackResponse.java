@@ -65,4 +65,20 @@ public class SlackResponse implements Serializable {
 
         return slackService.addReaction(channelId, ts, emojiName);
     }
+
+    /**
+     * Remove an emoji reaction to the message that this `SlackResponse` points to.
+     *
+     * @param emojiName - name of the emoji (no colons), e.g. `thumbsup`
+     *
+     * @return boolean indicating whether the API request succeeded
+     */
+    @Whitelisted
+    public boolean removeReaction(String emojiName) {
+        if (slackService == null) {
+            return false;
+        }
+
+        return slackService.removeReaction(channelId, ts, emojiName);
+    }
 }
