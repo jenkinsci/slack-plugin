@@ -61,7 +61,7 @@ public class EmailSlackUserIdResolver extends SlackUserIdResolver {
     private static final String SLACK_ID_FIELD = "id";
 
     private List<MailAddressResolver> mailAddressResolvers;
-    private Function<User, String> defaultMailAddressResolver;
+    private transient Function<User, String> defaultMailAddressResolver;
 
     @VisibleForTesting
     EmailSlackUserIdResolver(String authToken, CloseableHttpClient httpClient, List<MailAddressResolver> mailAddressResolvers, Function<User, String> defaultMailAddressResolver) {
