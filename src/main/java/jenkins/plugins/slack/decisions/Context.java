@@ -1,9 +1,9 @@
 package jenkins.plugins.slack.decisions;
 
+import edu.umd.cs.findbugs.annotations.Nullable;
 import hudson.model.AbstractBuild;
 import hudson.model.Result;
 import hudson.tasks.junit.TestResultAction;
-import javax.annotation.Nullable;
 import jenkins.plugins.slack.logging.BuildKey;
 
 public class Context {
