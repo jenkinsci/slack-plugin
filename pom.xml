@@ -1,24 +1,24 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/maven-v4_0_0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
         <groupId>org.jenkins-ci.plugins</groupId>
         <artifactId>plugin</artifactId>
-        <version>4.15</version>
+        <version>4.33</version>
     </parent>
 
     <artifactId>slack</artifactId>
     <packaging>hpi</packaging>
-    <version>${revision}${changelist}</version>
+    <version>${changelist}</version>
     <name>Slack Notification Plugin</name>
     <description>A Build status publisher that notifies channels on a Slack team</description>
     <url>https://github.com/jenkinsci/slack-plugin</url>
 
     <properties>
-        <revision>2.50</revision>
-        <changelist>-SNAPSHOT</changelist>
-        <jenkins.version>2.222.4</jenkins.version>
+        <changelist>999999-SNAPSHOT</changelist>
+        <gitHubRepo>jenkinsci/slack-plugin</gitHubRepo>
+        <jenkins.version>2.289.1</jenkins.version>
         <hpi.compatibleSinceVersion>2.32</hpi.compatibleSinceVersion>
         <java.level>8</java.level>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -36,9 +36,9 @@
     </licenses>
 
     <scm>
-        <connection>scm:git:ssh://git@github.com/jenkinsci/slack-plugin.git</connection>
-        <developerConnection>scm:git:ssh://git@github.com/jenkinsci/slack-plugin.git</developerConnection>
-        <url>https://github.com/jenkinsci/slack-plugin</url>
+        <connection>scm:git:https://github.com/${gitHubRepo}</connection>
+        <developerConnection>scm:git:https://github.com/${gitHubRepo}</developerConnection>
+        <url>https://github.com/${gitHubRepo}</url>
         <tag>${scmTag}</tag>
     </scm>
 
@@ -53,8 +53,8 @@
         <dependencies>
             <dependency>
                 <groupId>io.jenkins.tools.bom</groupId>
-                <artifactId>bom-2.222.x</artifactId>
-                <version>21</version>
+                <artifactId>bom-2.289.x</artifactId>
+                <version>1117.v62a_f6a_01de98</version>
                 <scope>import</scope>
                 <type>pom</type>
             </dependency>
@@ -66,12 +66,12 @@
         <dependency>
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-lang3</artifactId>
-            <version>3.11</version>
+            <version>3.12.0</version>
         </dependency>
         <dependency>
             <groupId>org.json</groupId>
             <artifactId>json</artifactId>
-            <version>20190722</version>
+            <version>20211205</version>
         </dependency>
 
         <!-- required plugins -->
@@ -182,28 +182,11 @@
         <dependency>
             <groupId>org.hamcrest</groupId>
             <artifactId>hamcrest-core</artifactId>
-            <version>${hamcrest.version}</version>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.hamcrest</groupId>
-            <artifactId>hamcrest-library</artifactId>
-            <version>${hamcrest.version}</version>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.mockito</groupId>
-            <artifactId>mockito-core</artifactId>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.powermock</groupId>
-            <artifactId>powermock-module-junit4</artifactId>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.powermock</groupId>
-            <artifactId>powermock-api-mockito2</artifactId>
+            <artifactId>mockito-inline</artifactId>
             <scope>test</scope>
         </dependency>
     </dependencies>
@@ -214,12 +197,12 @@
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-checkstyle-plugin</artifactId>
-                    <version>3.1.1</version>
+                    <version>3.1.2</version>
                     <dependencies>
                         <dependency>
                             <groupId>com.puppycrawl.tools</groupId>
                             <artifactId>checkstyle</artifactId>
-                            <version>8.29</version>
+                            <version>9.2.1</version>
                         </dependency>
                     </dependencies>
                 </plugin>
@@ -274,12 +257,6 @@
         </pluginRepository>
     </pluginRepositories>
 
-    <!--
-      The developers show up as current maintainers in the Jenkins wiki.
-      https://wiki.jenkins-ci.org/display/JENKINS/Slack+Plugin
-
-      The id should be the jenkinsci.org username and not your GitHub username.
-    -->
     <developers>
         <developer>
             <id>timja</id>
