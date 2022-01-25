@@ -4,7 +4,6 @@ import hudson.model.FreeStyleBuild;
 import hudson.model.FreeStyleProject;
 import java.util.Arrays;
 import java.util.Collection;
-import jenkins.model.Jenkins;
 import jenkins.plugins.slack.ActiveNotifier;
 import jenkins.plugins.slack.TokenExpander;
 import jenkins.plugins.slack.logging.BuildAwareLogger;
@@ -38,10 +37,8 @@ public class MessageBuilderTest extends TestCase {
         when(build.getProject()).thenReturn(project);
         when(build.getDisplayName()).thenReturn(buildDisplayName);
 
-        Jenkins jenkins = mock(Jenkins.class);
-        when(jenkins.getFullDisplayName()).thenReturn("");
+        when(project.getFullDisplayName()).thenReturn(projectDisplayName);
 
-        when(project.getParent()).thenReturn(jenkins);
         when(project.getDisplayName()).thenReturn(projectDisplayName);
 
         this.expectedResult = expectedResult;
