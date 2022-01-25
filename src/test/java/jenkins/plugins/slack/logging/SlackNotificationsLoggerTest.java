@@ -4,6 +4,7 @@ import hudson.model.TaskListener;
 import java.io.PrintStream;
 import java.util.function.Supplier;
 import java.util.logging.Logger;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
@@ -14,7 +15,7 @@ import org.mockito.MockitoAnnotations;
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyZeroInteractions;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
 public class SlackNotificationsLoggerTest {
@@ -26,10 +27,17 @@ public class SlackNotificationsLoggerTest {
     private ArgumentCaptor<Supplier<String>> messageSupplier;
     private SlackNotificationsLogger logger;
 
+    private AutoCloseable autoCloseable;
+
     @Before
     public void setup() {
-        MockitoAnnotations.initMocks(this);
+        autoCloseable = MockitoAnnotations.openMocks(this);
         logger = new SlackNotificationsLogger(system, user);
+    }
+
+    @After
+    public void fin() throws Exception {
+        autoCloseable.close();
     }
 
     @Test
@@ -38,7 +46,7 @@ public class SlackNotificationsLoggerTest {
 
         logger.debug("[key]", "this message has number %d %s it", 15, "within");
 
-        verifyZeroInteractions(user);
+        verifyNoMoreInteractions(user);
         verify(system).fine(messageSupplier.capture());
         assertEquals(expected, messageSupplier.getValue().get());
     }

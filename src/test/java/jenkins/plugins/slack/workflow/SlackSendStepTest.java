@@ -21,14 +21,11 @@ import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
 import org.apache.commons.io.IOUtils;
 import org.jenkinsci.plugins.workflow.steps.StepContext;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-import org.junit.runner.RunWith;
 import org.mockito.Mock;
-import org.powermock.api.mockito.PowerMockito;
-import org.powermock.core.classloader.annotations.PowerMockIgnore;
-import org.powermock.core.classloader.annotations.PrepareForTest;
-import org.powermock.modules.junit4.PowerMockRunner;
+import org.mockito.MockedStatic;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -38,18 +35,17 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.anyBoolean;
 import static org.mockito.Mockito.anyString;
 import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.mockStatic;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static org.mockito.MockitoAnnotations.initMocks;
+import static org.mockito.MockitoAnnotations.openMocks;
 
 /**
  * Traditional Unit tests, allows testing null Jenkins.get()
  */
-@RunWith(PowerMockRunner.class)
-@PrepareForTest({Jenkins.class, SlackSendStep.class, CredentialsObtainer.class})
-@PowerMockIgnore({"com.sun.org.apache.xerces.*", "javax.xml.*", "org.xml.*"})
 public class SlackSendStepTest {
 
     @Mock
@@ -72,18 +68,31 @@ public class SlackSendStepTest {
     @Mock
     Item item;
 
+    private AutoCloseable mocks;
+    private MockedStatic<Jenkins> mockedJenkins;
+    private MockedStatic<CredentialsObtainer> credentialsObtainerMockedStatic;
+
     @Before
     public void setUp() throws IOException, InterruptedException {
-        initMocks(this);
+        mocks = openMocks(this);
 
-        PowerMockito.mockStatic(Jenkins.class);
-        PowerMockito.mockStatic(CredentialsObtainer.class);
+        mock(CredentialsObtainer.class);
         when(jenkins.getDescriptorByType(SlackNotifier.DescriptorImpl.class)).thenReturn(slackDescMock);
-        when(CredentialsObtainer.getItemForCredentials(any())).thenReturn(item);
-        PowerMockito.when(Jenkins.get()).thenReturn(jenkins);
+        credentialsObtainerMockedStatic = mockStatic(CredentialsObtainer.class);
+        credentialsObtainerMockedStatic.when(() -> CredentialsObtainer.getItemForCredentials(any())).thenReturn(item);
+        mockedJenkins = mockStatic(Jenkins.class);
+        Jenkins jenkins = mock(Jenkins.class);
+        mockedJenkins.when(Jenkins::get).thenReturn(jenkins);
         when(taskListenerMock.getLogger()).thenReturn(printStreamMock);
         when(stepContextMock.get(Run.class)).thenReturn(run);
         when(stepContextMock.get(TaskListener.class)).thenReturn(taskListenerMock);
+    }
+
+    @After
+    public void fin() throws Exception {
+        mocks.close();
+        mockedJenkins.close();
+        credentialsObtainerMockedStatic.close();
     }
 
     @Test
@@ -104,7 +113,7 @@ public class SlackSendStepTest {
 
         when(Jenkins.get()).thenReturn(jenkins);
 
-        PowerMockito.when(CredentialsObtainer.getTokenToUse(anyString(), any(Item.class), any())).thenReturn(token);
+        credentialsObtainerMockedStatic.when(() -> CredentialsObtainer.getTokenToUse(anyString(), any(Item.class), any())).thenReturn(token);
 
         when(stepContextMock.get(Project.class)).thenReturn(project);
 
@@ -145,7 +154,7 @@ public class SlackSendStepTest {
 
         when(Jenkins.get()).thenReturn(jenkins);
 
-        PowerMockito.when(CredentialsObtainer.getTokenToUse(anyString(), any(Item.class), any())).thenReturn("token");
+        credentialsObtainerMockedStatic.when(() -> CredentialsObtainer.getTokenToUse(anyString(), any(Item.class), any())).thenReturn("token");
 
         when(taskListenerMock.getLogger()).thenReturn(printStreamMock);
         NoSlackUserIdResolver noSlackUserIdResolver = new NoSlackUserIdResolver();
@@ -186,7 +195,7 @@ public class SlackSendStepTest {
 
         when(Jenkins.get()).thenReturn(jenkins);
 
-        PowerMockito.when(CredentialsObtainer.getTokenToUse(anyString(), any(Item.class), any())).thenReturn("token");
+        credentialsObtainerMockedStatic.when(() -> CredentialsObtainer.getTokenToUse(anyString(), any(Item.class), any())).thenReturn("token");
 
         when(taskListenerMock.getLogger()).thenReturn(printStreamMock);
         NoSlackUserIdResolver noSlackUserIdResolver = new NoSlackUserIdResolver();
@@ -233,7 +242,7 @@ public class SlackSendStepTest {
 
         when(Jenkins.get()).thenReturn(jenkins);
 
-        PowerMockito.when(CredentialsObtainer.getTokenToUse(anyString(), any(Item.class), any())).thenReturn("token");
+        credentialsObtainerMockedStatic.when(() -> CredentialsObtainer.getTokenToUse(anyString(), any(Item.class), any())).thenReturn("token");
 
         when(taskListenerMock.getLogger()).thenReturn(printStreamMock);
         doNothing().when(printStreamMock).println();
@@ -270,7 +279,7 @@ public class SlackSendStepTest {
 
         when(Jenkins.get()).thenReturn(jenkins);
 
-        PowerMockito.when(CredentialsObtainer.getTokenToUse(eq("globalTokenCredentialId"), any(Item.class), any())).thenReturn("token2");
+        credentialsObtainerMockedStatic.when(() -> CredentialsObtainer.getTokenToUse(eq("globalTokenCredentialId"), any(Item.class), any())).thenReturn("token2");
 
         when(stepContextMock.get(Project.class)).thenReturn(project);
 
@@ -305,7 +314,8 @@ public class SlackSendStepTest {
         SlackSendStep.SlackSendStepExecution stepExecution = spy(new SlackSendStep.SlackSendStepExecution(step, stepContextMock));
         when(Jenkins.get()).thenReturn(jenkins);
         when(run.getParent()).thenReturn(project);
-        PowerMockito.when(CredentialsObtainer.getTokenToUse(any(), any(), any())).thenReturn("runcredentials");
+
+        credentialsObtainerMockedStatic.when(() -> CredentialsObtainer.getTokenToUse(any(), any(), any())).thenReturn("runcredentials");
 
         when(slackDescMock.getBaseUrl()).thenReturn("globalBaseUrl");
         when(slackDescMock.getTeamDomain()).thenReturn("globalTeamDomain");
@@ -326,7 +336,7 @@ public class SlackSendStepTest {
         stepExecution.run();
 
         verify(stepExecution, times(1)).getSlackService(run, "globalBaseUrl", "globalTeamDomain",
-                false, "globalChannel", false, false, ":+1:", "slack","runcredentials", false, noSlackUserIdResolver);
+                false, "globalChannel", false, false, ":+1:", "slack", "runcredentials", false, noSlackUserIdResolver);
         verify(slackServiceMock, times(1)).publish("message", "");
     }
 
@@ -340,7 +350,7 @@ public class SlackSendStepTest {
 
         when(Jenkins.get()).thenReturn(jenkins);
 
-        PowerMockito.when(CredentialsObtainer.getTokenToUse(eq("globalTokenCredentialId"), any(Item.class), any())).thenReturn("token");
+        credentialsObtainerMockedStatic.when(() -> CredentialsObtainer.getTokenToUse(eq("globalTokenCredentialId"), any(), any())).thenReturn("token");
 
         when(stepContextMock.get(Project.class)).thenReturn(project);
 
@@ -376,7 +386,7 @@ public class SlackSendStepTest {
 
         when(Jenkins.get()).thenReturn(jenkins);
 
-        PowerMockito.when(CredentialsObtainer.getTokenToUse(eq("globalTokenCredentialId"), any(Item.class), any())).thenReturn("token");
+        credentialsObtainerMockedStatic.when(() -> CredentialsObtainer.getTokenToUse(eq("globalTokenCredentialId"), any(), any())).thenReturn("token");
 
         when(stepContextMock.get(Project.class)).thenReturn(project);
 
@@ -398,7 +408,7 @@ public class SlackSendStepTest {
 
         stepExecution.run();
         verify(stepExecution, times(1)).getSlackService(run, "globalBaseUrl", "globalTeamDomain", false, "globalChannel",
-                false, true,":+1:", "slack","token", false, noSlackUserIdResolver);
+                false, true, ":+1:", "slack", "token", false, noSlackUserIdResolver);
         verify(slackServiceMock, times(1)).publish("message", new JSONArray(), "");
     }
 
@@ -412,7 +422,7 @@ public class SlackSendStepTest {
 
         when(Jenkins.get()).thenReturn(jenkins);
 
-        PowerMockito.when(CredentialsObtainer.getTokenToUse(eq("globalTokenCredentialId"), any(Item.class), any())).thenReturn("token");
+        credentialsObtainerMockedStatic.when(() -> CredentialsObtainer.getTokenToUse(eq("globalTokenCredentialId"), any(), any())).thenReturn("token");
 
         when(stepContextMock.get(Project.class)).thenReturn(project);
 
@@ -447,7 +457,7 @@ public class SlackSendStepTest {
 
         when(Jenkins.get()).thenReturn(jenkins);
 
-        PowerMockito.when(CredentialsObtainer.getTokenToUse(eq("globalTokenCredentialId"), any(Item.class), any())).thenReturn("token");
+        credentialsObtainerMockedStatic.when(() -> CredentialsObtainer.getTokenToUse(eq("globalTokenCredentialId"), any(), any())).thenReturn("token");
 
         when(stepContextMock.get(Project.class)).thenReturn(project);
 
@@ -483,7 +493,7 @@ public class SlackSendStepTest {
 
         when(Jenkins.get()).thenReturn(jenkins);
 
-        PowerMockito.when(CredentialsObtainer.getTokenToUse(eq("globalTokenCredentialId"), any(Item.class), any())).thenReturn("token");
+        credentialsObtainerMockedStatic.when(() -> CredentialsObtainer.getTokenToUse(eq("globalTokenCredentialId"), any(), any())).thenReturn("token");
 
         when(stepContextMock.get(Project.class)).thenReturn(project);
 
@@ -522,7 +532,7 @@ public class SlackSendStepTest {
 
         when(Jenkins.get()).thenReturn(jenkins);
 
-        PowerMockito.when(CredentialsObtainer.getTokenToUse(anyString(), any(Item.class), any())).thenReturn("token");
+        credentialsObtainerMockedStatic.when(() -> CredentialsObtainer.getTokenToUse(anyString(), any(Item.class), any())).thenReturn("token");
 
         when(taskListenerMock.getLogger()).thenReturn(printStreamMock);
         doNothing().when(printStreamMock).println();
@@ -552,7 +562,7 @@ public class SlackSendStepTest {
 
         when(Jenkins.get()).thenReturn(jenkins);
 
-        PowerMockito.when(CredentialsObtainer.getTokenToUse(anyString(), any(Item.class), any())).thenReturn("token");
+        credentialsObtainerMockedStatic.when(() -> CredentialsObtainer.getTokenToUse(anyString(), any(Item.class), any())).thenReturn("token");
 
         when(taskListenerMock.getLogger()).thenReturn(printStreamMock);
         doNothing().when(printStreamMock).println();
@@ -577,7 +587,6 @@ public class SlackSendStepTest {
         assertEquals(expectedId, response.getChannelId());
         assertEquals(expectedTs, response.getTs());
         assertEquals(expectedThreadId, response.getThreadId());
-
     }
 
     @Test
@@ -599,7 +608,7 @@ public class SlackSendStepTest {
         NoSlackUserIdResolver noSlackUserIdResolver = new NoSlackUserIdResolver();
         when(slackDescMock.getSlackUserIdResolver()).thenReturn(noSlackUserIdResolver);
 
-        PowerMockito.when(CredentialsObtainer.getTokenToUse(eq("tokenCredentialId"), any(Item.class), any())).thenReturn("token");
+        credentialsObtainerMockedStatic.when(() -> CredentialsObtainer.getTokenToUse(eq("tokenCredentialId"), any(Item.class), any())).thenReturn("token");
 
         when(taskListenerMock.getLogger()).thenReturn(printStreamMock);
         doNothing().when(printStreamMock).println();

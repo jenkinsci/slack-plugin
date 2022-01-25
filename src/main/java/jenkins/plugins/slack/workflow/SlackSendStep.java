@@ -1,6 +1,7 @@
 package jenkins.plugins.slack.workflow;
 
 import com.google.common.collect.ImmutableSet;
+import edu.umd.cs.findbugs.annotations.NonNull;
 import groovy.json.JsonOutput;
 import hudson.AbortException;
 import hudson.Extension;
@@ -12,7 +13,6 @@ import hudson.util.ListBoxModel;
 import java.util.Objects;
 import java.util.Set;
 import java.util.logging.Logger;
-import javax.annotation.Nonnull;
 import jenkins.model.Jenkins;
 import jenkins.plugins.slack.CredentialsObtainer;
 import jenkins.plugins.slack.Messages;
@@ -64,7 +64,7 @@ public class SlackSendStep extends Step {
     private String username;
     private boolean notifyCommitters;
 
-    @Nonnull
+    @NonNull
     public String getMessage() {
         return message;
     }
@@ -244,7 +244,7 @@ public class SlackSendStep extends Step {
             return "slackSend";
         }
 
-        @Nonnull
+        @NonNull
         @Override
         public String getDisplayName() {
             return Messages.slackSendStepDisplayName();

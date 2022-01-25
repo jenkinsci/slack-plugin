@@ -1,6 +1,7 @@
 package jenkins.plugins.slack.pipeline;
 
 import com.google.common.collect.ImmutableSet;
+import edu.umd.cs.findbugs.annotations.NonNull;
 import hudson.Extension;
 import hudson.ProxyConfiguration;
 import hudson.Util;
@@ -13,7 +14,6 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import javax.annotation.Nonnull;
 import jenkins.model.Jenkins;
 import jenkins.plugins.slack.CredentialsObtainer;
 import jenkins.plugins.slack.HttpClient;
@@ -89,7 +89,7 @@ public class SlackUserIdFromEmailStep extends Step {
             return "slackUserIdFromEmail";
         }
 
-        @Nonnull
+        @NonNull
         @Override
         public String getDisplayName() {
             return Messages.slackUserIdFromEmailDisplayName();

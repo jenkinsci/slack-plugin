@@ -1,6 +1,7 @@
 package jenkins.plugins.slack.pipeline;
 
 import com.google.common.collect.ImmutableSet;
+import edu.umd.cs.findbugs.annotations.NonNull;
 import hudson.Extension;
 import hudson.FilePath;
 import hudson.Util;
@@ -12,7 +13,6 @@ import hudson.util.ListBoxModel;
 import java.io.IOException;
 import java.util.Set;
 import java.util.concurrent.ExecutionException;
-import javax.annotation.Nonnull;
 import jenkins.model.Jenkins;
 import jenkins.plugins.slack.CredentialsObtainer;
 import jenkins.plugins.slack.Messages;
@@ -90,7 +90,7 @@ public class SlackUploadFileStep extends Step {
             return "slackUploadFile";
         }
 
-        @Nonnull
+        @NonNull
         @Override
         public String getDisplayName() {
             return Messages.slackFileUploadDisplayName();
