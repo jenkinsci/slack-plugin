@@ -194,7 +194,7 @@ public class StandardSlackService implements SlackService {
             HttpPost post;
             String url;
 
-            if (!botUser || StringUtils.isNotEmpty(baseUrl)) {
+            if (!botUser) {
                 url = "https://" + teamDomain + "." + "slack.com" + "/services/hooks/jenkins-ci?token=" + populatedToken;
                 if (!StringUtils.isEmpty(baseUrl)) {
                     url = baseUrl + populatedToken;
