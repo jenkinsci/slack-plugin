@@ -20,7 +20,6 @@
         <gitHubRepo>jenkinsci/slack-plugin</gitHubRepo>
         <jenkins.version>2.289.1</jenkins.version>
         <hpi.compatibleSinceVersion>2.32</hpi.compatibleSinceVersion>
-        <java.level>8</java.level>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
         <hamcrest.version>2.2</hamcrest.version>
