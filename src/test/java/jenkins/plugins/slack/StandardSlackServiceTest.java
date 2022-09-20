@@ -302,4 +302,20 @@ public class StandardSlackServiceTest {
         assertTrue(service.publish("message"));
     }
 
+    @Test
+    public void shouldRemoveAReaction() {
+        StandardSlackServiceStub service = new StandardSlackServiceStub(
+                StandardSlackService.builder()
+                        .withBaseUrl("")
+                        .withTeamDomain("domain")
+                        .withBotUser(true)
+                        .withRoomId("#room1")
+                        .withPopulatedToken("token")
+                        .withUsername("username"));
+        CloseableHttpClientStub httpClientStub = new CloseableHttpClientStub();
+        httpClientStub.setHttpStatus(HttpStatus.SC_OK);
+        service.setHttpClient(httpClientStub);
+        assertTrue(service.removeReaction("#my-room", "12345", "thumbup"));
+    }
+
 }

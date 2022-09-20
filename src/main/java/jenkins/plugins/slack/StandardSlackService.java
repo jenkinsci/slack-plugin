@@ -427,6 +427,22 @@ public class StandardSlackService implements SlackService {
         return postToSlack("reactions.add", json);
     }
 
+    /**
+     * Remove an emoji reaction from a message.
+     */
+    @Override
+    public boolean removeReaction(String channelId, String timestamp, String emojiName) {
+        JSONObject json = SlackReactionRequest.builder()
+                .withChannelId(channelId)
+                .withTimestamp(timestamp)
+                .withEmojiName(emojiName)
+                .build()
+                .getBody();
+
+        logger.fine("Removing reaction:  " + json.toString());
+        return postToSlack("reactions.remove", json);
+    }
+
     private String getTokenToUse(String authTokenCredentialId, String token) {
         if (!StringUtils.isEmpty(authTokenCredentialId)) {
             StringCredentials credentials = CredentialsObtainer.lookupCredentials(authTokenCredentialId);
