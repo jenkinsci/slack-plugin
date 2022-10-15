@@ -8,3 +8,8 @@ updates:
     directory: /
     schedule:
       interval: weekly
+    ignore:
+      # Checkstyle >=10 requires Java 11+
+      - dependency-name: "com.puppycrawl.tools:checkstyle"
+        versions: [">= 10.0"]
+        
