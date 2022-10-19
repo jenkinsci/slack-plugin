@@ -326,34 +326,32 @@ public class SlackSendStep extends Step {
                 } else {
                     publishSuccess = slackService.publish(step.message, new JSONArray(), color);
                 }
-            } else if (step.attachments != null) {
-                JSONArray jsonArray = getAttachmentsAsJSONArray();
-                for (Object object : jsonArray) {
-                    if (object instanceof JSONObject) {
-                        JSONObject jsonNode = ((JSONObject) object);
-                        if (!jsonNode.has("fallback")) {
-                            jsonNode.put("fallback", step.message);
+            } else if (step.attachments != null || step.blocks != null) {
+                SlackRequest.SlackRequestBuilder requestBuilder = SlackRequest.builder()
+                    .withMessage(step.message)
+                    .withTimestamp(step.timestamp);
+
+                if (step.attachments != null) {
+                    JSONArray attachmentsJsonArray = getAttachmentsAsJSONArray();
+                    for (Object object : attachmentsJsonArray) {
+                        if (object instanceof JSONObject) {
+                            JSONObject jsonNode = ((JSONObject) object);
+                            if (!jsonNode.has("fallback")) {
+                                jsonNode.put("fallback", step.message);
+                            }
                         }
                     }
-                }
-                publishSuccess = slackService.publish(
-                        SlackRequest.builder()
-                                .withMessage(step.message)
-                                .withAttachments(jsonArray)
-                                .withColor(color)
-                                .withTimestamp(step.timestamp)
-                                .build()
-                );
-            } else if (step.blocks != null) {
-                JSONArray jsonArray = getBlocksAsJSONArray();
 
-                publishSuccess = slackService.publish(
-                        SlackRequest.builder()
-                                .withMessage(step.message)
-                                .withBlocks(jsonArray)
-                                .withTimestamp(step.timestamp)
-                                .build()
-                );
+                    requestBuilder = requestBuilder.withAttachments(attachmentsJsonArray)
+                        .withColor(color);
+                }
+
+                if (step.blocks != null) {
+                    JSONArray blocksJsonArray = getBlocksAsJSONArray();
+                    requestBuilder = requestBuilder.withBlocks(blocksJsonArray);
+                }
+
+                publishSuccess = slackService.publish(requestBuilder.build());
             } else if (step.message != null) {
                 if (step.timestamp != null) {
                     publishSuccess = slackService.publish(step.message, color, step.timestamp);
