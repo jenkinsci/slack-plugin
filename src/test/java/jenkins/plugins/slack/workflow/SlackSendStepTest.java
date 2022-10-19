@@ -224,6 +224,64 @@ public class SlackSendStepTest {
     }
 
     @Test
+    public void testStepWithAttachmentsAndBlocks() throws Exception {
+        SlackSendStep step = new SlackSendStep();
+        step.setMessage("message");
+        step.setTokenCredentialId("tokenCredentialId");
+        step.setBotUser(true);
+        step.setTeamDomain("teamDomain");
+        step.setChannel("channel");
+
+        JSONArray attachments = new JSONArray();
+        JSONObject jsonObject = new JSONObject();
+        jsonObject.put("title", "Title of the message");
+        jsonObject.put("author_name", "Name of the author");
+        jsonObject.put("author_icon", "Avatar for author");
+        attachments.add(jsonObject);
+
+        step.setAttachments(attachments.toString());
+
+        Map<String, String> blocks = new HashMap<>();
+        blocks.put("title", "Title of the message");
+        blocks.put("author_name", "Name of the author");
+        blocks.put("author_icon", "Avatar for author");
+
+        step.setBlocks(Collections.singletonList(blocks));
+
+        SlackSendStep.SlackSendStepExecution stepExecution = spy(new SlackSendStep.SlackSendStepExecution(step, stepContextMock));
+        ((JSONObject) attachments.get(0)).put("fallback", "message");
+
+        when(Jenkins.get()).thenReturn(jenkins);
+
+        credentialsObtainerMockedStatic.when(() -> CredentialsObtainer.getTokenToUse(anyString(), any(Item.class), any())).thenReturn("token");
+
+        when(taskListenerMock.getLogger()).thenReturn(printStreamMock);
+        NoSlackUserIdResolver noSlackUserIdResolver = new NoSlackUserIdResolver();
+        when(slackDescMock.getSlackUserIdResolver()).thenReturn(noSlackUserIdResolver);
+
+        doNothing().when(printStreamMock).println();
+
+        when(stepExecution.getSlackService(eq(run), any(), anyString(), anyBoolean(), anyString(), anyBoolean(), anyBoolean(), any(), any(), any(), anyBoolean(), any(SlackUserIdResolver.class))).thenReturn(slackServiceMock);
+
+        stepExecution.run();
+        verify(slackServiceMock, times(0)).publish("message", "");
+
+        JSONArray expectedBlocks = new JSONArray();
+        JSONObject blockJsonObject = new JSONObject();
+        blockJsonObject.put("title", "Title of the message");
+        blockJsonObject.put("author_name", "Name of the author");
+        blockJsonObject.put("author_icon", "Avatar for author");
+        expectedBlocks.add(blockJsonObject);
+
+        SlackRequest expectedSlackRequest = SlackRequest.builder()
+                .withAttachments(attachments)
+                .withBlocks(expectedBlocks)
+                .withMessage("message")
+                .withColor("").build();
+        verify(slackServiceMock, times(1)).publish(expectedSlackRequest);
+    }
+
+    @Test
     public void testStepWithAttachmentsAsListOfMap() throws Exception {
         SlackSendStep step = new SlackSendStep();
         step.setMessage("message");

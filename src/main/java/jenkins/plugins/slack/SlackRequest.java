@@ -13,7 +13,7 @@ public class SlackRequest {
     private final JSONArray blocks;
 
     private SlackRequest(String message, String color, JSONArray attachments, JSONArray blocks, String timestamp) {
-        if (blocks != null && color != null) {
+        if ((blocks != null && attachments == null) && color != null) {
             throw new IllegalArgumentException("Color is not supported when blocks are set");
         }
 
