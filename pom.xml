@@ -19,7 +19,7 @@
     <properties>
         <changelist>999999-SNAPSHOT</changelist>
         <gitHubRepo>jenkinsci/slack-plugin</gitHubRepo>
-        <jenkins.version>2.289.3</jenkins.version>
+        <jenkins.version>2.346.3</jenkins.version>
         <hpi.compatibleSinceVersion>2.32</hpi.compatibleSinceVersion>
         <checkstyle.failsOnError>true</checkstyle.failsOnError>
         <checkstyle.failOnViolation>true</checkstyle.failOnViolation>
@@ -50,8 +50,8 @@
         <dependencies>
             <dependency>
                 <groupId>io.jenkins.tools.bom</groupId>
-                <artifactId>bom-2.289.x</artifactId>
-                <version>1461.vb_3c6de28f2b_a_</version>
+                <artifactId>bom-2.346.x</artifactId>
+                <version>1678.vc1feb_6a_3c0f1</version>
                 <scope>import</scope>
                 <type>pom</type>
             </dependency>
