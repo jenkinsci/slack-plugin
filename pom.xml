@@ -5,7 +5,7 @@
     <parent>
         <groupId>org.jenkins-ci.plugins</groupId>
         <artifactId>plugin</artifactId>
-        <version>4.51</version>
+        <version>4.52</version>
         <relativePath />
     </parent>
 
@@ -19,7 +19,7 @@
     <properties>
         <changelist>999999-SNAPSHOT</changelist>
         <gitHubRepo>jenkinsci/slack-plugin</gitHubRepo>
-        <jenkins.version>2.346.3</jenkins.version>
+        <jenkins.version>2.361.4</jenkins.version>
         <hpi.compatibleSinceVersion>2.32</hpi.compatibleSinceVersion>
         <checkstyle.failsOnError>true</checkstyle.failsOnError>
         <checkstyle.failOnViolation>true</checkstyle.failOnViolation>
@@ -50,7 +50,7 @@
         <dependencies>
             <dependency>
                 <groupId>io.jenkins.tools.bom</groupId>
-                <artifactId>bom-2.346.x</artifactId>
+                <artifactId>bom-2.361.x</artifactId>
                 <version>1723.vcb_9fee52c9fc</version>
                 <scope>import</scope>
                 <type>pom</type>
