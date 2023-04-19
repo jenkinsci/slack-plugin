@@ -26,6 +26,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
 import org.mockito.MockedStatic;
+import org.mockito.Mockito;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -37,7 +38,6 @@ import static org.mockito.Mockito.anyString;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.mockStatic;
-import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -109,7 +109,11 @@ public class SlackSendStepTest {
         slackSendStep.setColor("good");
         slackSendStep.setIconEmoji(":+1:");
         slackSendStep.setUsername("slack");
-        SlackSendStep.SlackSendStepExecution stepExecution = spy(new SlackSendStep.SlackSendStepExecution(slackSendStep, stepContextMock));
+        SlackSendStep.SlackSendStepExecution stepExecution = mock(SlackSendStep.SlackSendStepExecution.class, Mockito.withSettings()
+                .spiedInstance(new SlackSendStep.SlackSendStepExecution(slackSendStep, stepContextMock))
+                .useConstructor(slackSendStep, stepContextMock)
+                .defaultAnswer(Mockito.CALLS_REAL_METHODS));
+
 
         when(Jenkins.get()).thenReturn(jenkins);
 
@@ -149,7 +153,10 @@ public class SlackSendStepTest {
         jsonObject.put("author_icon", "Avatar for author");
         attachments.add(jsonObject);
         step.setAttachments(attachments.toString());
-        SlackSendStep.SlackSendStepExecution stepExecution = spy(new SlackSendStep.SlackSendStepExecution(step, stepContextMock));
+        SlackSendStep.SlackSendStepExecution stepExecution = mock(SlackSendStep.SlackSendStepExecution.class, Mockito.withSettings()
+                .spiedInstance(new SlackSendStep.SlackSendStepExecution(step, stepContextMock))
+                .useConstructor(step, stepContextMock)
+                .defaultAnswer(Mockito.CALLS_REAL_METHODS));
         ((JSONObject) attachments.get(0)).put("fallback", "message");
 
         when(Jenkins.get()).thenReturn(jenkins);
@@ -191,7 +198,10 @@ public class SlackSendStepTest {
 
         step.setBlocks(Collections.singletonList(blocks));
 
-        SlackSendStep.SlackSendStepExecution stepExecution = spy(new SlackSendStep.SlackSendStepExecution(step, stepContextMock));
+        SlackSendStep.SlackSendStepExecution stepExecution = mock(SlackSendStep.SlackSendStepExecution.class, Mockito.withSettings()
+                .spiedInstance(new SlackSendStep.SlackSendStepExecution(step, stepContextMock))
+                .useConstructor(step, stepContextMock)
+                .defaultAnswer(Mockito.CALLS_REAL_METHODS));
 
         when(Jenkins.get()).thenReturn(jenkins);
 
@@ -248,7 +258,10 @@ public class SlackSendStepTest {
 
         step.setBlocks(Collections.singletonList(blocks));
 
-        SlackSendStep.SlackSendStepExecution stepExecution = spy(new SlackSendStep.SlackSendStepExecution(step, stepContextMock));
+        SlackSendStep.SlackSendStepExecution stepExecution = mock(SlackSendStep.SlackSendStepExecution.class, Mockito.withSettings()
+                .spiedInstance(new SlackSendStep.SlackSendStepExecution(step, stepContextMock))
+                .useConstructor(step, stepContextMock)
+                .defaultAnswer(Mockito.CALLS_REAL_METHODS));
         ((JSONObject) attachments.get(0)).put("fallback", "message");
 
         when(Jenkins.get()).thenReturn(jenkins);
@@ -296,7 +309,10 @@ public class SlackSendStepTest {
         attachment1.put("author_icon", "Avatar for author");
 
         step.setAttachments(Collections.singletonList(attachment1));
-        SlackSendStep.SlackSendStepExecution stepExecution = spy(new SlackSendStep.SlackSendStepExecution(step, stepContextMock));
+        SlackSendStep.SlackSendStepExecution stepExecution = mock(SlackSendStep.SlackSendStepExecution.class, Mockito.withSettings()
+                .spiedInstance(new SlackSendStep.SlackSendStepExecution(step, stepContextMock))
+                .useConstructor(step, stepContextMock)
+                .defaultAnswer(Mockito.CALLS_REAL_METHODS));
 
         when(Jenkins.get()).thenReturn(jenkins);
 
@@ -333,7 +349,10 @@ public class SlackSendStepTest {
         SlackSendStep step = new SlackSendStep();
         step.setMessage("message");
 
-        SlackSendStep.SlackSendStepExecution stepExecution = spy(new SlackSendStep.SlackSendStepExecution(step, stepContextMock));
+        SlackSendStep.SlackSendStepExecution stepExecution = mock(SlackSendStep.SlackSendStepExecution.class, Mockito.withSettings()
+                .spiedInstance(new SlackSendStep.SlackSendStepExecution(step, stepContextMock))
+                .useConstructor(step, stepContextMock)
+                .defaultAnswer(Mockito.CALLS_REAL_METHODS));
 
         when(Jenkins.get()).thenReturn(jenkins);
 
@@ -369,7 +388,10 @@ public class SlackSendStepTest {
         SlackSendStep step = new SlackSendStep();
         step.setMessage("message");
 
-        SlackSendStep.SlackSendStepExecution stepExecution = spy(new SlackSendStep.SlackSendStepExecution(step, stepContextMock));
+        SlackSendStep.SlackSendStepExecution stepExecution = mock(SlackSendStep.SlackSendStepExecution.class, Mockito.withSettings()
+                .spiedInstance(new SlackSendStep.SlackSendStepExecution(step, stepContextMock))
+                .useConstructor(step, stepContextMock)
+                .defaultAnswer(Mockito.CALLS_REAL_METHODS));
         when(Jenkins.get()).thenReturn(jenkins);
         when(run.getParent()).thenReturn(project);
 
@@ -404,7 +426,10 @@ public class SlackSendStepTest {
         step.setMessage("message");
         step.setReplyBroadcast(true);
 
-        SlackSendStep.SlackSendStepExecution stepExecution = spy(new SlackSendStep.SlackSendStepExecution(step, stepContextMock));
+        SlackSendStep.SlackSendStepExecution stepExecution = mock(SlackSendStep.SlackSendStepExecution.class, Mockito.withSettings()
+                .spiedInstance(new SlackSendStep.SlackSendStepExecution(step, stepContextMock))
+                .useConstructor(step, stepContextMock)
+                .defaultAnswer(Mockito.CALLS_REAL_METHODS));
 
         when(Jenkins.get()).thenReturn(jenkins);
 
@@ -440,7 +465,10 @@ public class SlackSendStepTest {
         step.setMessage("message");
         step.setSendAsText(true);
 
-        SlackSendStep.SlackSendStepExecution stepExecution = spy(new SlackSendStep.SlackSendStepExecution(step, stepContextMock));
+        SlackSendStep.SlackSendStepExecution stepExecution = mock(SlackSendStep.SlackSendStepExecution.class, Mockito.withSettings()
+                .spiedInstance(new SlackSendStep.SlackSendStepExecution(step, stepContextMock))
+                .useConstructor(step, stepContextMock)
+                .defaultAnswer(Mockito.CALLS_REAL_METHODS));
 
         when(Jenkins.get()).thenReturn(jenkins);
 
@@ -476,7 +504,10 @@ public class SlackSendStepTest {
         step.setMessage("message");
         step.setIconEmoji(":+1:");
 
-        SlackSendStep.SlackSendStepExecution stepExecution = spy(new SlackSendStep.SlackSendStepExecution(step, stepContextMock));
+        SlackSendStep.SlackSendStepExecution stepExecution = mock(SlackSendStep.SlackSendStepExecution.class, Mockito.withSettings()
+                .spiedInstance(new SlackSendStep.SlackSendStepExecution(step, stepContextMock))
+                .useConstructor(step, stepContextMock)
+                .defaultAnswer(Mockito.CALLS_REAL_METHODS));
 
         when(Jenkins.get()).thenReturn(jenkins);
 
@@ -511,7 +542,10 @@ public class SlackSendStepTest {
         step.setMessage("message");
         step.setUsername("username");
 
-        SlackSendStep.SlackSendStepExecution stepExecution = spy(new SlackSendStep.SlackSendStepExecution(step, stepContextMock));
+        SlackSendStep.SlackSendStepExecution stepExecution = mock(SlackSendStep.SlackSendStepExecution.class, Mockito.withSettings()
+                .spiedInstance(new SlackSendStep.SlackSendStepExecution(step, stepContextMock))
+                .useConstructor(step, stepContextMock)
+                .defaultAnswer(Mockito.CALLS_REAL_METHODS));
 
         when(Jenkins.get()).thenReturn(jenkins);
 
@@ -547,7 +581,10 @@ public class SlackSendStepTest {
         step.setUsername("username");
         step.setTimestamp("1241242.124124");
 
-        SlackSendStep.SlackSendStepExecution stepExecution = spy(new SlackSendStep.SlackSendStepExecution(step, stepContextMock));
+        SlackSendStep.SlackSendStepExecution stepExecution = mock(SlackSendStep.SlackSendStepExecution.class, Mockito.withSettings()
+                .spiedInstance(new SlackSendStep.SlackSendStepExecution(step, stepContextMock))
+                .useConstructor(step, stepContextMock)
+                .defaultAnswer(Mockito.CALLS_REAL_METHODS));
 
         when(Jenkins.get()).thenReturn(jenkins);
 
@@ -586,7 +623,10 @@ public class SlackSendStepTest {
         step.setTeamDomain("teamDomain");
         step.setChannel("channel");
 
-        SlackSendStep.SlackSendStepExecution stepExecution = spy(new SlackSendStep.SlackSendStepExecution(step, stepContextMock));
+        SlackSendStep.SlackSendStepExecution stepExecution = mock(SlackSendStep.SlackSendStepExecution.class, Mockito.withSettings()
+                .spiedInstance(new SlackSendStep.SlackSendStepExecution(step, stepContextMock))
+                .useConstructor(step, stepContextMock)
+                .defaultAnswer(Mockito.CALLS_REAL_METHODS));
 
         when(Jenkins.get()).thenReturn(jenkins);
 
@@ -616,7 +656,10 @@ public class SlackSendStepTest {
         step.setChannel("channel");
         step.setColor("good");
 
-        SlackSendStep.SlackSendStepExecution stepExecution = spy(new SlackSendStep.SlackSendStepExecution(step, stepContextMock));
+        SlackSendStep.SlackSendStepExecution stepExecution = mock(SlackSendStep.SlackSendStepExecution.class, Mockito.withSettings()
+                .spiedInstance(new SlackSendStep.SlackSendStepExecution(step, stepContextMock))
+                .useConstructor(step, stepContextMock)
+                .defaultAnswer(Mockito.CALLS_REAL_METHODS));
 
         when(Jenkins.get()).thenReturn(jenkins);
 
@@ -659,7 +702,10 @@ public class SlackSendStepTest {
         step.setChannel("channel");
         step.setColor("good");
 
-        SlackSendStep.SlackSendStepExecution stepExecution = spy(new SlackSendStep.SlackSendStepExecution(step, stepContextMock));
+        SlackSendStep.SlackSendStepExecution stepExecution = mock(SlackSendStep.SlackSendStepExecution.class, Mockito.withSettings()
+                .spiedInstance(new SlackSendStep.SlackSendStepExecution(step, stepContextMock))
+                .useConstructor(step, stepContextMock)
+                .defaultAnswer(Mockito.CALLS_REAL_METHODS));
 
         when(Jenkins.get()).thenReturn(jenkins);
 
