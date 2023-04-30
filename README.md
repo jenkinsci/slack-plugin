@@ -4,7 +4,6 @@
 [![Jenkins Plugin][plugin-version-badge]][plugin]
 [![GitHub release][github-release-badge]][github-release]
 [![Jenkins Plugin Installs][plugin-install-badge]][plugin]
-[![Slack Signup][slack-badge]][slack-signup] (click to sign up)
 
 Provides Jenkins notification integration with Slack or Slack compatible
 applications like [RocketChat][rocketchat] and [Mattermost][mattermost].
