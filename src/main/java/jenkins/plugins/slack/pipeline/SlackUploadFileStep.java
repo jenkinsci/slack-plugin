@@ -134,7 +134,7 @@ public class SlackUploadFileStep extends Step {
             VirtualChannel virtualChannel = filePath.getChannel();
             assert virtualChannel != null;
 
-            virtualChannel.callAsync(new SlackUploadFileRunner(listener, Jenkins.get().proxy, slackFileRequest)).get();
+            virtualChannel.callAsync(new SlackUploadFileRunner(listener, slackFileRequest)).get();
 
             return null;
         }

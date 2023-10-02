@@ -1,7 +1,7 @@
 package jenkins.plugins.slack;
 
 import hudson.ProxyConfiguration;
-import jenkins.plugins.slack.NoProxyHostCheckerRoutePlanner;
+import jenkins.model.Jenkins;
 import org.apache.http.HttpHost;
 import org.apache.http.auth.AuthScope;
 import org.apache.http.auth.Credentials;
@@ -20,7 +20,7 @@ import org.kohsuke.accmod.restrictions.NoExternalUse;
 @Restricted(NoExternalUse.class)
 public class HttpClient {
 
-    public static CloseableHttpClient getCloseableHttpClient(ProxyConfiguration proxy) {
+    public static CloseableHttpClient getCloseableHttpClient() {
         int timeoutInSeconds = 60;
 
         RequestConfig config = RequestConfig.custom()
@@ -35,6 +35,8 @@ public class HttpClient {
         final CredentialsProvider credentialsProvider = new BasicCredentialsProvider();
         clientBuilder.setDefaultCredentialsProvider(credentialsProvider);
 
+        Jenkins jenkins = Jenkins.getInstanceOrNull();
+        ProxyConfiguration proxy = jenkins != null ? jenkins.proxy : null;
         if (proxy != null) {
             final HttpHost proxyHost = new HttpHost(proxy.name, proxy.port);
             final HttpRoutePlanner routePlanner = new NoProxyHostCheckerRoutePlanner(proxy.getNoProxyHost(), proxyHost);

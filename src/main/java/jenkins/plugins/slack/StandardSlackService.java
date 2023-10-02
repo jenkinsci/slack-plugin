@@ -2,7 +2,6 @@ package jenkins.plugins.slack;
 
 import com.google.common.annotations.VisibleForTesting;
 import hudson.FilePath;
-import hudson.ProxyConfiguration;
 import hudson.Util;
 import hudson.model.Run;
 import hudson.model.TaskListener;
@@ -19,7 +18,6 @@ import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
-import jenkins.model.Jenkins;
 import jenkins.plugins.slack.pipeline.SlackFileRequest;
 import jenkins.plugins.slack.pipeline.SlackUploadFileRunner;
 import jenkins.plugins.slack.user.SlackUserIdResolver;
@@ -259,7 +257,7 @@ public class StandardSlackService implements SlackService {
                 SlackFileRequest slackFileRequest = new SlackFileRequest(
                 workspace, populatedToken, roomId, null, artifactIncludes);
                 try {
-                    workspace.getChannel().callAsync(new SlackUploadFileRunner(log, Jenkins.get().proxy, slackFileRequest)).get();
+                    workspace.getChannel().callAsync(new SlackUploadFileRunner(log, slackFileRequest)).get();
                 } catch (IllegalStateException | InterruptedException e) {
                     logger.log(Level.WARNING, "Exception", e);
                     result = false;
@@ -467,9 +465,7 @@ public class StandardSlackService implements SlackService {
     }
 
     protected CloseableHttpClient getHttpClient() {
-        Jenkins jenkins = Jenkins.getInstanceOrNull();
-        ProxyConfiguration proxy = jenkins != null ? jenkins.proxy : null;
-        return HttpClient.getCloseableHttpClient(proxy);
+        return HttpClient.getCloseableHttpClient();
     }
 
     @VisibleForTesting

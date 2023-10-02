@@ -3,7 +3,6 @@ package jenkins.plugins.slack.pipeline;
 import com.google.common.collect.ImmutableSet;
 import edu.umd.cs.findbugs.annotations.NonNull;
 import hudson.Extension;
-import hudson.ProxyConfiguration;
 import hudson.Util;
 import hudson.model.Item;
 import hudson.model.Run;
@@ -150,9 +149,7 @@ public class SlackUserIdFromEmailStep extends Step {
         }
 
         protected CloseableHttpClient getHttpClient() {
-            final Jenkins jenkins = Jenkins.getInstanceOrNull();
-            final ProxyConfiguration proxy = jenkins != null ? jenkins.proxy : null;
-            return HttpClient.getCloseableHttpClient(proxy);
+            return HttpClient.getCloseableHttpClient();
         }
 
     }

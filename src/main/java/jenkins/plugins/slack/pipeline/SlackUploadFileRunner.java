@@ -1,7 +1,6 @@
 package jenkins.plugins.slack.pipeline;
 
 import hudson.FilePath;
-import hudson.ProxyConfiguration;
 import hudson.model.TaskListener;
 import hudson.util.DirScanner;
 import hudson.util.FileVisitor;
@@ -41,16 +40,14 @@ public class SlackUploadFileRunner extends MasterToSlaveCallable<Boolean, Throwa
 
     private final TaskListener listener;
     private final String initialComment;
-    private final ProxyConfiguration proxy;
 
-    public SlackUploadFileRunner(TaskListener listener, ProxyConfiguration proxy, SlackFileRequest slackFileRequest) {
+    public SlackUploadFileRunner(TaskListener listener, SlackFileRequest slackFileRequest) {
         this.listener = listener;
         this.filePath = slackFileRequest.getFilePath();
         this.fileToUploadPath = slackFileRequest.getFileToUploadPath();
         this.channels = slackFileRequest.getChannels();
         this.initialComment = slackFileRequest.getInitialComment();
         this.token = slackFileRequest.getToken();
-        this.proxy = proxy;
     }
 
     @Override
@@ -79,7 +76,7 @@ public class SlackUploadFileRunner extends MasterToSlaveCallable<Boolean, Throwa
     }
 
     private boolean doIt(List<File> files) {
-            CloseableHttpClient client = HttpClient.getCloseableHttpClient(proxy);
+            CloseableHttpClient client = HttpClient.getCloseableHttpClient();
             String threadTs = null;
             String theChannels = channels;
 

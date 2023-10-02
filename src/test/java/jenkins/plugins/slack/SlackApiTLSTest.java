@@ -16,7 +16,7 @@ public class SlackApiTLSTest {
 
     @Test
     public void connectToAPI() {
-        try (CloseableHttpClient httpClient = HttpClient.getCloseableHttpClient(null)) {
+        try (CloseableHttpClient httpClient = HttpClient.getCloseableHttpClient()) {
             HttpPost post = new HttpPost(SLACK_API_TEST);
             post.setHeader("Content-Type", "application/json; charset=utf-8");
             try (CloseableHttpResponse response = httpClient.execute(post)) {
