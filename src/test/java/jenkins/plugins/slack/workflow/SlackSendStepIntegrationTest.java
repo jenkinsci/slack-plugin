@@ -50,4 +50,12 @@ public class SlackSendStepIntegrationTest {
         //everything should come from step configuration
         jenkinsRule.assertLogContains(Messages.notificationFailed(), run);
     }
+
+    @Test
+    public void test_fail_on_missing_message() throws Exception {
+        WorkflowJob job = jenkinsRule.jenkins.createProject(WorkflowJob.class, "workflow");
+        //with a null message
+        job.setDefinition(new CpsFlowDefinition("slackSend(message: null, baseUrl: 'baseUrl', teamDomain: 'teamDomain', token: 'token', tokenCredentialId: 'tokenCredentialId', channel: '#channel', color: 'good', failOnError: true);", true));
+        jenkinsRule.assertBuildStatus(Result.FAILURE, job.scheduleBuild2(0).get());
+    }
 }
