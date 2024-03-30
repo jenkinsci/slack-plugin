@@ -62,14 +62,11 @@ public abstract class SlackUserIdResolver extends AbstractDescribableImpl<SlackU
         SlackUserProperty userProperty = user.getProperty(SlackUserProperty.class);
         if (userProperty != null) {
             userId = userProperty.getUserId();
-        } else {
-            userProperty = new SlackUserProperty();
         }
 
         if (StringUtils.isEmpty(userId)) {
-            userId = resolveUserId(user);
-            if (userId != null) {
-                userProperty.setUserId(userId);
+            userProperty = resolveUserPropertyFromSlack(user);
+            if (userProperty.getUserId() != null) {
                 try {
                     user.addProperty(userProperty);
                 } catch (IOException ex) {
@@ -82,7 +79,7 @@ public abstract class SlackUserIdResolver extends AbstractDescribableImpl<SlackU
         return enableNotifications ? userId : null;
     }
 
-    protected abstract String resolveUserId(User user);
+    protected abstract SlackUserProperty resolveUserPropertyFromSlack(User user);
 
     @SuppressWarnings("unchecked")
     public List<String> resolveUserIdsForRun(Run run) {
