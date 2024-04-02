@@ -102,6 +102,8 @@ public class EmailSlackUserIdResolver extends SlackUserIdResolver {
             .map(resolver -> {
                 try {
                     String email = resolver.findMailAddressFor(user);
+                    LOGGER.log(Level.FINEST, String.format(
+                            "The email resolver '%s' resolved %s as %s", resolver.getClass().getName(), user.getId(), email));
                     return email;
                 } catch (Exception ex) {
                     LOGGER.log(Level.WARNING, String.format(
@@ -192,9 +194,12 @@ public class EmailSlackUserIdResolver extends SlackUserIdResolver {
 
         SlackUserProperty userProperty = null;
         if(slackUserId != null){
+            LOGGER.fine(String.format("Found Slack ID '%s' for email '%s'", slackUserId, emailAddress));
             userProperty = new SlackUserProperty();
             userProperty.setDisableNotifications(false);
             userProperty.setUserId(slackUserId);
+        } else {
+            LOGGER.log(Level.INFO, String.format("Failed to resolve userId from Slack from email '%s'", emailAddress));
         }
         return userProperty;
     }
@@ -204,13 +209,19 @@ public class EmailSlackUserIdResolver extends SlackUserIdResolver {
 
         User user = User.get(baseUsername, false, null);
         if(user == null){
+            LOGGER.log(Level.INFO, String.format("Could not find user with name '%s' from email '%s'", baseUsername, emailAddress));
             return null;
         }
         String userEmail = resolveUserEmail(user);
-        if(userEmail != emailAddress){
+        if(userEmail != null && userEmail != emailAddress){
+            LOGGER.log(Level.INFO, String.format("User with name '%s' does not match expected email '%s': have '%s'", baseUsername, emailAddress, userEmail));
             return null;
         }
         SlackUserProperty userProperty = user.getProperty(SlackUserProperty.class);
+        if(userProperty == null){
+            LOGGER.log(Level.INFO, String.format("User with name '%s' does not have slack property", baseUsername));
+        }
+        LOGGER.fine(String.format("Found Slack ID '%s' for user '%s'", userProperty.getUserId(), baseUsername));
         return userProperty;
     }
 
