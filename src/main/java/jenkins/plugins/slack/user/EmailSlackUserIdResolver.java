@@ -29,6 +29,7 @@ import hudson.model.User;
 import hudson.tasks.MailAddressResolver;
 import java.io.IOException;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -205,29 +206,38 @@ public class EmailSlackUserIdResolver extends SlackUserIdResolver {
     }
 
     private SlackUserProperty resolveSlackPropertyFromEmailViaInferredUsername(String emailAddress){
+        if (StringUtils.isEmpty(emailAddress)) {
+            return null;
+        }
+
         String baseUsername = emailAddress.split("@")[0];
 
-        User user = User.get(baseUsername, false, null);
+        User user = User.get(baseUsername, false, Collections.emptyMap());
         if(user == null){
             LOGGER.log(Level.INFO, String.format("Could not find user with name '%s' from email '%s'", baseUsername, emailAddress));
             return null;
         }
         String userEmail = resolveUserEmail(user);
-        if(userEmail != null && userEmail != emailAddress){
+        if(userEmail != null && !emailAddress.equals(userEmail)){
             LOGGER.log(Level.INFO, String.format("User with name '%s' does not match expected email '%s': have '%s'", baseUsername, emailAddress, userEmail));
             return null;
         }
         SlackUserProperty userProperty = user.getProperty(SlackUserProperty.class);
         if(userProperty == null){
             LOGGER.log(Level.INFO, String.format("User with name '%s' does not have slack property", baseUsername));
+        } else {
+            LOGGER.fine(String.format("Found Slack ID '%s' for user '%s'", userProperty.getUserId(), baseUsername));
         }
-        LOGGER.fine(String.format("Found Slack ID '%s' for user '%s'", userProperty.getUserId(), baseUsername));
         return userProperty;
     }
 
     private SlackUserProperty resolveSlackPropertyFromEmailViaUsers(String emailAddress){
+        if (StringUtils.isEmpty(emailAddress)) {
+            return null;
+        }
+
         List<User> usersWithEmailAddress = User.getAll().stream()
-            .filter(user -> resolveUserEmail(user) == emailAddress)
+            .filter(user -> emailAddress.equals(resolveUserEmail(user)))
             .collect(Collectors.toList());
         List<ResolvedUserConfig> usersPerId = usersWithEmailAddress.stream()
             .map(user -> new ResolvedUserConfig(user))
@@ -248,7 +258,7 @@ public class EmailSlackUserIdResolver extends SlackUserIdResolver {
         return null;
     }
 
-    private class ResolvedUserConfig {
+    private static class ResolvedUserConfig {
         private User user;
         private SlackUserProperty slackProperty;
         public ResolvedUserConfig(User user) {

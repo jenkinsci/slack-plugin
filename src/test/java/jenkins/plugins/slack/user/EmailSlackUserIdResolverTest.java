@@ -102,7 +102,7 @@ public class EmailSlackUserIdResolverTest {
         userProperty.setUserId(EXPECTED_USER_ID);
         when(mockUser.getProperty(SlackUserProperty.class)).thenReturn(userProperty);
         try (MockedStatic<User> userMock = Mockito.mockStatic(User.class)) {
-            userMock.when(() -> User.get(anyString(), anyBoolean(), eq(null))).thenReturn(mockUser);
+            userMock.when(() -> User.get(anyString(), anyBoolean(), any())).thenReturn(mockUser);
 
             userId = resolver.resolveUserIdForEmailAddress(EMAIL_ADDRESS);
 
@@ -122,7 +122,7 @@ public class EmailSlackUserIdResolverTest {
         when(mockUser.getProperty(SlackUserProperty.class)).thenReturn(userProperty);
         when(mailAddressResolver.findMailAddressFor(any(User.class))).thenReturn("nope@example.com");
         try (MockedStatic<User> userMock = Mockito.mockStatic(User.class)) {
-            userMock.when(() -> User.get(anyString(), anyBoolean(), eq(null))).thenReturn(mockUser);
+            userMock.when(() -> User.get(anyString(), anyBoolean(), any())).thenReturn(mockUser);
 
             userId = resolver.resolveUserIdForEmailAddress(EMAIL_ADDRESS);
 
