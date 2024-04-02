@@ -42,13 +42,20 @@ import org.junit.Before;
 import org.junit.Test;
 import org.jvnet.hudson.test.FakeChangeLogSCM.EntryImpl;
 import org.jvnet.hudson.test.FakeChangeLogSCM.FakeChangeLogSet;
+import org.mockito.MockedStatic;
+import org.mockito.Mockito;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.assertNotNull;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -78,18 +85,113 @@ public class EmailSlackUserIdResolverTest {
     }
 
     @Test
-    public void testResolveUserIdForEmailAddress() throws IOException {
+    public void testResolveUserIdForEmailAddressViaSlack() throws IOException {
         String userId;
 
-        // Test handling of a success response from Slack
         httpClient.setHttpResponse(getResponseOK());
         userId = resolver.resolveUserIdForEmailAddress(EMAIL_ADDRESS);
         assertEquals(EXPECTED_USER_ID, userId);
+    }
 
-        // Test handling of an error response from Slack
+    @Test
+    public void testResolveUserIdFindByInferredUsername() throws IOException {
+        String userId;
         httpClient.setHttpResponse(getResponseError());
-        userId = resolver.resolveUserIdForEmailAddress(EMAIL_ADDRESS);
-        assertNull(userId);
+        User mockUser = mock(User.class);
+        SlackUserProperty userProperty = new SlackUserProperty();
+        userProperty.setUserId(EXPECTED_USER_ID);
+        when(mockUser.getProperty(SlackUserProperty.class)).thenReturn(userProperty);
+        try (MockedStatic<User> userMock = Mockito.mockStatic(User.class)) {
+            userMock.when(() -> User.get(anyString(), anyBoolean(), eq(null))).thenReturn(mockUser);
+
+            userId = resolver.resolveUserIdForEmailAddress(EMAIL_ADDRESS);
+
+            assertEquals(EXPECTED_USER_ID, userId);
+            verify(mailAddressResolver, times(1)).findMailAddressFor(mockUser);
+            userMock.verify(() -> User.get(eq("spengler"), eq(false), any()), times(1));
+        }
+    }
+
+    @Test
+    public void testResolveUserIdFindByInferredUsernameBadEmail() throws IOException {
+        String userId;
+        httpClient.setHttpResponse(getResponseError());
+        User mockUser = mock(User.class);
+        SlackUserProperty userProperty = new SlackUserProperty();
+        userProperty.setUserId(EXPECTED_USER_ID);
+        when(mockUser.getProperty(SlackUserProperty.class)).thenReturn(userProperty);
+        when(mailAddressResolver.findMailAddressFor(any(User.class))).thenReturn("nope@example.com");
+        try (MockedStatic<User> userMock = Mockito.mockStatic(User.class)) {
+            userMock.when(() -> User.get(anyString(), anyBoolean(), eq(null))).thenReturn(mockUser);
+
+            userId = resolver.resolveUserIdForEmailAddress(EMAIL_ADDRESS);
+
+            assertNull(userId);
+            verify(mailAddressResolver, times(1)).findMailAddressFor(mockUser);
+            userMock.verify(() -> User.get(eq("spengler"), eq(false), any()), times(1));
+        }
+    }
+
+    @Test
+    public void testResolveUserIdFindByUsersListing() throws IOException {
+        String userId;
+        httpClient.setHttpResponse(getResponseError());
+        User mockUser = mock(User.class);
+        SlackUserProperty userProperty = new SlackUserProperty();
+        userProperty.setUserId(EXPECTED_USER_ID);
+        when(mockUser.getProperty(SlackUserProperty.class)).thenReturn(userProperty);
+        try (MockedStatic<User> userMock = Mockito.mockStatic(User.class)) {
+            userMock.when(() -> User.get(anyString(), anyBoolean(), eq(null))).thenReturn(null);
+            userMock.when(() -> User.getAll()).thenReturn(Collections.singletonList(mockUser));
+
+            userId = resolver.resolveUserIdForEmailAddress(EMAIL_ADDRESS);
+
+            assertEquals(EXPECTED_USER_ID, userId);
+            verify(mailAddressResolver, times(1)).findMailAddressFor(mockUser);
+            userMock.verify(() -> User.get(eq("spengler"), eq(false), any()), times(1));
+        }
+    }
+
+    @Test
+    public void testResolveUserIdForUserWithoutResolvableEmailAddress() throws Exception {
+        mailAddressResolver = mock(MailAddressResolver.class);
+        resolver = new EmailSlackUserIdResolver(AUTH_TOKEN, httpClient, Collections.emptyList(), user -> null);
+        httpClient.setHttpResponse(getResponseOK());
+
+        SlackUserProperty userProperty = resolver.fetchUserSlackProperty(mock(User.class));
+        assertNull(userProperty);
+    }
+
+    @Test
+    public void testResolveUserIdForUserWithResolvableEmailAddressViaResolver() throws Exception {
+        resolver = new EmailSlackUserIdResolver(AUTH_TOKEN, httpClient, Collections.singletonList(mailAddressResolver), user -> null);
+        httpClient.setHttpResponse(getResponseOK());
+
+        SlackUserProperty userProperty = resolver.fetchUserSlackProperty(mock(User.class));
+        assertNotNull(userProperty);
+        assertEquals(EXPECTED_USER_ID, userProperty.getUserId());
+        assertEquals(false, userProperty.getDisableNotifications());
+    }
+
+    @Test
+    public void testResolveUserIdWithoutAuthToken() throws Exception {
+        mailAddressResolver = mock(MailAddressResolver.class);
+        resolver = new EmailSlackUserIdResolver(AUTH_TOKEN, httpClient, Collections.singletonList(mailAddressResolver), user -> EMAIL_ADDRESS);
+        resolver.setAuthToken(null);
+        httpClient.setHttpResponse(getResponseOK());
+
+        SlackUserProperty userProperty = resolver.fetchUserSlackProperty(mock(User.class));
+        assertNull(userProperty);
+    }
+
+    @Test
+    public void testResolveUserIdForUserWithoutDefaultMailAddressResolver() throws Exception {
+        mailAddressResolver = mock(MailAddressResolver.class);
+        resolver = new EmailSlackUserIdResolver(AUTH_TOKEN, httpClient, Collections.singletonList(mailAddressResolver), null);
+        httpClient.setHttpResponse(getResponseOK());
+
+        SlackUserProperty userProperty = resolver.fetchUserSlackProperty(mock(User.class));
+        assertNull(userProperty);
     }
 
     @Test
@@ -102,40 +204,9 @@ public class EmailSlackUserIdResolverTest {
     }
 
     @Test
-    public void testResolveUserIdForUserWithoutEmailAddress() throws Exception {
-        mailAddressResolver = mock(MailAddressResolver.class);
-        resolver = new EmailSlackUserIdResolver(AUTH_TOKEN, httpClient, Collections.singletonList(mailAddressResolver), user -> null);
-        httpClient.setHttpResponse(getResponseOK());
-
-        String userId = resolver.resolveUserId(mock(User.class));
-        assertNull(userId);
-    }
-
-    @Test
-    public void testResolveUserIdWithoutAuthToken() throws Exception {
-        mailAddressResolver = mock(MailAddressResolver.class);
-        resolver = new EmailSlackUserIdResolver(AUTH_TOKEN, httpClient, Collections.singletonList(mailAddressResolver), user -> EMAIL_ADDRESS);
-        resolver.setAuthToken(null);
-        httpClient.setHttpResponse(getResponseOK());
-
-        String userId = resolver.resolveUserId(mock(User.class));
-        assertNull(userId);
-    }
-
-    @Test
-    public void testResolveUserIdForUserWithoutDefaultMailAddressResolver() throws Exception {
-        mailAddressResolver = mock(MailAddressResolver.class);
-        resolver = new EmailSlackUserIdResolver(AUTH_TOKEN, httpClient, Collections.singletonList(mailAddressResolver), null);
-        httpClient.setHttpResponse(getResponseOK());
-
-        String userId = resolver.resolveUserId(mock(User.class));
-        assertNull(userId);
-    }
-
-    @Test
     public void testResolveUserIdForUserWithoutResolver() throws Exception {
 
-        resolver = new EmailSlackUserIdResolver(AUTH_TOKEN, httpClient, null, user -> {return EMAIL_ADDRESS;});
+        resolver = new EmailSlackUserIdResolver(AUTH_TOKEN, httpClient, null, user -> EMAIL_ADDRESS);
         httpClient.setHttpResponse(getResponseOK());
 
         String userId = resolver.findOrResolveUserId(mock(User.class));

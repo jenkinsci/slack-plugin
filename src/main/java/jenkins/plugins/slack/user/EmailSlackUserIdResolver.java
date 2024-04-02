@@ -101,7 +101,8 @@ public class EmailSlackUserIdResolver extends SlackUserIdResolver {
             .orElseGet(Stream::empty)
             .map(resolver -> {
                 try {
-                    return resolver.findMailAddressFor(user);
+                    String email = resolver.findMailAddressFor(user);
+                    return email;
                 } catch (Exception ex) {
                     LOGGER.log(Level.WARNING, String.format(
                             "The email resolver '%s' failed", resolver.getClass().getName()), ex);
@@ -113,7 +114,7 @@ public class EmailSlackUserIdResolver extends SlackUserIdResolver {
             .orElse(null);
     }
 
-    protected SlackUserProperty resolveUserPropertyFromSlack(User user) {
+    protected SlackUserProperty fetchUserSlackProperty(User user) {
         String userEmail = resolveUserEmail(user);
 
         SlackUserProperty userProperty = null;
@@ -132,7 +133,7 @@ public class EmailSlackUserIdResolver extends SlackUserIdResolver {
     }
 
     public String resolveUserIdForEmailAddress(String emailAddress) {
-        SlackUserProperty userProperty = resolveSlackPropertyForEmailAddress(emailAddress);
+        SlackUserProperty userProperty = resolveSlackProperty(emailAddress);
         if(userProperty == null){
             return null;
         }
@@ -142,7 +143,7 @@ public class EmailSlackUserIdResolver extends SlackUserIdResolver {
         return userProperty.getUserId();
     }
 
-    private SlackUserProperty resolveSlackPropertyForEmailAddress(String emailAddress) {
+    private SlackUserProperty resolveSlackProperty(String emailAddress) {
         if (StringUtils.isEmpty(emailAddress)) {
             LOGGER.fine("Email address was empty");
             return null;
@@ -150,7 +151,7 @@ public class EmailSlackUserIdResolver extends SlackUserIdResolver {
 
         SlackUserProperty userProperty = resolveSlackPropertyFromEmailViaSlack(emailAddress);
         if(userProperty == null) {
-            userProperty = resolveSlackPropertyFromEmailViaInferedUsername(emailAddress);
+            userProperty = resolveSlackPropertyFromEmailViaInferredUsername(emailAddress);
         }
         if(userProperty == null) {
             userProperty = resolveSlackPropertyFromEmailViaUsers(emailAddress);
@@ -161,6 +162,10 @@ public class EmailSlackUserIdResolver extends SlackUserIdResolver {
 
     private SlackUserProperty resolveSlackPropertyFromEmailViaSlack(String emailAddress){
         if (StringUtils.isEmpty(authToken)) {
+            LOGGER.fine("Auth token was empty");
+            return null;
+        }
+        if (StringUtils.isEmpty(emailAddress)) {
             LOGGER.fine("Auth token was empty");
             return null;
         }
@@ -194,10 +199,17 @@ public class EmailSlackUserIdResolver extends SlackUserIdResolver {
         return userProperty;
     }
 
-    private SlackUserProperty resolveSlackPropertyFromEmailViaInferedUsername(String emailAddress){
+    private SlackUserProperty resolveSlackPropertyFromEmailViaInferredUsername(String emailAddress){
         String baseUsername = emailAddress.split("@")[0];
 
         User user = User.get(baseUsername, false, null);
+        if(user == null){
+            return null;
+        }
+        String userEmail = resolveUserEmail(user);
+        if(userEmail != emailAddress){
+            return null;
+        }
         SlackUserProperty userProperty = user.getProperty(SlackUserProperty.class);
         return userProperty;
     }
@@ -205,17 +217,18 @@ public class EmailSlackUserIdResolver extends SlackUserIdResolver {
     private SlackUserProperty resolveSlackPropertyFromEmailViaUsers(String emailAddress){
         List<User> usersWithEmailAddress = User.getAll().stream()
             .filter(user -> resolveUserEmail(user) == emailAddress)
-            .toList();
+            .collect(Collectors.toList());
         List<ResolvedUserConfig> usersPerId = usersWithEmailAddress.stream()
             .map(user -> new ResolvedUserConfig(user))
             .filter(user -> user.slackProperty != null && user.slackProperty.getUserId() != null)
             .filter(distinctSlackUserProperties())
             .collect(Collectors.toList());
         if(usersPerId.size() > 1) {
-            Stream<String> conflictingUsersDisplayName = usersPerId.stream()
-                .map(resolved -> resolved.user.getDisplayName());
+            List<String> conflictingUsersDisplayName = usersPerId.stream()
+                .map(resolved -> resolved.user.getDisplayName())
+                .collect(Collectors.toList());
             LOGGER.log(Level.WARNING, String.format(
-                    "Multiple users found with email '%s' having different slack IDs or configuration: %s", emailAddress, String.join(",", conflictingUsersDisplayName.toList())));
+                    "Multiple users found with email '%s' having different slack IDs or configuration: %s", emailAddress, String.join(",", conflictingUsersDisplayName)));
         }
         Optional<ResolvedUserConfig> pickedUser = usersPerId.stream().findFirst();
         if(pickedUser.isPresent()) {
