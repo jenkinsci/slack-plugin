@@ -193,7 +193,7 @@ public class StandardSlackService implements SlackService {
         try (CloseableHttpClient client = getHttpClient()) {
             HttpPost post;
             String url;
-
+            String slackError = null;
             if (!botUser) {
                 url = "https://" + teamDomain + "." + "slack.com" + "/services/hooks/jenkins-ci?token=" + populatedToken;
                 if (!StringUtils.isEmpty(baseUrl)) {
@@ -217,15 +217,20 @@ public class StandardSlackService implements SlackService {
                 if (botUser && entity != null) {
                     responseString = EntityUtils.toString(entity);
                     try {
-
                         org.json.JSONObject slackResponse = new org.json.JSONObject(responseString);
                         result = slackResponse.getBoolean("ok");
+                        if(!result) {
+                            slackError = slackResponse.getString("error");
+                        }
                     } catch (org.json.JSONException ex) {
                         logger.log(Level.WARNING, "Slack post may have failed.  Invalid JSON response: " + responseString);
                         result = false;
                     }
                 }
-                if (responseCode != HttpStatus.SC_OK || !result) {
+                if (responseCode != HttpStatus.SC_OK && !result) {
+                    if(slackError != null) {
+                        logger.log(Level.WARNING, "Error from Slack API: " + slackError);
+                    }
                     logger.log(Level.WARNING, "Slack post may have failed. Response: " + responseString);
                     logger.log(Level.WARNING, "Response Code: " + responseCode);
                     result = false;
