@@ -19,7 +19,7 @@
     <properties>
         <changelist>999999-SNAPSHOT</changelist>
         <gitHubRepo>jenkinsci/slack-plugin</gitHubRepo>
-        <jenkins.version>2.361.4</jenkins.version>
+        <jenkins.version>2.426.3</jenkins.version>
         <hpi.compatibleSinceVersion>2.32</hpi.compatibleSinceVersion>
         <checkstyle.failsOnError>true</checkstyle.failsOnError>
         <checkstyle.failOnViolation>true</checkstyle.failOnViolation>
@@ -50,8 +50,8 @@
         <dependencies>
             <dependency>
                 <groupId>io.jenkins.tools.bom</groupId>
-                <artifactId>bom-2.361.x</artifactId>
-                <version>2102.v854b_fec19c92</version>
+                <artifactId>bom-2.426.x</artifactId>
+                <version>3023.v02a_987a_b_3ff9</version>
                 <scope>import</scope>
                 <type>pom</type>
             </dependency>
@@ -218,7 +218,6 @@
                         <configuration>
                             <configLocation>checkstyle.xml</configLocation>
                             <includeTestSourceDirectory>true</includeTestSourceDirectory>
-                            <encoding>UTF-8</encoding>
                             <consoleOutput>true</consoleOutput>
                             <failsOnError>${checkstyle.failsOnError}</failsOnError>
                             <failOnViolation>${checkstyle.failOnViolation}</failOnViolation>
