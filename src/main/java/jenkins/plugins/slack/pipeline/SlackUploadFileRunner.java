@@ -162,14 +162,16 @@ public class SlackUploadFileRunner extends MasterToSlaveCallable<Boolean, Throwa
         return jsonArray;
     }
 
-    private static ResponseHandler<JSONObject> getStandardResponseHandler() {
+    private ResponseHandler<JSONObject> getStandardResponseHandler() {
         return response -> {
             int status = response.getStatusLine().getStatusCode();
             if (status >= 200 && status < 300) {
                 HttpEntity entity = response.getEntity();
                 return entity != null ? new JSONObject(EntityUtils.toString(entity)) : null;
             } else {
-                logger.log(Level.WARNING, UPLOAD_FAILED_TEMPLATE + status);
+                String errorMessage = UPLOAD_FAILED_TEMPLATE + status + " " + EntityUtils.toString(response.getEntity());
+                listener.getLogger().println(errorMessage);
+                logger.log(Level.WARNING, errorMessage);
                 return null;
             }
         };
@@ -191,7 +193,12 @@ public class SlackUploadFileRunner extends MasterToSlaveCallable<Boolean, Throwa
         ResponseHandler<JSONObject> standardResponseHandler = getStandardResponseHandler();
         JSONObject result = client.execute(requestBuilder.build(), standardResponseHandler);
 
-        if (result == null || !result.getBoolean("ok")) {
+        if (result == null) {
+            // logging should have been done in the result handler where the response is available
+            return null;
+        }
+        if (!result.getBoolean("ok")) {
+            listener.getLogger().println("Couldn't convert channel name to ID in Slack: " + result);
             return null;
         }
 
