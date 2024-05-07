@@ -314,29 +314,47 @@ option.
 
 ### Creating your app
 
-Note: These docs may become outdated as Slack changes their website, if they do become outdated please send a PR here to update the docs.
+1. Go to <https://api.slack.com/apps> and click "Create New App".
+2. Click `From an app manifest
+3. Select your workspace
+4. Delete the example manifest that Slack provides
+5. Click YAML
+6. Paste the following into the text box:
 
-1.  Go to <https://api.slack.com/apps> and click "Create New App".
-2.  Pick an app name, i.e. "Jenkins" and a workspace that you'll be installing it to.
-3.  Click "Create App". This will leave you on the "Basic Information" screen for your new app.
-3.  Scroll down to "Display Information" and fill it out. You can get the Jenkins logo from: <https://jenkins.io/artwork/>.
-4.  Scroll back up to "Add features and functionality".
-5.  Click "Permissions" to navigate to the "OAuth & Permissions" page.
-6.  Scroll down to "Scopes". Under "Bot Token Scopes"
-    1.  Add `chat:write` Scope.
-    2.  (optional) Add `files:write` Scope if you will be uploading files.
-    3.  (optional) Add `chat:write.customize` Scope if you will be sending messages with a custom username and/or avatar.
-    4.  (optional) Add `reactions:write` Scope if you will be [adding reactions](#emoji-reactions).
-    5.  (optional) Add `users:read` and `users:read.email` Scope if you will be [looking users up by email](#user-id-look-up).
-7.  (optional) Click "App Home" in the sidebar
-    1.  (optional) Edit the slack display name for the bot.
-    2.  Return to the "OAuth & Permissions" page.
-8.  At the top of the page, click "Install App to Workspace". This will generate a "Bot User OAuth Access Token".
-9.  Copy the "Bot User OAuth Access Token".
-10. *On Jenkins*: Find the Slack configuration in "Manage Jenkins → Configure System".
-    1.  *On Jenkins*: Click "Add" to create a new "Secret text" Credential with that token.
+```yaml
+display_information:
+  name: Jenkins
+features:
+  bot_user:
+    display_name: Jenkins
+    always_online: true
+oauth_config:
+  scopes:
+    bot:
+      - channels:read
+      - chat:write
+      - chat:write.customize
+      - files:write
+      - reactions:write
+      - users:read
+      - users:read.email
+      - groups:read
+settings:
+  org_deploy_enabled: false
+  socket_mode_enabled: false
+  token_rotation_enabled: false
+```
+
+7. Click "Next"
+8. Click "Create"
+9. Click "Install App to Workspace"
+10. Click "Allow"
+11. Click "OAuth & Permissions" in the sidebar
+9.  Copy the "Bot User OAuth Access Token"
+10. *On Jenkins*: Find the Slack configuration in "Manage Jenkins → System".
+    1.  *On Jenkins*: Click "Add" to create a new "Secret text" Credential with the bot user token.
     2.  *On Jenkins*: Select the new "Secret text" in the dropdown.
-    3.  *On Jenkins*: Make note of the "Default channel / member id".
+    3.  *On Jenkins*: Add a default channel (this can be removed after validating the connection works).
     4.  *On Jenkins*: Tick the "Custom slack app bot user" option.
 11. Invite the Jenkins bot user into the Slack channel(s) you wish to be notified in.
 12. *On Jenkins*: Click test connection. A message will be sent to the default channel / default member.
