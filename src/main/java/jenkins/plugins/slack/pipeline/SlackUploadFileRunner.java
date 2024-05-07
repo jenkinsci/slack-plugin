@@ -39,19 +39,21 @@ public class SlackUploadFileRunner extends MasterToSlaveCallable<Boolean, Throwa
     private final FilePath filePath;
     private final String fileToUploadPath;
 
-    private final String channels;
+    private final String channelId;
 
     private final String token;
 
     private final TaskListener listener;
     private final String initialComment;
     private final ProxyConfiguration proxy;
+    private final String threadTs;
 
     public SlackUploadFileRunner(TaskListener listener, ProxyConfiguration proxy, SlackFileRequest slackFileRequest) {
         this.listener = listener;
         this.filePath = slackFileRequest.getFilePath();
         this.fileToUploadPath = slackFileRequest.getFileToUploadPath();
-        this.channels = slackFileRequest.getChannels();
+        this.channelId = slackFileRequest.getChannelId();
+        this.threadTs = slackFileRequest.getThreadTs();
         this.initialComment = slackFileRequest.getInitialComment();
         this.token = slackFileRequest.getToken();
         this.proxy = proxy;
@@ -83,16 +85,6 @@ public class SlackUploadFileRunner extends MasterToSlaveCallable<Boolean, Throwa
     }
 
     private boolean doIt(List<File> files) {
-        String threadTs = null;
-        String theChannels = channels;
-
-        //thread_ts is passed once with roomId: Ex: roomId:threadTs
-        String[] splitThread = channels.split(":", 2);
-        if (splitThread.length == 2) {
-            theChannels = splitThread[0];
-            threadTs = splitThread[1];
-        }
-
         List<String> fileIds = new ArrayList<>();
         try (CloseableHttpClient client = HttpClient.getCloseableHttpClient(proxy)) {
             for (File file : files) {
@@ -113,8 +105,7 @@ public class SlackUploadFileRunner extends MasterToSlaveCallable<Boolean, Throwa
                 String fileId = getUploadUrlResult.getString("file_id");
                 fileIds.add(fileId);
             }
-            String channelId = convertChannelNameToId(theChannels, client);
-            if (!completeUploadExternal(channelId, threadTs, fileIds, client)) {
+            if (!completeUploadExternal(channelId, threadTs , fileIds, client)) {
                 listener.getLogger().println("Failed to complete uploading file to Slack");
                 return false;
             }
@@ -175,56 +166,6 @@ public class SlackUploadFileRunner extends MasterToSlaveCallable<Boolean, Throwa
                 return null;
             }
         };
-    }
-
-    private String convertChannelNameToId(String channels, CloseableHttpClient client) throws IOException {
-        return convertChannelNameToId(channels, client, null);
-    }
-
-    private String convertChannelNameToId(String channelName, CloseableHttpClient client, String cursor) throws IOException {
-        RequestBuilder requestBuilder = RequestBuilder.get("https://slack.com/api/conversations.list")
-                .addHeader("Authorization", "Bearer " + token)
-                .addParameter("exclude_archived", "true")
-                .addParameter("types", "public_channel,private_channel");
-
-        if (cursor != null) {
-            requestBuilder.addParameter("cursor", cursor);
-        }
-        ResponseHandler<JSONObject> standardResponseHandler = getStandardResponseHandler();
-        JSONObject result = client.execute(requestBuilder.build(), standardResponseHandler);
-
-        if (result == null) {
-            // logging should have been done in the result handler where the response is available
-            return null;
-        }
-        if (!result.getBoolean("ok")) {
-            listener.getLogger().println("Couldn't convert channel name to ID in Slack: " + result);
-            return null;
-        }
-
-        JSONArray channelsArray = result.getJSONArray("channels");
-        for (int i = 0; i < channelsArray.length(); i++) {
-            JSONObject channel = channelsArray.getJSONObject(i);
-            if (channel.getString("name").equals(cleanChannelName(channelName))) {
-                return channel.getString("id");
-            }
-        }
-
-        cursor = result.getJSONObject("response_metadata").getString("next_cursor");
-        if (cursor != null && !cursor.isEmpty()) {
-            return convertChannelNameToId(channelName, client, cursor);
-        }
-
-        listener.getLogger().println("Couldn't find channel id for channel name " + channelName);
-
-        return null;
-    }
-
-    private static String cleanChannelName(String channelName) {
-        if (channelName.startsWith("#")) {
-            return channelName.substring(1);
-        }
-        return channelName;
     }
 
     private boolean uploadFile(String uploadUrl, MultipartEntityBuilder multipartEntityBuilder, CloseableHttpClient client) throws IOException {

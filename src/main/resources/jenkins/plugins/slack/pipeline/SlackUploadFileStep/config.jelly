@@ -14,5 +14,9 @@
         <f:entry field="credentialId" title="Credential">
             <c:select/>
         </f:entry>
+
+        <f:entry field="failOnError">
+            <f:checkbox title="Fail On Error" />
+        </f:entry>
     </f:advanced>
 </j:jelly>

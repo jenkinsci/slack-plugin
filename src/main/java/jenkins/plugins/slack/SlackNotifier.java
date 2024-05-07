@@ -27,6 +27,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Stream;
 import jenkins.model.Jenkins;
+import jenkins.plugins.slack.cache.SlackChannelIdCache;
 import jenkins.plugins.slack.config.GlobalCredentialMigrator;
 import jenkins.plugins.slack.logging.BuildAwareLogger;
 import jenkins.plugins.slack.logging.BuildKey;
@@ -868,6 +869,16 @@ public class SlackNotifier extends Notifier {
         @Override
         public String getDisplayName() {
             return PLUGIN_DISPLAY_NAME;
+        }
+
+        @POST
+        public FormValidation doClearCache() {
+            Jenkins.get().checkPermission(Jenkins.ADMINISTER);
+
+            logger.info("Clearing channel ID cache");
+            SlackChannelIdCache.clearCache();
+
+            return FormValidation.ok("Cache cleared");
         }
 
         @POST
