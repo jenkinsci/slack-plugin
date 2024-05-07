@@ -1,6 +1,7 @@
 package jenkins.plugins.slack;
 
 import com.google.common.annotations.VisibleForTesting;
+import hudson.AbortException;
 import hudson.FilePath;
 import hudson.ProxyConfiguration;
 import hudson.Util;
@@ -20,6 +21,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import jenkins.model.Jenkins;
+import jenkins.plugins.slack.cache.SlackChannelIdCache;
 import jenkins.plugins.slack.pipeline.SlackFileRequest;
 import jenkins.plugins.slack.pipeline.SlackUploadFileRunner;
 import jenkins.plugins.slack.user.SlackUserIdResolver;
@@ -256,8 +258,17 @@ public class StandardSlackService implements SlackService {
         boolean result = true;
         if(workspace!=null) {
             for(String roomId : roomIds) {
+                String channelId;
+                try {
+                    channelId = SlackChannelIdCache.getChannelId(populatedToken, roomId);
+                } catch (ExecutionException | InterruptedException e) {
+                    throw new RuntimeException(e);
+                } catch (AbortException e) {
+                    return false;
+                }
+
                 SlackFileRequest slackFileRequest = new SlackFileRequest(
-                workspace, populatedToken, roomId, null, artifactIncludes);
+                workspace, populatedToken, channelId, null, artifactIncludes, null);
                 try {
                     workspace.getChannel().callAsync(new SlackUploadFileRunner(log, Jenkins.get().proxy, slackFileRequest)).get();
                 } catch (IllegalStateException | InterruptedException e) {

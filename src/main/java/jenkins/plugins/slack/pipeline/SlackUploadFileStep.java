@@ -2,6 +2,7 @@ package jenkins.plugins.slack.pipeline;
 
 import com.google.common.collect.ImmutableSet;
 import edu.umd.cs.findbugs.annotations.NonNull;
+import hudson.AbortException;
 import hudson.Extension;
 import hudson.FilePath;
 import hudson.Util;
@@ -12,11 +13,13 @@ import hudson.remoting.VirtualChannel;
 import hudson.util.ListBoxModel;
 import java.io.IOException;
 import java.util.Set;
+import java.util.concurrent.CompletionException;
 import java.util.concurrent.ExecutionException;
 import jenkins.model.Jenkins;
 import jenkins.plugins.slack.CredentialsObtainer;
 import jenkins.plugins.slack.Messages;
 import jenkins.plugins.slack.SlackNotifier;
+import jenkins.plugins.slack.cache.SlackChannelIdCache;
 import org.jenkinsci.plugins.workflow.steps.Step;
 import org.jenkinsci.plugins.workflow.steps.StepContext;
 import org.jenkinsci.plugins.workflow.steps.StepDescriptor;
@@ -35,6 +38,7 @@ public class SlackUploadFileStep extends Step {
     private String channel;
     private String initialComment;
     private String filePath;
+    private boolean failOnError;
 
     @DataBoundConstructor
     public SlackUploadFileStep(String filePath) {
@@ -70,6 +74,15 @@ public class SlackUploadFileStep extends Step {
 
     public String getFilePath() {
         return filePath;
+    }
+
+    public boolean isFailOnError() {
+        return failOnError;
+    }
+
+    @DataBoundSetter
+    public void setFailOnError(boolean failOnError) {
+        this.failOnError = failOnError;
     }
 
     @Override
@@ -126,17 +139,63 @@ public class SlackUploadFileStep extends Step {
             String populatedToken = CredentialsObtainer.getTokenToUse(tokenCredentialId, item, null);
             String channel = step.channel != null ? step.channel : slackDesc.getRoom();
 
+            String channelId;
+            try {
+                channelId = SlackChannelIdCache.getChannelId(populatedToken, cleanChannelName(channel));
+                if (channelId == null) {
+                    String message = "Failed uploading file to slack, channel not found: " + channel;
+                    if (step.failOnError) {
+                        throw new AbortException(message);
+                    } else {
+                        listener.error(message);
+                        return null;
+                    }
+                }
+            } catch (CompletionException | SlackChannelIdCache.HttpStatusCodeException e) {
+                throw new AbortException("Failed uploading file to slack, channel not found: " + channel + ", error: " + e.getMessage());
+            }
+
+            String threadTs = getThreadTs(channel);
+
             SlackFileRequest slackFileRequest = new SlackFileRequest(
-                    filePath, populatedToken, channel, step.initialComment, step.filePath
+                    filePath, populatedToken, channelId, step.initialComment, step.filePath, threadTs
             );
 
             assert filePath != null;
             VirtualChannel virtualChannel = filePath.getChannel();
             assert virtualChannel != null;
 
-            virtualChannel.callAsync(new SlackUploadFileRunner(listener, Jenkins.get().proxy, slackFileRequest)).get();
+            Boolean result = virtualChannel.callAsync(new SlackUploadFileRunner(listener, Jenkins.get().proxy, slackFileRequest)).get();
+            if (!result) {
+                String errorMessage = "Failed uploading file to slack";
+                if (step.failOnError) {
+                    throw new AbortException(errorMessage);
+                } else {
+                    listener.error(errorMessage);
+                }
+            }
 
             return null;
         }
+    }
+
+    private static String getThreadTs(String channelName) {
+        String[] splitForThread = channelName.split(":", 2);
+        if (splitForThread.length == 2) {
+            return splitForThread[1];
+        }
+        return null;
+    }
+
+    private static String cleanChannelName(String channelName) {
+        String[] splitForThread = channelName.split(":", 2);
+        String channel = channelName;
+        if (splitForThread.length == 2) {
+            channel = splitForThread[0];
+        }
+        if (channel.startsWith("#")) {
+            return channel.substring(1);
+        }
+        return channelName;
     }
 }
