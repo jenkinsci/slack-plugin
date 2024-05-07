@@ -198,7 +198,7 @@ public class SlackUploadFileRunner extends MasterToSlaveCallable<Boolean, Throwa
         JSONArray channelsArray = result.getJSONArray("channels");
         for (int i = 0; i < channelsArray.length(); i++) {
             JSONObject channel = channelsArray.getJSONObject(i);
-            if (channel.getString("name").equals(channelName)) {
+            if (channel.getString("name").equals(cleanChannelName(channelName))) {
                 return channel.getString("id");
             }
         }
@@ -211,6 +211,13 @@ public class SlackUploadFileRunner extends MasterToSlaveCallable<Boolean, Throwa
         listener.getLogger().println("Couldn't find channel id for channel name " + channelName);
 
         return null;
+    }
+
+    private static String cleanChannelName(String channelName) {
+        if (channelName.startsWith("#")) {
+            return channelName.substring(1);
+        }
+        return channelName;
     }
 
     private boolean uploadFile(String uploadUrl, MultipartEntityBuilder multipartEntityBuilder, CloseableHttpClient client) throws IOException {
