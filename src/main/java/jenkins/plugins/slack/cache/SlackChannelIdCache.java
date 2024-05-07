@@ -10,14 +10,19 @@ import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionException;
 import java.util.concurrent.ExecutionException;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 import jenkins.model.Jenkins;
 import jenkins.plugins.slack.HttpClient;
+import org.apache.http.Header;
 import org.apache.http.HttpEntity;
+import org.apache.http.HttpResponse;
+import org.apache.http.HttpStatus;
 import org.apache.http.client.ResponseHandler;
+import org.apache.http.client.ServiceUnavailableRetryStrategy;
 import org.apache.http.client.methods.RequestBuilder;
 import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.impl.client.HttpClientBuilder;
+import org.apache.http.protocol.HttpContext;
 import org.apache.http.util.EntityUtils;
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -32,9 +37,35 @@ public class SlackChannelIdCache {
             .maximumSize(100)
             .refreshAfterWrite(Duration.ofHours(24))
             .build(SlackChannelIdCache::populateCache);
+    private static final int MAX_RETRIES = 10;
 
     private static Map<String, String> populateCache(String token) {
-        try (CloseableHttpClient client = HttpClient.getCloseableHttpClient(Jenkins.get().getProxy())) {
+        HttpClientBuilder closeableHttpClientBuilder = HttpClient.getCloseableHttpClientBuilder(Jenkins.get().getProxy())
+                .setRetryHandler((exception, executionCount, context) -> executionCount <= MAX_RETRIES)
+                .setServiceUnavailableRetryStrategy(new ServiceUnavailableRetryStrategy() {
+
+                    long retryInterval;
+
+                    @Override
+                    public boolean retryRequest(HttpResponse response, int executionCount, HttpContext context) {
+                        boolean shouldRetry = executionCount <= MAX_RETRIES &&
+                                response.getStatusLine().getStatusCode() == HttpStatus.SC_TOO_MANY_REQUESTS;
+                        if (shouldRetry) {
+                            Header firstHeader = response.getFirstHeader("Retry-After");
+                            if (firstHeader != null) {
+                                retryInterval = Long.parseLong(firstHeader.getValue()) * 1000L;
+                                logger.info(String.format("Rate limited by Slack, retrying in %dms", retryInterval));
+                            }
+                        }
+                        return shouldRetry;
+                    }
+
+                    @Override
+                    public long getRetryInterval() {
+                        return retryInterval;
+                    }
+                });
+        try (CloseableHttpClient client = closeableHttpClientBuilder.build()) {
             return convertChannelNameToId(client, token, new HashMap<>(), null);
         } catch (IOException e) {
             throw new RuntimeException(e);
