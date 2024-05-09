@@ -143,6 +143,18 @@ node {
 
 This feature requires [botUser](#bot-user-mode) mode.
 
+##### File upload to a user channel
+
+You can upload files to a user channel by messaging the user first and then using the channel ID from the message response:
+
+```groovy
+node {
+  sh "echo hey > blah.txt"
+  def slackResponse = slackSend channel: '$userId', message: 'Hey', sendAsText: true
+  slackUploadFile filePath: "*.txt", channel: slackResponse.channelId
+}
+```
+
 #### Threads Support
 
 You can send a message and create a thread on that message using the pipeline step.
