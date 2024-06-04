@@ -73,6 +73,9 @@ public class SlackChannelIdCache {
     }
 
     public static String getChannelId(String botUserToken, String channelName) throws ExecutionException, InterruptedException, AbortException {
+        if (channelName.matches("^(C[A-Z0-9]{8}|G[A-Z0-9]{10}||D[A-Z0-9]{8})$")) {
+            return channelName;
+        }
         Map<String, String> channelNameToIdMap = CHANNEL_METADATA_CACHE.get(botUserToken);
         String channelId = channelNameToIdMap.get(channelName);
 
