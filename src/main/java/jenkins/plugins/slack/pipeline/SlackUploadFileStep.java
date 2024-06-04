@@ -188,9 +188,10 @@ public class SlackUploadFileStep extends Step {
         String channel = channelName;
         if (splitForThread.length == 2) {
             channel = splitForThread[0];
-        }
-        if (channel.startsWith("#")) {
-            return channel.substring(1);
+            if (channel.startsWith("#")) {
+                return channel.substring(1);
+            }
+            return channel;
         }
         return channelName;
     }
