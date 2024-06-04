@@ -96,10 +96,17 @@ public class SlackChannelIdCache {
     }
 
     private static Map<String, String> convertChannelNameToId(CloseableHttpClient client, String token, Map<String, String> channels, String cursor) throws IOException {
+        convertPublicChannelNameToId(client, token, channels, cursor);
+        convertPrivateChannelNameToId(client, token, channels, cursor);
+        return channels;
+    }
+
+    private static Map<String, String> convertPublicChannelNameToId(CloseableHttpClient client, String token, Map<String, String> channels, String cursor) throws IOException {
         RequestBuilder requestBuilder = RequestBuilder.get("https://slack.com/api/conversations.list")
                 .addHeader("Authorization", "Bearer " + token)
                 .addParameter("exclude_archived", "true")
-                .addParameter("types", "public_channel,private_channel");
+                .addParameter("types", "public_channel")
+                .addParameter("limit", "999");
 
         if (cursor != null) {
             requestBuilder.addParameter("cursor", cursor);
@@ -124,7 +131,43 @@ public class SlackChannelIdCache {
 
         cursor = result.getJSONObject("response_metadata").getString("next_cursor");
         if (cursor != null && !cursor.isEmpty()) {
-            return convertChannelNameToId(client, token, channels, cursor);
+            return convertPublicChannelNameToId(client, token, channels, cursor);
+        }
+
+        return channels;
+    }
+
+    private static Map<String, String> convertPrivateChannelNameToId(CloseableHttpClient client, String token, Map<String, String> channels, String cursor) throws IOException {
+        RequestBuilder requestBuilder = RequestBuilder.get("https://slack.com/api/conversations.list")
+                .addHeader("Authorization", "Bearer " + token)
+                .addParameter("exclude_archived", "true")
+                .addParameter("types", "private_channel")
+                .addParameter("limit", "999");
+
+        if (cursor != null) {
+            requestBuilder.addParameter("cursor", cursor);
+        }
+        ResponseHandler<JSONObject> standardResponseHandler = getStandardResponseHandler();
+        JSONObject result = client.execute(requestBuilder.build(), standardResponseHandler);
+
+        if (!result.getBoolean("ok")) {
+            logger.warning("Couldn't convert channel name to ID in Slack: " + result);
+            return channels;
+        }
+
+        JSONArray channelsArray = result.getJSONArray("channels");
+        for (int i = 0; i < channelsArray.length(); i++) {
+            JSONObject channel = channelsArray.getJSONObject(i);
+
+            String channelName = channel.getString("name");
+            String channelId = channel.getString("id");
+
+            channels.put(channelName, channelId);
+        }
+
+        cursor = result.getJSONObject("response_metadata").getString("next_cursor");
+        if (cursor != null && !cursor.isEmpty()) {
+            return convertPrivateChannelNameToId(client, token, channels, cursor);
         }
 
         return channels;
