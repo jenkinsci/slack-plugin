@@ -129,6 +129,8 @@ public class SlackUploadFileRunner extends MasterToSlaveCallable<Boolean, Throwa
         }
 
         jsonObject.put("files", convertListToJsonArray(fileIds));
+
+        logger.info("Completing upload with: " + jsonObject);
         HttpUriRequest completeRequest = RequestBuilder
                 .post("https://slack.com/api/files.completeUploadExternal")
                 .setEntity(new StringEntity(jsonObject.toString(), ContentType.APPLICATION_JSON))
@@ -136,6 +138,7 @@ public class SlackUploadFileRunner extends MasterToSlaveCallable<Boolean, Throwa
                 .build();
 
         JSONObject completeRequestResponse = client.execute(completeRequest, getStandardResponseHandler());
+        logger.info("Upload complete response: " + completeRequestResponse);
 
         if (completeRequestResponse != null && !completeRequestResponse.getBoolean("ok")) {
             listener.getLogger().println(UPLOAD_FAILED_TEMPLATE + completeRequestResponse);
