@@ -72,10 +72,13 @@ public class SlackChannelIdCache {
         }
     }
 
-    public static String getChannelId(String botUserToken, String channelName) throws ExecutionException, InterruptedException, AbortException {
-        if (channelName.matches("^(C[A-Z0-9]{8}|G[A-Z0-9]{10}||D[A-Z0-9]{8})$")) {
-            return channelName;
+    public static String getChannelId(String botUserToken, String channel) throws ExecutionException, InterruptedException, AbortException {
+        if (channel.matches("^(C[A-Z0-9]{8}|G[A-Z0-9]{10}||D[A-Z0-9]{8})$")) {
+            return channel;
         }
+
+        String channelName = cleanChannelName(channel);
+
         Map<String, String> channelNameToIdMap = CHANNEL_METADATA_CACHE.get(botUserToken);
         String channelId = channelNameToIdMap.get(channelName);
 
@@ -94,6 +97,19 @@ public class SlackChannelIdCache {
 
         return channelId;
     }
+
+    private static String cleanChannelName(String channelName) {
+        String[] splitForThread = channelName.split(":", 2);
+        String channel = channelName;
+        if (splitForThread.length == 2) {
+            channel = splitForThread[0];
+        }
+        if (channel.startsWith("#")) {
+            return channel.substring(1);
+        }
+        return channel;
+    }
+
 
     private static Map<String, String> convertChannelNameToId(CloseableHttpClient client, String token, Map<String, String> channels, String cursor) throws IOException {
         convertPublicChannelNameToId(client, token, channels, cursor);
