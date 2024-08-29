@@ -141,11 +141,10 @@ public class SlackUploadFileStep extends Step {
 
             String channelId;
             try {
-                String channelName = cleanChannelName(channel);
-                channelId = SlackChannelIdCache.getChannelId(populatedToken, channelName);
+                channelId = SlackChannelIdCache.getChannelId(populatedToken, channel);
                 if (channelId == null) {
                     // possibly a user ID which won't be found in the channel ID cache
-                    channelId = channelName;
+                    channelId = channel;
                 }
             } catch (CompletionException | SlackChannelIdCache.HttpStatusCodeException e) {
                 throw new AbortException("Failed uploading file to slack, channel not found: " + channel + ", error: " + e.getMessage());
@@ -181,18 +180,5 @@ public class SlackUploadFileStep extends Step {
             return splitForThread[1];
         }
         return null;
-    }
-
-    private static String cleanChannelName(String channelName) {
-        String[] splitForThread = channelName.split(":", 2);
-        String channel = channelName;
-        if (splitForThread.length == 2) {
-            channel = splitForThread[0];
-            if (channel.startsWith("#")) {
-                return channel.substring(1);
-            }
-            return channel;
-        }
-        return channelName;
     }
 }
