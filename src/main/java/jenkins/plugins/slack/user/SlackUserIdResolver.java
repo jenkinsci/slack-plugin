@@ -58,18 +58,11 @@ public abstract class SlackUserIdResolver extends AbstractDescribableImpl<SlackU
     }
 
     public final String findOrResolveUserId(User user) {
-        String userId = null;
         SlackUserProperty userProperty = user.getProperty(SlackUserProperty.class);
-        if (userProperty != null) {
-            userId = userProperty.getUserId();
-        } else {
-            userProperty = new SlackUserProperty();
-        }
 
-        if (StringUtils.isEmpty(userId)) {
-            userId = resolveUserId(user);
-            if (userId != null) {
-                userProperty.setUserId(userId);
+        if (userProperty == null || StringUtils.isEmpty(userProperty.getUserId())) {
+            userProperty = fetchUserSlackProperty(user);
+            if (userProperty.getUserId() != null) {
                 try {
                     user.addProperty(userProperty);
                 } catch (IOException ex) {
@@ -79,10 +72,10 @@ public abstract class SlackUserIdResolver extends AbstractDescribableImpl<SlackU
         }
 
         final boolean enableNotifications = !userProperty.getDisableNotifications();
-        return enableNotifications ? userId : null;
+        return enableNotifications ? userProperty.getUserId() : null;
     }
 
-    protected abstract String resolveUserId(User user);
+    protected abstract SlackUserProperty fetchUserSlackProperty(User user);
 
     @SuppressWarnings("unchecked")
     public List<String> resolveUserIdsForRun(Run run) {
