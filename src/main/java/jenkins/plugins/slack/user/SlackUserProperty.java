@@ -30,7 +30,7 @@ import hudson.model.UserPropertyDescriptor;
 import net.sf.json.JSONObject;
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.DataBoundSetter;
-import org.kohsuke.stapler.StaplerRequest;
+import org.kohsuke.stapler.StaplerRequest2;
 import org.kohsuke.stapler.export.Exported;
 
 public class SlackUserProperty extends UserProperty {
@@ -76,7 +76,7 @@ public class SlackUserProperty extends UserProperty {
         }
 
         @Override
-        public UserProperty newInstance(StaplerRequest req, JSONObject formData) {
+        public UserProperty newInstance(StaplerRequest2 req, JSONObject formData) {
             return req.bindJSON(SlackUserProperty.class, formData);
         }
     }
