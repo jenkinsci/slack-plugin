@@ -8,24 +8,27 @@ import hudson.util.FileVisitor;
 import java.io.File;
 import java.io.IOException;
 import java.io.Serializable;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import jenkins.plugins.slack.HttpClient;
 import jenkins.security.MasterToSlaveCallable;
-import org.apache.http.HttpEntity;
-import org.apache.http.HttpStatus;
-import org.apache.http.client.ResponseHandler;
-import org.apache.http.client.methods.CloseableHttpResponse;
-import org.apache.http.client.methods.HttpUriRequest;
-import org.apache.http.client.methods.RequestBuilder;
-import org.apache.http.entity.ContentType;
-import org.apache.http.entity.StringEntity;
-import org.apache.http.entity.mime.HttpMultipartMode;
-import org.apache.http.entity.mime.MultipartEntityBuilder;
-import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.util.EntityUtils;
+import org.apache.hc.client5.http.entity.mime.HttpMultipartMode;
+import org.apache.hc.client5.http.entity.mime.MultipartEntityBuilder;
+import org.apache.hc.client5.http.fluent.Request;
+import org.apache.hc.client5.http.fluent.Response;
+import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
+import org.apache.hc.core5.http.ContentType;
+import org.apache.hc.core5.http.HttpEntity;
+import org.apache.hc.core5.http.HttpStatus;
+import org.apache.hc.core5.http.ParseException;
+import org.apache.hc.core5.http.io.HttpClientResponseHandler;
+import org.apache.hc.core5.http.io.entity.EntityUtils;
+import org.apache.hc.core5.http.io.entity.StringEntity;
+import org.apache.hc.core5.net.URIBuilder;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
@@ -89,7 +92,7 @@ public class SlackUploadFileRunner extends MasterToSlaveCallable<Boolean, Throwa
         try (CloseableHttpClient client = HttpClient.getCloseableHttpClient(proxy)) {
             for (File file : files) {
                 MultipartEntityBuilder multipartEntityBuilder = MultipartEntityBuilder.create()
-                        .setMode(HttpMultipartMode.BROWSER_COMPATIBLE)
+                        .setMode(HttpMultipartMode.LEGACY)
                         .addBinaryBody("file", file, ContentType.DEFAULT_BINARY, file.getName());
                 JSONObject getUploadUrlResult = getUploadUrlExternal(file, client);
                 if (getUploadUrlResult == null) {
@@ -110,7 +113,7 @@ public class SlackUploadFileRunner extends MasterToSlaveCallable<Boolean, Throwa
                 return false;
             }
 
-        } catch (IOException e) {
+        } catch (IOException | ParseException | URISyntaxException e) {
             String msg = "Exception uploading to Slack ";
             logger.log(Level.WARNING, msg, e);
             listener.getLogger().println(msg + e.getMessage());
@@ -129,13 +132,12 @@ public class SlackUploadFileRunner extends MasterToSlaveCallable<Boolean, Throwa
         }
 
         jsonObject.put("files", convertListToJsonArray(fileIds));
-        HttpUriRequest completeRequest = RequestBuilder
+        Request completeRequest = Request
                 .post("https://slack.com/api/files.completeUploadExternal")
-                .setEntity(new StringEntity(jsonObject.toString(), ContentType.APPLICATION_JSON))
-                .addHeader("Authorization", "Bearer " + token)
-                .build();
+                .body(new StringEntity(jsonObject.toString(), ContentType.APPLICATION_JSON))
+                .addHeader("Authorization", "Bearer " + token);
 
-        JSONObject completeRequestResponse = client.execute(completeRequest, getStandardResponseHandler());
+        JSONObject completeRequestResponse = completeRequest.execute(client).handleResponse(getStandardResponseHandler());
 
         if (completeRequestResponse != null && !completeRequestResponse.getBoolean("ok")) {
             listener.getLogger().println(UPLOAD_FAILED_TEMPLATE + completeRequestResponse);
@@ -153,9 +155,9 @@ public class SlackUploadFileRunner extends MasterToSlaveCallable<Boolean, Throwa
         return jsonArray;
     }
 
-    private ResponseHandler<JSONObject> getStandardResponseHandler() {
+    private HttpClientResponseHandler<JSONObject> getStandardResponseHandler() {
         return response -> {
-            int status = response.getStatusLine().getStatusCode();
+            int status = response.getCode();
             if (status >= 200 && status < 300) {
                 HttpEntity entity = response.getEntity();
                 return entity != null ? new JSONObject(EntityUtils.toString(entity)) : null;
@@ -168,29 +170,28 @@ public class SlackUploadFileRunner extends MasterToSlaveCallable<Boolean, Throwa
         };
     }
 
-    private boolean uploadFile(String uploadUrl, MultipartEntityBuilder multipartEntityBuilder, CloseableHttpClient client) throws IOException {
-        HttpUriRequest request = RequestBuilder
-                .post(uploadUrl)
-                .setEntity(multipartEntityBuilder.build())
-                .addHeader("Authorization", "Bearer " + token)
-                .build();
+    private boolean uploadFile(String uploadUrl, MultipartEntityBuilder multipartEntityBuilder, CloseableHttpClient client) throws IOException, ParseException {
+        Request request = Request.post(uploadUrl)
+                .body(multipartEntityBuilder.build())
+                .addHeader("Authorization", "Bearer " + token);
 
-        try (CloseableHttpResponse responseBody = client.execute(request)) {
-            if (responseBody.getStatusLine().getStatusCode() != HttpStatus.SC_OK) {
-                listener.getLogger().println(UPLOAD_FAILED_TEMPLATE + EntityUtils.toString(responseBody.getEntity()));
-                return false;
-            }
+        Response responseBody = request.execute(client);
+        if (responseBody.returnResponse().getCode() != HttpStatus.SC_OK) {
+            listener.getLogger().println(UPLOAD_FAILED_TEMPLATE + responseBody.returnContent().asString());
+            return false;
         }
         return true;
     }
 
-    private JSONObject getUploadUrlExternal(File file, CloseableHttpClient client) throws IOException {
-        HttpUriRequest getUploadApiRequest = RequestBuilder.get(GET_UPLOAD_URL_API)
+    private JSONObject getUploadUrlExternal(File file, CloseableHttpClient client) throws IOException, URISyntaxException {
+        URI uri = new URIBuilder(GET_UPLOAD_URL_API)
                 .addParameter("filename", file.getName())
                 .addParameter("length", String.valueOf(file.length()))
-                .addHeader("Authorization", "Bearer " + token)
                 .build();
-        JSONObject getUploadRequestResponse = client.execute(getUploadApiRequest, getStandardResponseHandler());
+        Request getUploadApiRequest = Request.get(uri)
+                .addHeader("Authorization", "Bearer " + token);
+
+        JSONObject getUploadRequestResponse = getUploadApiRequest.execute(client).handleResponse(getStandardResponseHandler());
         if (getUploadRequestResponse != null && !getUploadRequestResponse.getBoolean("ok")) {
             listener.getLogger().println(UPLOAD_FAILED_TEMPLATE + getUploadRequestResponse);
             return null;

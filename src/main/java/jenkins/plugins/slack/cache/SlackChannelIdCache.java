@@ -4,6 +4,7 @@ import com.github.benmanes.caffeine.cache.Caffeine;
 import com.github.benmanes.caffeine.cache.LoadingCache;
 import hudson.AbortException;
 import java.io.IOException;
+import java.net.URISyntaxException;
 import java.time.Duration;
 import java.util.HashMap;
 import java.util.Map;
@@ -13,17 +14,20 @@ import java.util.concurrent.ExecutionException;
 import java.util.logging.Logger;
 import jenkins.model.Jenkins;
 import jenkins.plugins.slack.HttpClient;
-import org.apache.http.Header;
-import org.apache.http.HttpEntity;
-import org.apache.http.HttpResponse;
-import org.apache.http.HttpStatus;
-import org.apache.http.client.ResponseHandler;
-import org.apache.http.client.ServiceUnavailableRetryStrategy;
-import org.apache.http.client.methods.RequestBuilder;
-import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.HttpClientBuilder;
-import org.apache.http.protocol.HttpContext;
-import org.apache.http.util.EntityUtils;
+import org.apache.hc.client5.http.HttpRequestRetryStrategy;
+import org.apache.hc.client5.http.fluent.Request;
+import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
+import org.apache.hc.client5.http.impl.classic.HttpClientBuilder;
+import org.apache.hc.core5.http.Header;
+import org.apache.hc.core5.http.HttpEntity;
+import org.apache.hc.core5.http.HttpRequest;
+import org.apache.hc.core5.http.HttpResponse;
+import org.apache.hc.core5.http.HttpStatus;
+import org.apache.hc.core5.http.io.HttpClientResponseHandler;
+import org.apache.hc.core5.http.io.entity.EntityUtils;
+import org.apache.hc.core5.http.protocol.HttpContext;
+import org.apache.hc.core5.net.URIBuilder;
+import org.apache.hc.core5.util.TimeValue;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
@@ -41,15 +45,14 @@ public class SlackChannelIdCache {
 
     private static Map<String, String> populateCache(String token) {
         HttpClientBuilder closeableHttpClientBuilder = HttpClient.getCloseableHttpClientBuilder(Jenkins.get().getProxy())
-                .setRetryHandler((exception, executionCount, context) -> executionCount <= MAX_RETRIES)
-                .setServiceUnavailableRetryStrategy(new ServiceUnavailableRetryStrategy() {
+                .setRetryStrategy(new HttpRequestRetryStrategy() {
 
-                    long retryInterval;
+                    private long retryInterval;
 
                     @Override
                     public boolean retryRequest(HttpResponse response, int executionCount, HttpContext context) {
                         boolean shouldRetry = executionCount <= MAX_RETRIES &&
-                                response.getStatusLine().getStatusCode() == HttpStatus.SC_TOO_MANY_REQUESTS;
+                                response.getCode() == HttpStatus.SC_TOO_MANY_REQUESTS;
                         if (shouldRetry) {
                             Header firstHeader = response.getFirstHeader("Retry-After");
                             if (firstHeader != null) {
@@ -61,13 +64,18 @@ public class SlackChannelIdCache {
                     }
 
                     @Override
-                    public long getRetryInterval() {
-                        return retryInterval;
+                    public boolean retryRequest(HttpRequest request, IOException exception, int execCount, HttpContext context) {
+                        return false;
+                    }
+
+                    @Override
+                    public TimeValue getRetryInterval(HttpResponse response, int execCount, HttpContext context) {
+                        return TimeValue.ofSeconds(retryInterval);
                     }
                 });
         try (CloseableHttpClient client = closeableHttpClientBuilder.build()) {
             return convertChannelNameToId(client, token, new HashMap<>(), null);
-        } catch (IOException e) {
+        } catch (IOException | URISyntaxException e) {
             throw new RuntimeException(e);
         }
     }
@@ -110,24 +118,23 @@ public class SlackChannelIdCache {
     }
 
 
-    private static Map<String, String> convertChannelNameToId(CloseableHttpClient client, String token, Map<String, String> channels, String cursor) throws IOException {
+    private static Map<String, String> convertChannelNameToId(CloseableHttpClient client, String token, Map<String, String> channels, String cursor) throws IOException, URISyntaxException {
         convertPublicChannelNameToId(client, token, channels, cursor);
         convertPrivateChannelNameToId(client, token, channels, cursor);
         return channels;
     }
 
-    private static Map<String, String> convertPublicChannelNameToId(CloseableHttpClient client, String token, Map<String, String> channels, String cursor) throws IOException {
-        RequestBuilder requestBuilder = RequestBuilder.get("https://slack.com/api/conversations.list")
-                .addHeader("Authorization", "Bearer " + token)
+    private static Map<String, String> convertPublicChannelNameToId(CloseableHttpClient client, String token, Map<String, String> channels, String cursor) throws IOException, URISyntaxException {
+        URIBuilder uriBuilder = new URIBuilder("https://slack.com/api/conversations.list")
                 .addParameter("exclude_archived", "true")
                 .addParameter("types", "public_channel")
                 .addParameter("limit", "999");
-
         if (cursor != null) {
-            requestBuilder.addParameter("cursor", cursor);
+            uriBuilder.addParameter("cursor", cursor);
         }
-        ResponseHandler<JSONObject> standardResponseHandler = getStandardResponseHandler();
-        JSONObject result = client.execute(requestBuilder.build(), standardResponseHandler);
+        Request requestBuilder = Request.get(uriBuilder.build())
+                .addHeader("Authorization", "Bearer " + token);
+        JSONObject result = requestBuilder.execute(client).handleResponse(getStandardResponseHandler());
 
         if (!result.getBoolean("ok")) {
             logger.warning("Couldn't convert channel name to ID in Slack: " + result);
@@ -152,18 +159,17 @@ public class SlackChannelIdCache {
         return channels;
     }
 
-    private static Map<String, String> convertPrivateChannelNameToId(CloseableHttpClient client, String token, Map<String, String> channels, String cursor) throws IOException {
-        RequestBuilder requestBuilder = RequestBuilder.get("https://slack.com/api/conversations.list")
-                .addHeader("Authorization", "Bearer " + token)
+    private static Map<String, String> convertPrivateChannelNameToId(CloseableHttpClient client, String token, Map<String, String> channels, String cursor) throws IOException, URISyntaxException {
+        URIBuilder uriBuilder = new URIBuilder("https://slack.com/api/conversations.list")
                 .addParameter("exclude_archived", "true")
                 .addParameter("types", "private_channel")
                 .addParameter("limit", "999");
-
         if (cursor != null) {
-            requestBuilder.addParameter("cursor", cursor);
+            uriBuilder.addParameter("cursor", cursor);
         }
-        ResponseHandler<JSONObject> standardResponseHandler = getStandardResponseHandler();
-        JSONObject result = client.execute(requestBuilder.build(), standardResponseHandler);
+        Request requestBuilder = Request.get(uriBuilder.build())
+                .addHeader("Authorization", "Bearer " + token);
+        JSONObject result = requestBuilder.execute(client).handleResponse(getStandardResponseHandler());
 
         if (!result.getBoolean("ok")) {
             logger.warning("Couldn't convert channel name to ID in Slack: " + result);
@@ -188,15 +194,15 @@ public class SlackChannelIdCache {
         return channels;
     }
 
-    private static ResponseHandler<JSONObject> getStandardResponseHandler() {
+    private static HttpClientResponseHandler<JSONObject> getStandardResponseHandler() {
         return response -> {
-            int status = response.getStatusLine().getStatusCode();
+            int status = response.getCode();
             if (status >= 200 && status < 300) {
                 HttpEntity entity = response.getEntity();
                 return entity != null ? new JSONObject(EntityUtils.toString(entity)) : null;
             } else {
                 String errorMessage = UPLOAD_FAILED_TEMPLATE + status + " " + EntityUtils.toString(response.getEntity());
-                throw new HttpStatusCodeException(response.getStatusLine().getStatusCode(), errorMessage);
+                throw new HttpStatusCodeException(response.getCode(), errorMessage);
             }
         };
     }

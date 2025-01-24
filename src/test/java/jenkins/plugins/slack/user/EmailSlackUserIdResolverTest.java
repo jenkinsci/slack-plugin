@@ -32,12 +32,12 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import jenkins.plugins.slack.CloseableHttpClientStub;
-import jenkins.plugins.slack.CloseableHttpResponseStub;
 import org.apache.commons.io.IOUtils;
-import org.apache.http.HttpStatus;
-import org.apache.http.client.methods.CloseableHttpResponse;
-import org.apache.http.entity.StringEntity;
+import org.apache.hc.client5.http.impl.classic.CloseableHttpClientStub;
+import org.apache.hc.client5.http.impl.classic.CloseableHttpResponse;
+import org.apache.hc.client5.http.impl.classic.CloseableHttpResponseStub;
+import org.apache.hc.core5.http.HttpStatus;
+import org.apache.hc.core5.http.io.entity.StringEntity;
 import org.junit.Before;
 import org.junit.Test;
 import org.jvnet.hudson.test.FakeChangeLogSCM.EntryImpl;
@@ -191,7 +191,7 @@ public class EmailSlackUserIdResolverTest {
     private CloseableHttpResponse getResponse(String content) throws IOException {
         CloseableHttpResponseStub httpResponse = new CloseableHttpResponseStub(HttpStatus.SC_OK);
         httpResponse.setEntity(new StringEntity(content));
-        return httpResponse;
+        return httpResponse.toCloseableHttpResponse();
     }
 
     private CloseableHttpResponse getResponseOK() throws IOException {

@@ -1,10 +1,9 @@
 package jenkins.plugins.slack;
 
 import java.io.IOException;
-import org.apache.http.StatusLine;
-import org.apache.http.client.methods.CloseableHttpResponse;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.hc.client5.http.classic.methods.HttpPost;
+import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
+import org.apache.hc.client5.http.impl.classic.CloseableHttpResponse;
 import org.junit.Test;
 
 import static org.hamcrest.Matchers.is;
@@ -20,8 +19,7 @@ public class SlackApiTLSTest {
             HttpPost post = new HttpPost(SLACK_API_TEST);
             post.setHeader("Content-Type", "application/json; charset=utf-8");
             try (CloseableHttpResponse response = httpClient.execute(post)) {
-                StatusLine statusLine = response.getStatusLine();
-                assertThat(statusLine.getStatusCode(), is(200));
+                assertThat(response.getCode(), is(200));
             }
         } catch (IOException e) {
             e.printStackTrace();

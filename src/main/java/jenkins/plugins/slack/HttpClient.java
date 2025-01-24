@@ -2,18 +2,21 @@ package jenkins.plugins.slack;
 
 import hudson.ProxyConfiguration;
 import hudson.util.Secret;
-import org.apache.http.HttpHost;
-import org.apache.http.auth.AuthScope;
-import org.apache.http.auth.Credentials;
-import org.apache.http.auth.NTCredentials;
-import org.apache.http.auth.UsernamePasswordCredentials;
-import org.apache.http.client.CredentialsProvider;
-import org.apache.http.client.config.RequestConfig;
-import org.apache.http.conn.routing.HttpRoutePlanner;
-import org.apache.http.impl.client.BasicCredentialsProvider;
-import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.HttpClientBuilder;
-import org.apache.http.impl.client.HttpClients;
+import org.apache.hc.client5.http.auth.AuthScope;
+import org.apache.hc.client5.http.auth.Credentials;
+import org.apache.hc.client5.http.auth.NTCredentials;
+import org.apache.hc.client5.http.auth.UsernamePasswordCredentials;
+import org.apache.hc.client5.http.config.ConnectionConfig;
+import org.apache.hc.client5.http.config.RequestConfig;
+import org.apache.hc.client5.http.impl.auth.BasicCredentialsProvider;
+import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
+import org.apache.hc.client5.http.impl.classic.HttpClientBuilder;
+import org.apache.hc.client5.http.impl.classic.HttpClients;
+import org.apache.hc.client5.http.impl.io.PoolingHttpClientConnectionManager;
+import org.apache.hc.client5.http.impl.io.PoolingHttpClientConnectionManagerBuilder;
+import org.apache.hc.client5.http.routing.HttpRoutePlanner;
+import org.apache.hc.core5.http.HttpHost;
+import org.apache.hc.core5.util.Timeout;
 import org.kohsuke.accmod.Restricted;
 import org.kohsuke.accmod.restrictions.NoExternalUse;
 
@@ -23,16 +26,22 @@ public class HttpClient {
     public static HttpClientBuilder getCloseableHttpClientBuilder(ProxyConfiguration proxy) {
         int timeoutInSeconds = 60;
 
-        RequestConfig config = RequestConfig.custom()
-                .setConnectTimeout(timeoutInSeconds * 1000)
-                .setConnectionRequestTimeout(timeoutInSeconds * 1000)
-                .setSocketTimeout(timeoutInSeconds * 1000).build();
+        ConnectionConfig connectionConfig = ConnectionConfig.custom()
+                .setConnectTimeout(Timeout.ofSeconds(timeoutInSeconds))
+                .setSocketTimeout(Timeout.ofSeconds(timeoutInSeconds)).build();
+        PoolingHttpClientConnectionManager connectionManager = PoolingHttpClientConnectionManagerBuilder.create()
+                .setDefaultConnectionConfig(connectionConfig)
+                .build();
+
+        RequestConfig requestConfig = RequestConfig.custom()
+                .setConnectionRequestTimeout(Timeout.ofSeconds(timeoutInSeconds)).build();
 
         final HttpClientBuilder clientBuilder = HttpClients
                 .custom()
                 .useSystemProperties()
-                .setDefaultRequestConfig(config);
-        final CredentialsProvider credentialsProvider = new BasicCredentialsProvider();
+                .setConnectionManager(connectionManager)
+                .setDefaultRequestConfig(requestConfig);
+        final BasicCredentialsProvider credentialsProvider = new BasicCredentialsProvider();
         clientBuilder.setDefaultCredentialsProvider(credentialsProvider);
 
         if (proxy != null) {
@@ -61,9 +70,9 @@ public class HttpClient {
         if (userName.indexOf('\\') >= 0){
             final String domain = userName.substring(0, userName.indexOf('\\'));
             final String user = userName.substring(userName.indexOf('\\') + 1);
-            return new NTCredentials(user, password, "", domain);
+            return new NTCredentials(user, password.toCharArray(), "", domain);
         } else {
-            return new UsernamePasswordCredentials(userName, password);
+            return new UsernamePasswordCredentials(userName, password.toCharArray());
         }
     }
 }

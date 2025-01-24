@@ -43,7 +43,7 @@ import java.util.stream.Collectors;
 import jenkins.model.Jenkins;
 import jenkins.scm.RunWithSCM;
 import org.apache.commons.lang.StringUtils;
-import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
 
 public abstract class SlackUserIdResolver extends AbstractDescribableImpl<SlackUserIdResolver> implements ExtensionPoint {
 

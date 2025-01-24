@@ -28,13 +28,13 @@ import jenkins.plugins.slack.user.SlackUserIdResolver;
 import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.http.HttpEntity;
-import org.apache.http.HttpStatus;
-import org.apache.http.client.methods.CloseableHttpResponse;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.entity.StringEntity;
-import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.util.EntityUtils;
+import org.apache.hc.client5.http.classic.methods.HttpPost;
+import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
+import org.apache.hc.client5.http.impl.classic.CloseableHttpResponse;
+import org.apache.hc.core5.http.HttpEntity;
+import org.apache.hc.core5.http.HttpStatus;
+import org.apache.hc.core5.http.io.entity.EntityUtils;
+import org.apache.hc.core5.http.io.entity.StringEntity;
 import org.jenkinsci.plugins.plaincredentials.StringCredentials;
 
 public class StandardSlackService implements SlackService {
@@ -214,7 +214,7 @@ public class StandardSlackService implements SlackService {
             post.setEntity(new StringEntity(body.toString(), StandardCharsets.UTF_8));
 
             try (CloseableHttpResponse response = client.execute(post)) {
-                int responseCode = response.getStatusLine().getStatusCode();
+                int responseCode = response.getCode();
                 HttpEntity entity = response.getEntity();
                 if (botUser && entity != null) {
                     responseString = EntityUtils.toString(entity);
@@ -237,8 +237,6 @@ public class StandardSlackService implements SlackService {
             } catch (Exception e) {
                 logger.log(Level.WARNING, "Error posting to Slack", e);
                 result = false;
-            } finally {
-                post.releaseConnection();
             }
         } catch (IOException e) {
             logger.log(Level.WARNING, "Error closing HttpClient", e);
