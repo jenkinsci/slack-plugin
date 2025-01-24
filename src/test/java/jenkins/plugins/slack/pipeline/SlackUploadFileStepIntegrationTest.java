@@ -9,16 +9,15 @@ import org.jenkinsci.plugins.plaincredentials.impl.StringCredentialsImpl;
 import org.jenkinsci.plugins.workflow.cps.CpsFlowDefinition;
 import org.jenkinsci.plugins.workflow.cps.SnippetizerTester;
 import org.jenkinsci.plugins.workflow.job.WorkflowJob;
-import org.junit.Rule;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.jvnet.hudson.test.JenkinsRule;
+import org.jvnet.hudson.test.junit.jupiter.WithJenkins;
 
-public class SlackUploadFileStepIntegrationTest {
-    @Rule
-    public JenkinsRule j = new JenkinsRule();
+@WithJenkins
+class SlackUploadFileStepIntegrationTest {
 
     @Test
-    public void configRoundTrip() throws Exception {
+    void configRoundTrip(JenkinsRule j) throws Exception {
         SnippetizerTester st = new SnippetizerTester(j);
         SlackUploadFileStep step = new SlackUploadFileStep("file.txt");
         st.assertRoundTrip(step, "slackUploadFile 'file.txt'");
@@ -31,7 +30,7 @@ public class SlackUploadFileStepIntegrationTest {
     }
 
     @Test
-    public void test_run_passes() throws Exception {
+    void test_run_passes(JenkinsRule j) throws Exception {
         Jenkins jenkins = j.jenkins;
 
         SystemCredentialsProvider instance = SystemCredentialsProvider.getInstance();

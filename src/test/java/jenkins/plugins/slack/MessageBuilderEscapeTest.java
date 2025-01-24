@@ -3,19 +3,19 @@ package jenkins.plugins.slack;
 import hudson.model.AbstractBuild;
 import hudson.model.AbstractProject;
 import jenkins.plugins.slack.logging.BuildAwareLogger;
-import org.junit.BeforeClass;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-public class MessageBuilderEscapeTest {
+class MessageBuilderEscapeTest {
 
     private static ActiveNotifier.MessageBuilder messageBuilder;
 
-    @BeforeClass
-    public static void setupMessageBuilder() {
+    @BeforeAll
+    static void setupMessageBuilder() {
         AbstractBuild build = mock(AbstractBuild.class);
         AbstractProject project = mock(AbstractProject.class);
         AbstractProject job = mock(AbstractProject.class);
@@ -32,7 +32,7 @@ public class MessageBuilderEscapeTest {
     }
 
     @Test
-    public void testEscapeAnchor() {
+    void testEscapeAnchor() {
         String input = "<a href='target'>test</a>";
         String expected = "<'target'|test>";
         String escaped = messageBuilder.escape(input);
@@ -40,7 +40,7 @@ public class MessageBuilderEscapeTest {
     }
 
     @Test
-    public void testEscapePercent() {
+    void testEscapePercent() {
         String input = "hello % world";
         String expected = "hello % world";
         String escaped = messageBuilder.escape(input);
@@ -48,7 +48,7 @@ public class MessageBuilderEscapeTest {
     }
 
     @Test
-    public void testEscapeBraces() {
+    void testEscapeBraces() {
         String input = "something { is } odd";
         String expected = "something { is } odd";
         String escaped = messageBuilder.escape(input);
@@ -56,7 +56,7 @@ public class MessageBuilderEscapeTest {
     }
 
     @Test
-    public void testEscapeBracesInLink() {
+    void testEscapeBracesInLink() {
         String input = "<a href='target'>test { case }</a>";
         String expected = "<'target'|test { case }>";
         String escaped = messageBuilder.escape(input);

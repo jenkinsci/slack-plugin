@@ -3,16 +3,17 @@ package jenkins.plugins.slack.decisions;
 import hudson.model.Result;
 import hudson.tasks.junit.TestResultAction;
 import jenkins.plugins.slack.logging.BuildAwareLogger;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
+import org.mockito.junit.jupiter.MockitoExtension;
 
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.BDDMockito.given;
 
-public class OnRegressionTest {
+@ExtendWith(MockitoExtension.class)
+class OnRegressionTest {
     @Mock
     private Context context;
     @Mock
@@ -24,13 +25,8 @@ public class OnRegressionTest {
 
     private OnRegression condition = new OnRegression(null, log);
 
-    @Before
-    public void setup() {
-        MockitoAnnotations.initMocks(this);
-    }
-
     @Test
-    public void shouldMeetConditionIfCurrentIsWorseThanPrevious() {
+    void shouldMeetConditionIfCurrentIsWorseThanPrevious() {
         given(context.currentResultOrSuccess()).willReturn(Result.FAILURE);
         given(context.previousResultOrSuccess()).willReturn(Result.SUCCESS);
 
@@ -40,7 +36,7 @@ public class OnRegressionTest {
     }
 
     @Test
-    public void shouldNotMeetConditionIfCurrentIsBetterThanPrevious() {
+    void shouldNotMeetConditionIfCurrentIsBetterThanPrevious() {
         given(context.currentResultOrSuccess()).willReturn(Result.SUCCESS);
         given(context.previousResultOrSuccess()).willReturn(Result.FAILURE);
 
@@ -50,7 +46,7 @@ public class OnRegressionTest {
     }
 
     @Test
-    public void shouldMeetConditionIfCurrentIsHasMoreTestFailuresThanPrevious() {
+    void shouldMeetConditionIfCurrentIsHasMoreTestFailuresThanPrevious() {
         given(context.currentResultOrSuccess()).willReturn(Result.UNSTABLE);
         given(context.previousResultOrSuccess()).willReturn(Result.UNSTABLE);
         given(context.getPreviousTestResult()).willReturn(previousTestResult);
@@ -64,7 +60,7 @@ public class OnRegressionTest {
     }
 
     @Test
-    public void shouldNotMeetConditionIfCurrentIsHasFewerTestFailuresThanPrevious() {
+    void shouldNotMeetConditionIfCurrentIsHasFewerTestFailuresThanPrevious() {
         given(context.currentResultOrSuccess()).willReturn(Result.UNSTABLE);
         given(context.previousResultOrSuccess()).willReturn(Result.UNSTABLE);
         given(context.getPreviousTestResult()).willReturn(previousTestResult);

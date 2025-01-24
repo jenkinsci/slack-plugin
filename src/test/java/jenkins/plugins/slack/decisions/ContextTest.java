@@ -2,28 +2,24 @@ package jenkins.plugins.slack.decisions;
 
 import hudson.model.AbstractBuild;
 import hudson.model.Result;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
+import org.mockito.junit.jupiter.MockitoExtension;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.BDDMockito.given;
 
-public class ContextTest {
+@ExtendWith(MockitoExtension.class)
+class ContextTest {
     @Mock
     private AbstractBuild<?, ?> previous;
     @Mock
     private AbstractBuild<?, ?> current;
 
-    @Before
-    public void setup() {
-        MockitoAnnotations.initMocks(this);
-    }
-
     @Test
-    public void shouldReturnSuccessIfPreviousBuildNull() {
+    void shouldReturnSuccessIfPreviousBuildNull() {
         Context context = new Context(current, null);
         Result expected = Result.SUCCESS;
 
@@ -33,7 +29,7 @@ public class ContextTest {
     }
 
     @Test
-    public void shouldReturnSuccessIfPreviousResultNull() {
+    void shouldReturnSuccessIfPreviousResultNull() {
         given(previous.getResult()).willReturn(null);
         Context context = new Context(current, previous);
         Result expected = Result.SUCCESS;
@@ -44,7 +40,7 @@ public class ContextTest {
     }
 
     @Test
-    public void shouldReturnPreviousResultIfPresent() {
+    void shouldReturnPreviousResultIfPresent() {
         Result expected = Result.UNSTABLE;
         given(previous.getResult()).willReturn(expected);
         Context context = new Context(current, previous);
@@ -55,7 +51,7 @@ public class ContextTest {
     }
 
     @Test
-    public void shouldReturnCurrentResultIfPresent() {
+    void shouldReturnCurrentResultIfPresent() {
         Result expected = Result.NOT_BUILT;
         given(current.getResult()).willReturn(expected);
         Context context = new Context(current, previous);
@@ -66,7 +62,7 @@ public class ContextTest {
     }
 
     @Test
-    public void shouldReturnNullIfCurrentBuildNull() {
+    void shouldReturnNullIfCurrentBuildNull() {
         Context context = new Context(null, previous);
 
         Result actual = context.currentResult();
@@ -75,7 +71,7 @@ public class ContextTest {
     }
 
     @Test
-    public void shouldReturnNullIfCurrentResultNull() {
+    void shouldReturnNullIfCurrentResultNull() {
         given(current.getResult()).willReturn(null);
         Context context = new Context(current, previous);
 

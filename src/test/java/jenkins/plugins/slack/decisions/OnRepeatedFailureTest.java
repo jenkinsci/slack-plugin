@@ -2,29 +2,25 @@ package jenkins.plugins.slack.decisions;
 
 import hudson.model.Result;
 import jenkins.plugins.slack.logging.BuildAwareLogger;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
+import org.mockito.junit.jupiter.MockitoExtension;
 
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.BDDMockito.given;
 
-public class OnRepeatedFailureTest {
-    @Mock
+@ExtendWith(MockitoExtension.class)
+class OnRepeatedFailureTest {
+    @Mock(strictness = Mock.Strictness.LENIENT)
     private Context context;
     @Mock
     private BuildAwareLogger log;
     private OnRepeatedFailure condition = new OnRepeatedFailure(null, log);
 
-    @Before
-    public void setup() {
-        MockitoAnnotations.initMocks(this);
-    }
-
     @Test
-    public void shouldMeetConditionIfCurrentAndPreviousAreFailures() {
+    void shouldMeetConditionIfCurrentAndPreviousAreFailures() {
         given(context.previousResultOrSuccess()).willReturn(Result.FAILURE);
         given(context.currentResult()).willReturn(Result.FAILURE);
 
@@ -34,7 +30,7 @@ public class OnRepeatedFailureTest {
     }
 
     @Test
-    public void shouldNotMeetConditionIfCurrentIsUnstable() {
+    void shouldNotMeetConditionIfCurrentIsUnstable() {
         given(context.previousResultOrSuccess()).willReturn(Result.FAILURE);
         given(context.currentResult()).willReturn(Result.UNSTABLE);
 
@@ -44,7 +40,7 @@ public class OnRepeatedFailureTest {
     }
 
     @Test
-    public void shouldNotMeetConditionIfPreviousIsUnstable() {
+    void shouldNotMeetConditionIfPreviousIsUnstable() {
         given(context.previousResultOrSuccess()).willReturn(Result.UNSTABLE);
         given(context.currentResult()).willReturn(Result.FAILURE);
 

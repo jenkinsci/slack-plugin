@@ -2,18 +2,18 @@ package jenkins.plugins.slack;
 
 import org.apache.hc.client5.http.impl.classic.CloseableHttpClientStub;
 import org.apache.hc.core5.http.HttpStatus;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
-public class StandardSlackServiceTest {
+class StandardSlackServiceTest {
     /**
      * Use a valid host, but an invalid team domain
      */
     @Test
-    public void invalidTeamDomainShouldFail() {
+    void invalidTeamDomainShouldFail() {
         StandardSlackService service = new StandardSlackService(
                 StandardSlackService.builder()
                         .withBaseUrl("")
@@ -26,7 +26,7 @@ public class StandardSlackServiceTest {
     }
 
     @Test
-    public void badConfigurationWillBeCorrected() {
+    void badConfigurationWillBeCorrected() {
         StandardSlackService service = new StandardSlackService(
                 StandardSlackService.builder()
                         .withBaseUrl("https://example.slack.com/services/hooks/jenkins-ci")
@@ -42,7 +42,7 @@ public class StandardSlackServiceTest {
      * Use a valid team domain, but a bad token
      */
     @Test
-    public void invalidTokenShouldFail() {
+    void invalidTokenShouldFail() {
         StandardSlackService service = new StandardSlackService(
                 StandardSlackService.builder()
                         .withBaseUrl("")
@@ -55,7 +55,7 @@ public class StandardSlackServiceTest {
     }
 
     @Test
-    public void publishToASingleRoomSendsASingleMessage() {
+    void publishToASingleRoomSendsASingleMessage() {
         StandardSlackServiceStub service = new StandardSlackServiceStub(
                 StandardSlackService.builder()
                         .withBaseUrl("")
@@ -70,7 +70,7 @@ public class StandardSlackServiceTest {
     }
 
     @Test
-    public void publishToMultipleRoomsSendsAMessageToEveryRoom() {
+    void publishToMultipleRoomsSendsAMessageToEveryRoom() {
         StandardSlackServiceStub service = new StandardSlackServiceStub(
                 StandardSlackService.builder()
                         .withBaseUrl("")
@@ -85,7 +85,7 @@ public class StandardSlackServiceTest {
     }
 
     @Test
-    public void successfulPublishToASingleRoomReturnsTrue() {
+    void successfulPublishToASingleRoomReturnsTrue() {
         StandardSlackServiceStub service = new StandardSlackServiceStub(
                 StandardSlackService.builder()
                         .withBaseUrl("")
@@ -101,7 +101,7 @@ public class StandardSlackServiceTest {
 
 
     @Test
-    public void successfulPublishToSingleRoomWithProvidedTokenReturnsTrue() {
+    void successfulPublishToSingleRoomWithProvidedTokenReturnsTrue() {
         StandardSlackServiceStub service = new StandardSlackServiceStub(
                 StandardSlackService.builder()
                         .withBaseUrl("")
@@ -116,7 +116,7 @@ public class StandardSlackServiceTest {
     }
 
     @Test
-    public void successfulPublishToMultipleRoomsReturnsTrue() {
+    void successfulPublishToMultipleRoomsReturnsTrue() {
         StandardSlackServiceStub service = new StandardSlackServiceStub(
                 StandardSlackService.builder()
                         .withBaseUrl("")
@@ -131,7 +131,7 @@ public class StandardSlackServiceTest {
     }
 
     @Test
-    public void failedPublishToASingleRoomReturnsFalse() {
+    void failedPublishToASingleRoomReturnsFalse() {
         StandardSlackServiceStub service = new StandardSlackServiceStub(
                 StandardSlackService.builder()
                         .withBaseUrl("")
@@ -146,7 +146,7 @@ public class StandardSlackServiceTest {
     }
 
     @Test
-    public void singleFailedPublishToMultipleRoomsReturnsFalse() {
+    void singleFailedPublishToMultipleRoomsReturnsFalse() {
         StandardSlackServiceStub service = new StandardSlackServiceStub(
                 StandardSlackService.builder()
                         .withBaseUrl("")
@@ -162,7 +162,7 @@ public class StandardSlackServiceTest {
     }
 
     @Test
-    public void publishToEmptyRoomReturnsTrue() {
+    void publishToEmptyRoomReturnsTrue() {
         StandardSlackServiceStub service = new StandardSlackServiceStub(
                 StandardSlackService.builder()
                         .withBaseUrl("")
@@ -178,7 +178,7 @@ public class StandardSlackServiceTest {
 
 
     @Test
-    public void sendAsBotUserReturnsTrue() {
+    void sendAsBotUserReturnsTrue() {
         StandardSlackServiceStub service = new StandardSlackServiceStub(
                 StandardSlackService.builder()
                         .withBaseUrl("")
@@ -193,7 +193,7 @@ public class StandardSlackServiceTest {
     }
 
     @Test
-    public void sendAsBotUserInThreadReturnsTrue() {
+    void sendAsBotUserInThreadReturnsTrue() {
         StandardSlackServiceStub service = new StandardSlackServiceStub(
                 StandardSlackService.builder()
                         .withBaseUrl("")
@@ -208,7 +208,7 @@ public class StandardSlackServiceTest {
     }
 
     @Test
-    public void sendAsBotUserWithUpdate() {
+    void sendAsBotUserWithUpdate() {
         StandardSlackServiceStub service = new StandardSlackServiceStub(
                 StandardSlackService.builder()
                         .withBaseUrl("")
@@ -223,7 +223,7 @@ public class StandardSlackServiceTest {
     }
 
     @Test
-    public void populatedTokenIsUsed() {
+    void populatedTokenIsUsed() {
         final String populatedToken = "secret-text";
         StandardSlackServiceStub service = new StandardSlackServiceStub(
                 StandardSlackService.builder()
@@ -240,7 +240,7 @@ public class StandardSlackServiceTest {
     }
 
     @Test
-    public void iconEmojiAndBotUserReturnsTrue() {
+    void iconEmojiAndBotUserReturnsTrue() {
         StandardSlackServiceStub service = new StandardSlackServiceStub(
                 StandardSlackService.builder()
                         .withBaseUrl("")
@@ -256,7 +256,7 @@ public class StandardSlackServiceTest {
     }
 
     @Test
-    public void usernameAndBotUserReturnsTrue() {
+    void usernameAndBotUserReturnsTrue() {
         StandardSlackServiceStub service = new StandardSlackServiceStub(
                 StandardSlackService.builder()
                         .withBaseUrl("")
@@ -272,7 +272,7 @@ public class StandardSlackServiceTest {
     }
 
     @Test
-    public void iconEmojiAndNotBotUserReturnsTrue() {
+    void iconEmojiAndNotBotUserReturnsTrue() {
         StandardSlackServiceStub service = new StandardSlackServiceStub(
                 StandardSlackService.builder()
                         .withBaseUrl("")
@@ -288,7 +288,7 @@ public class StandardSlackServiceTest {
     }
 
     @Test
-    public void usernameAndNotBotUserReturnsTrue() {
+    void usernameAndNotBotUserReturnsTrue() {
         StandardSlackServiceStub service = new StandardSlackServiceStub(
                 StandardSlackService.builder()
                         .withBaseUrl("")
@@ -304,7 +304,7 @@ public class StandardSlackServiceTest {
     }
 
     @Test
-    public void shouldRemoveAReaction() {
+    void shouldRemoveAReaction() {
         StandardSlackServiceStub service = new StandardSlackServiceStub(
                 StandardSlackService.builder()
                         .withBaseUrl("")

@@ -1,14 +1,14 @@
 package jenkins.plugins.slack.decisions;
 
 import java.util.Arrays;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
-public class NotificationConditionsTest {
+class NotificationConditionsTest {
 
     @Test
-    public void shouldMatchIfAnyConditionMatches() {
+    void shouldMatchIfAnyConditionMatches() {
         NotificationConditions conditions = new NotificationConditions(Arrays.asList(
                 p -> false,
                 p -> false,

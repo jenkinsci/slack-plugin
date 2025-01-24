@@ -11,43 +11,44 @@ import jenkins.model.Jenkins;
 import jenkins.plugins.slack.Messages;
 import jenkins.plugins.slack.SlackNotifier;
 import org.jenkinsci.plugins.plaincredentials.StringCredentials;
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.jvnet.hudson.test.JenkinsRule;
+import org.jvnet.hudson.test.junit.jupiter.WithJenkins;
 import org.jvnet.hudson.test.recipes.LocalData;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 
 @SuppressWarnings("deprecation")
-public class GlobalCredentialMigratorTest {
+@WithJenkins
+class GlobalCredentialMigratorTest {
 
-    @Rule
-    public JenkinsRule j = new JenkinsRule();
-
+    @SuppressWarnings({"unused", "FieldCanBeLocal"})
+    private JenkinsRule j;
     private SlackNotifier.DescriptorImpl descriptor;
 
-    @Before
-    public void setup() {
+    @BeforeEach
+    void setup(JenkinsRule j) {
+        this.j = j;
         descriptor = ExtensionList.lookupSingleton(SlackNotifier.DescriptorImpl.class);
     }
 
     @Test
     @LocalData
-    public void noToken() {
+    void noToken() {
         assertNull(Util.fixEmpty(descriptor.getToken()));
-        assertEquals(descriptor.getTokenCredentialId(), "abcdef");
+        assertEquals("abcdef", descriptor.getTokenCredentialId());
     }
 
     @Test
     @LocalData
-    public void withToken() {
+    void withToken() {
         assertNull(Util.fixEmpty(descriptor.getToken()));
         String tokenCredentialId = descriptor.getTokenCredentialId();
 
         StringCredentials stringCredentials = lookupCredentials(tokenCredentialId);
-        assertEquals(stringCredentials.getDescription(), Messages.migratedCredentialDescription());
+        assertEquals(Messages.migratedCredentialDescription(), stringCredentials.getDescription());
     }
 
     private StringCredentials lookupCredentials(String credentialId) {
