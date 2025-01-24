@@ -1,5 +1,7 @@
 package jenkins.plugins.slack;
 
+import org.apache.hc.client5.http.impl.classic.CloseableHttpClientStub;
+
 public class StandardSlackServiceStub extends StandardSlackService {
 
     private CloseableHttpClientStub httpClientStub;

@@ -2,14 +2,15 @@ package jenkins.plugins.slack;
 
 import hudson.ProxyConfiguration;
 import java.util.regex.Pattern;
-import org.apache.http.HttpHost;
-import org.apache.http.HttpRequest;
-import org.apache.http.conn.routing.HttpRoute;
-import org.apache.http.conn.routing.HttpRoutePlanner;
-import org.apache.http.impl.conn.DefaultProxyRoutePlanner;
-import org.apache.http.impl.conn.DefaultRoutePlanner;
-import org.apache.http.impl.conn.DefaultSchemePortResolver;
-import org.apache.http.protocol.HttpContext;
+import org.apache.hc.client5.http.HttpRoute;
+import org.apache.hc.client5.http.impl.DefaultSchemePortResolver;
+import org.apache.hc.client5.http.impl.routing.DefaultProxyRoutePlanner;
+import org.apache.hc.client5.http.impl.routing.DefaultRoutePlanner;
+import org.apache.hc.client5.http.routing.HttpRoutePlanner;
+import org.apache.hc.core5.http.HttpException;
+import org.apache.hc.core5.http.HttpHost;
+import org.apache.hc.core5.http.protocol.HttpContext;
+
 
 public class NoProxyHostCheckerRoutePlanner implements HttpRoutePlanner {
 
@@ -27,11 +28,12 @@ public class NoProxyHostCheckerRoutePlanner implements HttpRoutePlanner {
         defaultProxyRoutePlanner = new DefaultProxyRoutePlanner(host);
     }
 
-    public HttpRoute determineRoute(HttpHost target, HttpRequest request, HttpContext context) throws org.apache.http.HttpException {
+    @Override
+    public HttpRoute determineRoute(HttpHost target, HttpContext context) throws HttpException {
         final String targetHostUri = target.toURI();
         if(isNoProxyHost(targetHostUri))
-            return defaultRoutePlanner.determineRoute(target,request,context);
-        return defaultProxyRoutePlanner.determineRoute(target,request,context);
+            return defaultRoutePlanner.determineRoute(target, context);
+        return defaultProxyRoutePlanner.determineRoute(target, context);
     }
 
     private boolean isNoProxyHost(String host) {

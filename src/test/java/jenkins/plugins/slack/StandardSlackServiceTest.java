@@ -1,6 +1,7 @@
 package jenkins.plugins.slack;
 
-import org.apache.http.HttpStatus;
+import org.apache.hc.client5.http.impl.classic.CloseableHttpClientStub;
+import org.apache.hc.core5.http.HttpStatus;
 import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
