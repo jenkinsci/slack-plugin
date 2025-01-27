@@ -2,29 +2,25 @@ package jenkins.plugins.slack.decisions;
 
 import hudson.model.Result;
 import jenkins.plugins.slack.logging.BuildAwareLogger;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
+import org.mockito.junit.jupiter.MockitoExtension;
 
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.BDDMockito.given;
 
-public class OnBackToNormalTest {
+@ExtendWith(MockitoExtension.class)
+class OnBackToNormalTest {
     @Mock
     private Context context;
     @Mock
     private BuildAwareLogger log;
     private OnBackToNormal subject = new OnBackToNormal(null, log);
 
-    @Before
-    public void setup() {
-        MockitoAnnotations.initMocks(this);
-    }
-
     @Test
-    public void shouldMeetConditionIfPreviousFailureIsNowSuccess() {
+    void shouldMeetConditionIfPreviousFailureIsNowSuccess() {
         given(context.previousResultOrSuccess()).willReturn(Result.FAILURE);
         given(context.currentResult()).willReturn(Result.SUCCESS);
 
@@ -34,7 +30,7 @@ public class OnBackToNormalTest {
     }
 
     @Test
-    public void shouldMeetConditionIfPreviousUnstableIsNowSuccess() {
+    void shouldMeetConditionIfPreviousUnstableIsNowSuccess() {
         given(context.previousResultOrSuccess()).willReturn(Result.UNSTABLE);
         given(context.currentResult()).willReturn(Result.SUCCESS);
 
@@ -44,7 +40,7 @@ public class OnBackToNormalTest {
     }
 
     @Test
-    public void shouldNotMeetConditionIfCurrentIsNotSuccess() {
+    void shouldNotMeetConditionIfCurrentIsNotSuccess() {
         given(context.previousResultOrSuccess()).willReturn(Result.FAILURE);
         given(context.currentResult()).willReturn(Result.FAILURE);
 
@@ -54,7 +50,7 @@ public class OnBackToNormalTest {
     }
 
     @Test
-    public void shouldNotMeetConditionIfPreviousIsSuccess() {
+    void shouldNotMeetConditionIfPreviousIsSuccess() {
         given(context.previousResultOrSuccess()).willReturn(Result.FAILURE);
         given(context.currentResult()).willReturn(Result.FAILURE);
 

@@ -7,16 +7,15 @@ import org.jenkinsci.plugins.workflow.cps.CpsFlowDefinition;
 import org.jenkinsci.plugins.workflow.job.WorkflowJob;
 import org.jenkinsci.plugins.workflow.job.WorkflowRun;
 import org.jenkinsci.plugins.workflow.steps.StepConfigTester;
-import org.junit.Rule;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.jvnet.hudson.test.JenkinsRule;
+import org.jvnet.hudson.test.junit.jupiter.WithJenkins;
 
-public class SlackSendStepIntegrationTest {
-    @Rule
-    public JenkinsRule jenkinsRule = new JenkinsRule();
+@WithJenkins
+class SlackSendStepIntegrationTest {
 
     @Test
-    public void configRoundTrip() throws Exception {
+    void configRoundTrip(JenkinsRule jenkinsRule) throws Exception {
         SlackSendStep step1 = new SlackSendStep();
         step1.setMessage("message");
         step1.setColor("good");
@@ -32,7 +31,7 @@ public class SlackSendStepIntegrationTest {
     }
 
     @Test
-    public void test_global_config_override() throws Exception {
+    void test_global_config_override(JenkinsRule jenkinsRule) throws Exception {
         WorkflowJob job = jenkinsRule.jenkins.createProject(WorkflowJob.class, "workflow");
         //just define message
         job.setDefinition(new CpsFlowDefinition("slackSend(message: 'message', baseUrl: 'baseUrl', teamDomain: 'teamDomain', token: 'token', tokenCredentialId: 'tokenCredentialId', channel: '#channel', color: 'good', iconEmoji: ':+1:', username: 'username', timestamp: '124124.12412');", true));
@@ -42,7 +41,7 @@ public class SlackSendStepIntegrationTest {
     }
 
     @Test
-    public void test_fail_on_error() throws Exception {
+    void test_fail_on_error(JenkinsRule jenkinsRule) throws Exception {
         WorkflowJob job = jenkinsRule.jenkins.createProject(WorkflowJob.class, "workflow");
         //just define message
         job.setDefinition(new CpsFlowDefinition("slackSend(message: 'message', baseUrl: 'baseUrl', teamDomain: 'teamDomain', token: 'token', tokenCredentialId: 'tokenCredentialId', channel: '#channel', color: 'good', failOnError: true);", true));
@@ -52,7 +51,7 @@ public class SlackSendStepIntegrationTest {
     }
 
     @Test
-    public void test_fail_on_missing_message() throws Exception {
+    void test_fail_on_missing_message(JenkinsRule jenkinsRule) throws Exception {
         WorkflowJob job = jenkinsRule.jenkins.createProject(WorkflowJob.class, "workflow");
         //with a null message
         job.setDefinition(new CpsFlowDefinition("slackSend(message: null, baseUrl: 'baseUrl', teamDomain: 'teamDomain', token: 'token', tokenCredentialId: 'tokenCredentialId', channel: '#channel', color: 'good', failOnError: true);", true));

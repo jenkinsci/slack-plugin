@@ -4,21 +4,22 @@ import hudson.model.TaskListener;
 import java.io.PrintStream;
 import java.util.function.Supplier;
 import java.util.logging.Logger;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
+import org.mockito.junit.jupiter.MockitoExtension;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
-public class SlackNotificationsLoggerTest {
+@ExtendWith(MockitoExtension.class)
+class SlackNotificationsLoggerTest {
     @Mock
     private Logger system;
     @Mock
@@ -27,21 +28,13 @@ public class SlackNotificationsLoggerTest {
     private ArgumentCaptor<Supplier<String>> messageSupplier;
     private SlackNotificationsLogger logger;
 
-    private AutoCloseable autoCloseable;
-
-    @Before
-    public void setup() {
-        autoCloseable = MockitoAnnotations.openMocks(this);
+    @BeforeEach
+    void setup() {
         logger = new SlackNotificationsLogger(system, user);
     }
 
-    @After
-    public void fin() throws Exception {
-        autoCloseable.close();
-    }
-
     @Test
-    public void shouldOnlyWriteDebugMessagesToSystemLog() {
+    void shouldOnlyWriteDebugMessagesToSystemLog() {
         String expected = "[key] this message has number 15 within it";
 
         logger.debug("[key]", "this message has number %d %s it", 15, "within");
@@ -52,7 +45,7 @@ public class SlackNotificationsLoggerTest {
     }
 
     @Test
-    public void shouldWriteInfoMessagesToSystemAndUserLogs() {
+    void shouldWriteInfoMessagesToSystemAndUserLogs() {
         String expectedUserLog = "[Slack Notifications] a 100% useful sort of message";
         String expectedSystemLog = "[Project #17] a 100% useful sort of message";
 

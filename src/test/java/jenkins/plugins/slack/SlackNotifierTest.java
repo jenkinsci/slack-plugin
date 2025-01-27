@@ -3,58 +3,46 @@ package jenkins.plugins.slack;
 import hudson.FilePath;
 import hudson.model.TaskListener;
 import hudson.util.FormValidation;
-import java.util.Arrays;
-import java.util.Collection;
-import junit.framework.TestCase;
 import net.sf.json.JSONArray;
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.jvnet.hudson.test.JenkinsRule;
+import org.jvnet.hudson.test.junit.jupiter.WithJenkins;
 
-@RunWith(Parameterized.class)
-public class SlackNotifierTest extends TestCase {
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
+@WithJenkins
+class SlackNotifierTest {
+
+    @SuppressWarnings({"unused", "FieldCanBeLocal"})
+    private JenkinsRule rule;
     private SlackNotifierStub.DescriptorImplStub descriptor;
-    private SlackServiceStub slackServiceStub;
-    private boolean response;
-    private FormValidation.Kind expectedResult;
 
-    @Rule
-    public final JenkinsRule rule = new JenkinsRule();
-
-    @Before
-    @Override
-    public void setUp() {
+    @BeforeEach
+    void setUp(JenkinsRule rule) {
+        this.rule = rule;
         descriptor = new SlackNotifierStub.DescriptorImplStub();
     }
 
-    public SlackNotifierTest(SlackServiceStub slackServiceStub, boolean response, FormValidation.Kind expectedResult) {
-        this.slackServiceStub = slackServiceStub;
-        this.response = response;
-        this.expectedResult = expectedResult;
-    }
-
-    @Parameterized.Parameters
-    public static Collection<Object[]> businessTypeKeys() {
-        return Arrays.asList(new Object[][]{
+    static Object[][] businessTypeKeys() {
+        return new Object[][]{
                 {new SlackServiceStub(), true, FormValidation.Kind.OK},
                 {new SlackServiceStub(), false, FormValidation.Kind.ERROR},
                 {null, false, FormValidation.Kind.ERROR}
-        });
+        };
     }
 
-    @Test
-    public void testDoTestConnection() {
+    @ParameterizedTest
+    @MethodSource("businessTypeKeys")
+    void testDoTestConnection(SlackServiceStub slackServiceStub, boolean response, FormValidation.Kind expectedResult) {
         if (slackServiceStub != null) {
             slackServiceStub.setResponse(response);
         }
         descriptor.setSlackService(slackServiceStub);
         FormValidation result = descriptor
                 .doTestConnection("baseUrl", "teamDomain", "authTokenCredentialId", false, "room", false, ":+1:", "slack", null);
-        assertEquals(result.kind, expectedResult);
+        assertEquals(expectedResult, result.kind);
     }
 
     public static class SlackServiceStub implements SlackService {

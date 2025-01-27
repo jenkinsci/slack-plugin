@@ -38,14 +38,15 @@ import org.apache.hc.client5.http.impl.classic.CloseableHttpResponse;
 import org.apache.hc.client5.http.impl.classic.CloseableHttpResponseStub;
 import org.apache.hc.core5.http.HttpStatus;
 import org.apache.hc.core5.http.io.entity.StringEntity;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.jvnet.hudson.test.FakeChangeLogSCM.EntryImpl;
 import org.jvnet.hudson.test.FakeChangeLogSCM.FakeChangeLogSet;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
@@ -65,20 +66,21 @@ public class EmailSlackUserIdResolverTest {
     private EmailSlackUserIdResolver resolver;
     private MailAddressResolver mailAddressResolver;
 
-    public EmailSlackUserIdResolverTest() throws IOException {
+    @BeforeAll
+    static void beforeAll() throws IOException {
         responseOKContent = readResource("lookUpByEmailResponseOK.json");
         responseErrorContent = readResource("lookUpByEmailResponseError.json");
     }
 
-    @Before
-    public void setUp() {
+    @BeforeEach
+    void setUp() {
         httpClient = new CloseableHttpClientStub();
         mailAddressResolver = getMailAddressResolver();
         resolver = getResolver(mailAddressResolver);
     }
 
     @Test
-    public void testResolveUserIdForEmailAddress() throws IOException {
+    void testResolveUserIdForEmailAddress() throws IOException {
         String userId;
 
         // Test handling of a success response from Slack
@@ -93,7 +95,7 @@ public class EmailSlackUserIdResolverTest {
     }
 
     @Test
-    public void testResolveUserIdForUser() throws Exception {
+    void testResolveUserIdForUser() throws Exception {
         // MailAddressResolver is mocked to return EMAIL_ADDRESS associated with
         // the EXPECTED_USER_ID
         httpClient.setHttpResponse(getResponseOK());
@@ -102,7 +104,7 @@ public class EmailSlackUserIdResolverTest {
     }
 
     @Test
-    public void testResolveUserIdForUserWithoutEmailAddress() throws Exception {
+    void testResolveUserIdForUserWithoutEmailAddress() throws Exception {
         mailAddressResolver = mock(MailAddressResolver.class);
         resolver = new EmailSlackUserIdResolver(AUTH_TOKEN, httpClient, Collections.singletonList(mailAddressResolver), user -> null);
         httpClient.setHttpResponse(getResponseOK());
@@ -112,7 +114,7 @@ public class EmailSlackUserIdResolverTest {
     }
 
     @Test
-    public void testResolveUserIdWithoutAuthToken() throws Exception {
+    void testResolveUserIdWithoutAuthToken() throws Exception {
         mailAddressResolver = mock(MailAddressResolver.class);
         resolver = new EmailSlackUserIdResolver(AUTH_TOKEN, httpClient, Collections.singletonList(mailAddressResolver), user -> EMAIL_ADDRESS);
         resolver.setAuthToken(null);
@@ -123,7 +125,7 @@ public class EmailSlackUserIdResolverTest {
     }
 
     @Test
-    public void testResolveUserIdForUserWithoutDefaultMailAddressResolver() throws Exception {
+    void testResolveUserIdForUserWithoutDefaultMailAddressResolver() throws Exception {
         mailAddressResolver = mock(MailAddressResolver.class);
         resolver = new EmailSlackUserIdResolver(AUTH_TOKEN, httpClient, Collections.singletonList(mailAddressResolver), null);
         httpClient.setHttpResponse(getResponseOK());
@@ -133,9 +135,9 @@ public class EmailSlackUserIdResolverTest {
     }
 
     @Test
-    public void testResolveUserIdForUserWithoutResolver() throws Exception {
+    void testResolveUserIdForUserWithoutResolver() throws Exception {
 
-        resolver = new EmailSlackUserIdResolver(AUTH_TOKEN, httpClient, null, user -> {return EMAIL_ADDRESS;});
+        resolver = new EmailSlackUserIdResolver(AUTH_TOKEN, httpClient, null, user -> EMAIL_ADDRESS);
         httpClient.setHttpResponse(getResponseOK());
 
         String userId = resolver.findOrResolveUserId(mock(User.class));
@@ -144,7 +146,7 @@ public class EmailSlackUserIdResolverTest {
     }
 
     @Test
-    public void testResolveUserIdForUserWithSlackUserProperty() {
+    void testResolveUserIdForUserWithSlackUserProperty() {
         SlackUserProperty userProperty = new SlackUserProperty();
         userProperty.setUserId(EXPECTED_USER_ID);
         User mockUser = mock(User.class);
@@ -155,7 +157,7 @@ public class EmailSlackUserIdResolverTest {
     }
 
     @Test
-    public void testResolveUserIdForChangelogSet() throws Exception {
+    void testResolveUserIdForChangelogSet() throws Exception {
         httpClient.setHttpResponse(getResponseOK());
 
         // Create a FakeChangeLogSet with a single Entry by a mocked User
@@ -184,8 +186,8 @@ public class EmailSlackUserIdResolverTest {
         assertTrue(userIdList.containsAll(expectedUserIdList));
     }
 
-    private String readResource(String resourceName) throws IOException {
-        return IOUtils.toString(this.getClass().getResourceAsStream(resourceName), StandardCharsets.UTF_8);
+    private static String readResource(String resourceName) throws IOException {
+        return IOUtils.toString(EmailSlackUserIdResolverTest.class.getResourceAsStream(resourceName), StandardCharsets.UTF_8);
     }
 
     private CloseableHttpResponse getResponse(String content) throws IOException {

@@ -4,17 +4,17 @@ import java.io.IOException;
 import org.apache.hc.client5.http.classic.methods.HttpPost;
 import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
 import org.apache.hc.client5.http.impl.classic.CloseableHttpResponse;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 
-public class SlackApiTLSTest {
+class SlackApiTLSTest {
 
-    public static final String SLACK_API_TEST = "https://slack.com/api/api.test";
+    private static final String SLACK_API_TEST = "https://slack.com/api/api.test";
 
     @Test
-    public void connectToAPI() {
+    void connectToAPI() {
         try (CloseableHttpClient httpClient = HttpClient.getCloseableHttpClient(null)) {
             HttpPost post = new HttpPost(SLACK_API_TEST);
             post.setHeader("Content-Type", "application/json; charset=utf-8");

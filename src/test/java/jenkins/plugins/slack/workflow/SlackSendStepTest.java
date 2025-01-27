@@ -21,16 +21,18 @@ import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
 import org.apache.commons.io.IOUtils;
 import org.jenkinsci.plugins.workflow.steps.StepContext;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.MockedStatic;
 import org.mockito.Mockito;
+import org.mockito.junit.jupiter.MockitoExtension;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.anyBoolean;
@@ -41,41 +43,38 @@ import static org.mockito.Mockito.mockStatic;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static org.mockito.MockitoAnnotations.openMocks;
 
 /**
  * Traditional Unit tests, allows testing null Jenkins.get()
  */
-public class SlackSendStepTest {
+@ExtendWith(MockitoExtension.class)
+class SlackSendStepTest {
 
     @Mock
     TaskListener taskListenerMock;
-    @Mock
+    @Mock(strictness = Mock.Strictness.LENIENT)
     PrintStream printStreamMock;
-    @Mock
+    @Mock(strictness = Mock.Strictness.LENIENT)
     StepContext stepContextMock;
     @Mock
     Project project;
-    @Mock
+    @Mock(strictness = Mock.Strictness.LENIENT)
     Run run;
     @Mock
     SlackService slackServiceMock;
     @Mock
     Jenkins jenkins;
-    @Mock
+    @Mock(strictness = Mock.Strictness.LENIENT)
     SlackNotifier.DescriptorImpl slackDescMock;
 
     @Mock
     Item item;
 
-    private AutoCloseable mocks;
     private MockedStatic<Jenkins> mockedJenkins;
     private MockedStatic<CredentialsObtainer> credentialsObtainerMockedStatic;
 
-    @Before
-    public void setUp() throws IOException, InterruptedException {
-        mocks = openMocks(this);
-
+    @BeforeEach
+    void setUp() throws IOException, InterruptedException {
         mock(CredentialsObtainer.class);
         when(jenkins.getDescriptorByType(SlackNotifier.DescriptorImpl.class)).thenReturn(slackDescMock);
         credentialsObtainerMockedStatic = mockStatic(CredentialsObtainer.class);
@@ -88,15 +87,14 @@ public class SlackSendStepTest {
         when(stepContextMock.get(TaskListener.class)).thenReturn(taskListenerMock);
     }
 
-    @After
-    public void fin() throws Exception {
-        mocks.close();
+    @AfterEach
+    void fin() throws Exception {
         mockedJenkins.close();
         credentialsObtainerMockedStatic.close();
     }
 
     @Test
-    public void testStepOverrides() throws Exception {
+    void testStepOverrides() throws Exception {
         final String token = "mytoken";
         SlackSendStep slackSendStep = new SlackSendStep();
         slackSendStep.setMessage("message");
@@ -138,7 +136,7 @@ public class SlackSendStepTest {
     }
 
     @Test
-    public void testStepWithAttachments() throws Exception {
+    void testStepWithAttachments() throws Exception {
         SlackSendStep step = new SlackSendStep();
         step.setMessage("message");
         step.setTokenCredentialId("tokenCredentialId");
@@ -183,7 +181,7 @@ public class SlackSendStepTest {
     }
 
     @Test
-    public void testStepWithBlocks() throws Exception {
+    void testStepWithBlocks() throws Exception {
         SlackSendStep step = new SlackSendStep();
         step.setMessage("message");
         step.setTokenCredentialId("tokenCredentialId");
@@ -234,7 +232,7 @@ public class SlackSendStepTest {
     }
 
     @Test
-    public void testStepWithAttachmentsAndBlocks() throws Exception {
+    void testStepWithAttachmentsAndBlocks() throws Exception {
         SlackSendStep step = new SlackSendStep();
         step.setMessage("message");
         step.setTokenCredentialId("tokenCredentialId");
@@ -295,7 +293,7 @@ public class SlackSendStepTest {
     }
 
     @Test
-    public void testStepWithAttachmentsAsListOfMap() throws Exception {
+    void testStepWithAttachmentsAsListOfMap() throws Exception {
         SlackSendStep step = new SlackSendStep();
         step.setMessage("message");
         step.setTokenCredentialId("tokenCredentialId");
@@ -345,7 +343,7 @@ public class SlackSendStepTest {
     }
 
     @Test
-    public void testValuesForGlobalConfig() throws Exception {
+    void testValuesForGlobalConfig() throws Exception {
         SlackSendStep step = new SlackSendStep();
         step.setMessage("message");
 
@@ -384,7 +382,7 @@ public class SlackSendStepTest {
 
 
     @Test
-    public void testCanGetItemFromRun() throws Exception {
+    void testCanGetItemFromRun() throws Exception {
         SlackSendStep step = new SlackSendStep();
         step.setMessage("message");
 
@@ -421,7 +419,7 @@ public class SlackSendStepTest {
     }
 
     @Test
-    public void testReplyBroadcast() throws Exception {
+    void testReplyBroadcast() throws Exception {
         SlackSendStep step = new SlackSendStep();
         step.setMessage("message");
         step.setReplyBroadcast(true);
@@ -460,7 +458,7 @@ public class SlackSendStepTest {
     }
 
     @Test
-    public void testSendAsText() throws Exception {
+    void testSendAsText() throws Exception {
         SlackSendStep step = new SlackSendStep();
         step.setMessage("message");
         step.setSendAsText(true);
@@ -499,7 +497,7 @@ public class SlackSendStepTest {
     }
 
     @Test
-    public void testIconEmoji() throws Exception {
+    void testIconEmoji() throws Exception {
         SlackSendStep step = new SlackSendStep();
         step.setMessage("message");
         step.setIconEmoji(":+1:");
@@ -537,7 +535,7 @@ public class SlackSendStepTest {
     }
 
     @Test
-    public void testUsername() throws Exception {
+    void testUsername() throws Exception {
         SlackSendStep step = new SlackSendStep();
         step.setMessage("message");
         step.setUsername("username");
@@ -575,7 +573,7 @@ public class SlackSendStepTest {
     }
 
     @Test
-    public void testTimestamp() throws Exception {
+    void testTimestamp() throws Exception {
         SlackSendStep step = new SlackSendStep();
         step.setMessage("message");
         step.setUsername("username");
@@ -614,7 +612,7 @@ public class SlackSendStepTest {
     }
 
     @Test
-    public void testNonNullEmptyColor() throws Exception {
+    void testNonNullEmptyColor() throws Exception {
         SlackSendStep step = new SlackSendStep();
         step.setMessage("message");
         step.setColor("");
@@ -645,7 +643,7 @@ public class SlackSendStepTest {
     }
 
     @Test
-    public void testSlackResponseObject() throws Exception {
+    void testSlackResponseObject() throws Exception {
         SlackSendStep step = new SlackSendStep();
         step.setMessage("message");
         step.setToken("token");
@@ -691,7 +689,7 @@ public class SlackSendStepTest {
     }
 
     @Test
-    public void testSlackResponseObjectNullNonBotUser() throws Exception {
+    void testSlackResponseObjectNullNonBotUser() throws Exception {
         SlackSendStep step = new SlackSendStep();
         step.setMessage("message");
         step.setToken("token");
