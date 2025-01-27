@@ -34,7 +34,7 @@ public class NoSlackUserIdResolver extends SlackUserIdResolver {
         super(null, null);
     }
 
-    protected String resolveUserId(User user) {
+    protected SlackUserProperty fetchUserSlackProperty(User user) {
         return null;
     }
 

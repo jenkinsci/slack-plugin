@@ -29,11 +29,16 @@ import hudson.model.User;
 import hudson.tasks.MailAddressResolver;
 import java.io.IOException;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Function;
+import java.util.function.Predicate;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import org.apache.commons.lang.StringUtils;
 import org.apache.hc.client5.http.classic.methods.HttpGet;
@@ -91,41 +96,79 @@ public class EmailSlackUserIdResolver extends SlackUserIdResolver {
         this.mailAddressResolvers = mailAddressResolvers;
     }
 
-    protected String resolveUserId(User user) {
-        Optional<String> userId = Optional.ofNullable(mailAddressResolvers)
-                .map(Collection::stream)
-                .orElseGet(Stream::empty)
-                .map(resolver -> {
-                    try {
-                        return resolver.findMailAddressFor(user);
-                    } catch (Exception ex) {
-                        LOGGER.log(Level.WARNING, String.format(
-                                "The email resolver '%s' failed", resolver.getClass().getName()), ex);
-                        return null;
-                    }
-                })
-                .filter(StringUtils::isNotEmpty)
-                .map(this::resolveUserIdForEmailAddress)
-                .filter(StringUtils::isNotEmpty)
-                .findAny();
+    private String resolveUserEmail(User user){
+        return Optional.ofNullable(mailAddressResolvers)
+            .map(Collection::stream)
+            .orElseGet(Stream::empty)
+            .map(resolver -> {
+                try {
+                    String email = resolver.findMailAddressFor(user);
+                    LOGGER.log(Level.FINEST, String.format(
+                            "The email resolver '%s' resolved %s as %s", resolver.getClass().getName(), user.getId(), email));
+                    return email;
+                } catch (Exception ex) {
+                    LOGGER.log(Level.WARNING, String.format(
+                            "The email resolver '%s' failed", resolver.getClass().getName()), ex);
+                    return null;
+                }
+            })
+            .filter(StringUtils::isNotEmpty)
+            .findAny()
+            .orElse(null);
+    }
+
+    protected SlackUserProperty fetchUserSlackProperty(User user) {
+        String userEmail = resolveUserEmail(user);
+
+        SlackUserProperty userProperty = null;
+        if(userEmail != null){
+            userProperty = resolveSlackPropertyFromEmailViaSlack(userEmail);
+        }
 
         // Return value can be null, so Optional.orElseGet(Supplier) doesn't work.
-        if (userId.isPresent()) {
-            return userId.get();
+        if (userProperty != null) {
+            return userProperty;
         } else if (defaultMailAddressResolver != null){
-            return resolveUserIdForEmailAddress(defaultMailAddressResolver.apply(user));
+            return resolveSlackPropertyFromEmailViaSlack(defaultMailAddressResolver.apply(user));
         } else {
             return null;
         }
     }
 
     public String resolveUserIdForEmailAddress(String emailAddress) {
+        SlackUserProperty userProperty = resolveSlackProperty(emailAddress);
+        if(userProperty == null){
+            return null;
+        }
+        if(userProperty.getDisableNotifications()){
+            return null;
+        }
+        return userProperty.getUserId();
+    }
+
+    private SlackUserProperty resolveSlackProperty(String emailAddress) {
         if (StringUtils.isEmpty(emailAddress)) {
             LOGGER.fine("Email address was empty");
             return null;
         }
 
+        SlackUserProperty userProperty = resolveSlackPropertyFromEmailViaSlack(emailAddress);
+        if(userProperty == null) {
+            userProperty = resolveSlackPropertyFromEmailViaInferredUsername(emailAddress);
+        }
+        if(userProperty == null) {
+            userProperty = resolveSlackPropertyFromEmailViaUsers(emailAddress);
+        }
+
+        return userProperty;
+    }
+
+    private SlackUserProperty resolveSlackPropertyFromEmailViaSlack(String emailAddress){
         if (StringUtils.isEmpty(authToken)) {
+            LOGGER.fine("Auth token was empty");
+            return null;
+        }
+        if (StringUtils.isEmpty(emailAddress)) {
             LOGGER.fine("Auth token was empty");
             return null;
         }
@@ -149,7 +192,84 @@ public class EmailSlackUserIdResolver extends SlackUserIdResolver {
         } catch (IOException | ParseException | JSONException ex) {
             LOGGER.log(Level.WARNING, "Error getting userId from Slack", ex);
         }
-        return slackUserId;
+
+        SlackUserProperty userProperty = null;
+        if(slackUserId != null){
+            LOGGER.fine(String.format("Found Slack ID '%s' for email '%s'", slackUserId, emailAddress));
+            userProperty = new SlackUserProperty();
+            userProperty.setDisableNotifications(false);
+            userProperty.setUserId(slackUserId);
+        } else {
+            LOGGER.log(Level.INFO, String.format("Failed to resolve userId from Slack from email '%s'", emailAddress));
+        }
+        return userProperty;
+    }
+
+    private SlackUserProperty resolveSlackPropertyFromEmailViaInferredUsername(String emailAddress){
+        if (StringUtils.isEmpty(emailAddress)) {
+            return null;
+        }
+
+        String baseUsername = emailAddress.split("@")[0];
+
+        User user = User.get(baseUsername, false, Collections.emptyMap());
+        if(user == null){
+            LOGGER.log(Level.INFO, String.format("Could not find user with name '%s' from email '%s'", baseUsername, emailAddress));
+            return null;
+        }
+        String userEmail = resolveUserEmail(user);
+        if(userEmail != null && !emailAddress.equals(userEmail)){
+            LOGGER.log(Level.INFO, String.format("User with name '%s' does not match expected email '%s': have '%s'", baseUsername, emailAddress, userEmail));
+            return null;
+        }
+        SlackUserProperty userProperty = user.getProperty(SlackUserProperty.class);
+        if(userProperty == null){
+            LOGGER.log(Level.INFO, String.format("User with name '%s' does not have slack property", baseUsername));
+        } else {
+            LOGGER.fine(String.format("Found Slack ID '%s' for user '%s'", userProperty.getUserId(), baseUsername));
+        }
+        return userProperty;
+    }
+
+    private SlackUserProperty resolveSlackPropertyFromEmailViaUsers(String emailAddress){
+        if (StringUtils.isEmpty(emailAddress)) {
+            return null;
+        }
+
+        List<User> usersWithEmailAddress = User.getAll().stream()
+            .filter(user -> emailAddress.equals(resolveUserEmail(user)))
+            .collect(Collectors.toList());
+        List<ResolvedUserConfig> usersPerId = usersWithEmailAddress.stream()
+            .map(user -> new ResolvedUserConfig(user))
+            .filter(user -> user.slackProperty != null && user.slackProperty.getUserId() != null)
+            .filter(distinctSlackUserProperties())
+            .collect(Collectors.toList());
+        if(usersPerId.size() > 1) {
+            List<String> conflictingUsersDisplayName = usersPerId.stream()
+                .map(resolved -> resolved.user.getDisplayName())
+                .collect(Collectors.toList());
+            LOGGER.log(Level.WARNING, String.format(
+                    "Multiple users found with email '%s' having different slack IDs or configuration: %s", emailAddress, String.join(",", conflictingUsersDisplayName)));
+        }
+        Optional<ResolvedUserConfig> pickedUser = usersPerId.stream().findFirst();
+        if(pickedUser.isPresent()) {
+            return pickedUser.get().slackProperty;
+        }
+        return null;
+    }
+
+    private static class ResolvedUserConfig {
+        private User user;
+        private SlackUserProperty slackProperty;
+        public ResolvedUserConfig(User user) {
+            this.user = user;
+            this.slackProperty = user.getProperty(SlackUserProperty.class);
+        }
+    }
+
+    public static Predicate<ResolvedUserConfig> distinctSlackUserProperties() {
+        Set<String> seen = ConcurrentHashMap.newKeySet();
+        return t -> seen.add(String.format("%s-%b", t.slackProperty.getUserId(), t.slackProperty.getDisableNotifications()));
     }
 
     @Extension
