@@ -21,7 +21,7 @@
         <gitHubRepo>jenkinsci/slack-plugin</gitHubRepo>
         <!-- https://www.jenkins.io/doc/developer/plugin-development/choosing-jenkins-baseline/ -->
         <jenkins.baseline>2.479</jenkins.baseline>
-        <jenkins.version>${jenkins.baseline}.1</jenkins.version>
+        <jenkins.version>${jenkins.baseline}.3</jenkins.version>
         <hpi.compatibleSinceVersion>2.32</hpi.compatibleSinceVersion>
         <checkstyle.failsOnError>true</checkstyle.failsOnError>
         <checkstyle.failOnViolation>true</checkstyle.failOnViolation>
