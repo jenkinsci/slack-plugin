@@ -29,7 +29,7 @@ import jenkins.plugins.slack.logging.BuildAwareLogger;
 import jenkins.plugins.slack.logging.BuildKey;
 import jenkins.plugins.slack.matrix.MatrixTriggerMode;
 import org.apache.commons.collections.CollectionUtils;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.jenkinsci.plugins.displayurlapi.DisplayURLProvider;
 
 @SuppressWarnings("rawtypes")

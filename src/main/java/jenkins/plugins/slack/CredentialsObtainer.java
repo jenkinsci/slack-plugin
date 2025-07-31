@@ -12,7 +12,7 @@ import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import jenkins.model.Jenkins;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.jenkinsci.plugins.plaincredentials.StringCredentials;
 import org.jenkinsci.plugins.workflow.steps.StepContext;
 import org.kohsuke.accmod.Restricted;

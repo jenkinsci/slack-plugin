@@ -37,7 +37,7 @@ import jenkins.plugins.slack.user.SlackUserIdResolver;
 import jenkins.plugins.slack.user.SlackUserIdResolverDescriptor;
 import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.jenkinsci.Symbol;
 import org.jenkinsci.plugins.displayurlapi.DisplayURLProvider;
 import org.jenkinsci.plugins.plaincredentials.StringCredentials;
