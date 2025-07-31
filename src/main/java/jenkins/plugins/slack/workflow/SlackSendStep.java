@@ -23,11 +23,9 @@ import jenkins.plugins.slack.SlackService;
 import jenkins.plugins.slack.StandardSlackService;
 import jenkins.plugins.slack.StandardSlackServiceBuilder;
 import jenkins.plugins.slack.user.SlackUserIdResolver;
-import net.sf.json.JSON;
 import net.sf.json.JSONArray;
 import net.sf.json.JSONException;
 import net.sf.json.JSONObject;
-import net.sf.json.groovy.JsonSlurper;
 import org.jenkinsci.plugins.workflow.steps.Step;
 import org.jenkinsci.plugins.workflow.steps.StepContext;
 import org.jenkinsci.plugins.workflow.steps.StepDescriptor;
@@ -408,19 +406,12 @@ public class SlackSendStep extends Step {
         }
 
         private JSONArray convertStringToJsonArray(TaskListener listener, String jsonString, String fieldType) {
-            JsonSlurper jsonSlurper = new JsonSlurper();
-            JSON json;
             try {
-                json = jsonSlurper.parseText(jsonString);
+                return JSONArray.fromObject(jsonString);
             } catch (JSONException e) {
                 listener.error(Messages.notificationFailedWithException(e));
                 return null;
             }
-            if (!(json instanceof JSONArray)) {
-                listener.error(Messages.notificationFailedWithException(new IllegalArgumentException(fieldType + " must be JSONArray")));
-                return null;
-            }
-            return (JSONArray) json;
         }
 
         JSONArray getAttachmentsAsJSONArray() throws Exception {
