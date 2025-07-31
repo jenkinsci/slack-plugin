@@ -2,7 +2,7 @@ package jenkins.plugins.slack.workflow;
 
 import java.io.Serializable;
 import jenkins.plugins.slack.SlackService;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.jenkinsci.plugins.scriptsecurity.sandbox.whitelists.Whitelisted;
 import org.json.JSONObject;
 
