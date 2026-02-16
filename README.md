@@ -78,8 +78,7 @@ If you want to configure a notification to be sent to Slack for **all jobs**, yo
 
     slackSend color: "good", message: "Message from Jenkins Pipeline"
 
-Additionally you can pass attachments or blocks (requires [bot user](#bot-user-mode)) in order to send complex
-messages, for example:
+Additionally you can pass attachments or blocks in order to send complex messages, for example:
 
 Attachments:
 
@@ -95,7 +94,7 @@ def attachments = [
 slackSend(channel: "#general", attachments: attachments)
 ```
 
-Blocks (this feature requires a '[bot user](#bot-user-mode)' and a custom slack app):
+Blocks:
 
 ```groovy
 blocks = [
@@ -128,7 +127,7 @@ slackSend(channel: "#general", blocks: blocks)
 
 For more information about slack messages see [Slack Messages Api](https://api.slack.com/docs/messages), [Slack attachments Api](https://api.slack.com/docs/message-attachments) and [Block kit](https://api.slack.com/block-kit)
 
-Note: the attachments API is classified as legacy, with blocks as the replacement (but blocks are only supported when using a bot user through a custom slack app).
+Note: the attachments API is classified as legacy. It does not support newer features such as blocks, file uploads, or threads.
 
 #### File upload
 
@@ -140,8 +139,6 @@ node {
   slackUploadFile filePath: "*.txt", initialComment:  "HEY HEY"
 }
 ```
-
-This feature requires [botUser](#bot-user-mode) mode.
 
 ##### File upload to a user channel
 
@@ -168,8 +165,6 @@ def slackResponse = slackSend(channel: "cool-threads", message: "Here is the pri
 slackSend(channel: slackResponse.threadId, message: "Thread reply #1")
 slackSend(channel: slackResponse.threadId, message: "Thread reply #2")
 ```
-
-This feature requires [botUser](#bot-user-mode) mode.
 
 Messages that are posted to a thread can also optionally be broadcasted to the
 channel. Set `replyBroadcast: true` to do so. For example:
@@ -206,8 +201,6 @@ def slackResponse = slackSend(channel: "updating-stuff", message: "Here is the p
 slackSend(channel: slackResponse.channelId, message: "Update message now", timestamp: slackResponse.ts)
 ```
 
-This feature requires [botUser](#bot-user-mode) mode.
-
 #### Emoji Reactions
 
 Add an emoji reaction to a previously-sent message like this:
@@ -236,7 +229,7 @@ This may only work reliably in channels (as opposed to private messages) due to 
 
 This does not currently work in a situation where Jenkins is restarted between sending the initial message and adding the reaction. If this is something you need, please file an issue.
 
-This feature requires [botUser](#bot-user-mode) mode and the `reactions:write` API scope.
+Requires the `reactions:write` API scope.
 
 #### Unfurling Links
 
@@ -271,7 +264,7 @@ def userIdsString = userIds.collect { "<@$it>" }.join(' ')
 slackSend(color: "good", message: "$userIdsString Message from Jenkins Pipeline")
 ```
 
-This feature requires [botUser](#bot-user-mode) mode and the `users:read` and `users:read.email` API scopes.
+Requires the `users:read` and `users:read.email` API scopes.
 
 #### Colors
 
