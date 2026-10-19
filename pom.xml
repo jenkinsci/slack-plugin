@@ -54,7 +54,7 @@
             <dependency>
                 <groupId>io.jenkins.tools.bom</groupId>
                 <artifactId>bom-${jenkins.baseline}.x</artifactId>
-                <version>7169.vb_32a_cfd93fa_6</version>
+                <version>7216.v6cb_72de2015d</version>
                 <scope>import</scope>
                 <type>pom</type>
             </dependency>
